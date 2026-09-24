@@ -26,6 +26,11 @@ Fasi: kick-off → interviste ai key user → analisi di dettaglio → messa in 
 - **Migrazione**: ~24.000 documenti di vendita (6 anni) restano su TSE e vengono letti al volo. Da migrare su TSC: clienti, prospect e ~1.000 manifestazioni attive.
 - Newsletter e automazioni: MailUp.
 
+## Chiarimento (Anna, 24/09)
+- I venditori **non** accedono al backoffice di TSC: useranno un "sito" (frontend) sviluppato da noi su TSC. Il backoffice lo vedono solo gli sviluppatori.
+- Quindi la grafica del mockup è riproducibile nel frontend. Il nodo tecnico è come il frontend legge e scrive i dati di **altri** clienti (anagrafiche, PDA, note, ordini): un frontend normalmente mostra solo i dati dell'utente loggato, quindi serviranno API o logiche lato server da verificare con Dario.
+- Per i campi anagrafici aggiuntivi il backoffice ha già l'app "Customer Custom Fields".
+
 ## Novità rispetto a quanto già nel mockup (ora aggiunte)
 - Anagrafica: tipologia Prospect/Cliente/Commerciante, sesso, email principale e secondaria (sempre in minuscolo), lingua (IT, EN, ES, AR, ZH), più indirizzi strutturati, dati di fatturazione (ragione sociale, indirizzo, P.IVA, SDI), misure (polso, anello medio e anulare dx/sx).
 - Brand di interesse come lista chiusa: Angelus, Cartier, Gerald Charles, Girard-Perregaux, Grand Seiko, Hublot, Messika, Nomos, Norqain, Patek Philippe, Rolex, Rolex CPO, Tudor, TAG Heuer, Pomellato, Verga Pre-Owned. Anche gli interessi sono una lista chiusa.
@@ -49,7 +54,7 @@ Fasi: kick-off → interviste ai key user → analisi di dettaglio → messa in 
 - Collegamento con file Excel esterni (programmazione consegne Rolex).
 
 ## Punti aperti (relazione tecnica + lista Verga)
-- **TSC non consente modifiche di interfaccia**: da verificare quanto del layout del mockup è realizzabile.
+- La frase "TSC non consente modifiche di interfaccia" riguarda il backoffice, che i venditori non useranno. Da verificare invece: accesso del frontend ai dati di tutti i clienti (API), ruoli e permessi dei venditori nel frontend.
 - Relazioni: bastano quelle standard di TSC?
 - Misure: campo del cliente o variante di prodotto?
 - Brand di interesse: campo dedicato o "Categoria" esistente?
