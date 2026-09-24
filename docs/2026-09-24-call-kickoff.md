@@ -7,7 +7,7 @@
 ## 1. Contesto
 - Verga ha **3 negozi + 1 a Portofino**, distinti per brand.
 - Attività: vendita **orologi e gioielli**, **riparazioni**, vendita **usato** (gestita da un'azienda separata).
-- Oggi usano **Manago** (CRM + newsletter): verrà dismesso, la newsletter passa a **MailUp**.
+- Oggi usano **SALESmanago** (newsletter/automazioni): verrà dismesso, la newsletter passa a **MailUp**.
 - Oltre agli orologi trattano brand di gioielli (es. **Pomellato, Messika**) con flusso: cliente interessato → ordine → prodotto arriva qualche giorno dopo.
 
 ## 2. Cos'è il portale
@@ -79,6 +79,18 @@
 - [ ] Decidere **data di nascita vs decade**
 - [ ] Verificare fattibilità integrazione **SelaSearch** sui clienti
 - [ ] Chiarire flussi **riparazioni** e **ordini** (gioielli Pomellato/Messika) e rapporto con l'azienda dell'**usato**
-- [ ] Migrazione dati da **Manago** e integrazione con **MailUp**
+- [ ] Migrazione dati da **SALESmanago** e integrazione con **MailUp**
 - [ ] Gestione privacy/consensi (GDPR) per anagrafiche, legami e newsletter
 - [ ] Definire ruoli/permessi venditori e gestione multi-negozio
+
+## 13. Integrazioni dagli appunti di collega e titolare
+- **Email/automazioni** oggi su **SALESmanago** → call di approfondimento sul mail marketing da organizzare con **Ottavia**.
+- **Legami**: oggi non li gestiscono. Elenco di legami semplici (es. "amico di", "dipendente di", "parente di"); nella scheda utente due campi: tipo di legame + soggetto collegato. Legami salvati in una **tabella separata** del DB. Se la persona collegata non esiste si crea una **scheda vuota**, da completare se entrerà in negozio.
+- **Professioni/ruoli, brand di interesse, interessi**: tutti gestiti come **dati analitici** (liste fornite dal cliente).
+- **Attività legate al brand**: multiscelta da elenco fornito dal cliente (es. golf, tennis, padel, equitazione, vela, teatro).
+- **Celebrità**: campo dedicato con elenco (cantante, attore, sportivo…).
+- **Compleanno**: calendario con giorno/mese/anno; se manca l'anno → **decade**.
+- **Autoregistrazione a due step**: 1) nome, cognome, email, telefono · 2) dati facoltativi utili alla comunicazione, completabili dal venditore.
+- **Registro "passaggi"/attività**: ogni evento (telefonata, visita, ingresso in negozio) registra operatore, cliente, tipo evento, data → da qui si ricava l'**ultima visita**; prevista la possibilità di **follow-up**.
+- **Ricerca**: clienti per brand e per **referenza** (codice che identifica le caratteristiche visive del modello).
+- **Gioielli (Pomellato, Messika)**: prodotti registrati come **brand + nome collezione + referenza**. Di solito **niente manifestazione di interesse**: è un acquisto diretto, di importo minore. Dettagli da approfondire con l'**amministrazione**.
