@@ -606,7 +606,7 @@ const spent = id => purchases.filter(p => p.clientId === id).reduce((a, p) => a 
 const tierOf = id => TIERS.find(t => spent(id) >= t.min);
 const tierTag = id => { const t = tierOf(id); return t ? `<span class="tag" style="color:${t.c};border-color:currentColor;background:transparent" title="Fascia calcolata sugli acquisti: ${eur(spent(id))}"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 13.9 7 22l5-3 5 3-1.5-8.1"/></svg>${t.n}</span>` : ''; };
 const stars = (n, act) => `<span class="stars" ${act ? 'role="radiogroup" aria-label="Valutazione venditore"' : ''}>${[1,2,3,4,5].map(i => act ? `<button type="button" data-act="${act}" data-v="${i}" aria-label="${i} su 5" class="${i <= n ? 'on' : ''}">★</button>` : `<span class="${i <= n ? 'on' : ''}">★</span>`).join('')}</span>`;
-const sleeping = id => { const e = lastContact(id); return !e || daysAgo(e.date) > 180; };
+const sleeping = id => { const e = lastContact(id); return daysAgo(e ? e.date : C(id).since) > 180; };
 const unread = () => NOTIFS.filter(n => !n.read).length;
 const compatible = pda => !['aperta','preordine'].includes(pda.stato) ? [] : products.filter(p => p.brand === pda.brand && !p.reservedFor && ['disponibile','in_arrivo'].includes(p.stato) && (pda.ref ? p.ref === pda.ref : p.modello.toLowerCase().includes(pda.modello.toLowerCase())));
 const clientLinks = id => links.map((l, i) => ({l, i})).filter(({l}) => l.from === id || l.to === id).map(({l, i}) => l.from === id ? {label:l.type, other:C(l.to), i} : {label:l.back || backOf(l.type), other:C(l.from), i});
@@ -873,7 +873,7 @@ function renderResults(){
       <thead><tr><th>Cliente</th><th>Professione</th><th>Brand di interesse</th><th>Ultimo passaggio</th><th>Ultimo acquisto</th><th>Manifestazioni</th></tr></thead>
       <tbody>${list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id), op = clientPdas(c.id).filter(p => p.stato !== 'venduta').length; return `
         <tr class="click" data-go="cliente" data-id="${c.id}">
-          <td><div class="cell-person">${avatar(c)}<div><b>${esc(fullName(c))} </b>${c.rating ? stars(c.rating) : ''}<small>${esc(c.email || 'Scheda da completare')}</small><div class="tags" style="margin-top:4px"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : ''}" style="height:20px">${esc(c.tipo)}</span>${tierTag(c.id)}${sleeping(c.id) ? '<span class="tag red" style="height:20px">Dormiente</span>' : ''}</div></div></div></td>
+          <td><div class="cell-person">${avatar(c)}<div><b>${esc(fullName(c))} </b>${c.rating ? stars(c.rating) : ''}<small>${esc(c.email || 'Scheda da completare')}</small><div class="tags" style="margin-top:4px"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : ''}" style="height:20px">${esc(c.tipo || 'Prospect')}</span>${c.source === 'Autoregistrazione' ? `<span class="tag blue" style="height:20px">${ic('send')}Autoregistrato</span>` : ''}${tierTag(c.id)}${sleeping(c.id) ? '<span class="tag red" style="height:20px">Dormiente</span>' : ''}</div></div></div></td>
           <td>${esc(c.prof || '—')}${c.azienda ? `<div class="faint" style="font-size:12px">${esc(c.azienda)}</div>` : ''}${c.celeb ? `<div><span class="tag amber" style="margin-top:4px">${ic('star')}${esc(c.celeb)}</span></div>` : ''}</td>
           <td><div class="tags">${c.brands.map(b => `<span class="tag">${esc(b)}</span>`).join('')}</div></td>
           <td class="num">${v ? `${fmtD(v.date)}<div class="faint" style="font-size:12px">${rel(v.date)}</div>` : '<span class="faint">—</span>'}</td>
@@ -1485,7 +1485,7 @@ function act(el, ev){
     case 'lk-quick-save': {
       const g = x => document.getElementById(x).value.trim();
       if (!g('lkq-nome')) { toast('Inserisci almeno il nome'); break; }
-      const nc = {id:'c' + (clients.length + 300), nome:g('lkq-nome'), cognome:g('lkq-cognome'), email:'', tel:g('lkq-tel'), indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[], modelli:[], interests:[], boutique:S.boutique, source:'Legame', incomplete:true, since:'2026-09-24', note:''};
+      const nc = {...blankExtra(), id:'c' + (clients.length + 300), nome:g('lkq-nome'), cognome:g('lkq-cognome'), email:'', tel:g('lkq-tel'), indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[], modelli:[], interests:[], boutique:S.boutique, source:'Legame', incomplete:true, since:'2026-09-24', note:''};
       clients.push(nc); Object.assign(S.nc.lk, {otherId:nc.id, quick:false, q:''}); keepForm(render); toast(`Anagrafica creata: ${fullName(nc)}`); break; }
     case 'lk-add': {
       const L = S.nc.lk, back = L.back.trim() || backOf(L.type.trim());
@@ -1515,7 +1515,7 @@ function act(el, ev){
       if (!S.auto.nome || !S.auto.cognome || !S.auto.email || !S.auto.tel) { err.hidden = false; err.textContent = 'Compila nome, cognome, email e telefono per continuare.'; break; }
       if (!/^\S+@\S+\.\S+$/.test(S.auto.email)) { err.hidden = false; err.textContent = 'Controlla l\'indirizzo email: sembra incompleto.'; break; }
       if (!document.getElementById('a-priv').checked) { err.hidden = false; err.textContent = 'Per registrarti serve il consenso all\'informativa privacy.'; break; }
-      const nc = {id:'c' + (clients.length + 1 + Math.floor(Math.random()*1000)), nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, tel:S.auto.tel, indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[...S.auto.brands], modelli:[], interests:[], boutique:S.boutique, source:'Autoregistrazione', incomplete:true, newsletter:true, since:'2026-09-24', note:''};
+      const nc = {...blankExtra(), id:'c' + (clients.length + 1 + Math.floor(Math.random()*1000)), nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, tel:S.auto.tel, indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[...S.auto.brands], modelli:[], interests:[], boutique:S.boutique, source:'Autoregistrazione', incomplete:true, newsletter:true, since:'2026-09-24', note:''};
       clients.push(nc); S.auto.createdId = nc.id; S.auto.step = 2; render(); window.scrollTo(0,0); break; }
     case 'a-done': { const c = C(S.auto.createdId); if (c) c.interests = [...S.auto.interests]; S.auto.step = 3; render(); window.scrollTo(0,0); break; }
     case 'a-reset': S.auto = {step:1, brands:[], interests:[], noYear:false, decade:''}; render(); break;
