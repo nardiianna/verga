@@ -219,6 +219,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .lk:last-child{border-bottom:0}
 .lk .grow{flex:1;min-width:0}
 .lk .rel{font-size:12px;color:var(--muted)}
+.lk-add{display:flex;flex-direction:column;gap:14px;padding:16px;border:1px dashed var(--line-strong);border-radius:12px;background:var(--surface-2)}
 .kv{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;font-size:13.5px}
 .kv dt{color:var(--muted)}
 .kv dd{margin:0;font-weight:500}
@@ -434,7 +435,9 @@ const PROFESSIONS = ['Dipendente','Manager','Libero professionista','Imprenditor
 const CELEB = ['Cantante','Attore/Attrice','Sportivo','Influencer','Volto TV'];
 const DECADES = ["Anni '40","Anni '50","Anni '60","Anni '70","Anni '80","Anni '90",'Anni 2000','Anni 2010'];
 const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
-const LINK_TYPES = {'Coniuge di':'Coniuge di','Genitore di':'Figlio/a di','Figlio/a di':'Genitore di','Parente di':'Parente di','Amico/a di':'Amico/a di','Dipendente di':'Datore di lavoro di','Datore di lavoro di':'Dipendente di','Socio/a di':'Socio/a di'};
+const LINK_TYPES = {'Moglie di':'Marito di','Marito di':'Moglie di','Compagno/a di':'Compagno/a di','Figlio/a di':'Genitore di','Padre di':'Figlio/a di','Madre di':'Figlio/a di','Genitore di':'Figlio/a di','Fratello/Sorella di':'Fratello/Sorella di','Nipote di':'Zio/a di','Parente di':'Parente di','Amico/a di':'Amico/a di','Dipendente di':'Datore di lavoro di','Datore di lavoro di':'Dipendente di','Socio/a di':'Socio/a di','Assistente di':'Assistito/a da'};
+const LINK_CHIPS = ['Moglie di','Marito di','Figlio/a di','Genitore di','Nipote di','Amico/a di','Dipendente di','Socio/a di'];
+const backOf = t => LINK_TYPES[t] || 'Collegato/a a';
 const EV = {
   visita:{label:'Passato in negozio', short:'Visita', icon:'store', cls:''},
   chiamata_in:{label:'Ci ha chiamato', short:'Chiamata ricevuta', icon:'phoneIn', cls:'in'},
@@ -454,7 +457,7 @@ const clients = [
   {id:'c10',nome:'Stefano',cognome:'Ferri',email:'stefano.ferri@example.com',tel:'+39 333 000 0010',indirizzo:'',prof:'Libero professionista',azienda:'',celeb:'Cantante',birth:{d:14,m:6,decade:"Anni '70"},brands:['Rolex','Patek Philippe'],modelli:['Submariner','Yacht-Master'],interests:['Vela','Motori'],boutique:'Boutique Portofino',source:'Negozio',newsletter:false,since:'2019-08-08',note:''},
 ];
 const links = [
-  {from:'c2',to:'c1',type:'Coniuge di'},
+  {from:'c2',to:'c1',type:'Moglie di',back:'Marito di'},
   {from:'c6',to:'c1',type:'Dipendente di'},
   {from:'c10',to:'c1',type:'Amico/a di'},
   {from:'c5',to:'c6',type:'Parente di'},
@@ -520,7 +523,7 @@ const S = {
   pdaf:'aperta',
   cart:{clientId:null, items:[], pay:'Carta'},
   auto:{step:1, brands:[], interests:[], noYear:false, decade:''},
-  nc:{brands:[], interests:[], noYear:false, decade:'', celebOn:false},
+  nc:{brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk:{type:'', back:'', q:'', otherId:null, quick:false}, pending:[]},
 };
 
 /* ---------------- helpers ---------------- */
@@ -547,7 +550,7 @@ const lastPurchase = id => clientPurchases(id)[0];
 const clientPdas = id => pdas.filter(p => p.clientId === id);
 const openPdas = () => pdas.filter(p => p.stato === 'aperta');
 const compatible = pda => products.filter(p => p.brand === pda.brand && !p.reservedFor && ['disponibile','in_arrivo'].includes(p.stato) && (pda.ref ? p.ref === pda.ref : p.modello.toLowerCase().includes(pda.modello.toLowerCase())));
-const clientLinks = id => links.filter(l => l.from === id || l.to === id).map(l => l.from === id ? {label:l.type, other:C(l.to)} : {label:LINK_TYPES[l.type], other:C(l.from)});
+const clientLinks = id => links.map((l, i) => ({l, i})).filter(({l}) => l.from === id || l.to === id).map(({l, i}) => l.from === id ? {label:l.type, other:C(l.to), i} : {label:l.back || backOf(l.type), other:C(l.from), i});
 const birthText = b => { if (!b || (!b.d && !b.y && !b.decade)) return null; const dm = b.d ? `${b.d} ${MESI[b.m-1]}` : ''; if (b.y) return `${dm} ${b.y}`.trim(); if (b.decade) return `${dm}${dm ? ' · ' : ''}${b.decade}`; return dm; };
 const sourceTag = c => c.source === 'Autoregistrazione' ? `<span class="tag blue">${ic('send')}Autoregistrato online</span>` : c.source === 'Legame' ? `<span class="tag">${ic('link')}Creato da legame</span>` : '';
 const stateTag = p => p.stato === 'aperta' ? '<span class="tag amber">In attesa</span>' : p.stato === 'assegnata' ? '<span class="tag ok">Pre-acquisto</span>' : '<span class="tag">Venduta</span>';
@@ -571,7 +574,7 @@ const NOTES = {
   login:{from:['Login del venditore: primo passo del flusso concordato in call.','La boutique è legata al login: eventi e vendite la prendono in automatico.','Pensato per tablet in negozio: operatore + PIN, target grandi.'],open:['Login con PIN o con credenziali TSC?','Un venditore può lavorare su più boutique nella stessa giornata?']},
   dashboard:{from:['L\'operatore deve fare 3 cose: gestire anagrafiche, fare la cassa, gestire gli eventi. Sono le azioni rapide in alto.','"Arrivi compatibili": quando arriva a Verga un modello che corrisponde a una manifestazione di interesse, il venditore lo assegna.','Follow-up dal registro passaggi (richiesta del titolare).','Compleanni: dalla data di nascita, quando c\'è.'],open:['Quali numeri vuole vedere la direzione sulla home?']},
   clienti:{from:['Filtri richiesti: brand, modello (es. Daytona), referenza (campo MPN), ultimo acquisto (ultimo anno / nessun acquisto da 5 anni), passaggio in negozio.','Interessi, professione e celebrità sono dati analitici filtrabili.','Esportazione segmento verso MailUp (sostituisce SALESmanago).'],open:['Filtri obbligatori richiesti dai brand: da farci elencare.','Ricerca clienti con SelaSearch: fattibilità da verificare.','La ricerca per referenza serve davvero? ("forse non serve")']},
-  cliente:{from:['Entrando nella scheda il venditore vede subito le manifestazioni di interesse.','Registrazione passaggio con un clic dalla scheda (visita, chiamata ricevuta, chiamata fatta). Ora, venditore e boutique presi in automatico.','Legami gestiti come nota interna, visibili su entrambe le schede, salvati in una tabella separata. Se la persona non esiste si crea una scheda vuota.','Professione (elenco) + azienda (testo) subito dopo nome e cognome. Celebrità come campo a parte (appunti collega).'],open:['Elenco definitivo dei tipi di legame.','Privacy: cosa si può scrivere nelle note interne?']},
+  cliente:{from:['Entrando nella scheda il venditore vede subito le manifestazioni di interesse.','Registrazione passaggio con un clic dalla scheda (visita, chiamata ricevuta, chiamata fatta). Ora, venditore e boutique presi in automatico.','Legami nella sezione dell\'anagrafica: scrivo il legame (es. "Moglie di"), cerco il cliente o creo al volo un\'anagrafica rapida. Nota interna, visibile su entrambe le schede (sull\'altra con il legame inverso, es. "Marito di"), salvata in una tabella separata.','Professione (elenco) + azienda (testo) subito dopo nome e cognome. Celebrità come campo a parte (appunti collega).'],open:['Elenco definitivo dei tipi di legame.','Privacy: cosa si può scrivere nelle note interne?']},
   nuovo:{from:['Prima di registrare: controllare se il cliente esiste già (box duplicati).','Dati base: nome, cognome, email, cellulare, indirizzo.','Compleanno con giorno/mese/anno; se il cliente non vuole dare l\'anno, si indica la decade.','Brand/modelli e attività di interesse come elenchi, ampliabili nel tempo.'],open:['Elenco definitivo di professioni, attività e celebrità.','Testi dei consensi privacy e newsletter (MailUp).']},
   prodotti:{from:['Catalogo prodotti con ricerca per referenza (MPN), modello, seriale.','Ogni pezzo venduto è un prodotto unico (seriale).','Gioielli Pomellato/Messika registrati come brand + collezione + referenza.'],open:['Da dove arriva il catalogo e ogni quanto si sincronizza?','Disponibilità per boutique: la gestisce TSC?']},
   cassa:{from:['In cassa il prodotto si inserisce con il codice referenza.','La cassa è sempre associata a un cliente.','Scenario tipico: dalla scheda cliente trovo il Rolex prenotato e lo metto in cassa.','Il prodotto va a chi l\'aveva prenotato, ma non sempre: si può vendere anche un pezzo non riservato.'],open:['Integrazione con registratore di cassa / fiscale.','Metodi di pagamento, acconti e finanziamenti.']},
@@ -867,7 +870,7 @@ function cPanoramica(c, cp, ps){
     </div>
     <div class="stack">
       <section class="card">
-        <div class="card-h">${ic('link')}<h2>Legami</h2><span class="sp"></span><button class="btn btn-sm" data-act="legame" data-id="${c.id}">${ic('plus')}Aggiungi</button></div>
+        <div class="card-h">${ic('link')}<h2>Legami</h2><span class="sp"></span><button class="btn btn-sm" data-act="tab-legami">${ic('plus')}Aggiungi</button></div>
         <div>${ls.length ? ls.map(l => `<div class="lk">${avatar(l.other)}<div class="grow"><div class="rel">${esc(c.nome)} è ${esc(l.label.toLowerCase())}</div><button class="link" data-go="cliente" data-id="${l.other.id}">${esc(fullName(l.other))}</button>${l.other.incomplete ? ' <span class="tag" style="height:20px">scheda vuota</span>' : ''}</div></div>`).join('') : '<div class="empty">Nessun legame.</div>'}</div>
         <div class="card-b faint" style="font-size:12px;border-top:1px solid var(--line)">Nota interna, non visibile al cliente. Il legame compare su entrambe le schede.</div>
       </section>
@@ -934,6 +937,7 @@ function clientForm(c){
     </div>
     <div id="dup"></div>
   </div>
+  ${linkSection(c)}
   <div class="fsec"><h3>${ic('star')}Celebrità</h3>
     <div class="chips" data-group="celeb">${['Nessuna',...CELEB].map(v => `<button type="button" class="chip ${((n.celeb || c?.celeb || 'Nessuna') === v) ? 'on' : ''}" data-act="celeb" data-v="${v}">${v}</button>`).join('')}</div>
   </div>
@@ -952,11 +956,46 @@ function clientForm(c){
   <div class="fsec"><h3>${ic('sparkle')}Attività di interesse</h3>
     <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${ints.includes(v) ? 'on' : ''}" data-act="nc-int" data-v="${v}">${ints.includes(v) ? ic('check') : ''}${v}</button>`).join('')}<button type="button" class="chip" style="border-style:dashed" data-act="soon">${ic('plus')}Aggiungi voce</button></div>
   </div>
-  <div class="fsec"><h3>${ic('edit')}Note interne e consensi</h3>
+  <div class="fsec"><h3>${ic('edit')}Note interne e newsletter</h3>
     <label class="field"><span>Nota interna (non visibile al cliente)</span><textarea class="ta" id="f-note">${esc(c?.note)}</textarea></label>
-    <label class="check"><input type="checkbox" id="f-priv" checked> Informativa privacy consegnata e accettata</label>
     <label class="check"><input type="checkbox" id="f-nl" ${c?.newsletter ? 'checked' : ''}> Consenso a newsletter e comunicazioni (MailUp)</label>
   </div>`;
+}
+
+function linkSection(c){
+  const L = S.nc.lk, me = c ? c.id : null;
+  const existing = c ? clientLinks(c.id).map(x => ({...x, rm:`data-act="lk-rm" data-i="${x.i}"`})) : S.nc.pending.map((x, i) => ({label:x.type, other:C(x.to), rm:`data-act="lk-rm-p" data-i="${i}"`}));
+  const o = L.otherId ? C(L.otherId) : null;
+  const who = c ? esc(c.nome) : 'Il cliente';
+  return `<div class="fsec" id="sec-legami"><h3>${ic('link')}Legami e parentele</h3>
+    <p class="faint" style="margin:-6px 0 0;font-size:12.5px">Nota interna, non visibile al cliente. Il collegamento compare su entrambe le anagrafiche.</p>
+    ${existing.length ? `<div class="card">${existing.map(x => `<div class="lk">${avatar(x.other)}<div class="grow"><div class="rel">${who} è ${esc(x.label.toLowerCase())}</div><b>${esc(fullName(x.other))}</b>${x.other.incomplete ? ' <span class="tag" style="height:20px">scheda da completare</span>' : ''}</div><button type="button" class="btn btn-ghost btn-sm" ${x.rm} aria-label="Rimuovi legame">${ic('trash')}</button></div>`).join('')}</div>` : ''}
+    <div class="lk-add">
+      <div class="fgrid">
+        <label class="field"><span>${c ? esc(c.nome) : 'Il cliente'} è…</span><input class="in" id="lk-type" list="lk-dl" value="${esc(L.type)}" placeholder="Es. Moglie di" autocomplete="off"></label>
+        <label class="field"><span>Sulla scheda dell'altra persona comparirà</span><input class="in" id="lk-back" value="${esc(L.back)}" placeholder="Es. Marito di" autocomplete="off"></label>
+      </div>
+      <datalist id="lk-dl">${Object.keys(LINK_TYPES).map(t => `<option value="${t}">`).join('')}</datalist>
+      <div class="chips">${LINK_CHIPS.map(t => `<button type="button" class="chip ${L.type === t ? 'on' : ''}" data-act="lk-chip" data-v="${t}">${t}</button>`).join('')}</div>
+      <div class="field"><span>Persona collegata</span>
+        ${o ? `<div class="picked">${avatar(o)}<div class="grow"><b>${esc(fullName(o))}</b><div class="muted" style="font-size:12px">${esc(o.email || 'Anagrafica da completare')}</div></div><button type="button" class="link" data-act="lk-unpick">Cambia</button></div>`
+        : L.quick ? `<div class="card card-b" style="display:flex;flex-direction:column;gap:12px">
+            <b>Nuova anagrafica rapida</b>
+            <div class="fgrid"><label class="field"><span>Nome <em>*</em></span><input class="in" id="lkq-nome" value="${esc(L.qn)}"></label><label class="field"><span>Cognome <em>*</em></span><input class="in" id="lkq-cognome" value="${esc(L.qc)}"></label><label class="field"><span>Cellulare</span><input class="in" id="lkq-tel" type="tel"></label></div>
+            <p class="faint" style="margin:0;font-size:12px">Basta il nome: il resto si completa se la persona entra in negozio.</p>
+            <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="btn" data-act="lk-quick-x">Annulla</button><button type="button" class="btn btn-primary" data-act="lk-quick-save">${ic('userPlus')}Crea e seleziona</button></div></div>`
+        : `<div class="scan-wrap">${ic('search')}<input class="in" id="lk-q" style="padding-left:44px" value="${esc(L.q)}" placeholder="Cerca tra i clienti per nome, email o telefono" autocomplete="off"></div>
+           <div class="picklist" id="lk-list">${lkPick(L.q, me)}</div>`}
+      </div>
+      <div><button type="button" class="btn btn-primary" data-act="lk-add" ${o && L.type ? '' : 'disabled'}>${ic('link')}Collega anagrafiche</button></div>
+    </div>
+  </div>`;
+}
+function lkPick(q, me){
+  const qq = (q || '').trim().toLowerCase();
+  const list = clients.filter(c => c.id !== me && (!qq || `${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(qq))).slice(0,5);
+  return list.map(c => `<div class="row" data-act="lk-pick" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.email || 'Anagrafica da completare')}</div></div></div>`).join('')
+    + `<div class="row" data-act="lk-quick" style="color:var(--accent);font-weight:600">${ic('userPlus')}${qq ? `Non c'è? Crea anagrafica per «${esc(q.trim())}»` : 'Non c\'è? Crea una nuova anagrafica'}</div>`;
 }
 
 /* ---------------- NUOVO CLIENTE ---------------- */
@@ -1147,16 +1186,6 @@ function renderModal(){
       <div class="field"><span>Follow-up</span><div class="chips">${[['','Nessuno'],['2026-09-27','Tra 3 giorni'],['2026-10-01','Tra una settimana'],['2026-10-24','Tra un mese']].map(([v,l]) => `<button class="chip ${M.fu === v ? 'on' : ''}" data-act="m-fu" data-v="${v}">${l}</button>`).join('')}</div></div>`;
     f = `<span class="auto-info">${ic('clock')}Oggi ${fmtT(NOW.toISOString())} · ${S.operator} · ${S.boutique}</span><button class="btn" data-act="m-close">Annulla</button><button class="btn btn-primary" data-act="m-save-ev" ${c ? '' : 'disabled'}>${ic('check')}Registra</button>`;
   }
-  if (M.kind === 'legame') {
-    const c = C(M.clientId), o = M.otherId ? C(M.otherId) : null;
-    h = 'Aggiungi legame';
-    b = `<div class="field"><span>${esc(c.nome)} è…</span><div class="chips">${Object.keys(LINK_TYPES).map(t => `<button class="chip ${M.type === t ? 'on' : ''}" data-act="m-ltype" data-v="${t}">${t.replace(' di','')}</button>`).join('')}</div></div>
-      <div class="field"><span>…di</span>${o ? `<div class="picked">${avatar(o)}<div class="grow"><b>${esc(fullName(o))}</b>${o.incomplete ? '<div class="muted" style="font-size:12px">Nuova scheda vuota</div>' : ''}</div><button class="link" data-act="m-lunpick">Cambia</button></div>` :
-        `<input class="in" id="m-ls" placeholder="Cerca tra le anagrafiche" autocomplete="off" value="${esc(M.q)}"><div class="picklist" id="m-ls-list">${linkPick(M.q)}</div>`}</div>
-      ${o && M.type ? `<div class="banner info">${ic('link')}<div class="grow"><p>Su ${esc(c.nome)}: <b>${esc(M.type.toLowerCase())} ${esc(fullName(o))}</b><br>Su ${esc(o.nome)}: <b>${esc(LINK_TYPES[M.type].toLowerCase())} ${esc(fullName(c))}</b></p></div></div>` : ''}
-      <p class="faint" style="margin:0;font-size:12px">Il legame è una nota interna: non viene comunicato al cliente e non finisce nelle newsletter.</p>`;
-    f = `<button class="btn" data-act="m-close">Annulla</button><button class="btn btn-primary" data-act="m-save-link" ${o && M.type ? '' : 'disabled'}>${ic('check')}Salva legame</button>`;
-  }
   if (M.kind === 'pda') {
     const c = M.clientId ? C(M.clientId) : null;
     h = 'Manifestazione di interesse';
@@ -1188,13 +1217,6 @@ function renderModal(){
   r.innerHTML = `<div class="overlay" data-act="m-bg"><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(h)}"><div class="modal-h"><h2>${h}</h2><button class="btn btn-ghost btn-sm" data-act="m-close" aria-label="Chiudi">${ic('x')}</button></div><div class="modal-b">${b}</div><div class="modal-f">${f}</div></div></div>`;
 }
 const others = p => pdas.filter(x => x.id !== p.id && x.stato === 'aperta' && x.brand === p.brand && x.modello === p.modello);
-function linkPick(q){
-  const qq = (q || '').trim().toLowerCase();
-  const list = clients.filter(c => c.id !== M.clientId && (!qq || `${c.nome} ${c.cognome} ${c.email}`.toLowerCase().includes(qq))).slice(0,5);
-  return list.map(c => `<div class="row" data-act="m-lpick" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.email || 'Scheda da completare')}</div></div></div>`).join('')
-    + (qq ? `<div class="row" data-act="m-lcreate" style="color:var(--accent);font-weight:600">${ic('plus')}Crea scheda vuota per «${esc(q)}»</div>` : '<div class="row faint" style="cursor:default">Scrivi un nome: se la persona non è in anagrafica puoi creare una scheda vuota.</div>');
-}
-
 /* ---------------- DRAWER NOTE ---------------- */
 function renderDrawer(){
   const r = document.getElementById('drawer-root');
@@ -1234,7 +1256,6 @@ function act(el, ev){
       events.push({id:'e' + (++evSeq), clientId:id, type:el.dataset.t, date:nowISO(), operator:S.operator, boutique:S.boutique, note:''});
       render(); toast(`${EV[el.dataset.t].label} · registrato alle ${fmtT(NOW.toISOString())}`); break; }
     case 'pda-new': openModal({kind:'pda', clientId:id || null, lock:!!id}); break;
-    case 'legame': openModal({kind:'legame', clientId:id, type:'', otherId:null, q:''}); break;
     case 'assegna': openModal({kind:'assegna', pdaId:id, productId: compatible(pdas.find(p => p.id === id))[0]?.id}); break;
     case 'to-cassa': S.cart.clientId = id; go('cassa'); break;
     case 'pda-cassa': { const p = pdas.find(x => x.id === id); S.cart.clientId = p.clientId; if (!S.cart.items.includes(p.productId)) S.cart.items.push(p.productId); go('cassa'); toast('Pre-acquisto messo in cassa'); break; }
@@ -1252,6 +1273,25 @@ function act(el, ev){
     case 'nc-model': S.nc.modelli = S.nc.modelli || []; toggle(S.nc.modelli, v); keepForm(() => render()); break;
     case 'nc-int': toggle(S.nc.interests, v); keepForm(() => render()); break;
     case 'save-client': saveClient(id); break;
+    case 'tab-legami': S.tab = 'anagrafica'; render(); document.getElementById('sec-legami').scrollIntoView({block:'center'}); document.getElementById('lk-type').focus({preventScroll:true}); break;
+    case 'lk-chip': Object.assign(S.nc.lk, {type:v, back:backOf(v)}); keepForm(render); break;
+    case 'lk-pick': S.nc.lk.otherId = id; keepForm(render); break;
+    case 'lk-unpick': S.nc.lk.otherId = null; keepForm(render); break;
+    case 'lk-quick': { const w = (S.nc.lk.q || '').trim().split(/\s+/); Object.assign(S.nc.lk, {quick:true, qn:w[0] || '', qc:w.slice(1).join(' ')}); keepForm(render); document.getElementById('lkq-nome').focus(); break; }
+    case 'lk-quick-x': S.nc.lk.quick = false; keepForm(render); break;
+    case 'lk-quick-save': {
+      const g = x => document.getElementById(x).value.trim();
+      if (!g('lkq-nome')) { toast('Inserisci almeno il nome'); break; }
+      const nc = {id:'c' + (clients.length + 300), nome:g('lkq-nome'), cognome:g('lkq-cognome'), email:'', tel:g('lkq-tel'), indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[], modelli:[], interests:[], boutique:S.boutique, source:'Legame', incomplete:true, since:'2026-09-24', note:''};
+      clients.push(nc); Object.assign(S.nc.lk, {otherId:nc.id, quick:false, q:''}); keepForm(render); toast(`Anagrafica creata: ${fullName(nc)}`); break; }
+    case 'lk-add': {
+      const L = S.nc.lk, back = L.back.trim() || backOf(L.type.trim());
+      const cid = S.view === 'cliente' ? S.id : null;
+      if (cid) links.push({from:cid, to:L.otherId, type:L.type.trim(), back}); else S.nc.pending.push({to:L.otherId, type:L.type.trim(), back});
+      S.nc.lk = {type:'', back:'', q:'', otherId:null, quick:false};
+      keepForm(render); toast(cid ? 'Legame salvato su entrambe le anagrafiche' : 'Legame aggiunto: verrà salvato con il cliente'); break; }
+    case 'lk-rm': links.splice(+el.dataset.i, 1); keepForm(render); toast('Legame rimosso'); break;
+    case 'lk-rm-p': S.nc.pending.splice(+el.dataset.i, 1); keepForm(render); break;
     /* cassa */
     case 'cart-client': S.cart.clientId = id; render(); break;
     case 'cart-client-clear': S.cart.clientId = null; render(); break;
@@ -1287,13 +1327,6 @@ function act(el, ev){
     case 'm-save-ev': {
       events.push({id:'e' + (++evSeq), clientId:M.clientId, type:M.type, date:nowISO(), operator:S.operator, boutique:S.boutique, note:document.getElementById('m-note').value.trim(), followup:M.fu || null});
       const n = fullName(C(M.clientId)); closeModal(); render(); toast(`${EV[events[events.length-1].type].label}: ${n}`); break; }
-    case 'm-ltype': M.type = v; renderModal(); break;
-    case 'm-lpick': M.otherId = id; renderModal(); break;
-    case 'm-lunpick': M.otherId = null; renderModal(); break;
-    case 'm-lcreate': {
-      const parts = M.q.trim().split(/\s+/); const nc = {id:'c' + (clients.length + 100), nome:parts[0], cognome:parts.slice(1).join(' '), email:'', tel:'', indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[], modelli:[], interests:[], boutique:S.boutique, source:'Legame', incomplete:true, since:'2026-09-24', note:''};
-      clients.push(nc); M.otherId = nc.id; renderModal(); break; }
-    case 'm-save-link': links.push({from:M.clientId, to:M.otherId, type:M.type}); closeModal(); render(); toast('Legame salvato su entrambe le schede'); break;
     case 'm-brand': M.brand = v; M.modello = ''; renderModal(); break;
     case 'm-model': M.modello = v; renderModal(); break;
     case 'm-save-pda': {
@@ -1313,9 +1346,9 @@ function act(el, ev){
 function toggle(arr, v){ const i = arr.indexOf(v); if (i >= 0) arr.splice(i,1); else arr.push(v); }
 /* conserva i valori digitati quando il form viene ridisegnato */
 function keepForm(fn){
-  const ids = ['f-nome','f-cognome','f-prof','f-azienda','f-email','f-tel','f-ind','f-boutique','f-bd','f-bm','f-by','f-dec','f-note'];
-  const vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.value; });
-  const y = window.scrollY; fn(); ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] !== undefined) el.value = vals[i]; }); window.scrollTo(0, y);
+  const ids = ['f-nome','f-cognome','f-prof','f-azienda','f-email','f-tel','f-ind','f-boutique','f-bd','f-bm','f-by','f-dec','f-note','f-nl'];
+  const vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.type === 'checkbox' ? el.checked : el.value; });
+  const y = window.scrollY; fn(); ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] !== undefined) el[el.type === 'checkbox' ? 'checked' : 'value'] = vals[i]; }); window.scrollTo(0, y);
 }
 function keepAuto(){
   const ids = ['a-nome','a-cognome','a-email','a-tel'], vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.value; });
@@ -1329,7 +1362,7 @@ function saveClient(id){
   if (S.nc.noYear) birth.decade = v('f-dec'); else birth.y = +v('f-by') || null;
   const data = {nome:v('f-nome'), cognome:v('f-cognome'), prof:v('f-prof'), azienda:v('f-azienda'), email:v('f-email'), tel:v('f-tel'), indirizzo:v('f-ind'), boutique:v('f-boutique'), birth, brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : '', note:v('f-note'), newsletter:document.getElementById('f-nl').checked};
   if (id) { const c = C(id); Object.assign(c, data); if (c.email && c.tel) c.incomplete = false; S.tab = 'panoramica'; render(); toast('Anagrafica aggiornata'); }
-  else { const c = {id:'c' + (clients.length + 200), source:'Negozio', since:'2026-09-24', ...data}; clients.push(c); go('cliente', c.id); toast('Cliente registrato'); }
+  else { const c = {id:'c' + (clients.length + 200), source:'Negozio', since:'2026-09-24', ...data}; clients.push(c); const pend = S.nc.pending; pend.forEach(l => links.push({from:c.id, ...l})); go('cliente', c.id); toast(pend.length ? `Cliente registrato con ${pend.length} ${pend.length === 1 ? 'legame' : 'legami'}` : 'Cliente registrato'); }
 }
 function checkout(){
   const c = C(S.cart.clientId); let total = 0;
@@ -1342,8 +1375,9 @@ function checkout(){
 /* quando si apre una scheda in modifica, carico gli elenchi del cliente nello stato del form */
 const _go = go;
 go = function(view, id=null, extra={}){
-  if (view === 'nuovo') S.nc = {brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna'};
-  if (view === 'cliente' && id) { const c = C(id); if (c) S.nc = {brands:[...c.brands], interests:[...c.interests], modelli:[...c.modelli], noYear:!!(c.birth && c.birth.decade), decade:c.birth?.decade || '', celeb:c.celeb || 'Nessuna'}; }
+  const lk = {type:'', back:'', q:'', otherId:null, quick:false};
+  if (view === 'nuovo') S.nc = {brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk, pending:[]};
+  if (view === 'cliente' && id) { const c = C(id); if (c) S.nc = {brands:[...c.brands], interests:[...c.interests], modelli:[...c.modelli], noYear:!!(c.birth && c.birth.decade), decade:c.birth?.decade || '', celeb:c.celeb || 'Nessuna', lk, pending:[]}; }
   _go(view, id, extra);
 };
 
@@ -1353,10 +1387,12 @@ document.addEventListener('input', e => {
   if (t.dataset.f !== undefined) { S.f[t.dataset.f] = t.value; renderResults(); return; }
   if (t.id === 'gs') return gsearch(t.value);
   if (t.id === 'm-cs') { document.getElementById('m-cs-list').innerHTML = clientPick(t.value, 'm-pick'); return; }
-  if (t.id === 'm-ls') { M.q = t.value; document.getElementById('m-ls-list').innerHTML = linkPick(t.value); return; }
   if (t.id === 'cart-cs') { document.getElementById('cart-cs-list').innerHTML = clientPick(t.value, 'cart-client'); return; }
   if (t.id === 'scan') { document.getElementById('scan-list').innerHTML = scanList(t.value); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'INPUT') { S.pf[t.dataset.pf] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('pf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
+  if (t.id === 'lk-q') { S.nc.lk.q = t.value; document.getElementById('lk-list').innerHTML = lkPick(t.value, S.view === 'cliente' ? S.id : null); return; }
+  if (t.id === 'lk-type') { S.nc.lk.type = t.value; if (!S.nc.lk.backEdited) { S.nc.lk.back = LINK_TYPES[t.value.trim()] || ''; document.getElementById('lk-back').value = S.nc.lk.back; } document.querySelector('[data-act="lk-add"]').disabled = !(S.nc.lk.otherId && t.value.trim()); return; }
+  if (t.id === 'lk-back') { S.nc.lk.back = t.value; S.nc.lk.backEdited = !!t.value; return; }
   if (t.dataset.dup !== undefined) return dupCheck();
 });
 document.addEventListener('change', e => {
