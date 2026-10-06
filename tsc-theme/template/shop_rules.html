@@ -2,7 +2,7 @@
 Di standard lasciare tutto true, in base al caso specifico direttamente o via twig si cambiano i valori #}
 
 {% set is_agent = false %}
-{% if customer.custom_fields.role == "agent" %}
+{% if customer.custom_fields.role|trim|lower == "agent" %}
     {% set is_agent = true %}
 {% endif %}
 
