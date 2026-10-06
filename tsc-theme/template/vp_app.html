@@ -1,0 +1,1714 @@
+/* Portale Verga: applicazione. Generato dal mockup (mockup/index.html) e adattato a TSC. */
+
+/* =========================================================
+   Verga 1947 · Portale venditori (tema TSC)
+   Versione 1: dati reali da TSC dove disponibili, il resto in archivio locale.
+   ATTENZIONE: questo file passa da Twig, non usare graffe doppie, graffa+percento o graffa+cancelletto.
+   ========================================================= */
+const LOGO_FULL = document.getElementById('logo-full').innerHTML;
+const LOGO_MARK = document.getElementById('logo-mark').innerHTML;
+const NOW = new Date();
+const isoLocal = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const TODAY = isoLocal(NOW);
+const addDays = n => { const d = new Date(NOW); d.setDate(d.getDate() + n); return isoLocal(d); };
+const inWeek = b => { if (!b || !b.d || !b.m) return false; for (let i = 0; i < 7; i++) { const d = new Date(NOW); d.setDate(d.getDate() + i); if (d.getDate() === b.d && d.getMonth() + 1 === b.m) return true; } return false; };
+
+const I = {
+  search:'<circle cx="11" cy="11" r="7.5"/><path d="m21 21-4.3-4.3"/>',
+  home:'<path d="m3 10 9-7 9 7v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V13h6v9"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>',
+  userPlus:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/>',
+  cart:'<circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2 2h2l2.7 12.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L22 7H5.1"/>',
+  watch:'<circle cx="12" cy="12" r="6"/><path d="M12 9.5V12l1.5 1.5"/><path d="m16.1 7.7-.8-4a2 2 0 0 0-2-1.7h-2.6a2 2 0 0 0-2 1.7l-.8 4"/><path d="m7.9 16.3.8 4a2 2 0 0 0 2 1.7h2.6a2 2 0 0 0 2-1.7l.8-4"/>',
+  gem:'<path d="M6 3h12l4 6-10 12L2 9z"/><path d="M2 9h20M12 21 8 9l4-6 4 6-4 12"/>',
+  calendar:'<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+  wrench:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.8-3.8a6 6 0 0 1-7.9 7.9l-6.9 6.9a2.1 2.1 0 0 1-3-3l6.9-6.9a6 6 0 0 1 7.9-7.9z"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  phoneIn:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/><path d="M16 2v6h6M22 2l-6 6"/>',
+  phoneOut:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/><path d="M16 8V2h6M16 8l6-6"/>',
+  store:'<path d="M3 21h18M5 21V8l7-5 7 5v13"/><path d="M9 21v-6h6v6"/>',
+  link:'<path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.8 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.8-1.7"/>',
+  heart:'<path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7z"/>',
+  x:'<path d="M18 6 6 18M6 6l12 12"/>',
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  filter:'<path d="M22 3H2l8 9.5V19l4 2v-8.5z"/>',
+  info:'<circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/>',
+  logout:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>',
+  gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 8 12 8s1-5 4.5-5a2.5 2.5 0 0 1 0 5"/>',
+  box:'<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
+  scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/>',
+  clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+  mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/>',
+  phone:'<rect x="6" y="2" width="12" height="20" rx="2"/><path d="M11 18h2"/>',
+  star:'<path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2 2 9.3l6.9-1z"/>',
+  trash:'<path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>',
+  arrow:'<path d="M5 12h14M12 5l7 7-7 7"/>',
+  back:'<path d="M19 12H5M12 19l-7-7 7-7"/>',
+  sparkle:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M5.6 18.4l2.8-2.8M15.6 8.4l2.8-2.8"/>',
+  list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+  bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',
+  truck:'<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
+  bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff:'<path d="M9.9 4.2A10 10 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6A17 17 0 0 0 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6M14.1 14.1a3 3 0 1 1-4.2-4.2M2 2l20 20"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/>',
+  print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  clip:'<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+  tag:'<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1"/>',
+  pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+  send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
+};
+const ic = (n, cls='') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------------- dati di esempio ---------------- */
+const BOUTIQUES = [
+  {name:'Bottega Storica', addr:'Via Mazzini 3, Milano'},
+  {name:'Boutique Multibrand', addr:'Via V. Capelli 4, Milano'},
+  {name:'Boutique Patek Philippe', addr:'Via V. Capelli 6, Milano'},
+  {name:'Boutique Portofino', addr:'Calata Marconi 45, Portofino'},
+];
+const OPERATORS = [
+  {name:'Marco Verdi', email:'marco.verdi@verga1947.it', b:'Bottega Storica', role:'Direttore vendite'},
+  {name:'Sara Colombo', email:'sara.colombo@verga1947.it', b:'Boutique Multibrand', role:'Venditrice'},
+  {name:'Luca Ferrari', email:'luca.ferrari@verga1947.it', b:'Boutique Patek Philippe', role:'Venditore'},
+  {name:'Giorgia Costa', email:'giorgia.costa@verga1947.it', b:'Boutique Portofino', role:'Venditrice'},
+];
+const role = () => VPD.isSuperAgent ? 'Direttore vendite' : (OPERATORS.find(o => o.name === S.operator)?.role || 'Venditore');
+const canAssign = () => ['Direttore vendite','Titolare'].includes(role());
+/* lista chiusa fornita da Verga (LISTA PER NUOVO CRM 2027) */
+const BRANDS = ['Angelus','Cartier','Gerald Charles','Girard-Perregaux','Grand Seiko','Hublot','Messika','Nomos','Norqain','Patek Philippe','Rolex','Rolex CPO','Tudor','TAG Heuer','Pomellato','Verga Pre-Owned'];
+const JEWEL = ['Pomellato','Messika'];
+const LANGS = ['Italiano','Inglese','Spagnolo','Arabo','Cinese'];
+const TIPI = ['Prospect','Cliente','Commerciante'];
+const TIERS = [{n:'Platino',min:60000,c:'#6d7f8c'},{n:'Oro',min:30000,c:'#a8811f'},{n:'Argento',min:10000,c:'#8a9298'},{n:'Bronzo',min:1,c:'#9a6437'}];
+const MOTIVI = ['Nuova manifestazione d\'interesse','Aggiornamento manifestazione','Acquisto','Riparazione','Altro'];
+const MODELS = {Angelus:['U10','U23','La Magia'],'Gerald Charles':['Maestro'],'Girard-Perregaux':['Laureato','1966','Free Bridge'],'Grand Seiko':['Heritage','Evolution 9','Elegance'],Hublot:['Big Bang','Classic Fusion','Spirit of Big Bang'],Nomos:['Tangente','Club','Orion'],Norqain:['Freedom','Adventure','Wild ONE'],'Rolex CPO':['Submariner','Cosmograph Daytona','GMT-Master II','Datejust'],'TAG Heuer':['Carrera','Monaco','Aquaracer'],'Verga Pre-Owned':['Vintage','Contemporaneo'],Rolex:['Cosmograph Daytona','Submariner','GMT-Master II','Datejust 36','Datejust 41','Oyster Perpetual','Yacht-Master','Day-Date'],'Patek Philippe':['Nautilus','Aquanaut','Calatrava','Grand Complications'],Cartier:['Santos','Tank','Panthère','Ballon Bleu'],Tudor:['Black Bay 58','Pelagos','Ranger','Royal'],Pomellato:['Nudo','Iconica','Sabbia'],Messika:['Move Uno','Move Romane','Joy']};
+const INTERESTS = ['Golf','Tennis e padel','Vela','Equitazione','Teatro','Ciclismo','Fashion e beauty','Beverage','Arte','Motori'];
+const PROFESSIONS = ['Impiegato','Manager','CEO','Imprenditore','Libero professionista','Avvocato','Medico','VIP','Pensionato','Studente'];
+const CELEB = ['Cantante','Attore/Attrice','Sportivo','Influencer','Volto TV'];
+const DECADES = ["Anni '40","Anni '50","Anni '60","Anni '70","Anni '80","Anni '90",'Anni 2000','Anni 2010'];
+const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const LINK_TYPES = {'Coniuge di':'Coniuge di','Collega di':'Collega di','Moglie di':'Marito di','Marito di':'Moglie di','Compagno/a di':'Compagno/a di','Figlio/a di':'Genitore di','Padre di':'Figlio/a di','Madre di':'Figlio/a di','Genitore di':'Figlio/a di','Fratello/Sorella di':'Fratello/Sorella di','Nipote di':'Zio/a di','Parente di':'Parente di','Amico/a di':'Amico/a di','Dipendente di':'Datore di lavoro di','Datore di lavoro di':'Dipendente di','Socio/a di':'Socio/a di','Assistente di':'Assistito/a da'};
+const LINK_CHIPS = ['Coniuge di','Moglie di','Marito di','Figlio/a di','Padre di','Madre di','Fratello/Sorella di','Amico/a di','Collega di'];
+const backOf = t => LINK_TYPES[t] || 'Collegato/a a';
+const EV = {
+  visita:{label:'Passato in negozio', short:'Visita', icon:'store', cls:''},
+  chiamata_in:{label:'Ci ha chiamato', short:'Chiamata ricevuta', icon:'phoneIn', cls:'in'},
+  chiamata_out:{label:'Lo abbiamo chiamato', short:'Chiamata fatta', icon:'phoneOut', cls:'out'},
+  mail:{label:'Mail', short:'Mail', icon:'mail', cls:'in'},
+};
+
+/* ---------------- dati: TSC + archivio locale provvisorio ----------------
+   Da TSC (tramite il tema e il middleware pda2_shared) arrivano: clienti dell'agente,
+   dati del cliente selezionato, i suoi ordini e proposte, prodotti e carrello.
+   Tutto il resto (passaggi, note, task, legami, manifestazioni, riparazioni, campi CRM)
+   per ora e' salvato nel browser (localStorage) finche' non ci sono gli endpoint. */
+const VPD = window.VP || {};
+const STORE_KEY = 'vp_store_v1';
+const store = (() => { try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (_) { return {}; } })();
+['events','pdas','links','repairs','localClients','notifs'].forEach(k => store[k] = store[k] || []);
+store.extra = store.extra || {}; store.seq = store.seq || {ev:100, pda:100, rip:430};
+function saveStore(){
+  store.seq = {ev:evSeq, pda:pdaSeq, rip:ripSeq};
+  store.events = events; store.pdas = pdas; store.links = links; store.repairs = repairs; store.notifs = NOTIFS;
+  store.localClients = clients.filter(c => c.local).map(c => ({...c}));
+  clients.filter(c => !c.local).forEach(c => { const x = {}; CRM_KEYS.forEach(k => x[k] = c[k]); store.extra[c.id] = x; });
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (_) {}
+}
+const CRM_KEYS = ['nome','cognome','sesso','lingua','tipo','rating','email','email2','tel','cf','pec','addresses','billing','misure','notes','tasks','privacy','prof','azienda','celeb','birth','brands','modelli','interests','boutique','newsletter','incomplete'];
+const blankExtra = () => ({cf:'',pec:'',sesso:'',lingua:'',tipo:'Prospect',rating:0,email2:'',addresses:[],billing:{},misure:{},notes:[],tasks:[],privacy:null});
+const splitName = full => { const p = String(full || '').trim().split(/\s+/); return p.length > 1 ? [p[0], p.slice(1).join(' ')] : [p[0] || '', '']; };
+function fromTsc(x){
+  const b = x.billing || {}, [nome, cognome] = splitName(b.fullname || x.fullname || x.name);
+  const id = String(x.customer_id ?? x.id ?? b.customerid ?? '');
+  return {id, tsc:true, nome, cognome, email:String(b.email || x.email || '').toLowerCase(), tel:b.phone || '', cf:b.fiscalcode || '', pec:b.pec || '',
+    addresses:b.address ? [{label:'Fatturazione', via:b.address, cap:b.zipcode || '', citta:b.city || '', prov:b.district || '', naz:b.country || ''}] : [],
+    billing:b.vatnumber ? {rs:b.fullname || '', ind:[b.address, b.zipcode, b.city].filter(Boolean).join(' '), piva:b.vatnumber, sdi:b.sdi || ''} : {},
+    tipo:'Cliente', prof:'', azienda:'', celeb:'', birth:{}, brands:[], modelli:[], interests:[], boutique:'', source:'Gestionale', since:'', note:'', indirizzo:''};
+}
+const asList = v => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
+const clients = [];
+asList(VPD.customers).forEach(x => { const c = fromTsc(x); if (c.id) clients.push(c); });
+if (VPD.customerData && VPD.customerData.billing) {
+  const cd = fromTsc(VPD.customerData), ex = clients.find(c => c.id === cd.id);
+  if (ex) Object.assign(ex, Object.fromEntries(Object.entries(cd).filter(([, v]) => v !== '' && !(Array.isArray(v) && !v.length)))); else if (cd.id) clients.push(cd);
+}
+store.localClients.forEach(c => clients.push({...c, local:true}));
+clients.forEach(c => { const base = blankExtra(); Object.keys(base).forEach(k => { if (c[k] === undefined || c[k] === '' && base[k] !== '') c[k] = base[k]; }); Object.assign(c, store.extra[c.id] || {}); c.notes = c.notes || []; c.tasks = c.tasks || []; });
+const links = store.links;
+const NOTIFS = store.notifs;
+let evSeq = store.seq.ev;
+const events = store.events;
+let pdaSeq = store.seq.pda;
+const pdas = store.pdas;
+/* prodotti dal catalogo TSC (getItemsByFilter) */
+const BRAND_NAMES = {}; asList(VPD.brands).forEach(b => { if (b) BRAND_NAMES[String(b.uid ?? b.id ?? b._id)] = b.name || b.title || ''; });
+const products = asList(VPD.products).map(it => {
+  const d = it.data || {}, bid = String(it.brand ?? it.brandUID ?? d.brand ?? '');
+  const stock = +(it.stockCount ?? d.stockCount ?? 0), unl = +(d.unlimited || 0);
+  return {id:String(it.uid ?? it.id), tsc:true, tipo:/anell|collan|bracciale|orecchin|gioiell/i.test(it.title || '') ? 'gioiello' : 'orologio', brand:BRAND_NAMES[bid] || it.brand_name || '', modello:it.title || '', ref:it.sku || d.sku || it.code || '', det:'', seriale:'', price:+(it.final_price ?? it.price ?? 0) || 0, boutique:'', stato:stock > 0 || unl ? 'disponibile' : 'esaurito', link:`/product/${it.uid}/${it.slug || ''}`};
+});
+/* ordini del cliente selezionato (order_frontend.php del middleware) */
+const purchases = [];
+const SEL_ID = VPD.selected && VPD.selected.id ? String(VPD.selected.id) : null;
+asList(VPD.orders && VPD.orders.list).forEach(o => purchases.push({clientId:SEL_ID, date:String(o.date || '').slice(0, 10), brand:'Ordine', modello:'n° ' + o.orderID, ref:'', price:+o.total || 0, boutique:'', seller:'', orderID:o.orderID, status:o.status}));
+/* proposte (PDA) del cliente selezionato (proposal_frontend.php) */
+const PROPOSALS = asList(VPD.proposals && VPD.proposals.list);
+
+/* ---------------- stato UI ---------------- */
+const S = {
+  view:'login', id:null, tab:'panoramica', navOpen:false, notes:false,
+  boutique:'Bottega Storica', operator:'Marco Verdi', pin:'',
+  f:{q:'',tipo:'',tier:'',rating:'',brand:'',modello:'',ref:'',seller:'',pref:'',interest:'',ibrand:'',lingua:'',prof:'',last:'',visit:'',boutique:'',celeb:''},
+  pf:{q:'',brand:'',tipo:'',stato:''},
+  evf:{type:'',boutique:''},
+  pdaf:'aperta',
+  rf:{chip:'aperte', q:'', tipo:'', boutique:'', tecnico:''}, rn:null, pv:null,
+  cart:{clientId:null, items:[], pay:'Carta'},
+  auto:{step:1, brands:[], interests:[], noYear:false, decade:''},
+  nc:{brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk:{type:'', back:'', q:'', otherId:null, quick:false}, pending:[], addr:[], rating:0},
+};
+
+/* ---------------- helpers ---------------- */
+const C = id => clients.find(c => c.id === id) || (id ? {...blankExtra(), id, ghost:true, nome:'Cliente', cognome:'non in elenco', email:'', tel:'', brands:[], modelli:[], interests:[], birth:{}, boutique:'', source:'', since:''} : undefined);
+const P = id => products.find(p => p.id === id) || {id, brand:'', modello:'Prodotto', ref:'', seriale:'', price:0, tipo:'orologio', boutique:'', stato:''};
+const fullName = c => c ? `${c.nome} ${c.cognome}` : '';
+const initials = c => ((c.nome||'?')[0] + (c.cognome||'')[0]).toUpperCase();
+const opInitials = n => n.split(' ').map(x => x[0]).join('');
+const dt = s => new Date(s.length <= 10 ? s + 'T12:00' : s);
+const fmtD = s => s ? dt(s).toLocaleDateString('it-IT',{day:'2-digit',month:'2-digit',year:'numeric'}) : '—';
+const fmtT = s => dt(s).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+const fmtDT = s => sameDay(s) ? 'Oggi, ' + fmtT(s) : fmtD(s) + ', ' + fmtT(s);
+const sameDay = s => dt(s).toDateString() === NOW.toDateString();
+const dday = s => Math.round((new Date(dt(s).toDateString()) - new Date(NOW.toDateString())) / 86400000);
+const daysAgo = s => -dday(s);
+const rel = s => { const n = daysAgo(s); if (n <= 0) return 'oggi'; if (n === 1) return 'ieri'; if (n < 30) return n + ' giorni fa'; if (n < 365) { const m = Math.round(n/30); return m === 1 ? '1 mese fa' : m + ' mesi fa'; } const y = Math.floor(n/365); return y === 1 ? '1 anno fa' : y + ' anni fa'; };
+const eur = n => n.toLocaleString('it-IT',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const nowISO = () => { const d = new Date(); return isoLocal(d) + 'T' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); };
+const clientEvents = id => events.filter(e => e.clientId === id).sort((a,b) => dt(b.date) - dt(a.date));
+const lastVisit = id => clientEvents(id).find(e => e.type === 'visita');
+const lastContact = id => clientEvents(id)[0];
+const clientPurchases = id => purchases.filter(p => p.clientId === id).sort((a,b) => dt(b.date) - dt(a.date));
+const lastPurchase = id => clientPurchases(id)[0];
+const clientPdas = id => pdas.filter(p => p.clientId === id);
+const openPdas = () => pdas.filter(p => ['aperta','preordine'].includes(p.stato));
+const spent = id => purchases.filter(p => p.clientId === id).reduce((a, p) => a + p.price, 0);
+const tierOf = id => TIERS.find(t => spent(id) >= t.min);
+const tierTag = id => { const t = tierOf(id); return t ? `<span class="tag" style="color:${t.c};border-color:currentColor;background:transparent" title="Fascia calcolata sugli acquisti: ${eur(spent(id))}"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 13.9 7 22l5-3 5 3-1.5-8.1"/></svg>${t.n}</span>` : ''; };
+const stars = (n, act) => `<span class="stars" ${act ? 'role="radiogroup" aria-label="Valutazione venditore"' : ''}>${[1,2,3,4,5].map(i => act ? `<button type="button" data-act="${act}" data-v="${i}" aria-label="${i} su 5" class="${i <= n ? 'on' : ''}">★</button>` : `<span class="${i <= n ? 'on' : ''}">★</span>`).join('')}</span>`;
+const sleeping = id => { const e = lastContact(id); return daysAgo(e ? e.date : C(id).since) > 180; };
+const unread = () => NOTIFS.filter(n => !n.read).length;
+const compatible = pda => !['aperta','preordine'].includes(pda.stato) ? [] : products.filter(p => p.brand === pda.brand && !p.reservedFor && ['disponibile','in_arrivo'].includes(p.stato) && (pda.ref ? p.ref === pda.ref : p.modello.toLowerCase().includes(pda.modello.toLowerCase())));
+const clientLinks = id => links.map((l, i) => ({l, i})).filter(({l}) => l.from === id || l.to === id).map(({l, i}) => l.from === id ? {label:l.type, other:C(l.to), i} : {label:l.back || backOf(l.type), other:C(l.from), i});
+const birthText = b => { if (!b || (!b.d && !b.y && !b.decade)) return null; const dm = b.d ? `${b.d} ${MESI[b.m-1]}` : ''; if (b.y) return `${dm} ${b.y}`.trim(); if (b.decade) return `${dm}${dm ? ' · ' : ''}${b.decade}`; return dm; };
+const sourceTag = c => c.source === 'Autoregistrazione' ? `<span class="tag blue">${ic('send')}Autoregistrato online</span>` : c.source === 'Legame' ? `<span class="tag">${ic('link')}Creato da legame</span>` : '';
+const PDA_ST = {aperta:['Manifestazione','amber'],preordine:['Preordine','blue'],assegnata:['Associata','ok'],venduta:['Ordine',''],annullata:['Annullata','red']};
+const stateTag = p => `<span class="tag ${PDA_ST[p.stato][1]}">${PDA_ST[p.stato][0]}</span>`;
+const prodState = p => p.stato === 'disponibile' ? '<span class="tag ok">Disponibile</span>' : p.stato === 'in_arrivo' ? `<span class="tag blue">In arrivo ${fmtD(p.arrivo).slice(0,5)}</span>` : p.stato === 'riservato' ? `<span class="tag amber">Riservato a ${esc(fullName(C(p.reservedFor)))}</span>` : '<span class="tag">Venduto</span>';
+const avatar = (c, cls='') => c.incomplete && !c.email ? `<span class="av ghost ${cls}">${initials(c)}</span>` : `<span class="av ${cls}">${initials(c)}</span>`;
+const opts = (arr, sel, empty) => (empty !== undefined ? `<option value="">${empty}</option>` : '') + arr.map(v => `<option ${v === sel ? 'selected' : ''}>${esc(v)}</option>`).join('');
+
+/* ---------------- navigazione: ogni vista ha il suo URL su TSC ---------------- */
+const ROUTES = {dashboard:'/', clienti:'/profile/clienti', cliente:'/profile/cliente/', nuovo:'/profile/nuovo-cliente', passaggi:'/profile/passaggi', pda:'/profile/manifestazioni', prodotti:'/profile/catalogo', cassa:'/profile/cassa', riparazioni:'/profile/riparazioni', 'rip-new':'/profile/accettazione', busta:'/profile/busta/', prev:'/profile/preventivo/', auto:'/profile/autoregistrazione', login:'/login'};
+const SLUG_VIEW = {clienti:'clienti', cliente:'cliente', 'nuovo-cliente':'nuovo', passaggi:'passaggi', manifestazioni:'pda', catalogo:'prodotti', cassa:'cassa', riparazioni:'riparazioni', accettazione:'rip-new', busta:'busta', preventivo:'prev', autoregistrazione:'auto'};
+let NAVIGATING = false;
+function toast(msg){
+  if (NAVIGATING) { try { sessionStorage.setItem('vp_toast', msg); } catch (_) {} return; }
+  const r = document.getElementById('toast-root');
+  r.innerHTML = `<div class="vtoast" role="status">${ic('check')}${msg}</div>`;
+  clearTimeout(toast.t); toast.t = setTimeout(() => r.innerHTML = '', 2800);
+}
+/* cliente "attivo" per TSC: lo stesso cookie che usa la scelta cliente dell'agente (cassa, ordini, proposte) */
+function selectTscClient(id){
+  const c = C(id); if (!c) return;
+  if (c.local) setCookieAllsite('customer_info', JSON.stringify([{companyName:fullName(c), name:c.nome, surname:c.cognome, email:c.email, payment:'', new_customer:true, billing:{fullname:fullName(c), email:c.email, phone:c.tel, fiscalcode:c.cf, pec:c.pec}}]), 3);
+  else setCookieAllsite('customer_info', JSON.stringify([{id:c.id, name:fullName(c)}]), 3);
+}
+function go(view, id=null, extra={}){
+  saveStore();
+  let url = ROUTES[view] || '/';
+  if (['cliente','busta','prev'].includes(view)) url += encodeURIComponent(id || '');
+  const q = new URLSearchParams();
+  if (extra.tab) q.set('tab', extra.tab);
+  if (view === 'rip-new' && extra.keepRn && S.rn && S.rn.clientId) q.set('cliente', S.rn.clientId);
+  if (view === 'prodotti' && S.pf.q) q.set('q', S.pf.q);
+  if (view === 'cliente' && id) selectTscClient(id);
+  if (view === 'cassa' && S.cart.clientId) selectTscClient(S.cart.clientId);
+  try { sessionStorage.setItem('vp_cart', JSON.stringify(S.cart)); } catch (_) {}
+  NAVIGATING = true;
+  window.location.href = url + (q.toString() ? '?' + q : '');
+}
+const openModalNow = m => openModal(m);
+function openModalAfterNav(m){ if (NAVIGATING) { try { sessionStorage.setItem('vp_modal', JSON.stringify(m)); } catch (_) {} } else openModal(m); }
+function logout(){ saveStore(); setCookieSession('customer_info', ''); setCookieSession('order_data', ''); window.location.href = '/logout?callback=/login?logged-out=1'; }
+/* cassa: mette i pezzi nel carrello TSC e apre il checkout (proposta/ordine del tema) */
+function tscCheckout(){
+  const items = [...S.cart.items], c = C(S.cart.clientId);
+  if (!c) { toast('Associa un cliente per concludere la vendita'); return; }
+  if (typeof Storeden === 'undefined' || !Storeden.postProduct) { toast('Carrello TSC non disponibile su questa pagina'); return; }
+  selectTscClient(c.id);
+  const btn = document.querySelector('[data-act="checkout"]'); if (btn) { btn.disabled = true; btn.textContent = 'Invio al carrello…'; }
+  const next = () => {
+    const id = items.shift();
+    if (id === undefined) { S.cart = {clientId:c.id, items:[], pay:S.cart.pay, inv:S.cart.inv}; saveStore(); try { sessionStorage.setItem('vp_cart', JSON.stringify(S.cart)); } catch (_) {} window.location.href = '/cart'; return; }
+    Storeden.postProduct(id, 1, '', () => next());
+  };
+  next();
+}
+
+/* ---------------- note di progetto (per il team) ---------------- */
+const NOTES = {
+  login:{from:['Login con email e password del venditore.','La boutique si imposta in automatico da quella dell\'utente e si può cambiare dal selettore in alto: eventi e vendite la prendono da lì.','Ruoli: direttore vendite e titolare possono associare i prodotti alle PDA e vedono tutte le PDA aziendali (relazione tecnica di Dario). Marco Verdi è direttore vendite: entra con un altro venditore per vedere i permessi ridotti.'],open:['Le credenziali sono quelle degli utenti TSC o un accesso separato?','Su iPad condiviso in negozio serve un cambio utente rapido (es. PIN) oltre al login?','Boutique: la relazione tecnica parla di 1 boutique monomarca Rolex, 2 multimarca a Milano e Portofino stagionale; il sito elenca anche la boutique Patek Philippe. Nomi corretti da confermare.']},
+  dashboard:{from:['L\'operatore deve fare 3 cose: gestire anagrafiche, fare la cassa, gestire gli eventi. Sono le azioni rapide in alto.','Arrivi compatibili: quando arriva un pezzo, il direttore vendite verifica a mano le PDA in sospeso di tutte le boutique e lo associa. Non c\'è controllo automatico dello stock sul gestionale.','Follow-up dopo la visita in negozio; task periodiche per compleanni e anniversari (lista requisiti Verga).'],open:['Quali numeri vuole vedere la direzione sulla home?','Collegamento con file Excel esterni (programmazione consegne Rolex): uso reale da chiarire, TSC non pianifica consegne.']},
+  clienti:{from:['Ricerca su qualunque voce: nominativo, mail, cellulare, azienda, note; referenza cercata separatamente tra acquisti e manifestazioni (lista requisiti).','Filtri: brand, modello, referenza, ultimo acquisto, passaggio in negozio, tipologia, fascia, valutazione, lingua.','Venduto da: un venditore vede le sue vendite di un brand (es. "Claudia, le sue vendite Rolex").','Clienti dormienti: nessun passaggio, chiamata o mail da oltre 6 mesi.','Esportazione verso MailUp (sostituisce SALESmanago).'],open:['Filtri obbligatori richiesti dai brand.','Soglie delle fasce Bronzo/Argento/Oro/Platino per categoria.','Dopo quanto tempo un cliente è "dormiente"?']},
+  cliente:{from:['Tre sezioni separate: acquisti e riparazioni letti dal gestionale, manifestazioni registrate sul CRM.','Registrazione passaggio con un clic: visita, chiamata ricevuta, chiamata fatta, mail. Motivo: nuova manifestazione, aggiornamento manifestazione, acquisto, riparazione.','Tipologia Prospect / Cliente / Commerciante: il Prospect diventa Cliente al primo ordine (relazione tecnica).','Valutazione del venditore 1-5, separata dalla fascia calcolata sugli acquisti.','Note multiple firmate con utente, data e ora; non si modificano le note degli altri.','Chat interna: messaggi e task ai colleghi legati alla scheda, anche periodici.','Privacy firmata dal cliente su iPad (fondamentale per Verga).'],open:['Relazioni: bastano quelle standard di TSC?','"Acquisti" in scheda: fatture o ordini di vendita?','La relazione tecnica segnala che TSC non consente modifiche di interfaccia: quanto di questo layout è realizzabile?']},
+  nuovo:{from:['Due email (principale e secondaria), sempre in minuscolo.','Più indirizzi per la stessa anagrafica (via, CAP, città, provincia, nazione).','Data di nascita GG-MM-AAAA, sesso, professione (menu), azienda (libero), lingua (IT, EN, ES, AR, ZH).','Dati di fatturazione: ragione sociale, indirizzo, P.IVA, SDI (l\'SDI resta su TSC e non va al gestionale).','Misure: polso e anello, medio e anulare, mano destra e sinistra.','Brand e interessi: liste chiuse, il venditore non può aggiungere voci.'],open:['Elenco definitivo degli interessi "legati al settore".','Misure: campo del cliente o variante di prodotto?','Celebrità: campo a parte o voce VIP nella professione? La lista di Verga ha VIP tra le professioni.','Elenco completo delle professioni.']},
+  prodotti:{from:['Catalogo con ricerca per referenza (MPN), modello, seriale.','Ogni pezzo venduto è un prodotto unico (seriale).','Gioielli Pomellato/Messika registrati come brand + collezione + referenza.'],open:['Articoli a taglia (anelli): oggi la misura viene usata come matricola, ma il gestionale non accetta matricole duplicate. Serve un\'altra codifica.']},
+  cassa:{from:['La cassa crea un Ordine su TSC, che parte verso il gestionale (TSE) tramite eCube senza conferma di ritorno.','La fattura si chiede da qui: il gestionale la emette e restituisce subito il PDF da stampare. L\'operatore non apre mai il gestionale.','Intestazione: alla persona (scontrino) o alla sua società (fattura).','Il primo ordine trasforma il Prospect in Cliente.'],open:['Scontrino di cortesia: soluzione tipo Scontrini in Cloud da valutare.','Cosa fa l\'operatore se la fattura non arriva in tempo (timeout)?','Mostrare lo stato "inviato / confermato" dell\'ordine?']},
+  passaggi:{from:['Registro di visite, chiamate e mail, con motivo.','Ogni evento salva operatore, cliente, tipo e data: da qui si ricavano ultima visita e clienti dormienti.','Il follow-up dopo la visita può far partire una mail automatica.'],open:['Eventi del brand (serate, mostre) vanno gestiti qui o a parte?']},
+  pda:{from:['Stati della PDA: Manifestazione, Preordine, Associata, Ordine, Annullata (configurabili).','Associare e dissociare un prodotto: solo direttore vendite e titolare. Trasformare in ordine: qualsiasi venditore.','Notifica a chi ha creato la PDA quando il prodotto viene associato.','PDA visibili in tutte le boutique: un interesse nato in multimarca può essere soddisfatto dalla boutique Rolex.','Alla creazione parte la mail di presa in carico.'],open:['Il ramo Preordine va validato con Verga.','Quali campi della PDA passano al gestionale quando diventa ordine?','Circa 1.000 manifestazioni attive da migrare.']},
+  riparazioni:{from:['Stesso portale dei venditori: entrando in Riparazioni il colore passa dal verde al grafite. Usa la sezione solo il venditore, che registra a mano anche le fasi di laboratorio.','Monitoraggio buste al posto dell\'Excel "DB RIP": semaforo (rosso da fare o in ritardo, ambra in attesa del cliente, verde in lavorazione, blu pronto al ritiro).','Filtro "preventivo accettato, non assegnato" richiesto da Verga.','Per ogni busta: dove si trova fisicamente, chi ce l\'ha e la presunta consegna.','5 step per tutti i tipi di busta: gli step che non servono (es. preventivo in garanzia) vengono saltati.'],open:['Confermare i 5 step: Accettazione, Preventivo, Risposta cliente, Lavorazione, Riconsegna.','Numerazione delle buste: la genera il portale o sono prestampate? Diversa per laboratorio?','Posizioni a magazzino: elenco reale (stanze, cassetti, banchi).','Come calcolare la presunta consegna quando non esistono tempi standard.','Migrazione dello storico da "DB RIP" e da Arca.','2 licenze TSC: come si condividono clienti e storico tra le due.']},
+  'rip-new':{from:['Accettazione in negozio con i campi della scheda di Arca, senza Attività/Processo: l\'area si ricava dalla boutique.','Tipo busta: Riparazione, Garanzia, Cambio pila, CPO, Quotazione, Conto vendita (cliente sempre Verga Vintage, con numero e data CV).','Pulsante "Scatta foto" che su iPad apre la fotocamera; allegati multipli con un tocco.','Note principali (le vede il cliente in ricevuta) e note interne separate.','Alla conferma si crea in automatico la bolla del ciclo attivo con l\'articolo RIPARAZIONE, senza ricopiare i dati.','Subito dopo: ricevuta da firmare e 2 etichette per la busta.'],open:['Significato esatto di Nc, Nm e Cal.','Campo "Attributi" di Arca: cosa contiene?','Testo delle clausole della ricevuta.','Contenuto della seconda etichetta.','Codice fiscale e PEC: aggiunti all\'anagrafica cliente perché servono in ricevuta.']},
+  busta:{from:['Per ogni step le attività sono divise tra eseguite e da fare; una sola data per attività (inizio e fine coincidono), salvata con il venditore.','Il venditore inserisce le voci del preventivo dettate dal laboratorio e lo invia con un link privato.','Se il cliente rifiuta: preventivo chiuso, eventuale costo del solo preventivo, orologio restituito.','In chiusura più file allegati (documenti di scarico). Lo scarico dei componenti resta su TSE con il numero di busta, via eCube.','Avviso di ritiro con lo scontrino incluso.','CPO: dopo l\'offerta accettata la stessa busta passa da intestata al cliente a intestata a Verga; storico completo sulla busta.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni step (via eCube).']},
+  prev:{from:['Preventivo online al posto del PDF: una casella per ogni voce e il totale.','Il cliente sceglie le voci e conferma; paga al ritiro. Può anche stampare.','Accesso con link privato oppure con email e password: Verga li vuole entrambi.','La risposta torna sulla busta e va registrata nel gestionale.'],open:['Serve una firma o basta la conferma online?','Come torna il preventivo accettato nel gestionale.']},
+  auto:{from:['Form a due step. Step 1 obbligatorio e breve: nome, cognome, email (obbligatoria), telefono, brand di interesse facoltativi.','Step 2 facoltativo: dati utili per la comunicazione. Se non li compila, li chiede il venditore in negozio.','Ogni nuovo contatto nasce come Prospect.','Dopo il go-live Verga vuole mandare ai clienti una mail con un breve questionario (es. misura del polso).'],open:['Dove viene pubblicato il form (sito, QR in boutique, tablet)?','Consenso privacy: firma su iPad in negozio, online con checkbox?']},
+};
+NOTES.pdaList = NOTES.pda;
+
+/* ---------------- layout ---------------- */
+const RIP_VIEWS = ['riparazioni','rip-new','busta'];
+function render(){
+  const app = document.getElementById('app');
+  if (RIP_VIEWS.includes(S.view)) document.documentElement.dataset.area = 'rip'; else delete document.documentElement.dataset.area;
+  if (S.view === 'login') app.innerHTML = vLogin();
+  else if (S.view === 'auto') app.innerHTML = vAuto();
+  else if (S.view === 'prev') app.innerHTML = vPrev();
+  else if (S.view === 'customer') app.innerHTML = vCustomer();
+  else if (S.view === 'tsc') { app.innerHTML = shell(`${betaBanner()}<div id="vp-tsc-slot" class="vp-tsc"></div>`); const src = document.getElementById('vp-tsc-src'), slot = document.getElementById('vp-tsc-slot'); if (src && slot) { slot.appendChild(src); src.hidden = false; } }
+  else app.innerHTML = shell(betaBanner() + ({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,cassa:vCassa,passaggi:vPassaggi,pda:vPda,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
+  if (S.view === 'clienti') renderResults();
+}
+function shell(content){
+  const n = (v, icon, label, badge='') => `<button class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) || (S.view === 'tsc' && TSC_NAV() === v) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="vbadge num">${badge}</span>` : ''}</button>`;
+  const compat = openPdas().filter(p => compatible(p).length).length;
+  return `<div class="shell">
+  <aside class="side ${S.navOpen ? 'open' : ''}">
+    <div class="side-brand"><span class="logo">${LOGO_MARK}</span><div><b>VERGA</b><small>${RIP_VIEWS.includes(S.view) ? 'Riparazioni' : 'Portale venditori'}</small></div></div>
+    <nav class="vnav" aria-label="Sezioni">
+      ${n('dashboard','home','Home')}
+      <div class="grp">Clienti</div>
+      ${n('clienti','users','Clienti')}
+      ${n('passaggi','clock','Passaggi')}
+      ${n('pda','heart','Manifestazioni', compat || '')}
+      <div class="grp">Vendita</div>
+      ${n('cassa','cart','Cassa', S.cart.items.length || '')}
+      ${n('prodotti','box','Catalogo')}
+      ${n('riparazioni','wrench','Riparazioni')}
+    </nav>
+    <div class="side-foot vnav">
+      <button data-go="auto">${ic('send')}Autoregistrazione cliente</button>
+      <button data-act="logout">${ic('logout')}Esci</button>
+    </div>
+  </aside>
+  <div class="main">
+    <header class="top">
+      <button class="vbtn vbtn-ghost menu-btn" data-act="nav" aria-label="Menu">${ic('menu')}</button>
+      <div class="gsearch">${ic('search')}<input id="gs" class="gs" placeholder="Cerca cliente (nome, email, telefono) o prodotto (referenza, seriale)" autocomplete="off"><div id="gs-drop"></div></div>
+      <div class="top-sp hide-s"></div>
+      <label class="pill-btn hide-s">${ic('store')}<select id="boutique-sel" aria-label="Boutique">${opts(BOUTIQUES.map(b => b.name), S.boutique)}</select></label>
+      <button class="vbtn vbtn-primary" data-act="evento">${ic('plus')}<span class="hide-s">Registra passaggio</span></button>
+      <div class="bell"><button class="vbtn vbtn-ghost" data-act="bell" aria-label="Notifiche">${ic('bell')}</button>${unread() ? `<span class="dotn">${unread()}</span>` : ''}
+        ${S.bell ? `<div class="notif-drop"><div class="card-h"><h2>Notifiche</h2></div><div class="list">${NOTIFS.map((n, i) => `<div class="vrow click" data-act="notif" data-i="${i}" data-id="${n.clientId}" style="${n.read ? 'opacity:.6' : ''}"><div class="grow"><div style="font-size:13px">${esc(n.text)}</div><div class="s">${fmtDT(n.date)}</div></div></div>`).join('')}</div></div>` : ''}</div>
+      <div class="op hide-s" title="${esc(role())}"><span class="av">${opInitials(S.operator)}</span><span style="display:flex;flex-direction:column;line-height:1.2"><b style="font-size:13px">${esc(S.operator)}</b><small class="muted" style="font-size:11px">${esc(role())}</small></span></div>
+    </header>
+    <main class="content">${content}</main>
+  </div>
+</div>
+`;
+}
+
+/* ---------------- LOGIN ---------------- */
+function vLogin(){
+  return `<div class="login">
+  <section class="login-art">
+    <span class="logo">${LOGO_FULL}</span>
+    <div style="display:flex;flex-direction:column;gap:12px;position:relative">
+      <h2>Portale venditori</h2>
+      <p>Clienti, manifestazioni di interesse, passaggi in negozio e cassa in un unico posto.</p>
+    </div>
+    <div class="dial" aria-hidden="true"></div>
+  </section>
+  <section class="login-form">
+    <div><div class="label">Accesso riservato</div><h1 style="margin-top:6px">Accedi al portale</h1></div>
+    <label class="field"><span>Email</span><input class="in" id="l-email" type="email" autocomplete="username" autocapitalize="none" placeholder="nome.cognome@verga1947.it" value="${esc(S.loginEmail || '')}"></label>
+    <label class="field"><span>Password</span><div class="pw"><input class="in" id="l-pw" type="${S.showPw ? 'text' : 'password'}" autocomplete="current-password"><button type="button" data-act="pw-toggle" aria-label="${S.showPw ? 'Nascondi password' : 'Mostra password'}">${ic(S.showPw ? 'eyeOff' : 'eye')}</button></div></label>
+    <p id="l-err" class="tag red" hidden style="align-self:flex-start"></p>
+    <button class="vbtn vbtn-primary vbtn-lg" data-act="login">Accedi</button>
+    <a class="link" href="/restore-password" style="align-self:center;font-size:13px">Password dimenticata?</a>
+  </section>
+</div>`;
+}
+/* cliente finale loggato (non agente): il portale e' riservato ai venditori */
+function vCustomer(){
+  return `<div class="auto"><div class="auto-card" style="text-align:center">
+    <span class="logo">${LOGO_FULL}</span>
+    <h1>Benvenuto in Verga</h1>
+    <p class="lead">Questo è il portale riservato ai venditori Verga. Il tuo account cliente è attivo: ti aspettiamo in boutique.</p>
+    <div><button class="vbtn vbtn-lg" data-act="logout">${ic('logout')}Esci</button></div>
+  </div></div>`;
+}
+function betaBanner(){
+  if (S.betaHidden) return '';
+  return `<div class="banner" style="align-items:center">${ic('info')}<div class="grow"><p style="margin:0"><b>Versione di prova.</b> Clienti, ordini, proposte e catalogo arrivano da TSC. Passaggi, note, task, legami, manifestazioni e riparazioni sono salvati <b>solo su questo dispositivo</b> finché non attiviamo il salvataggio sul server.</p></div><button class="link" data-act="beta-hide">Nascondi</button></div>`;
+}
+const TSC_NAV = () => { const p = (VPD.path || [])[1], q = (VPD.path || [])[2]; return p === 'cart' ? 'cassa' : p === 'shop' || p === 'product' ? 'prodotti' : p === 'profile' && ['orders','proposals','choose-customer','customer-review','new-customer'].includes(q) ? 'clienti' : 'dashboard'; };
+
+/* ---------------- DASHBOARD ---------------- */
+function vDash(){
+  const todayEv = events.filter(e => sameDay(e.date) && e.boutique === S.boutique);
+  const matches = openPdas().flatMap(p => compatible(p).map(pr => ({p, pr})));
+  const fu = events.filter(e => e.followup && !e.done && dday(e.followup) <= 3).sort((a,b) => dt(a.followup) - dt(b.followup));
+  const bdays = clients.filter(c => inWeek(c.birth));
+  const recent = [...events].sort((a,b) => dt(b.date) - dt(a.date)).slice(0,6);
+  return `
+  <div class="hello page-h"><div><div class="label">${NOW.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'})} · ${S.boutique}</div><h1>Buongiorno, ${S.operator.split(' ')[0]}</h1></div></div>
+  <div class="qa">
+    <button class="primary" data-act="evento"><span class="ic">${ic('store')}</span><span><b>Registra passaggio</b><small>Visita o telefonata, senza aprire la scheda</small></span></button>
+    <button data-go="nuovo"><span class="ic">${ic('userPlus')}</span><span><b>Nuovo cliente</b><small>Controllo duplicati e registrazione</small></span></button>
+    <button data-act="pda-new"><span class="ic">${ic('heart')}</span><span><b>Manifestazione di interesse</b><small>Modello desiderato, senza prezzo</small></span></button>
+    <button data-go="cassa"><span class="ic">${ic('cart')}</span><span><b>Apri cassa</b><small>Scansiona la referenza e associa il cliente</small></span></button>
+  </div>
+  <div class="kpis">
+    <div class="kpi"><span class="label">Passaggi oggi</span><b class="num">${todayEv.length}</b><span class="muted">in ${S.boutique}</span></div>
+    <div class="kpi"><span class="label">Manifestazioni aperte</span><b class="num">${openPdas().length}</b><span class="muted">in tutte le boutique</span></div>
+    <div class="kpi alert"><span class="label">Arrivi compatibili</span><b class="num">${matches.length}</b><span class="muted">da assegnare</span></div>
+    <div class="kpi"><span class="label">Follow-up</span><b class="num">${fu.length}</b><span class="muted">entro 3 giorni</span></div>
+  </div>
+  <div class="grid2">
+    <div class="stack">
+      <section class="vcard">
+        <div class="card-h">${ic('sparkle')}<h2>Arrivi compatibili con le manifestazioni</h2><span class="sp"></span><button class="link" data-go="pda">Vedi tutte</button></div>
+        <div class="list">${matches.length ? matches.map(({p, pr}) => { const c = C(p.clientId); return `
+          <div class="vrow">
+            ${avatar(c)}
+            <div class="grow"><div class="t">${esc(fullName(c))} <span class="faint">aspetta</span> ${esc(p.brand)} ${esc(p.modello)}</div>
+            <div class="s">Disponibile: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)} · ${prodState(pr)}</div></div>
+            <button class="vbtn vbtn-sm ${canAssign() ? 'vbtn-primary' : ''}" data-act="assegna" data-id="${p.id}" ${canAssign() ? '' : 'disabled title="Solo direttore vendite o titolare"'}>${canAssign() ? '' : '🔒 '}Associa</button>
+          </div>`; }).join('') : '<div class="empty">Nessun arrivo compatibile.</div>'}</div>
+      </section>
+      <section class="vcard">
+        <div class="card-h">${ic('clock')}<h2>Ultimi passaggi</h2><span class="sp"></span><button class="link" data-go="passaggi">Registro completo</button></div>
+        <div class="list">${recent.map(evRow).join('')}</div>
+      </section>
+    </div>
+    <div class="stack">
+      <section class="vcard">
+        <div class="card-h">${ic('check')}<h2>Follow-up da fare</h2></div>
+        <div class="list">${fu.length ? fu.map(e => { const c = C(e.clientId); const late = dday(e.followup) <= 0; return `
+          <div class="vrow">
+            <button class="vbtn vbtn-sm" data-act="fu-done" data-id="${e.id}" aria-label="Segna come fatto">${ic('check')}</button>
+            <div class="grow click" data-go="cliente" data-id="${c.id}" style="cursor:pointer"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(e.note || EV[e.type].label)}</div></div>
+            <span class="tag ${late ? 'red' : 'amber'}">${late ? 'Oggi' : fmtD(e.followup).slice(0,5)}</span>
+          </div>`; }).join('') : '<div class="empty">Tutto fatto.</div>'}</div>
+      </section>
+      <section class="vcard">
+        <div class="card-h">${ic('gift')}<h2>Compleanni della settimana</h2></div>
+        <div class="list">${bdays.map(c => `<div class="vrow click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${c.birth.d} ${MESI[c.birth.m-1]} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div>`).join('')}</div>
+      </section>
+    </div>
+  </div>`;
+}
+function evRow(e){
+  const c = C(e.clientId); const t = EV[e.type];
+  return `<div class="vrow click" data-go="cliente" data-id="${c.id}">
+    <span class="tl-ic" style="width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:var(--${t.cls === 'in' ? 'blue-bg' : t.cls === 'out' ? 'amber-bg' : 'brand-soft'});color:var(--${t.cls === 'in' ? 'blue' : t.cls === 'out' ? 'amber' : 'brand'})">${ic(t.icon)}</span>
+    <div class="grow"><div class="t">${esc(fullName(c))} <span class="faint" style="font-weight:500">· ${t.short}</span></div><div class="s">${fmtDT(e.date)} · ${esc(e.boutique)} · ${esc(e.operator)}</div></div>
+  </div>`;
+}
+
+/* ---------------- CLIENTI ---------------- */
+function vClienti(){
+  const f = S.f;
+  return `
+  <div class="page-h"><div><div class="label">Anagrafiche</div><h1>Clienti</h1></div><span class="sp"></span>
+    <button class="vbtn" data-act="export">${ic('mail')}Esporta segmento su MailUp</button>
+    <button class="vbtn vbtn-primary" data-go="nuovo">${ic('userPlus')}Nuovo cliente</button></div>
+  <div class="flt">
+    <aside class="vcard flt-panel" aria-label="Filtri">
+      <div class="fsec"><h3>${ic('filter')}Filtri</h3>
+        <label class="field"><span>Cerca ovunque</span><input class="in" data-f="q" value="${esc(f.q)}" placeholder="Nome, email, cellulare, azienda, note…"></label>
+        <label class="field"><span>Tipologia</span><select class="sel" data-f="tipo">${opts(TIPI, f.tipo, 'Tutte')}</select></label>
+        <label class="field"><span>Fascia acquisti</span><select class="sel" data-f="tier">${opts(TIERS.map(t => t.n), f.tier, 'Tutte')}</select></label>
+        <label class="field"><span>Valutazione venditore</span><select class="sel" data-f="rating">${[['','Qualsiasi'],['5','★★★★★'],['4','★★★★ o più'],['3','★★★ o più']].map(([v,l]) => `<option value="${v}" ${f.rating === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      </div>
+      <div class="fsec"><div class="label">Acquisti</div>
+        <label class="field"><span>Brand acquistato</span><select class="sel" data-f="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
+        <label class="field"><span>Modello</span><input class="in" data-f="modello" value="${esc(f.modello)}" placeholder="Es. Submariner"></label>
+        <label class="field"><span>Referenza negli acquisti</span><input class="in mono" data-f="ref" value="${esc(f.ref)}" placeholder="Es. 124060"></label>
+        <label class="field"><span>Venduto da</span><select class="sel" data-f="seller">${opts(OPERATORS.map(o => o.name), f.seller, 'Tutti i venditori')}</select></label>
+        <label class="field"><span>Ultimo acquisto</span><select class="sel" data-f="last">${[['','Qualsiasi'],['12','Negli ultimi 12 mesi'],['1-5','Tra 1 e 5 anni fa'],['5','Nessun acquisto da oltre 5 anni'],['mai','Mai acquistato']].map(([v,l]) => `<option value="${v}" ${f.last === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      </div>
+      <div class="fsec"><div class="label">Manifestazioni</div>
+        <label class="field"><span>Referenza nelle manifestazioni</span><input class="in mono" data-f="pref" value="${esc(f.pref)}" placeholder="Es. 126500LN"></label>
+      </div>
+      <div class="fsec"><div class="label">Relazione</div>
+        <label class="field"><span>Ultimo passaggio in negozio</span><select class="sel" data-f="visit">${[['','Qualsiasi'],['30','Negli ultimi 30 giorni'],['180','Non passa da oltre 6 mesi'],['sleep','Dormienti: nessun contatto da 6 mesi']].map(([v,l]) => `<option value="${v}" ${f.visit === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <label class="field"><span>Boutique di riferimento</span><select class="sel" data-f="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
+      </div>
+      <div class="fsec"><div class="label">Profilo</div>
+        <label class="field"><span>Brand di interesse</span><select class="sel" data-f="ibrand">${opts(BRANDS, f.ibrand, 'Tutti')}</select></label>
+        <label class="field"><span>Interessi</span><select class="sel" data-f="interest">${opts(INTERESTS, f.interest, 'Tutti')}</select></label>
+        <label class="field"><span>Lingua</span><select class="sel" data-f="lingua">${opts(LANGS, f.lingua, 'Tutte')}</select></label>
+        <label class="field"><span>Professione</span><select class="sel" data-f="prof">${opts(PROFESSIONS, f.prof, 'Tutte')}</select></label>
+        <label class="field"><span>Celebrità</span><select class="sel" data-f="celeb">${opts(CELEB, f.celeb, 'Tutti')}</select></label>
+      </div>
+    </aside>
+    <section class="stack" style="gap:14px" id="results"></section>
+  </div>`;
+}
+function filteredClients(){
+  const f = S.f, q = f.q.trim().toLowerCase();
+  return clients.filter(c => {
+    if (q && !(`${c.nome} ${c.cognome} ${c.email} ${c.email2} ${c.tel} ${c.azienda} ${c.notes.map(n => n.text).join(' ')}`.toLowerCase().includes(q))) return false;
+    if (f.tipo && c.tipo !== f.tipo) return false;
+    if (f.tier && tierOf(c.id)?.n !== f.tier) return false;
+    if (f.rating && (c.rating || 0) < +f.rating) return false;
+    if (f.lingua && c.lingua !== f.lingua) return false;
+    if (f.ibrand && !c.brands.includes(f.ibrand)) return false;
+    if (f.pref && !clientPdas(c.id).some(p => p.ref.toLowerCase().includes(f.pref.toLowerCase()))) return false;
+    const ps = clientPurchases(c.id);
+    if (f.brand && !ps.some(p => p.brand === f.brand)) return false;
+    if (f.modello && !ps.some(p => p.modello.toLowerCase().includes(f.modello.toLowerCase()))) return false;
+    if (f.ref && !ps.some(p => p.ref.toLowerCase().includes(f.ref.toLowerCase()))) return false;
+    if (f.seller && !ps.some(p => p.seller === f.seller && (!f.brand || p.brand === f.brand))) return false;
+    if (f.last) { const lp = ps[0]; const d = lp ? daysAgo(lp.date) : null;
+      if (f.last === 'mai' && lp) return false;
+      if (f.last === '12' && !(lp && d <= 365)) return false;
+      if (f.last === '1-5' && !(lp && d > 365 && d <= 1826)) return false;
+      if (f.last === '5' && !(lp && d > 1826)) return false; }
+    if (f.visit) { const v = lastVisit(c.id); if (f.visit === '30' && !(v && daysAgo(v.date) <= 30)) return false; if (f.visit === '180' && v && daysAgo(v.date) <= 180) return false; if (f.visit === 'sleep' && !sleeping(c.id)) return false; }
+    if (f.boutique && c.boutique !== f.boutique) return false;
+    if (f.interest && !c.interests.includes(f.interest)) return false;
+    if (f.prof && c.prof !== f.prof) return false;
+    if (f.celeb && c.celeb !== f.celeb) return false;
+    return true;
+  });
+}
+function renderResults(){
+  const el = document.getElementById('results'); if (!el) return;
+  const list = filteredClients();
+  const names = {q:'Ricerca',tipo:'Tipologia',tier:'Fascia',rating:'Valutazione ≥',brand:'Brand acquistato',modello:'Modello',ref:'Referenza acquisti',seller:'Venduto da',pref:'Referenza manifestazioni',ibrand:'Brand di interesse',lingua:'Lingua',last:'Ultimo acquisto',visit:'Passaggio',boutique:'Boutique',interest:'Interessi',prof:'Professione',celeb:'Celebrità'};
+  const lastL = {'12':'ultimi 12 mesi','1-5':'1–5 anni fa','5':'oltre 5 anni fa','mai':'mai'}, visitL = {'30':'ultimi 30 giorni','180':'oltre 6 mesi fa','sleep':'dormienti'};
+  const act = Object.entries(S.f).filter(([k,v]) => v);
+  el.innerHTML = `
+    <div class="active-f"><b class="num">${list.length} clienti</b>
+      ${act.map(([k,v]) => `<span class="tag brand">${names[k]}: ${esc(k === 'last' ? lastL[v] : k === 'visit' ? visitL[v] : v)}<button data-act="clr-f" data-k="${k}" aria-label="Rimuovi filtro">${ic('x')}</button></span>`).join('')}
+      ${act.length ? '<button class="link" data-act="clr-all">Azzera filtri</button>' : '<span class="muted">Nessun filtro attivo</span>'}
+    </div>
+    <div class="vcard tbl-wrap"><table class="tbl">
+      <thead><tr><th>Cliente</th><th>Professione</th><th>Brand di interesse</th><th>Ultimo passaggio</th><th>Ultimo acquisto</th><th>Manifestazioni</th></tr></thead>
+      <tbody>${list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id), op = clientPdas(c.id).filter(p => p.stato !== 'venduta').length; return `
+        <tr class="click" data-go="cliente" data-id="${c.id}">
+          <td><div class="cell-person">${avatar(c)}<div><b>${esc(fullName(c))} </b>${c.rating ? stars(c.rating) : ''}<small>${esc(c.email || 'Scheda da completare')}</small><div class="tags" style="margin-top:4px"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : ''}" style="height:20px">${esc(c.tipo || 'Prospect')}</span>${c.source === 'Autoregistrazione' ? `<span class="tag blue" style="height:20px">${ic('send')}Autoregistrato</span>` : ''}${tierTag(c.id)}${sleeping(c.id) ? '<span class="tag red" style="height:20px">Dormiente</span>' : ''}</div></div></div></td>
+          <td>${esc(c.prof || '—')}${c.azienda ? `<div class="faint" style="font-size:12px">${esc(c.azienda)}</div>` : ''}${c.celeb ? `<div><span class="tag amber" style="margin-top:4px">${ic('star')}${esc(c.celeb)}</span></div>` : ''}</td>
+          <td><div class="tags">${c.brands.map(b => `<span class="tag">${esc(b)}</span>`).join('')}</div></td>
+          <td class="num">${v ? `${fmtD(v.date)}<div class="faint" style="font-size:12px">${rel(v.date)}</div>` : '<span class="faint">—</span>'}</td>
+          <td class="num">${lp ? `${fmtD(lp.date)}<div class="faint" style="font-size:12px">${esc(lp.brand)} ${esc(lp.modello)}</div>` : '<span class="faint">Nessuno</span>'}</td>
+          <td>${op ? `<span class="tag amber num">${op} aperte</span>` : '<span class="faint">—</span>'}</td>
+        </tr>`; }).join('') || `<tr><td colspan="6"><div class="empty">Nessun cliente corrisponde ai filtri.</div></td></tr>`}</tbody>
+    </table></div>`;
+}
+
+/* ---------------- SCHEDA CLIENTE ---------------- */
+function vCliente(){
+  const c = C(S.id); if (!c) return '<div class="empty">Cliente non trovato.</div>';
+  const lv = lastVisit(c.id), lc = lastContact(c.id);
+  const cp = clientPdas(c.id), ps = clientPurchases(c.id), evs = clientEvents(c.id);
+  const tab = (k, l, n) => `<button class="${S.tab === k ? 'on' : ''}" data-act="tab" data-v="${k}">${l}${n !== undefined ? `<span class="n num">${n}</span>` : ''}</button>`;
+  let body = '';
+  if (S.tab === 'panoramica') body = cPanoramica(c, cp, ps);
+  if (S.tab === 'anagrafica') body = cAnagrafica(c);
+  if (S.tab === 'pda') body = `<section class="vcard"><div class="card-h">${ic('heart')}<h2>Manifestazioni di interesse</h2><span class="faint" style="font-size:12px">Registrate sul CRM</span><span class="sp"></span><button class="vbtn vbtn-sm" data-act="pda-new" data-id="${c.id}">${ic('plus')}Nuova</button></div><div>${cp.length ? cp.map(pdaCard).join('') : '<div class="empty">Nessuna manifestazione di interesse.</div>'}</div></section>` + tscProposals(c);
+  if (S.tab === 'passaggi') body = `<section class="vcard"><div class="card-h"><h2>Storico passaggi e contatti</h2><span class="sp"></span><button class="vbtn vbtn-sm" data-act="evento" data-id="${c.id}">${ic('plus')}Aggiungi con nota</button></div><div class="timeline">${evs.length ? evs.map(tlRow).join('') : '<div class="empty">Nessun passaggio registrato.</div>'}</div></section>`;
+  if (S.tab === 'acquisti') body = `<section class="vcard tbl-wrap"><div class="card-h">${ic('bag')}<h2>Acquisti</h2><span class="faint" style="font-size:12px">Documenti letti in tempo reale dal gestionale</span><span class="sp"></span><span class="muted num">Totale ${eur(spent(c.id))}</span></div>${ps.length ? purchTable(ps) : '<div class="empty">Nessun acquisto registrato.</div>'}</section>`;
+  if (S.tab === 'riparazioni') body = ripPlaceholderCliente(c);
+  const sl = sleeping(c.id);
+  return `
+  <div><button class="link" data-go="clienti" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Clienti</button></div>
+  ${c.incomplete ? `<div class="banner">${ic('info')}<div class="grow"><p><b>Scheda da completare.</b> ${c.source === 'Legame' ? `Creata da un legame con ${clientLinks(c.id).map(l => esc(fullName(l.other))).join(', ')}. Completa i dati quando la persona entra in negozio.` : 'Il cliente si è registrato online con i soli dati obbligatori. Chiedi gli altri dati in negozio.'}</p></div><button class="vbtn vbtn-sm" data-act="tab" data-v="anagrafica">Completa ora</button></div>` : ''}
+  ${!c.privacy ? `<div class="banner" style="background:var(--red-bg);color:var(--red)">${ic('edit')}<div class="grow"><p><b>Privacy da firmare.</b> Passa il tablet al cliente: controlla i suoi dati e firma l'informativa.</p></div><button class="vbtn vbtn-sm vbtn-primary" data-act="firma" data-id="${c.id}">Fai firmare sul tablet</button></div>` : ''}
+  <section class="vcard">
+    <div class="chead">
+      ${avatar(c, 'lg')}
+      <div class="who">
+        <div class="tags"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : c.tipo === 'Commerciante' ? '' : 'brand'}">${esc(c.tipo)}</span>${tierTag(c.id)}${c.celeb ? `<span class="tag amber">${ic('star')}Celebrità · ${esc(c.celeb)}</span>` : ''}${sl ? `<span class="tag red" title="Nessun passaggio, chiamata o mail da oltre 6 mesi">${ic('clock')}Dormiente</span>` : ''}${sourceTag(c)}</div>
+        <h1>${esc(fullName(c))}</h1>
+        <div style="font-weight:600">${esc(c.prof || 'Professione non indicata')}${c.azienda ? ` <span class="muted" style="font-weight:500">· ${esc(c.azienda)}</span>` : ''}</div>
+        <div class="meta">
+          <span>${ic('mail')}${esc(c.email || '—')}${c.email2 ? ` <span class="faint">+1</span>` : ''}</span><span>${ic('phone')}${esc(c.tel || '—')}</span><span>${ic('store')}${esc(c.boutique)}</span>${birthText(c.birth) ? `<span>${ic('gift')}${esc(birthText(c.birth))}</span>` : ''}${c.lingua && c.lingua !== 'Italiano' ? `<span>${ic('send')}${esc(c.lingua)}</span>` : ''}
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="label">Valutazione venditore</span>${stars(c.rating, 'rate')}</div>
+      </div>
+      <div class="oneclick">
+        <span class="label">Registra con un clic</span>
+        <div class="oc-row" style="grid-template-columns:repeat(4,1fr)">
+          <button class="oc" data-act="quick-ev" data-t="visita" data-id="${c.id}">${ic('store')}Passato in negozio</button>
+          <button class="oc" data-act="quick-ev" data-t="chiamata_in" data-id="${c.id}">${ic('phoneIn')}Ci ha chiamato</button>
+          <button class="oc" data-act="quick-ev" data-t="chiamata_out" data-id="${c.id}">${ic('phoneOut')}Lo abbiamo chiamato</button>
+          <button class="oc" data-act="quick-ev" data-t="mail" data-id="${c.id}">${ic('mail')}Mail</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="vbtn" data-act="pda-new" data-id="${c.id}">${ic('heart')}Manifestazione</button>
+          <button class="vbtn vbtn-primary" data-act="to-cassa" data-id="${c.id}">${ic('cart')}Apri cassa</button>
+        </div>
+      </div>
+    </div>
+    <div class="lastline">${ic('clock')}
+      ${lv ? `Ultimo passaggio in negozio: <b>${fmtDT(lv.date)}</b> (${rel(lv.date)}) · ${esc(lv.boutique)} · con ${esc(lv.operator)}` : 'Nessun passaggio in negozio registrato'}
+      ${lc && lc !== lv ? `<span class="faint">·</span> Ultimo contatto: <b>${EV[lc.type].short.toLowerCase()}</b> ${rel(lc.date)}` : ''}
+      <span style="margin-left:auto" class="faint">${c.privacy ? `Privacy firmata il ${fmtD(c.privacy)} · ` : ''}In anagrafica dal ${fmtD(c.since)}</span>
+    </div>
+  </section>
+  <nav class="tabs" aria-label="Sezioni scheda">
+    ${tab('panoramica','Panoramica')}${tab('anagrafica','Anagrafica')}${tab('pda','Manifestazioni', cp.length)}${tab('acquisti','Acquisti', ps.length)}${tab('riparazioni','Riparazioni', clientRepairs(c.id).length)}${tab('passaggi','Passaggi', evs.length)}
+  </nav>
+  ${body}`;
+}
+function cPanoramica(c, cp, ps){
+  const ls = clientLinks(c.id);
+  const open = cp.filter(p => ['aperta','preordine','assegnata'].includes(p.stato));
+  return `<div class="grid2">
+    <div class="stack">
+      <section class="vcard">
+        <div class="card-h">${ic('heart')}<h2>Manifestazioni in corso</h2><span class="sp"></span>${cp.length > open.length ? `<button class="link" data-act="tab" data-v="pda">Tutte (${cp.length})</button>` : ''}<button class="vbtn vbtn-sm" data-act="pda-new" data-id="${c.id}">${ic('plus')}Nuova</button></div>
+        <div>${open.length ? open.map(pdaCard).join('') : '<div class="empty">Nessuna manifestazione in corso.<br><span class="faint">Registra il modello che il cliente desidera: diventerà una PDA senza prezzo.</span></div>'}</div>
+      </section>
+      <section class="vcard tbl-wrap">
+        <div class="card-h">${ic('bag')}<h2>Ultimi acquisti</h2><span class="sp"></span>${ps.length > 3 ? `<button class="link" data-act="tab" data-v="acquisti">Tutti</button>` : ''}</div>
+        ${ps.length ? purchTable(ps.slice(0,3)) : '<div class="empty">Nessun acquisto registrato.</div>'}
+      </section>
+      ${notesCard(c)}
+    </div>
+    <div class="stack">
+      ${tasksCard(c)}
+      <section class="vcard">
+        <div class="card-h">${ic('link')}<h2>Legami</h2><span class="sp"></span><button class="vbtn vbtn-sm" data-act="tab-legami">${ic('plus')}Aggiungi</button></div>
+        <div>${ls.length ? ls.map(l => `<div class="lk">${avatar(l.other)}<div class="grow"><div class="rel">${esc(c.nome)} è ${esc(l.label.toLowerCase())}</div><button class="link" data-go="cliente" data-id="${l.other.id}">${esc(fullName(l.other))}</button>${l.other.incomplete ? ' <span class="tag" style="height:20px">scheda vuota</span>' : ''}</div></div>`).join('') : '<div class="empty">Nessun legame.</div>'}</div>
+      </section>
+      <section class="vcard">
+        <div class="card-h">${ic('sparkle')}<h2>Interessi e misure</h2><span class="sp"></span><button class="link" data-act="tab" data-v="anagrafica">Modifica</button></div>
+        <div class="card-b stack" style="gap:14px">
+          <div><div class="label" style="margin-bottom:6px">Brand e modelli</div><div class="tags">${c.brands.map(b => `<span class="tag brand">${esc(b)}</span>`).join('')}${c.modelli.map(m => `<span class="tag">${esc(m)}</span>`).join('')}${!c.brands.length ? '<span class="faint">—</span>' : ''}</div></div>
+          <div><div class="label" style="margin-bottom:6px">Interessi</div><div class="tags">${c.interests.map(b => `<span class="tag">${esc(b)}</span>`).join('') || '<span class="faint">Da chiedere al cliente</span>'}</div></div>
+          <div><div class="label" style="margin-bottom:6px">Misure</div>${c.misure.polso || c.misure.dxAnulare ? `<dl class="kv"><dt>Polso</dt><dd class="num">${esc(c.misure.polso || '—')} cm</dd><dt>Anello mano dx</dt><dd class="num">medio ${esc(c.misure.dxMedio || '—')} · anulare ${esc(c.misure.dxAnulare || '—')}</dd><dt>Anello mano sx</dt><dd class="num">medio ${esc(c.misure.sxMedio || '—')} · anulare ${esc(c.misure.sxAnulare || '—')}</dd></dl>` : '<span class="faint">Da rilevare in negozio</span>'}</div>
+        </div>
+      </section>
+    </div>
+  </div>`;
+}
+function notesCard(c){
+  return `<section class="vcard">
+    <div class="card-h">${ic('edit')}<h2>Note interne</h2><span class="faint" style="font-size:12px">Firmate e con data. Ognuno modifica solo le proprie.</span></div>
+    <div class="card-b" style="display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--line)">
+      <textarea class="ta" id="new-note" placeholder="Scrivi una nota su ${esc(c.nome)}…" style="min-height:64px"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="faint" style="font-size:12px">Firmata da ${esc(S.operator)} · oggi ${fmtT(NOW.toISOString())}</span><button class="vbtn vbtn-sm vbtn-primary" data-act="add-note" data-id="${c.id}">${ic('plus')}Aggiungi nota</button></div>
+    </div>
+    <div>${c.notes.length ? [...c.notes].sort((a,b) => dt(b.date) - dt(a.date)).map(n => `<div class="note"><div class="by"><span class="av">${opInitials(n.by)}</span><b style="color:var(--ink)">${esc(n.by)}</b> · ${fmtDT(n.date)}<span style="margin-left:auto">${n.by === S.operator ? `<button class="link" style="font-size:12px" data-act="soon-edit">Modifica</button>` : `<span title="Solo l'autore può modificarla">🔒</span>`}</span></div><div>${esc(n.text)}</div></div>`).join('') : '<div class="empty">Nessuna nota.</div>'}</div>
+  </section>`;
+}
+function tasksCard(c){
+  const ts = c.tasks;
+  return `<section class="vcard">
+    <div class="card-h">${ic('send')}<h2>Messaggi e task ai colleghi</h2></div>
+    <div>${ts.length ? ts.map((t, i) => `<div class="vrow"><button class="vbtn vbtn-sm ${t.done ? 'vbtn-primary' : ''}" data-act="task-done" data-id="${c.id}" data-i="${i}" aria-label="Segna come fatto">${ic('check')}</button><div class="grow"><div class="t" style="${t.done ? 'text-decoration:line-through;opacity:.6' : ''}">${esc(t.text)}</div><div class="s">${esc(t.by)} → <b>${esc(t.to)}</b>${t.due ? ` · entro ${fmtD(t.due)}` : ''}</div></div>${t.rec ? `<span class="tag blue" title="Task periodica">${ic('clock')}${esc(t.rec)}</span>` : ''}</div>`).join('') : '<div class="empty">Nessun messaggio.</div>'}</div>
+    <div class="card-b" style="display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--line)">
+      <input class="in" id="task-text" placeholder="Es. richiamare per la consegna del Daytona">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <select class="sel" id="task-to" aria-label="Destinatario">${opts(OPERATORS.map(o => o.name).filter(n => n !== S.operator), '')}</select>
+        <input class="in" id="task-due" type="date" value="${addDays(7)}" aria-label="Scadenza">
+        <select class="sel" id="task-rec" aria-label="Ripetizione">${opts(['Una volta','Ogni anno','Ogni mese'], 'Una volta')}</select>
+      </div>
+      <button class="vbtn vbtn-sm" data-act="add-task" data-id="${c.id}" style="align-self:flex-end">${ic('send')}Invia al collega</button>
+    </div>
+  </section>`;
+}
+function pdaCard(p){
+  const m = compatible(p);
+  const pr = p.productId ? P(p.productId) : null;
+  const lock = !canAssign();
+  return `<div class="pda">
+    <span class="wm">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}</span>
+    <div class="grow">
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ttl">${esc(p.brand)} ${esc(p.modello)}</span>${stateTag(p)}</div>
+      <div class="spec">${p.ref ? `<span>Referenza <b class="mono">${esc(p.ref)}</b></span>` : '<span>Referenza <b>qualsiasi</b></span>'}<span>Quadrante <b>${esc(p.quadrante || '—')}</b></span><span>Bracciale <b>${esc(p.bracciale || '—')}</b></span></div>
+      ${p.note ? `<div class="muted" style="font-size:13px">${esc(p.note)}</div>` : ''}
+      <div class="faint" style="font-size:12px">Registrata il ${fmtD(p.date)} da ${esc(p.operator)}${['aperta','preordine'].includes(p.stato) ? ` · in attesa da ${rel(p.date).replace(' fa','')}` : ''}</div>
+      ${pr ? `<div class="match">${ic('check')}Prodotto associato: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span> · ${eur(pr.price)}</div>` : ''}
+      ${m.length ? `<div class="match">${ic('sparkle')}${m.length === 1 ? '1 pezzo compatibile' : m.length + ' pezzi compatibili'}: ${m.map(x => `${esc(x.ref)} (${x.stato === 'in_arrivo' ? 'in arrivo' : esc(x.boutique)})`).join(', ')}</div>` : ''}
+    </div>
+    <div class="act">
+      ${['aperta','preordine'].includes(p.stato) ? `<button class="vbtn vbtn-sm ${m.length && !lock ? 'vbtn-primary' : ''}" data-act="assegna" data-id="${p.id}" ${m.length && !lock ? '' : 'disabled'}>${lock ? '🔒 ' : ''}Associa prodotto</button>${lock && m.length ? '<span class="faint" style="font-size:11px;max-width:150px;text-align:right">Solo direttore vendite o titolare</span>' : ''}<button class="vbtn vbtn-sm vbtn-ghost" data-act="pda-cancel" data-id="${p.id}">Annulla</button>` : ''}
+      ${p.stato === 'assegnata' ? `<button class="vbtn vbtn-sm vbtn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>${!lock ? `<button class="vbtn vbtn-sm vbtn-ghost" data-act="dissocia" data-id="${p.id}">Dissocia</button>` : ''}` : ''}
+    </div>
+  </div>`;
+}
+function purchTable(ps){
+  return `<table class="tbl"><thead><tr><th>Data</th><th>Prodotto</th><th>Referenza</th><th>Boutique · Venditore</th><th style="text-align:right">Importo</th></tr></thead><tbody>
+    ${ps.map(p => `<tr ${p.orderID ? `class="click" data-href="/profile/orders?n=${encodeURIComponent(p.orderID)}"` : ''}><td class="num">${fmtD(p.date)}</td><td><b>${esc(p.brand)}</b> ${esc(p.modello)}</td><td class="mono">${esc(p.ref)}</td><td>${esc(p.boutique)}<div class="faint" style="font-size:12px">${esc(p.seller || '')}</div></td><td class="num" style="text-align:right">${eur(p.price)}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+function tlRow(e){
+  const t = EV[e.type];
+  return `<div class="tl"><span class="dot ${t.cls}">${ic(t.icon)}</span><div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>${t.label}</b><span class="faint">${fmtDT(e.date)}</span>${e.motivo ? `<span class="tag">${esc(e.motivo)}</span>` : ''}${e.followup ? `<span class="tag ${e.done ? 'ok' : 'amber'}">${e.done ? 'Follow-up fatto' : 'Follow-up ' + fmtD(e.followup).slice(0,5)}</span>` : ''}</div>
+  <div class="muted" style="font-size:13px">${esc(e.boutique)} · ${esc(e.operator)}</div>${e.note ? `<div style="margin-top:4px">${esc(e.note)}</div>` : ''}</div></div>`;
+}
+function cAnagrafica(c){ return `<section class="vcard">${clientForm(c)}<div class="modal-f" style="border-radius:0 0 12px 12px"><button class="vbtn" data-act="tab" data-v="panoramica">Annulla</button><button class="vbtn vbtn-primary" data-act="save-client" data-id="${c.id}">${ic('check')}Salva modifiche</button></div></section>`; }
+function clientForm(c){
+  const n = S.nc; const b = c ? c.birth || {} : {};
+  const brands = n.brands, ints = n.interests, bl = c?.billing || {}, ms = c?.misure || {};
+  const inp = (id, label, val, extra = '') => `<label class="field"><span>${label}</span><input class="in" id="${id}" value="${esc(val)}" ${extra}></label>`;
+  return `
+  <div class="fsec"><h3>${ic('users')}Dati anagrafici</h3>
+    <div class="fgrid">
+      <label class="field"><span>Tipologia</span><select class="sel" id="f-tipo">${opts(TIPI, c?.tipo || 'Prospect')}</select></label>
+      ${inp('f-nome','Nome <em>*</em>',c?.nome,'data-dup')}
+      ${inp('f-cognome','Cognome <em>*</em>',c?.cognome,'data-dup')}
+      <label class="field"><span>Sesso</span><select class="sel" id="f-sesso">${`<option value="">—</option>` + [['F','Donna'],['M','Uomo'],['X','Altro']].map(([v,l]) => `<option value="${v}" ${c?.sesso === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      <label class="field"><span>Professione</span><select class="sel" id="f-prof">${opts(PROFESSIONS, c?.prof, 'Seleziona')}</select></label>
+      ${inp('f-azienda','Azienda',c?.azienda,'placeholder="Campo libero"')}
+      ${inp('f-email','Email principale <em>*</em>',c?.email,'type="email" data-dup autocapitalize="none"')}
+      ${inp('f-email2','Email secondaria',c?.email2,'type="email" autocapitalize="none"')}
+      ${inp('f-cf','Codice fiscale',c?.cf,'class="in mono" autocapitalize="characters" maxlength="16"')}
+      ${inp('f-pec','PEC',c?.pec,'type="email" autocapitalize="none"')}
+      ${inp('f-tel','Cellulare',c?.tel,'type="tel" data-dup')}
+      <label class="field"><span>Lingua</span><select class="sel" id="f-lingua">${opts(LANGS, c?.lingua || 'Italiano')}</select></label>
+      <label class="field"><span>Boutique di riferimento</span><select class="sel" id="f-boutique">${opts(BOUTIQUES.map(x => x.name), c?.boutique || S.boutique)}</select></label>
+    </div>
+    <p class="faint" style="margin:0;font-size:12px">Per un Prospect bastano nome, cognome ed email. Le email vengono salvate sempre in minuscolo. La lingua decide la newsletter: italiano o vuoto → NL in italiano, altre lingue → NL in inglese.</p>
+    <div id="dup"></div>
+  </div>
+  <div class="fsec"><h3>${ic('home')}Indirizzi</h3>
+    ${n.addr.map((a, i) => `<div class="addr">
+      <label class="field"><span>Etichetta</span><input class="in" data-addr="${i}:label" value="${esc(a.label)}" placeholder="Casa Milano"></label>
+      <label class="field"><span>Via e numero</span><input class="in" data-addr="${i}:via" value="${esc(a.via)}"></label>
+      <label class="field"><span>CAP</span><input class="in" data-addr="${i}:cap" value="${esc(a.cap)}"></label>
+      <label class="field"><span>Città</span><input class="in" data-addr="${i}:citta" value="${esc(a.citta)}"></label>
+      <label class="field"><span>Prov.</span><input class="in" data-addr="${i}:prov" value="${esc(a.prov)}"></label>
+      <label class="field"><span>Nazione</span><input class="in" data-addr="${i}:naz" value="${esc(a.naz)}"></label>
+      <button type="button" class="vbtn vbtn-ghost" data-act="addr-rm" data-i="${i}" aria-label="Rimuovi indirizzo">${ic('trash')}</button>
+    </div>`).join('')}
+    <button type="button" class="vbtn vbtn-sm" data-act="addr-add" style="align-self:flex-start">${ic('plus')}Aggiungi indirizzo</button>
+  </div>
+  <div class="fsec"><h3>${ic('bag')}Dati di fatturazione</h3>
+    <div class="fgrid">
+      ${inp('f-rs','Ragione sociale',bl.rs)}
+      ${inp('f-bind','Indirizzo di fatturazione',bl.ind)}
+      ${inp('f-piva','Partita IVA',bl.piva)}
+      ${inp('f-sdi','Codice SDI',bl.sdi,'maxlength="7"')}
+    </div>
+    <p class="faint" style="margin:0;font-size:12px">In cassa si sceglie se intestare la vendita alla persona (scontrino) o alla società (fattura).</p>
+  </div>
+  ${linkSection(c)}
+  <div class="fsec"><h3>${ic('gift')}Data di nascita</h3>
+    <div class="fgrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+      <label class="field"><span>Giorno</span><select class="sel" id="f-bd">${opts(Array.from({length:31},(_,i) => String(i+1)), b.d ? String(b.d) : '', '—')}</select></label>
+      <label class="field"><span>Mese</span><select class="sel" id="f-bm">${`<option value="">—</option>` + MESI.map((m,i) => `<option value="${i+1}" ${b.m === i+1 ? 'selected' : ''}>${m}</option>`).join('')}</select></label>
+      ${n.noYear ? `<label class="field"><span>Decade</span><select class="sel" id="f-dec">${opts(DECADES, n.decade || b.decade, 'Seleziona')}</select></label>` : `<label class="field"><span>Anno</span><input class="in num" id="f-by" inputmode="numeric" maxlength="4" value="${esc(b.y)}" placeholder="aaaa"></label>`}
+    </div>
+    <label class="check"><input type="checkbox" id="f-noyear" data-act="noyear" ${n.noYear ? 'checked' : ''}> Il cliente preferisce non indicare l'anno: registra solo la decade</label>
+  </div>
+  <div class="fsec"><h3>${ic('watch')}Misure</h3>
+    <div class="fgrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
+      ${inp('f-polso','Polso (cm)',ms.polso,'inputmode="decimal"')}
+      ${inp('f-dxm','Anello · medio dx',ms.dxMedio,'inputmode="numeric"')}
+      ${inp('f-dxa','Anello · anulare dx',ms.dxAnulare,'inputmode="numeric"')}
+      ${inp('f-sxm','Anello · medio sx',ms.sxMedio,'inputmode="numeric"')}
+      ${inp('f-sxa','Anello · anulare sx',ms.sxAnulare,'inputmode="numeric"')}
+    </div>
+  </div>
+  <div class="fsec"><h3>${ic('star')}Valutazione del venditore</h3>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">${stars(n.rating, 'nc-rate')}<span class="faint" style="font-size:12.5px;max-width:60ch">Giudizio personale da 1 (pessimo) a 5: potenziale, notorietà, fattori umani. È separato dalla fascia Bronzo · Argento · Oro · Platino, che si calcola da sola sugli acquisti.</span></div>
+    <div class="field"><span>Celebrità</span><div class="chips">${['Nessuna',...CELEB].map(v => `<button type="button" class="chip ${((n.celeb || c?.celeb || 'Nessuna') === v) ? 'on' : ''}" data-act="celeb" data-v="${v}">${v}</button>`).join('')}</div></div>
+  </div>
+  <div class="fsec"><h3>${ic('heart')}Brand di interesse</h3>
+    <div class="chips">${BRANDS.map(v => `<button type="button" class="chip ${brands.includes(v) ? 'on' : ''}" data-act="nc-brand" data-v="${v}">${brands.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
+    ${brands.length ? `<label class="field"><span>Modelli di interesse</span><div class="chips">${brands.flatMap(bb => MODELS[bb] || []).map(m => `<button type="button" class="chip ${(n.modelli||[]).includes(m) ? 'on' : ''}" data-act="nc-model" data-v="${m}">${m}</button>`).join('')}</div></label>` : ''}
+  </div>
+  <div class="fsec"><h3>${ic('sparkle')}Interessi</h3>
+    <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${ints.includes(v) ? 'on' : ''}" data-act="nc-int" data-v="${v}">${ints.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
+    <p class="faint" style="margin:0;font-size:12px">Brand e interessi sono liste chiuse definite da Verga: il venditore può solo scegliere.</p>
+  </div>
+  <div class="fsec"><h3>${ic('edit')}${c ? 'Newsletter' : 'Prima nota e newsletter'}</h3>
+    ${c ? '<p class="faint" style="margin:0;font-size:12.5px">Le note interne si aggiungono dalla Panoramica: ogni nota è firmata con nome, data e ora.</p>' : `<label class="field"><span>Prima nota interna (verrà firmata con il tuo nome)</span><textarea class="ta" id="f-note"></textarea></label>`}
+    <label class="check"><input type="checkbox" id="f-nl" ${c?.newsletter ? 'checked' : ''}> Consenso a newsletter e comunicazioni (MailUp)</label>
+  </div>`;
+}
+function linkSection(c){
+  const L = S.nc.lk, me = c ? c.id : null;
+  const existing = c ? clientLinks(c.id).map(x => ({...x, rm:`data-act="lk-rm" data-i="${x.i}"`})) : S.nc.pending.map((x, i) => ({label:x.type, other:C(x.to), rm:`data-act="lk-rm-p" data-i="${i}"`}));
+  const o = L.otherId ? C(L.otherId) : null;
+  const who = c ? esc(c.nome) : 'Il cliente';
+  return `<div class="fsec" id="sec-legami"><h3>${ic('link')}Legami e parentele</h3>
+    <p class="faint" style="margin:-6px 0 0;font-size:12.5px">Nota interna, non visibile al cliente. Il collegamento compare su entrambe le anagrafiche.</p>
+    ${existing.length ? `<div class="vcard">${existing.map(x => `<div class="lk">${avatar(x.other)}<div class="grow"><div class="rel">${who} è ${esc(x.label.toLowerCase())}</div><b>${esc(fullName(x.other))}</b>${x.other.incomplete ? ' <span class="tag" style="height:20px">scheda da completare</span>' : ''}</div><button type="button" class="vbtn vbtn-ghost vbtn-sm" ${x.rm} aria-label="Rimuovi legame">${ic('trash')}</button></div>`).join('')}</div>` : ''}
+    <div class="lk-add">
+      <div class="fgrid">
+        <label class="field"><span>${c ? esc(c.nome) : 'Il cliente'} è…</span><input class="in" id="lk-type" list="lk-dl" value="${esc(L.type)}" placeholder="Es. Moglie di" autocomplete="off"></label>
+        <label class="field"><span>Sulla scheda dell'altra persona comparirà</span><input class="in" id="lk-back" value="${esc(L.back)}" placeholder="Es. Marito di" autocomplete="off"></label>
+      </div>
+      <datalist id="lk-dl">${Object.keys(LINK_TYPES).map(t => `<option value="${t}">`).join('')}</datalist>
+      <div class="chips">${LINK_CHIPS.map(t => `<button type="button" class="chip ${L.type === t ? 'on' : ''}" data-act="lk-chip" data-v="${t}">${t}</button>`).join('')}</div>
+      <div class="field"><span>Persona collegata</span>
+        ${o ? `<div class="picked">${avatar(o)}<div class="grow"><b>${esc(fullName(o))}</b><div class="muted" style="font-size:12px">${esc(o.email || 'Anagrafica da completare')}</div></div><button type="button" class="link" data-act="lk-unpick">Cambia</button></div>`
+        : L.quick ? `<div class="vcard card-b" style="display:flex;flex-direction:column;gap:12px">
+            <b>Nuova anagrafica rapida</b>
+            <div class="fgrid"><label class="field"><span>Nome <em>*</em></span><input class="in" id="lkq-nome" value="${esc(L.qn)}"></label><label class="field"><span>Cognome <em>*</em></span><input class="in" id="lkq-cognome" value="${esc(L.qc)}"></label><label class="field"><span>Cellulare</span><input class="in" id="lkq-tel" type="tel"></label></div>
+            <p class="faint" style="margin:0;font-size:12px">Basta il nome: il resto si completa se la persona entra in negozio.</p>
+            <div style="display:flex;gap:8px;justify-content:flex-end"><button type="button" class="vbtn" data-act="lk-quick-x">Annulla</button><button type="button" class="vbtn vbtn-primary" data-act="lk-quick-save">${ic('userPlus')}Crea e seleziona</button></div></div>`
+        : `<div class="scan-wrap">${ic('search')}<input class="in" id="lk-q" style="padding-left:44px" value="${esc(L.q)}" placeholder="Cerca tra i clienti per nome, email o telefono" autocomplete="off"></div>
+           <div class="picklist" id="lk-list">${lkPick(L.q, me)}</div>`}
+      </div>
+      <div><button type="button" class="vbtn vbtn-primary" data-act="lk-add" ${o && L.type ? '' : 'disabled'}>${ic('link')}Collega anagrafiche</button></div>
+    </div>
+  </div>`;
+}
+function lkPick(q, me){
+  const qq = (q || '').trim().toLowerCase();
+  const list = clients.filter(c => c.id !== me && (!qq || `${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(qq))).slice(0,5);
+  return list.map(c => `<div class="vrow" data-act="lk-pick" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.email || 'Anagrafica da completare')}</div></div></div>`).join('')
+    + `<div class="vrow" data-act="lk-quick" style="color:var(--accent);font-weight:600">${ic('userPlus')}${qq ? `Non c'è? Crea anagrafica per «${esc(q.trim())}»` : 'Non c\'è? Crea una nuova anagrafica'}</div>`;
+}
+
+/* proposte (PDA) registrate su TSC per il cliente selezionato */
+function tscProposals(c){
+  if (c.id !== SEL_ID || !PROPOSALS.length) return '';
+  return `<section class="vcard tbl-wrap" style="margin-top:24px"><div class="card-h">${ic('list')}<h2>Proposte su TSC</h2><span class="faint" style="font-size:12px">Lette dal gestionale tramite il middleware</span></div>
+    <table class="tbl"><thead><tr><th>N°</th><th>Data</th><th>Stato</th><th style="text-align:right">Totale</th></tr></thead><tbody>
+    ${PROPOSALS.map(x => `<tr class="click" data-href="/profile/proposals?n=${encodeURIComponent(x.pre_order_id)}"><td class="mono">${esc(x.pre_order_id)}</td><td class="num">${fmtD(String(x.date || '').slice(0, 10))}</td><td>${esc(x.pre_order_status ?? '')}</td><td class="num" style="text-align:right">${eur(+x.total || 0)}</td></tr>`).join('')}
+    </tbody></table></section>`;
+}
+/* ---------------- NUOVO CLIENTE ---------------- */
+function vNuovo(){
+  return `
+  <div><button class="link" data-go="clienti" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Clienti</button></div>
+  <div class="page-h"><div><div class="label">Anagrafica</div><h1>Nuovo cliente</h1></div></div>
+  <div class="banner info">${ic('search')}<div class="grow"><p>Prima di registrare, controlla che il cliente non esista già: mentre scrivi nome, email o telefono ti mostriamo le schede simili.</p></div></div>
+  <section class="vcard">${clientForm(null)}
+    <div class="modal-f" style="border-radius:0 0 12px 12px"><span class="auto-info">${ic('info')}Registrato da ${S.operator} · ${S.boutique}</span><button class="vbtn" data-go="clienti">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="save-client">${ic('check')}Registra cliente</button></div>
+  </section>`;
+}
+
+/* ---------------- CATALOGO ---------------- */
+function vProdotti(){
+  const f = S.pf, q = f.q.trim().toLowerCase();
+  const list = products.filter(p => (!q || `${p.ref} ${p.modello} ${p.seriale} ${p.brand}`.toLowerCase().includes(q)) && (!f.brand || p.brand === f.brand) && (!f.tipo || p.tipo === f.tipo) && (!f.stato || p.stato === f.stato));
+  return `
+  <div class="page-h"><div><div class="label">Vendita</div><h1>Catalogo</h1></div><span class="sp"></span><span class="muted">Sincronizzato da TSC · ogni pezzo ha un seriale unico</span></div>
+  <div class="vcard card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+    <label class="field"><span>Referenza, modello o seriale</span><input class="in" id="pf-q" data-pf="q" value="${esc(f.q)}" placeholder="Es. 126610LN"></label>
+    <label class="field"><span>Brand</span><select class="sel" data-pf="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
+    <label class="field"><span>Tipo</span><select class="sel" data-pf="tipo">${[['','Tutti'],['orologio','Orologi'],['gioiello','Gioielli']].map(([v,l]) => `<option value="${v}" ${f.tipo === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="field"><span>Stato</span><select class="sel" data-pf="stato">${[['','Tutti'],['disponibile','Disponibile'],['in_arrivo','In arrivo'],['riservato','Riservato']].map(([v,l]) => `<option value="${v}" ${f.stato === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+  </div>
+  <div class="vcard tbl-wrap"><table class="tbl">
+    <thead><tr><th>Prodotto</th><th>Referenza (MPN)</th><th>Seriale</th><th>Boutique</th><th>Stato</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
+    <tbody>${list.map(p => `<tr>
+      <td><div class="cell-person"><span class="av" style="border-radius:10px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div><b>${esc(p.brand)} ${esc(p.modello)}</b><small>${p.tipo === 'gioiello' ? 'Collezione ' + esc(p.modello) + ' · ' : ''}${esc(p.det)}</small></div></div></td>
+      <td class="mono">${esc(p.ref)}</td><td class="mono">${esc(p.seriale)}</td><td>${esc(p.boutique)}</td><td>${prodState(p)}</td>
+      <td class="num" style="text-align:right">${eur(p.price)}</td>
+      <td style="text-align:right">${p.stato === 'disponibile' || p.stato === 'riservato' ? `<button class="vbtn vbtn-sm" data-act="add-cart" data-id="${p.id}">${ic('cart')}In cassa</button>` : ''}</td>
+    </tr>`).join('') || '<tr><td colspan="7"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ---------------- CASSA ---------------- */
+function vCassa(){
+  const cart = S.cart, c = cart.clientId ? C(cart.clientId) : null;
+  const tot = cart.items.reduce((s, id) => s + P(id).price, 0);
+  const pre = c ? clientPdas(c.id).filter(p => p.stato === 'assegnata' && !cart.items.includes(p.productId)) : [];
+  return `
+  <div class="page-h"><div><div class="label">Vendita · ${S.boutique}</div><h1>Cassa</h1></div></div>
+  <div class="pos">
+    <div class="stack">
+      <section class="vcard">
+        <div class="card-h">${ic('users')}<h2>Cliente</h2><span class="tag red" style="${c ? 'display:none' : ''}">Obbligatorio</span><span class="sp"></span>${c ? '<button class="link" data-act="cart-client-clear">Cambia</button>' : ''}</div>
+        <div class="card-b">${c ? `<div class="picked">${avatar(c)}<div class="grow"><b>${esc(fullName(c))}</b><div class="muted" style="font-size:12.5px">${esc(c.email || '')} · ${esc(c.tel || '')}</div></div><button class="vbtn vbtn-sm" data-go="cliente" data-id="${c.id}">Scheda</button></div>` :
+          `<div class="scan-wrap">${ic('search')}<input class="in" id="cart-cs" style="padding-left:44px" placeholder="Cerca il cliente per nome, email o telefono" autocomplete="off"></div><div id="cart-cs-list" class="picklist" style="margin-top:10px">${clientPick('', 'cart-client')}</div>`}</div>
+      </section>
+      ${pre.length ? `<section class="vcard"><div class="card-h">${ic('heart')}<h2>Pre-acquisti del cliente</h2></div>${pre.map(p => { const pr = P(p.productId); return `<div class="vrow">${ic('watch')}<div class="grow"><div class="t">${esc(pr.brand)} ${esc(pr.modello)}</div><div class="s"><span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span> · ${eur(pr.price)}</div></div><button class="vbtn vbtn-primary vbtn-sm" data-act="add-cart" data-id="${pr.id}">${ic('plus')}Aggiungi</button></div>`; }).join('')}</section>` : ''}
+      <section class="vcard">
+        <div class="card-h">${ic('scan')}<h2>Aggiungi prodotto</h2></div>
+        <div class="card-b stack" style="gap:12px">
+          <div class="scan"><div class="scan-wrap">${ic('scan')}<input class="in mono" id="scan" placeholder="Scansiona o digita referenza / seriale" autocomplete="off"></div><button class="vbtn vbtn-primary vbtn-lg" data-act="scan-add">Aggiungi</button></div>
+          <div id="scan-list" class="picklist">${scanList('')}</div>
+        </div>
+      </section>
+    </div>
+    <section class="vcard receipt">
+      <div class="card-h">${ic('bag')}<h2>Ordine</h2><span class="sp"></span><span class="muted num">${cart.items.length} ${cart.items.length === 1 ? 'articolo' : 'articoli'}</span></div>
+      ${cart.items.length ? cart.items.map(id => { const p = P(id); return `<div class="ritem"><span class="wm" style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><b>${esc(p.brand)} ${esc(p.modello)}</b><div class="muted" style="font-size:12.5px"><span class="mono">${esc(p.ref)}</span> · seriale <span class="mono">${esc(p.seriale)}</span></div>${p.reservedFor && p.reservedFor !== cart.clientId ? `<div class="tag red" style="margin-top:6px">Riservato a ${esc(fullName(C(p.reservedFor)))}</div>` : ''}</div><span class="p num">${eur(p.price)}</span><button class="vbtn vbtn-ghost vbtn-sm" data-act="rm-cart" data-id="${id}" aria-label="Rimuovi">${ic('trash')}</button></div>`; }).join('') : '<div class="empty">Scansiona una referenza o aggiungi un pre-acquisto del cliente.</div>'}
+      <div class="tot"><div class="muted"><span>Imponibile</span><span class="num">${eur(tot / 1.22)}</span></div><div class="muted"><span>IVA 22%</span><span class="num">${eur(tot - tot / 1.22)}</span></div><div><span class="label" style="align-self:center">Totale</span><span class="big num">${eur(tot)}</span></div></div>
+      ${c ? `<div style="padding:0 20px 12px;display:flex;flex-direction:column;gap:8px"><span class="label">Intestazione</span><div class="pay" style="padding:0"><button class="${S.cart.inv !== 'societa' ? 'on' : ''}" data-act="inv" data-v="persona">${esc(fullName(c))}</button><button class="${S.cart.inv === 'societa' ? 'on' : ''}" data-act="inv" data-v="societa" ${c.billing?.rs ? '' : 'disabled title="Nessun dato di fatturazione in anagrafica"'}>${c.billing?.rs ? esc(c.billing.rs) : 'Società (non inserita)'}</button></div></div>` : ''}
+      <div class="pay">${['Carta','Bonifico','Contanti','Finanziamento'].map(m => `<button class="${cart.pay === m ? 'on' : ''}" data-act="pay" data-v="${m}">${m}</button>`).join('')}</div>
+      <div style="padding:0 20px 20px"><button class="vbtn vbtn-primary vbtn-lg" style="width:100%" data-act="checkout" ${cart.items.length && c ? '' : 'disabled'}>${ic('check')}Crea ordine</button>
+      ${!c ? '<p class="faint" style="font-size:12px;margin:8px 0 0;text-align:center">Associa un cliente per concludere la vendita.</p>' : ''}</div>
+    </section>
+  </div>`;
+}
+function scanList(q){
+  q = q.trim().toLowerCase();
+  const list = products.filter(p => ['disponibile','riservato'].includes(p.stato) && !S.cart.items.includes(p.id) && (!q || `${p.ref} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q))).slice(0,5);
+  return list.map(p => `<div class="vrow" data-act="add-cart" data-id="${p.id}"><span style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><div class="t">${esc(p.brand)} ${esc(p.modello)}</div><div class="s"><span class="mono">${esc(p.ref)}</span> · <span class="mono">${esc(p.seriale)}</span> · ${esc(p.boutique)}</div></div>${prodState(p)}<span class="num" style="font-weight:600">${eur(p.price)}</span></div>`).join('') || '<div class="empty">Nessun prodotto disponibile con questa referenza.</div>';
+}
+function clientPick(q, act, sel){
+  q = q.trim().toLowerCase();
+  const list = clients.filter(c => !q || `${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(q)).slice(0,6);
+  return list.map(c => `<div class="vrow ${sel === c.id ? 'on' : ''}" data-act="${act}" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.email || 'Scheda da completare')}</div></div></div>`).join('') || '<div class="empty">Nessun cliente trovato.</div>';
+}
+
+/* ---------------- PASSAGGI ---------------- */
+function vPassaggi(){
+  const f = S.evf;
+  const list = [...events].filter(e => (!f.type || e.type === f.type) && (!f.boutique || e.boutique === f.boutique)).sort((a,b) => dt(b.date) - dt(a.date));
+  return `
+  <div class="page-h"><div><div class="label">Registro attività</div><h1>Passaggi e contatti</h1></div><span class="sp"></span><button class="vbtn vbtn-primary" data-act="evento">${ic('plus')}Registra passaggio</button></div>
+  <div class="chips">${[['','Tutti'],['visita','Passaggi in negozio'],['chiamata_in','Chiamate ricevute'],['chiamata_out','Chiamate fatte'],['mail','Mail']].map(([v,l]) => `<button class="chip ${f.type === v ? 'on' : ''}" data-act="evf" data-k="type" data-v="${v}">${l}</button>`).join('')}
+    <select class="sel" style="width:auto;height:38px;border-radius:99px" data-evf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte le boutique')}</select></div>
+  <div class="vcard tbl-wrap"><table class="tbl">
+    <thead><tr><th>Quando</th><th>Cliente</th><th>Tipo</th><th>Motivo e nota</th><th>Boutique · Venditore</th><th>Follow-up</th></tr></thead>
+    <tbody>${list.map(e => { const c = C(e.clientId), t = EV[e.type]; return `<tr class="click" data-go="cliente" data-id="${c.id}">
+      <td class="num" style="white-space:nowrap">${fmtDT(e.date)}</td>
+      <td><div class="cell-person" style="min-width:160px">${avatar(c)}<b>${esc(fullName(c))}</b></div></td>
+      <td><span class="tag ${t.cls === 'in' ? 'blue' : t.cls === 'out' ? 'amber' : 'brand'}">${ic(t.icon)}${t.short}</span></td>
+      <td style="max-width:340px">${e.motivo ? `<span class="tag" style="margin-bottom:4px">${esc(e.motivo)}</span><br>` : ''}${esc(e.note || (e.motivo ? '' : '—'))}</td>
+      <td>${esc(e.boutique)}<div class="faint" style="font-size:12px">${esc(e.operator)}</div></td>
+      <td>${e.followup ? `<span class="tag ${e.done ? 'ok' : dday(e.followup) <= 0 ? 'red' : 'amber'}">${e.done ? 'Fatto' : fmtD(e.followup).slice(0,5)}</span>` : '<span class="faint">—</span>'}</td>
+    </tr>`; }).join('')}</tbody>
+  </table></div>`;
+}
+
+/* ---------------- MANIFESTAZIONI ---------------- */
+function vPda(){
+  const list = pdas.filter(p => !S.pdaf || p.stato === S.pdaf).sort((a,b) => compatible(b).length - compatible(a).length || dt(a.date) - dt(b.date));
+  return `
+  <div class="page-h"><div><div class="label">Clienti</div><h1>Manifestazioni di interesse</h1></div><span class="sp"></span><button class="vbtn vbtn-primary" data-act="pda-new">${ic('plus')}Nuova manifestazione</button></div>
+  <div class="banner info">${ic('info')}<div class="grow"><p>Una manifestazione è una <b>PDA con prodotto generico e senza prezzo</b>. Quando arriva un pezzo compatibile, il direttore vendite o il titolare lo <b>associa</b> e chi ha creato la PDA riceve una notifica. Quando il cliente viene a comprare, qualsiasi venditore la trasforma in <b>ordine</b>. Le PDA sono visibili in tutte le boutique.</p></div></div>
+  <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['assegnata','Associata'],['venduta','Ordine'],['annullata','Annullata'],['','Tutte']].map(([v,l]) => `<button class="chip ${S.pdaf === v ? 'on' : ''}" data-act="pdaf" data-v="${v}">${l} <span class="num" style="opacity:.7">${pdas.filter(p => !v || p.stato === v).length}</span></button>`).join('')}</div>
+  <section class="vcard">${list.map(p => { const c = C(p.clientId); return `<div style="border-bottom:1px solid var(--line)"><div style="padding:12px 20px 0;display:flex;align-items:center;gap:10px">${avatar(c)}<button class="link" data-go="cliente" data-id="${c.id}">${esc(fullName(c))}</button><span class="faint">· ${esc(c.boutique)}</span></div>${pdaCard(p)}</div>`; }).join('') || '<div class="empty">Nessuna manifestazione in questo stato.</div>'}</section>`;
+}
+
+/* ---------------- RIPARAZIONI ---------------- */
+/* Usa la sezione solo il venditore: registra a mano anche le fasi di laboratorio. */
+const TECNICI = ['Andrea Galli','Paolo Riva','Davide Sala','Casa madre (esterno)'];
+const UBICAZIONI = ['Cassaforte boutique','Laboratorio Mazzini · banco','Laboratorio Capelli · banco','Laboratorio Patek · banco','Casa madre (riparazione esterna)','Pronto in boutique per il ritiro','Riconsegnato al cliente'];
+const AREA_OF = {'Bottega Storica':'Laboratorio Mazzini','Boutique Multibrand':'Laboratorio Capelli','Boutique Patek Philippe':'Laboratorio Patek','Boutique Portofino':'Laboratorio Mazzini'};
+const MOTIVI_RIP = ['Preventivo riparazione','Revisione completa','Cambio pila','Sostituzione vetro','Regolazione bracciale','Lucidatura','Valutazione CPO','Quotazione'];
+const SKIP = s => ({n:s.n, skip:s.skip});
+const STD = [
+  {n:'Accettazione', t:['Modulo compilato','Foto scattate davanti al cliente','Ricevuta firmata dal cliente','Etichette stampate sulla busta']},
+  {n:'Preventivo', t:['Presa in carico del tecnico','Preventivo redatto','Preventivo inviato al cliente']},
+  {n:'Risposta cliente', t:['Risposta del cliente registrata']},
+  {n:'Lavorazione', t:['Riparazione assegnata','Riparazione eseguita','Documento di scarico allegato']},
+  {n:'Riconsegna', t:['Avviso di ritiro inviato con scontrino','Orologio ritirato']},
+];
+const RIP_TIPI = {
+  'Riparazione':{d:'Preventivo, accettazione del cliente e lavorazione', steps:STD},
+  'Garanzia':{d:'Nessun preventivo, il resto del flusso è uguale', steps:[STD[0], SKIP({n:'Preventivo', skip:'Non previsto in garanzia'}), SKIP({n:'Risposta cliente', skip:'Non prevista in garanzia'}), STD[3], STD[4]]},
+  'Cambio pila':{d:'Preventivo accettato subito', steps:[{n:'Accettazione', t:['Modulo compilato','Ricevuta firmata dal cliente']}, SKIP({n:'Preventivo', skip:'Accettato subito'}), SKIP({n:'Risposta cliente', skip:'Accettato subito'}), {n:'Lavorazione', t:['Pila sostituita']}, STD[4]]},
+  'CPO':{d:'Valutazione Rolex Certified Pre-Owned, 10 giorni per l\'offerta', steps:[STD[0],
+    {n:'Valutazione', t:['Prima valutazione del tecnico','Offerta redatta','Offerta comunicata al cliente']},
+    {n:'Risposta cliente', t:['Offerta accettata: la busta passa a Verga']},
+    {n:'Lavorazione e certificazione', t:['Riparazione assegnata','Riparazione chiusa','Inviato a certificazione Rolex','Rientro certificazione con documento allegato']},
+    {n:'In vendita', t:['Foto pubblicate','Orologio in vendita']}]},
+  'Quotazione':{d:'Valutazione come servizio, senza acquisto', steps:[STD[0], {n:'Valutazione', t:['Valutazione del tecnico','Quotazione comunicata al cliente']}, SKIP({n:'Risposta cliente', skip:'Non prevista'}), SKIP({n:'Lavorazione', skip:'Non prevista'}), {n:'Riconsegna', t:['Avviso di ritiro inviato','Orologio ritirato']}]},
+  'Conto vendita':{d:'Accettazione CV nell\'area Verga Vintage', steps:[{n:'Accettazione CV', t:['Modulo compilato','Foto scattate']}, {n:'Lavori da fare', t:['Lavori segnalati','Lavori eseguiti']}, SKIP({n:'Risposta cliente', skip:'Non prevista'}), SKIP({n:'Lavorazione', skip:'Inclusa nei lavori'}), {n:'In vendita', t:['Orologio in vendita']}]},
+};
+const VERGA_VINTAGE = {id:'vv', nome:'Verga', cognome:'Vintage', email:'vintage@verga1947.it', tel:'', incomplete:false};
+const RC = id => id === 'vv' ? VERGA_VINTAGE : C(id);
+const tk = (s, i) => `${s}-${i}`;
+const doneUpTo = (tipo, step, extra = {}) => { const d = {}; RIP_TIPI[tipo].steps.forEach((s, si) => { if (si < step && s.t) s.t.forEach((_, ti) => d[tk(si, ti)] = {date:'', by:''}); }); return Object.assign(d, extra); };
+let ripSeq = store.seq.rip;
+const repairs = store.repairs;
+const R = id => repairs.find(r => r.id === id);
+const rSteps = r => RIP_TIPI[r.tipo].steps;
+const prevTot = (r, onlyOk) => (r.prev?.voci || []).filter(v => !onlyOk || v.ok).reduce((s, v) => s + v.p, 0);
+const clientRepairs = id => repairs.filter(r => r.clientId === id).sort((a,b) => dt(b.acc) - dt(a.acc));
+/* semaforo: rosso = da fare, ambra = in attesa del cliente, verde = in lavorazione, blu = pronto al ritiro */
+function ripLight(r){
+  if (r.closed) return {k:'closed', c:'', l:'Chiusa'};
+  const s = rSteps(r)[r.step];
+  if (r.presunta && dday(r.presunta) < 0 && r.step < 4) return {k:'late', c:'red', l:'In ritardo'};
+  if (r.step === 2) return {k:'wait', c:'amber', l:'In attesa del cliente'};
+  if (r.step === 4) return {k:'ready', c:'blue', l:s.n === 'In vendita' ? 'Da mettere in vendita' : 'Pronto al ritiro'};
+  if (r.step === 3 && r.done[tk(3,0)]) return {k:'work', c:'ok', l:'In lavorazione'};
+  return {k:'todo', c:'red', l:'Da fare'};
+}
+const light = r => { const x = ripLight(r); return `<span class="tag ${x.c}"><span class="dotl ${x.c}"></span>${x.l}</span>`; };
+const accNotAss = r => !r.closed && r.step === 3 && !r.done[tk(3,0)] && r.prev?.stato === 'accettato';
+const objName = r => `${r.obj.marca} ${r.obj.modello}`;
+
+function vRip(){
+  const f = S.rf, q = f.q.trim().toLowerCase();
+  const tests = {aperte:r => !r.closed, todo:r => ['todo','late'].includes(ripLight(r).k), wait:r => ripLight(r).k === 'wait', nass:accNotAss, ready:r => ripLight(r).k === 'ready', chiuse:r => r.closed, tutte:() => true};
+  const base = repairs.filter(r => (!q || `${r.busta} ${fullName(RC(r.clientId))} ${objName(r)} ${r.obj.ref}`.toLowerCase().includes(q)) && (!f.tipo || r.tipo === f.tipo) && (!f.boutique || r.boutique === f.boutique) && (!f.tecnico || r.tecnico === f.tecnico));
+  const list = base.filter(tests[f.chip]).sort((a,b) => dt(a.acc) - dt(b.acc));
+  const cnt = k => repairs.filter(tests[k]).length;
+  return `
+  <div class="page-h"><div><div class="label">Assistenza · tutte le boutique</div><h1>Riparazioni</h1></div><span class="sp"></span><button class="vbtn vbtn-primary" data-go="rip-new">${ic('plus')}Nuova accettazione</button></div>
+  <div class="kpis">
+    <div class="kpi alert"><span class="label">Da fare</span><b class="num">${cnt('todo')}</b><span class="muted">di cui ${repairs.filter(r => ripLight(r).k === 'late').length} in ritardo</span></div>
+    <div class="kpi"><span class="label">In attesa del cliente</span><b class="num">${cnt('wait')}</b><span class="muted">preventivi inviati</span></div>
+    <div class="kpi"><span class="label">Accettati non assegnati</span><b class="num">${cnt('nass')}</b><span class="muted">da passare al tecnico</span></div>
+    <div class="kpi"><span class="label">Pronti al ritiro</span><b class="num">${cnt('ready')}</b><span class="muted">avvisare il cliente</span></div>
+  </div>
+  <div class="chips">${[['aperte','Aperte'],['todo','Da fare'],['wait','In attesa del cliente'],['nass','Preventivo accettato, non assegnato'],['ready','Pronti al ritiro'],['chiuse','Chiuse'],['tutte','Tutte']].map(([k,l]) => `<button class="chip ${f.chip === k ? 'on' : ''}" data-act="rf-chip" data-v="${k}">${l} <span class="num" style="opacity:.7">${cnt(k)}</span></button>`).join('')}</div>
+  <div class="vcard card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+    <label class="field"><span>Busta, cliente, marca o referenza</span><input class="in" id="rf-q" value="${esc(f.q)}" placeholder="Es. B-2026-0418"></label>
+    <label class="field"><span>Tipo</span><select class="sel" data-rf="tipo">${opts(Object.keys(RIP_TIPI), f.tipo, 'Tutti')}</select></label>
+    <label class="field"><span>Boutique</span><select class="sel" data-rf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
+    <label class="field"><span>Tecnico</span><select class="sel" data-rf="tecnico">${opts(TECNICI, f.tecnico, 'Tutti')}</select></label>
+  </div>
+  <div class="vcard tbl-wrap"><table class="tbl">
+    <thead><tr><th>Stato</th><th>Busta</th><th>Cliente</th><th>Oggetto</th><th>Step</th><th>Dove si trova · tecnico</th><th>Presunta consegna</th><th style="text-align:right">Preventivo</th></tr></thead>
+    <tbody>${list.map(r => { const c = RC(r.clientId), st = rSteps(r); return `<tr class="click" data-go="busta" data-id="${r.id}">
+      <td>${light(r)}</td>
+      <td style="white-space:nowrap"><b class="mono">${esc(r.busta)}</b><div class="faint" style="font-size:12px">${esc(r.tipo)} · ${fmtD(r.acc)}</div></td>
+      <td style="min-width:140px"><b>${esc(fullName(c))}</b><div class="faint" style="font-size:12px">${esc(r.boutique)}</div></td>
+      <td style="min-width:170px"><b>${esc(objName(r))}</b><div class="faint mono" style="font-size:12px">${esc(r.obj.ref)}</div><div class="faint" style="font-size:12px">${esc(r.motivo)}</div></td>
+      <td style="min-width:140px">${r.closed ? '<span class="faint">Chiusa</span>' : `<div style="font-weight:600;font-size:13px">${r.step + 1}/5 · ${esc(st[r.step].n)}</div><div class="mini-steps">${st.map((s, i) => `<i class="${s.skip || r.skipped?.[i] ? 'skip' : i < r.step ? 'done' : i === r.step ? 'cur' : ''}"></i>`).join('')}</div>`}</td>
+      <td>${esc(r.ubic)}<div class="faint" style="font-size:12px">${esc(r.tecnico || 'Nessun tecnico')}</div></td>
+      <td class="num">${r.presunta ? `${fmtD(r.presunta)}<div class="faint" style="font-size:12px">${r.closed ? '' : dday(r.presunta) < 0 ? `<span style="color:var(--red)">${-dday(r.presunta)} giorni di ritardo</span>` : `tra ${dday(r.presunta)} giorni`}</div>` : '<span class="faint">—</span>'}</td>
+      <td class="num" style="text-align:right">${r.prev?.voci?.length ? `${eur(r.prev.stato === 'accettato' ? prevTot(r, true) : prevTot(r))}<div class="faint" style="font-size:12px">${({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || ''}</div>` : '<span class="faint">—</span>'}</td>
+    </tr>`; }).join('') || '<tr><td colspan="8"><div class="empty">Nessuna busta in questo stato.</div></td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ---- accettazione ---- */
+const blankRn = (clientId = null) => ({clientId, tipo:'Riparazione', obj:{tipo:'Orologio', marca:'', modello:'', ref:'', materiale:'', nc:'', nm:'', cal:'', quadrante:'', colQ:'', meccanismo:'', bracciale:''}, motivo:'Preventivo riparazione', valore:'', ritiro:'', garanzia:false, photos:[], att:[], noteCliente:'', noteInterne:'', prom:'', promD:'', cv:{n:'', d:TODAY, valore:''}, q:''});
+function vRipNew(){
+  const n = S.rn, cv = n.tipo === 'Conto vendita', c = cv ? VERGA_VINTAGE : n.clientId ? C(n.clientId) : null;
+  const inp = (k, label, extra = '') => `<label class="field"><span>${label}</span><input class="in" data-rn="obj.${k}" value="${esc(n.obj[k])}" ${extra}></label>`;
+  const area = cv ? 'Verga Vintage' : n.tipo === 'CPO' ? 'CPO' : AREA_OF[S.boutique];
+  return `
+  <div><button class="link" data-go="riparazioni" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Riparazioni</button></div>
+  <div class="page-h"><div><div class="label">${esc(S.boutique)} · ${esc(area)}</div><h1>Nuova accettazione</h1></div></div>
+  <section class="vcard">
+    <div class="fsec"><h3>${ic('box')}Tipo di busta</h3>
+      <div class="seg rip-tipi">${Object.entries(RIP_TIPI).map(([k, t]) => `<button type="button" class="${n.tipo === k ? 'on' : ''}" data-act="rn-tipo" data-v="${k}"><b>${k}</b><small>${t.d}</small></button>`).join('')}</div>
+    </div>
+    <div class="fsec"><h3>${ic('users')}Cliente</h3>
+      ${cv ? `<div class="picked">${avatar(c)}<div class="grow"><b>Verga Vintage</b><div class="muted" style="font-size:12px">Nel conto vendita il cliente è sempre Verga Vintage</div></div></div>
+        <div class="fgrid"><label class="field"><span>Numero CV</span><input class="in" data-rn="cv.n" value="${esc(n.cv.n)}"></label><label class="field"><span>Data CV</span><input class="in" type="date" data-rn="cv.d" value="${esc(n.cv.d)}"></label><label class="field"><span>Valore</span><input class="in" inputmode="decimal" data-rn="cv.valore" value="${esc(n.cv.valore)}" placeholder="€"></label></div>`
+      : c ? `<div class="picked">${avatar(c)}<div class="grow"><b>${esc(fullName(c))}</b><div class="muted" style="font-size:12px">${esc(c.email || '')} · ${esc(c.tel || '')}${c.cf ? ' · CF ' + esc(c.cf) : ''}</div></div><button type="button" class="link" data-act="rn-unpick">Cambia</button></div>
+        ${!c.cf || !c.addresses.length ? `<div class="banner">${ic('info')}<div class="grow"><p>Per la ricevuta servono <b>indirizzo e codice fiscale</b>. <button class="link" data-go="cliente" data-id="${c.id}">Completa la scheda</button></p></div></div>` : ''}`
+      : `<div class="scan-wrap">${ic('search')}<input class="in" id="rn-cs" style="padding-left:44px" value="${esc(n.q)}" placeholder="Cerca il cliente per nome, email o telefono" autocomplete="off"></div><div class="picklist" id="rn-cs-list">${clientPick(n.q, 'rn-pick')}</div><button type="button" class="link" data-go="nuovo" style="align-self:flex-start">${ic('userPlus')} Non c'è? Crea nuovo cliente</button>`}
+    </div>
+    <div class="fsec"><h3>${ic('watch')}Oggetto</h3>
+      <div class="fgrid">
+        <label class="field"><span>Tipo</span><select class="sel" data-rn="obj.tipo">${opts(['Orologio','Orologio da tavolo','Gioiello','Altro'], n.obj.tipo)}</select></label>
+        <label class="field"><span>Marca <em>*</em></span><select class="sel" data-rn="obj.marca">${opts([...BRANDS.filter(b => !['Rolex CPO','Verga Pre-Owned'].includes(b)), 'Altra marca'], n.obj.marca, 'Seleziona')}</select></label>
+        ${inp('modello','Modello <em>*</em>','placeholder="Es. Submariner"')}
+        ${inp('ref','Referenza','class="in mono" placeholder="Es. 124060"')}
+        ${inp('materiale','Materiale','placeholder="Es. acciaio, oro giallo"')}
+        ${inp('nc','Numero cassa (Nc)')}
+        ${inp('nm','Numero movimento (Nm)')}
+        ${inp('cal','Calibro (Cal)')}
+        ${inp('quadrante','Quadrante')}
+        ${inp('colQ','Colore quadrante')}
+        <label class="field"><span>Meccanismo</span><select class="sel" data-rn="obj.meccanismo">${opts(['Automatico','Carica manuale','Quarzo'], n.obj.meccanismo, '—')}</select></label>
+        ${inp('bracciale','Bracciale','placeholder="Es. Oyster, pelle"')}
+      </div>
+    </div>
+    <div class="fsec"><h3>${ic('wrench')}Intervento</h3>
+      <div class="field"><span>Motivo</span><div class="chips">${MOTIVI_RIP.map(v => `<button type="button" class="chip ${n.motivo === v ? 'on' : ''}" data-act="rn-motivo" data-v="${v}">${v}</button>`).join('')}</div></div>
+      <div class="fgrid">
+        <label class="field"><span>Valore dichiarato (assicurazione)</span><input class="in num" inputmode="decimal" data-rn="valore" value="${esc(n.valore)}" placeholder="€"></label>
+        <label class="field"><span>Ritiro previsto</span><input class="in" type="date" data-rn="ritiro" value="${esc(n.ritiro)}"></label>
+      </div>
+      <label class="check"><input type="checkbox" data-act="rn-garanzia" ${n.garanzia || n.tipo === 'Garanzia' ? 'checked' : ''}> In garanzia</label>
+    </div>
+    <div class="fsec"><h3>${ic('camera')}Foto e allegati</h3>
+      <div class="thumbs">${n.photos.map((p, i) => `<span class="th">${p ? `<img src="${p}" alt="Foto ${i + 1}">` : `<span class="ph">${ic('watch')}</span>`}<button type="button" data-act="rn-ph-rm" data-i="${i}" aria-label="Rimuovi foto">${ic('x')}</button></span>`).join('')}
+        <label class="th add">${ic('camera')}<b>Scatta foto</b><input type="file" id="rn-cam" accept="image/*" capture="environment" multiple hidden></label></div>
+      <p class="faint" style="margin:0;font-size:12px">Su iPad il pulsante apre direttamente la fotocamera. Foto scattate davanti al cliente: <b class="num">${n.photos.length}</b> (vanno in ricevuta).</p>
+      <div class="field"><span>Allegati (garanzia, documenti del cliente…)</span>
+        <div class="att">${n.att.map((a, i) => `<span class="tag">${ic('clip')}${esc(a)}<button type="button" data-act="rn-att-rm" data-i="${i}" aria-label="Rimuovi">${ic('x')}</button></span>`).join('')}<label class="vbtn vbtn-sm">${ic('clip')}Aggiungi file<input type="file" id="rn-att" multiple hidden></label></div></div>
+    </div>
+    <div class="fsec"><h3>${ic('edit')}Note e promemoria</h3>
+      <div class="fgrid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        <label class="field"><span>Note principali · le vede il cliente in ricevuta</span><textarea class="ta" data-rn="noteCliente" placeholder="Es. ritarda di 20 secondi al giorno">${esc(n.noteCliente)}</textarea></label>
+        <label class="field"><span>Note interne di riparazione</span><textarea class="ta" data-rn="noteInterne" placeholder="Es. graffio sulla lunetta già presente">${esc(n.noteInterne)}</textarea></label>
+      </div>
+      <div class="fgrid"><label class="field"><span>Promemoria</span><input class="in" data-rn="prom" value="${esc(n.prom)}" placeholder="Es. richiamare per il preventivo"></label><label class="field"><span>Quando</span><input class="in" type="date" data-rn="promD" value="${esc(n.promD)}"></label></div>
+    </div>
+    <div class="modal-f" style="border-radius:0 0 12px 12px"><span class="auto-info">${ic('info')}Creata da ${esc(S.operator)} · ${esc(S.boutique)} · ${esc(area)}</span><button class="vbtn" data-go="riparazioni">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="rn-save">${ic('check')}Apri busta e stampa ricevuta</button></div>
+  </section>`;
+}
+
+/* ---- scheda busta ---- */
+function vBusta(){
+  const r = R(S.id); if (!r) return '<div class="empty">Busta non trovata.</div>';
+  const c = RC(r.clientId), st = rSteps(r), cur = st[r.step], lt = ripLight(r);
+  const owner = r.tipo === 'CPO' && r.owner === 'verga';
+  return `
+  <div><button class="link" data-go="riparazioni" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Riparazioni</button></div>
+  <section class="vcard">
+    <div class="chead">
+      <span class="av lg" style="border-radius:14px">${ic(r.obj.tipo === 'Gioiello' ? 'gem' : 'watch')}</span>
+      <div class="who">
+        <div class="tags">${light(r)}<span class="tag">${esc(r.tipo)}</span>${r.garanzia ? '<span class="tag ok">In garanzia</span>' : ''}${r.tipo === 'CPO' ? `<span class="tag ${owner ? 'brand' : 'amber'}">Intestata a ${owner ? 'Verga' : 'cliente'}</span>` : ''}</div>
+        <h1>${esc(r.busta)}</h1>
+        <div style="font-weight:600">${esc(objName(r))} <span class="muted mono" style="font-weight:500">${esc(r.obj.ref)}</span></div>
+        <div class="meta"><span>${ic('users')}<button class="link" ${c.id !== 'vv' ? `data-go="cliente" data-id="${c.id}"` : ''}>${esc(fullName(c))}</button></span><span>${ic('store')}${esc(r.boutique)}</span><span>${ic('clock')}Accettata ${fmtD(r.acc)} da ${esc(r.by)}</span><span>${ic('wrench')}${esc(r.motivo)}</span></div>
+      </div>
+      <div class="oneclick" style="min-width:220px">
+        <span class="label">Stampe</span>
+        <button class="vbtn" data-act="rb-ricevuta" data-id="${r.id}">${ic('print')}Ricevuta per il cliente</button>
+        <button class="vbtn" data-act="rb-etichette" data-id="${r.id}">${ic('tag')}Etichette busta</button>
+      </div>
+    </div>
+  </section>
+  <div class="steps5">${st.map((s, i) => { const tot = s.t ? s.t.length : 0, d = s.t ? s.t.filter((_, ti) => r.done[tk(i, ti)]).length : 0; const sk = s.skip || r.skipped?.[i]; const cls = sk ? 'skip' : (i < r.step || r.closed) ? 'done' : i === r.step ? 'cur' : '';
+    return `<div class="st ${cls}"><span class="n">STEP ${i + 1}</span><b>${esc(s.n)}</b><small>${sk ? esc(sk) : cls === 'done' ? 'Completato' : `${d} di ${tot} eseguite`}</small></div>`; }).join('')}</div>
+  <div class="grid2">
+    <div class="stack">
+      ${r.closed ? `<section class="vcard"><div class="empty">${ic('check')} Busta chiusa${r.esito === 'rifiutato' ? ': preventivo rifiutato, orologio restituito' : ''}${r.ritiroD ? ` · ritirata il ${fmtD(r.ritiroD)}` : ''}.</div></section>` : `
+      <section class="vcard">
+        <div class="card-h">${ic('list')}<h2>Step ${r.step + 1} · ${esc(cur.n)}</h2><span class="sp"></span><span class="faint" style="font-size:12px">Spunta quello che è stato fatto: data e venditore si salvano da soli</span></div>
+        ${taskList(r, r.step)}
+        ${stepPanel(r)}
+      </section>`}
+      ${prevCard(r)}
+      ${logCard(r)}
+    </div>
+    <div class="stack">
+      <section class="vcard">
+        <div class="card-h">${ic('pin')}<h2>Dove si trova</h2></div>
+        <div class="card-b stack" style="gap:12px">
+          <label class="field"><span>Posizione fisica</span><select class="sel" data-rb="ubic" data-id="${r.id}">${opts(UBICAZIONI, r.ubic)}</select></label>
+          <label class="field"><span>In mano a</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
+          <label class="field"><span>Presunta consegna</span><input class="in" type="date" data-rb="presunta" data-id="${r.id}" value="${esc(r.presunta || '')}"></label>
+          ${r.presunta && !r.closed ? `<p class="faint" style="margin:0;font-size:12.5px">${dday(r.presunta) < 0 ? `<b style="color:var(--red)">In ritardo di ${-dday(r.presunta)} giorni</b>` : `Arriva tra <b>${dday(r.presunta)} giorni</b>`}${r.tecnico ? ` · ce l'ha ${esc(r.tecnico)}` : ''}</p>` : ''}
+        </div>
+      </section>
+      <section class="vcard">
+        <div class="card-h">${ic('calendar')}<h2>Date</h2></div>
+        <div class="card-b"><dl class="kv">
+          <dt>Accettazione</dt><dd class="num">${fmtD(r.acc)}</dd>
+          <dt>Assegnazione</dt><dd class="num">${fmtD(r.ass)}</dd>
+          <dt>Riparazione esterna</dt><dd class="num">${fmtD(r.est)}</dd>
+          <dt>Chiusura</dt><dd class="num">${fmtD(r.chiusura)}</dd>
+          <dt>Preventivo rifiutato</dt><dd class="num">${fmtD(r.rifiuto)}</dd>
+          <dt>Ritiro previsto</dt><dd class="num">${fmtD(r.ritiro)}</dd>
+          <dt>Ritiro</dt><dd class="num">${fmtD(r.ritiroD)}</dd>
+          ${r.scontrino ? `<dt>Scontrino</dt><dd class="num">${esc(r.scontrino.n)} · ${eur(r.scontrino.tot)}</dd>` : ''}
+        </dl></div>
+      </section>
+      <section class="vcard">
+        <div class="card-h">${ic('watch')}<h2>Oggetto</h2></div>
+        <div class="card-b stack" style="gap:14px"><dl class="kv">
+          ${[['Tipo', r.obj.tipo],['Materiale', r.obj.materiale],['Nc', r.obj.nc],['Nm', r.obj.nm],['Calibro', r.obj.cal],['Quadrante', r.obj.quadrante],['Meccanismo', r.obj.meccanismo],['Bracciale', r.obj.bracciale],['Valore dichiarato', r.valore ? eur(+r.valore) : '']].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || '—')}</dd>`).join('')}
+        </dl>
+        <div class="thumbs">${(r.photos && r.photos.length ? r.photos : Array(Math.min(r.foto, 6)).fill('')).map(p => `<span class="th sm">${p ? `<img src="${p}" alt="">` : `<span class="ph">${ic('watch')}</span>`}</span>`).join('')}</div>
+        <span class="faint" style="font-size:12px">${r.foto} foto scattate all'accettazione</span>
+        ${r.noteCliente ? `<div><div class="label" style="margin-bottom:4px">Note per il cliente</div>${esc(r.noteCliente)}</div>` : ''}
+        ${r.noteInterne ? `<div><div class="label" style="margin-bottom:4px">Note interne</div>${esc(r.noteInterne)}</div>` : ''}
+        ${(r.att || []).length ? `<div class="att">${r.att.map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('')}</div>` : ''}
+        </div>
+      </section>
+    </div>
+  </div>`;
+}
+function taskList(r, si){
+  const s = rSteps(r)[si];
+  return `<div>${s.t.map((t, ti) => { const d = r.done[tk(si, ti)]; return `<label class="task"><input type="checkbox" data-act="rb-task" data-id="${r.id}" data-k="${tk(si, ti)}" ${d ? 'checked' : ''}><span class="grow" style="${d ? 'color:var(--muted)' : ''}">${esc(t)}</span>${d ? `<span class="faint" style="font-size:12px">${d.date ? fmtDT(d.date) + ' · ' + esc(d.by) : 'Eseguita'}</span>` : '<span class="tag red" style="height:22px">Da fare</span>'}</label>`; }).join('')}</div>`;
+}
+function stepPanel(r){
+  const s = rSteps(r)[r.step], name = s.n;
+  if (name === 'Preventivo' || (name === 'Valutazione' && r.tipo === 'CPO')) {
+    const v = r.prev.voci, lbl = r.tipo === 'CPO' ? 'offerta' : 'preventivo';
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      <div class="label">Voci del ${lbl} · dal listino della casa madre o lavorazioni interne</div>
+      ${v.length ? `<div class="vcard">${v.map((x, i) => `<div class="voce"><span class="grow">${esc(x.d)}</span><b class="num">${eur(x.p)}</b><button class="vbtn vbtn-ghost vbtn-sm" data-act="pv-rm" data-id="${r.id}" data-i="${i}" aria-label="Rimuovi voce">${ic('trash')}</button></div>`).join('')}<div class="voce" style="background:var(--surface-2)"><span class="grow label">Totale</span><b class="num" style="font-size:16px">${eur(prevTot(r))}</b></div></div>` : '<p class="faint" style="margin:0">Nessuna voce. Aggiungi le lavorazioni indicate dal laboratorio.</p>'}
+      <div class="voce-add"><input class="in" id="pv-d" placeholder="${r.tipo === 'CPO' ? 'Es. offerta di acquisto' : 'Es. revisione completa movimento'}"><input class="in num" id="pv-p" inputmode="decimal" placeholder="€"><button class="vbtn" data-act="pv-add" data-id="${r.id}">${ic('plus')}Aggiungi</button></div>
+      <p class="faint" style="margin:0;font-size:12px">Il ${lbl} si può aggiornare anche dopo l'invio, se il laboratorio trova altri problemi.</p>
+      <div style="display:flex;justify-content:flex-end"><button class="vbtn vbtn-primary" data-act="pv-send" data-id="${r.id}" ${v.length ? '' : 'disabled'}>${ic('send')}Invia ${lbl} al cliente</button></div>
+    </div>`;
+  }
+  if (name === 'Risposta cliente') {
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      <div class="banner info">${ic('link')}<div class="grow"><p>${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} con link privato <b class="mono">${esc(r.prev.link || '')}</b>. Il cliente sceglie le voci online, oppure accede con email e password. Una conferma al telefono non vale.</p></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="vbtn" data-go="prev" data-id="${r.id}">${ic('arrow')}Apri la vista del cliente (demo)</button><button class="vbtn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button><span class="sp" style="flex:1"></span><button class="vbtn vbtn-ghost" data-act="pv-refuse" data-id="${r.id}">Il cliente ha rifiutato</button></div>
+    </div>`;
+  }
+  if (name === 'Lavorazione' || name === 'Lavorazione e certificazione' || name === 'Lavori da fare') {
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      <div class="label">Documenti di scarico e certificazioni · più file per busta</div>
+      <div class="att">${(r.att || []).map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('') || '<span class="faint">Nessun file allegato</span>'}<label class="vbtn vbtn-sm">${ic('clip')}Allega file<input type="file" class="rb-att" data-id="${r.id}" multiple hidden></label></div>
+      <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b> (via eCube).</p>
+    </div>`;
+  }
+  if (name === 'Riconsegna') {
+    const tot = r.esito === 'rifiutato' ? (r.costoPrev || 0) : r.prev?.stato === 'accettato' ? prevTot(r, true) : 0;
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      ${r.esito === 'rifiutato' ? `<div class="banner">${ic('info')}<div class="grow"><p>Preventivo rifiutato: si restituisce l'orologio. Costo del solo preventivo: <b>${eur(r.costoPrev || 0)}</b>.</p></div></div>` : ''}
+      <div class="fgrid"><label class="field"><span>Numero scontrino</span><input class="in mono" id="rb-sn" value="${esc(r.scontrino?.n || '')}" placeholder="Es. 0042-0815"></label><label class="field"><span>Totale scontrino</span><input class="in num" id="rb-st" value="${tot}" inputmode="decimal"></label></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="vbtn" data-act="rb-avviso" data-id="${r.id}">${ic('mail')}Invia avviso di ritiro con scontrino</button><button class="vbtn vbtn-primary" data-act="rb-ritiro" data-id="${r.id}">${ic('check')}Registra il ritiro</button></div>
+    </div>`;
+  }
+  return '';
+}
+function prevCard(r){
+  if (!r.prev?.voci?.length || ['bozza'].includes(r.prev.stato) && r.step === 1) return '';
+  const st = {inviato:['Inviato, in attesa','amber'],accettato:['Accettato','ok'],rifiutato:['Rifiutato','red'],bozza:['In bozza','']}[r.prev.stato] || ['',''];
+  return `<section class="vcard"><div class="card-h">${ic('bag')}<h2>${r.tipo === 'CPO' ? 'Offerta' : 'Preventivo'}</h2><span class="tag ${st[1]}">${st[0]}</span><span class="sp"></span>${r.prev.stato === 'accettato' ? `<span class="muted num">Accettato ${eur(prevTot(r, true))} su ${eur(prevTot(r))}</span>` : `<span class="muted num">${eur(prevTot(r))}</span>`}</div>
+    ${r.prev.voci.map(v => `<div class="voce"><span style="color:var(--${r.prev.stato === 'inviato' ? 'faint' : v.ok ? 'ok' : 'red'})">${ic(r.prev.stato === 'inviato' ? 'clock' : v.ok ? 'check' : 'x')}</span><span class="grow" style="${r.prev.stato !== 'inviato' && !v.ok ? 'text-decoration:line-through;color:var(--muted)' : ''}">${esc(v.d)}</span><b class="num">${eur(v.p)}</b></div>`).join('')}</section>`;
+}
+function logCard(r){
+  return `<section class="vcard"><div class="card-h">${ic('clock')}<h2>Storico della busta</h2></div><div class="timeline">${[...r.log].sort((a,b) => dt(b.date) - dt(a.date)).map(l => `<div class="tl"><span class="dot">${ic(l.by === 'Cliente' ? 'users' : 'check')}</span><div><b>${esc(l.t)}</b><div class="muted" style="font-size:12.5px">${fmtDT(l.date)} · ${esc(l.by)}</div></div></div>`).join('')}</div></section>`;
+}
+function ripLog(r, t, by = S.operator){ r.log.push({date:nowISO(), by, t}); }
+/* avanza quando tutte le attività dello step sono eseguite, saltando gli step non previsti */
+function ripAdvance(r){
+  const st = rSteps(r);
+  while (r.step < st.length && (st[r.step].skip || st[r.step].t.every((_, ti) => r.done[tk(r.step, ti)]))) {
+    if (r.step === st.length - 1) { r.closed = true; r.ubic = r.tipo === 'CPO' || r.tipo === 'Conto vendita' ? r.ubic : 'Riconsegnato al cliente'; ripLog(r, r.tipo === 'CPO' || r.tipo === 'Conto vendita' ? 'Orologio in vendita: busta chiusa' : 'Busta chiusa'); return true; }
+    r.step++;
+    if (!st[r.step].skip) { toast(`Passata allo step ${r.step + 1}: ${st[r.step].n}`); return true; }
+  }
+  return false;
+}
+function ripTick(r, si, ti, on = true){ const k = tk(si, ti); if (on) r.done[k] = {date:nowISO(), by:S.operator}; else delete r.done[k]; }
+function ripPlaceholderCliente(c){
+  const rs = clientRepairs(c.id);
+  return `<section class="vcard"><div class="card-h">${ic('wrench')}<h2>Riparazioni</h2><span class="sp"></span><button class="vbtn vbtn-sm vbtn-primary" data-act="rip-for" data-id="${c.id}">${ic('plus')}Nuova riparazione</button></div>
+    <div class="list">${rs.length ? rs.map(r => `<div class="vrow click" data-go="busta" data-id="${r.id}">${ic('watch')}<div class="grow"><div class="t"><span class="mono">${esc(r.busta)}</span> · ${esc(objName(r))}</div><div class="s">${esc(r.tipo)} · ${esc(r.motivo)} · accettata ${fmtD(r.acc)} in ${esc(r.boutique)}</div></div>${light(r)}${ic('arrow')}</div>`).join('') : '<div class="empty">Nessuna riparazione per questo cliente.</div>'}</div></section>`;
+}
+
+/* ---- preventivo online: vista del cliente (link privato) ---- */
+function vPrev(){
+  const r = R(S.id), c = RC(r.clientId), p = r.prev, done = p.stato !== 'inviato';
+  const sel = S.pv || p.voci.map(() => true), tot = p.voci.reduce((s, v, i) => s + (sel[i] ? v.p : 0), 0);
+  return `<div class="auto">
+    <div class="auto-top no-print"><span class="demo-tag">Vista cliente · link privato · demo</span><button class="link" data-go="busta" data-id="${r.id}">${ic('back')} Torna al portale</button></div>
+    <div class="auto-card" style="max-width:720px">
+      <span class="logo" style="height:110px">${LOGO_FULL}</span>
+      <div style="text-align:center"><div class="label">${r.tipo === 'CPO' ? 'Offerta di acquisto' : 'Preventivo di riparazione'} · busta <span class="mono">${esc(r.busta)}</span></div><h1 style="margin-top:8px">Gentile ${esc(c.nome)}</h1></div>
+      <p class="lead">${done ? 'Grazie, abbiamo ricevuto la sua risposta. Le scriveremo quando l\'orologio sarà pronto.' : `Ecco le lavorazioni proposte dal nostro laboratorio per il suo <b>${esc(objName(r))}</b>. Scelga quali accettare: il pagamento avviene al ritiro.`}</p>
+      <section class="vcard">
+        <div class="card-h">${ic('watch')}<h2>${esc(objName(r))} <span class="muted mono" style="font-weight:500">${esc(r.obj.ref)}</span></h2><span class="sp"></span><span class="faint" style="font-size:12px">Accettato il ${fmtD(r.acc)} in ${esc(r.boutique)}</span></div>
+        ${p.voci.map((v, i) => `<label class="voce" style="cursor:${done ? 'default' : 'pointer'}"><input type="checkbox" class="pv-box" data-act="pv-sel" data-i="${i}" ${(done ? v.ok : sel[i]) ? 'checked' : ''} ${done ? 'disabled' : ''}><span class="grow">${esc(v.d)}</span><b class="num">${eur(v.p)}</b></label>`).join('')}
+        <div class="voce" style="background:var(--surface-2)"><span class="grow"><span class="label">Totale ${done ? 'accettato' : 'selezionato'}</span></span><b class="num" style="font-size:20px">${eur(done ? prevTot(r, true) : tot)}</b></div>
+      </section>
+      ${done ? '' : `<p class="faint" style="margin:0;font-size:12px;text-align:center">I tempi indicati valgono per i lavori standard. Se durante la lavorazione emergono altri interventi, la contatteremo prima di procedere.</p>
+      <div class="no-print" style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap"><button class="vbtn vbtn-ghost vbtn-lg" data-act="pv-c-refuse">Rifiuto il preventivo</button><span style="display:flex;gap:10px;flex-wrap:wrap"><button class="vbtn vbtn-lg" data-act="pv-print">${ic('print')}Stampa</button><button class="vbtn vbtn-primary vbtn-lg" data-act="pv-c-ok" ${tot ? '' : 'disabled'}>${ic('check')}Confermo le voci selezionate</button></span></div>`}
+      <p class="faint no-print" style="margin:0;font-size:12px;text-align:center">Ha un account Verga? Può ritrovare i suoi preventivi anche accedendo con email e password.</p>
+    </div>
+  </div>
+  `;
+}
+function ripRefuse(r, by, t){
+  r.prev.stato = 'rifiutato'; r.prev.voci.forEach(x => x.ok = false); r.esito = 'rifiutato'; r.rifiuto = TODAY; r.costoPrev = r.costoPrev || 0;
+  ripTick(r, 2, 0); r.skipped = {3:'Saltato: preventivo rifiutato'}; ripLog(r, t, by); r.step = 4; toast('Preventivo rifiutato: si passa alla riconsegna dell\'orologio');
+}
+const keepY = fn => { const y = window.scrollY; fn(); window.scrollTo(0, y); };
+
+/* ---------------- AUTOREGISTRAZIONE ---------------- */
+function vAuto(){
+  const a = S.auto;
+  const steps = `<div class="steps"><span class="${a.step >= 1 ? 'on' : ''}"><i>1</i>I tuoi dati</span><hr><span class="${a.step >= 2 ? 'on' : ''}"><i>2</i>Le tue passioni</span></div>`;
+  let body;
+  if (a.step === 1) body = `
+    <h1>Entra nel mondo Verga</h1>
+    <p class="lead">Registrati per ricevere inviti a eventi e novità sui tuoi brand preferiti. Ti servono meno di due minuti.</p>
+    ${steps}
+    <div class="fgrid" style="grid-template-columns:1fr 1fr">
+      <label class="field"><span>Nome <em>*</em></span><input class="in" id="a-nome" value="${esc(a.nome)}"></label>
+      <label class="field"><span>Cognome <em>*</em></span><input class="in" id="a-cognome" value="${esc(a.cognome)}"></label>
+      <label class="field"><span>Email <em>*</em></span><input class="in" id="a-email" type="email" value="${esc(a.email)}"></label>
+      <label class="field"><span>Telefono <em>*</em></span><input class="in" id="a-tel" type="tel" value="${esc(a.tel)}"></label>
+    </div>
+    <div class="field"><span>Brand che ti interessano <span class="faint" style="font-weight:500">(facoltativo)</span></span>
+      <div class="chips">${BRANDS.map(v => `<button type="button" class="chip ${a.brands.includes(v) ? 'on' : ''}" data-act="a-brand" data-v="${v}">${a.brands.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div></div>
+    <label class="check"><input type="checkbox" id="a-priv"> Ho letto l'informativa privacy e acconsento al trattamento dei dati. <em style="color:var(--red);font-style:normal">*</em></label>
+    <p id="a-err" class="tag red" hidden style="align-self:flex-start"></p>
+    <button class="vbtn vbtn-primary vbtn-lg" data-act="a-next">Continua ${ic('arrow')}</button>`;
+  else if (a.step === 2) body = `
+    <h1>Raccontaci di te</h1>
+    <p class="lead">Grazie ${esc(a.nome)}, sei registrato. Questi dati sono facoltativi: ci aiutano a invitarti agli eventi giusti. Puoi completarli anche in boutique.</p>
+    ${steps}
+    <div class="field"><span>Data di nascita</span>
+      <div class="fgrid" style="grid-template-columns:repeat(3,1fr)">
+        <select class="sel" aria-label="Giorno">${opts(Array.from({length:31},(_,i) => String(i+1)), '', 'Giorno')}</select>
+        <select class="sel" aria-label="Mese">${opts(MESI, '', 'Mese')}</select>
+        ${a.noYear ? `<select class="sel" aria-label="Decade">${opts(DECADES, a.decade, 'Decade')}</select>` : '<input class="in num" placeholder="Anno" inputmode="numeric" maxlength="4" aria-label="Anno">'}
+      </div>
+      <label class="check" style="margin-top:6px"><input type="checkbox" data-act="a-noyear" ${a.noYear ? 'checked' : ''}> Preferisco indicare solo la decade</label>
+    </div>
+    <div class="fgrid" style="grid-template-columns:1fr 1fr">
+      <label class="field"><span>Professione</span><select class="sel">${opts(PROFESSIONS, '', 'Seleziona')}</select></label>
+      <label class="field"><span>Boutique preferita</span><select class="sel">${opts(BOUTIQUES.map(b => b.name), '', 'Seleziona')}</select></label>
+    </div>
+    <div class="field"><span>Le tue passioni</span>
+      <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${a.interests.includes(v) ? 'on' : ''}" data-act="a-int" data-v="${v}">${a.interests.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div></div>
+    <label class="check"><input type="checkbox" checked> Desidero ricevere la newsletter e gli inviti agli eventi Verga.</label>
+    <div style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap"><button class="vbtn vbtn-ghost vbtn-lg" data-act="a-done">Salta per ora</button><button class="vbtn vbtn-primary vbtn-lg" data-act="a-done">Salva e completa</button></div>`;
+  else body = `
+    <h1>Benvenuto in Verga</h1>
+    <p class="lead">Ti abbiamo inviato una email di conferma. Ti aspettiamo in boutique.</p>
+    <div class="banner info" style="text-align:left">${ic('info')}<div class="grow"><p><b>Nel portale:</b> la scheda di ${esc(a.nome || 'questo cliente')} è comparsa tra i clienti con l'etichetta "Autoregistrato online". Il venditore completerà i dati mancanti alla prima visita.</p></div></div>
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="vbtn vbtn-lg" data-act="a-reset">Nuova registrazione</button></div>`;
+  return `<div class="auto">
+    <div class="auto-top"><span class="demo-tag">Vista cliente · demo</span><button class="link" data-go="${S.operator ? 'dashboard' : 'login'}">${ic('back')} Torna al portale</button></div>
+    <div class="auto-card"><span class="logo">${LOGO_FULL}</span>${body}</div>
+  </div>
+  `;
+}
+
+/* ---------------- MODALI ---------------- */
+let M = null; // stato del modale aperto
+function openModal(m){ M = m; renderModal(); }
+function closeModal(){ M = null; document.getElementById('modal-root').innerHTML = ''; }
+function renderModal(){
+  const r = document.getElementById('modal-root'); if (!M) { r.innerHTML = ''; return; }
+  let h = '', b = '', f = '';
+  if (M.kind === 'evento') {
+    const c = M.clientId ? C(M.clientId) : null;
+    h = 'Registra passaggio';
+    b = `<div class="field"><span>Cliente</span>${c ? `<div class="picked">${avatar(c)}<div class="grow"><b>${esc(fullName(c))}</b><div class="muted" style="font-size:12px">${esc(c.email || '')}</div></div>${M.lock ? '' : '<button class="link" data-act="m-unpick">Cambia</button>'}</div>` :
+        `<input class="in" id="m-cs" placeholder="Scrivi nome, email o telefono" autocomplete="off"><div class="picklist" id="m-cs-list">${clientPick('', 'm-pick')}</div><button class="link" data-act="m-newclient" style="align-self:flex-start">${ic('userPlus')} Non c'è? Crea nuovo cliente</button>`}</div>
+      <div class="field"><span>Tipo</span><div class="seg" style="grid-template-columns:repeat(4,1fr);grid-auto-flow:row">${Object.entries(EV).map(([k,t]) => `<button class="${M.type === k ? 'on' : ''}" data-act="m-type" data-v="${k}">${ic(t.icon)}${t.label}</button>`).join('')}</div></div>
+      <div class="field"><span>Motivo</span><div class="chips">${MOTIVI.map(v => `<button class="chip ${M.motivo === v ? 'on' : ''}" data-act="m-motivo" data-v="${v}">${v}</button>`).join('')}</div></div>
+      <label class="field"><span>Nota (facoltativa)</span><textarea class="ta" id="m-note" placeholder="Es. ha provato il Submariner, torna sabato con la moglie">${esc(M.note)}</textarea></label>
+      <div class="field"><span>Follow-up</span><div class="chips">${[['','Nessuno'],[addDays(3),'Tra 3 giorni'],[addDays(7),'Tra una settimana'],[addDays(30),'Tra un mese']].map(([v,l]) => `<button class="chip ${M.fu === v ? 'on' : ''}" data-act="m-fu" data-v="${v}">${l}</button>`).join('')}</div></div>`;
+    f = `<span class="auto-info">${ic('clock')}Oggi ${fmtT(NOW.toISOString())} · ${S.operator} · ${S.boutique}</span><button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary" data-act="m-save-ev" ${c ? '' : 'disabled'}>${ic('check')}${M.motivo === MOTIVI[0] ? 'Registra e crea manifestazione' : 'Registra'}</button>`;
+  }
+  if (M.kind === 'pda') {
+    const c = M.clientId ? C(M.clientId) : null;
+    h = 'Manifestazione di interesse';
+    b = `<div class="field"><span>Cliente</span>${c ? `<div class="picked">${avatar(c)}<div class="grow"><b>${esc(fullName(c))}</b></div>${M.lock ? '' : '<button class="link" data-act="m-unpick">Cambia</button>'}</div>` : `<input class="in" id="m-cs" placeholder="Cerca cliente" autocomplete="off"><div class="picklist" id="m-cs-list">${clientPick('', 'm-pick')}</div>`}</div>
+      <div class="field"><span>Brand</span><div class="chips">${BRANDS.map(v => `<button class="chip ${M.brand === v ? 'on' : ''}" data-act="m-brand" data-v="${v}">${v}</button>`).join('')}</div></div>
+      ${M.brand ? `<div class="field"><span>Modello</span><div class="chips">${(MODELS[M.brand] || []).map(v => `<button class="chip ${M.modello === v ? 'on' : ''}" data-act="m-model" data-v="${v}">${v}</button>`).join('')}</div></div>` : ''}
+      <div class="fgrid">
+        <label class="field"><span>Referenza (se il cliente la sa)</span><input class="in mono" id="m-ref" placeholder="Es. 126500LN"></label>
+        <label class="field"><span>Quadrante</span><input class="in" id="m-quad" placeholder="Es. bianco"></label>
+        <label class="field"><span>Bracciale</span><input class="in" id="m-brac" placeholder="Es. Oyster, Jubilee"></label>
+      </div>
+      <label class="field"><span>Note</span><textarea class="ta" id="m-pnote" placeholder="Es. accetta anche quadrante nero, occasione: anniversario a dicembre"></textarea></label>
+      <div class="field"><span>Stato iniziale</span><div class="chips">${[['aperta','Manifestazione','Il cliente è interessato, nessun ordine'],['preordine','Preordine','Merce ordinata su richiesta del cliente']].map(([k,l,d]) => `<button class="chip ${(M.stato || 'aperta') === k ? 'on' : ''}" data-act="m-pstato" data-v="${k}" title="${d}">${l}</button>`).join('')}</div></div>
+      <div class="banner info">${ic('info')}<div class="grow"><p>Viene creata una PDA con prodotto generico <b>senza prezzo</b>, visibile in tutte le boutique. Al cliente parte la mail di presa in carico. Quando arriva un pezzo compatibile, il direttore vendite o il titolare lo associa e tu ricevi una notifica.</p></div></div>`;
+    f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary" data-act="m-save-pda" ${c && M.brand && M.modello ? '' : 'disabled'}>${ic('check')}Registra manifestazione</button>`;
+  }
+  if (M.kind === 'assegna') {
+    const p = pdas.find(x => x.id === M.pdaId), c = C(p.clientId), list = compatible(p);
+    h = 'Associa prodotto';
+    b = `<p style="margin:0">Pezzi compatibili con la manifestazione di <b>${esc(fullName(c))}</b>: ${esc(p.brand)} ${esc(p.modello)}${p.ref ? ` <span class="mono">${esc(p.ref)}</span>` : ''}${p.quadrante ? `, quadrante ${esc(p.quadrante.toLowerCase())}` : ''}.</p>
+      <div class="picklist" style="max-height:none">${list.map(pr => `<div class="vrow ${M.productId === pr.id ? 'on' : ''}" data-act="m-pickprod" data-id="${pr.id}">${ic('watch')}<div class="grow"><div class="t">${esc(pr.brand)} ${esc(pr.modello)} · <span class="mono">${esc(pr.ref)}</span></div><div class="s">${esc(pr.det)} · seriale <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)}</div></div>${prodState(pr)}<b class="num">${eur(pr.price)}</b></div>`).join('')}</div>
+      ${others(p).length ? `<div class="banner">${ic('users')}<div class="grow"><p>Anche <b>${others(p).map(x => esc(fullName(C(x.clientId)))).join(', ')}</b> aspetta questo modello. Chi non riceve il pezzo resta in attesa.</p></div></div>` : ''}`;
+    f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary" data-act="m-save-assign" ${M.productId ? '' : 'disabled'}>${ic('check')}Associa prodotto</button>`;
+  }
+  if (M.kind === 'dissocia') {
+    const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId);
+    h = 'Dissocia prodotto';
+    b = `<p style="margin:0">Il ${esc(pr.brand)} ${esc(pr.modello)} (seriale <span class="mono">${esc(pr.seriale)}</span>) torna disponibile. In che stato mettere la PDA di <b>${esc(fullName(C(p.clientId)))}</b>?</p>
+      <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['annullata','Annullata']].map(([k,l]) => `<button class="chip ${M.to === k ? 'on' : ''}" data-act="m-dto" data-v="${k}">${l}</button>`).join('')}</div>
+      <p class="faint" style="margin:0;font-size:12px">Solo direttore vendite e titolare possono dissociare.</p>`;
+    f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary" data-act="m-save-dis">${ic('check')}Dissocia</button>`;
+  }
+  if (M.kind === 'firma') {
+    const c = C(M.clientId);
+    h = 'Privacy · da compilare sul tablet';
+    b = `<div class="banner info">${ic('info')}<div class="grow"><p>Passa il tablet al cliente. Può correggere i suoi dati, scegliere i consensi e firmare.</p></div></div>
+      <div class="fgrid" style="grid-template-columns:1fr 1fr">
+        <label class="field"><span>Nome</span><input class="in" value="${esc(c.nome)}"></label>
+        <label class="field"><span>Cognome</span><input class="in" value="${esc(c.cognome)}"></label>
+        <label class="field"><span>Email</span><input class="in" id="fs-email" value="${esc(c.email)}" autocapitalize="none"></label>
+        <label class="field"><span>Cellulare</span><input class="in" value="${esc(c.tel)}"></label>
+      </div>
+      <div style="max-height:110px;overflow:auto;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;color:var(--muted)">Informativa ai sensi dell'art. 13 del Regolamento UE 2016/679. Verga Luigi S.r.l. tratta i suoi dati per gestire acquisti, riparazioni e richieste. <i>Testo definitivo da ricevere da Verga.</i></div>
+      <label class="check"><input type="checkbox" checked disabled> Ho letto l'informativa (obbligatorio)</label>
+      <label class="check"><input type="checkbox" checked> Acconsento a ricevere newsletter e inviti (MailUp)</label>
+      <label class="check"><input type="checkbox"> Acconsento alla profilazione in base ai miei acquisti</label>
+      <div class="field"><span>Firma qui</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>`;
+    f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="m-save-sig" data-id="${c.id}">${ic('check')}Firma e conferma</button>`;
+  }
+  if (M.kind === 'venduto') {
+    h = 'Vendita conclusa';
+    b = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:12px 0"><span class="av lg" style="background:var(--ok-bg);color:var(--ok)">${ic('check')}</span><b style="font-size:18px">${eur(M.total)} · ${esc(M.pay)}</b><p class="muted" style="margin:0;max-width:46ch">Ordine <b class="mono">ORD-2026-0412</b> di <b>${esc(M.name)}</b> inviato al gestionale. ${M.promoted ? `<br><b>${esc(M.name)}</b> è passato da Prospect a Cliente.` : ''}</p></div>
+      <div class="vcard">
+        <div class="vrow">${ic('bag')}<div class="grow"><div class="t">${M.inv === 'societa' ? `Fattura a ${esc(M.rs)}` : 'Documento a nome del cliente'}</div><div class="s">${M.invState === 'done' ? 'Fattura FT 2026/01873 pronta' : M.invState === 'wait' ? 'Il gestionale sta emettendo il documento…' : 'Emessa dal gestionale e restituita qui in PDF'}</div></div>
+          ${M.invState === 'done' ? `<button class="vbtn vbtn-sm vbtn-primary" data-act="soon-print">${ic('check')}Stampa PDF</button>` : `<button class="vbtn vbtn-sm vbtn-primary" data-act="m-invoice" ${M.invState === 'wait' ? 'disabled' : ''}>${M.invState === 'wait' ? 'Attendere…' : 'Emetti fattura'}</button>`}</div>
+        <div class="vrow"><span class="faint">${ic('info')}</span><div class="grow"><div class="t">Scontrino di cortesia</div><div class="s">Soluzione in definizione (es. Scontrini in Cloud)</div></div></div>
+      </div>
+      <p class="faint" style="margin:0;font-size:12px;text-align:center">Al cliente parte la mail di acquisto personalizzata con brand e referenza.</p>`;
+    f = `<button class="vbtn" data-act="m-close">Nuova vendita</button><button class="vbtn vbtn-primary" data-act="m-open-client" data-id="${M.clientId}">Apri scheda cliente</button>`;
+  }
+  if (M.kind === 'ricevuta') {
+    const r = R(M.rid), c = RC(r.clientId), a = c.addresses?.[0];
+    h = 'Ricevuta di consegna';
+    b = `<div class="paper" id="print-area">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span class="logo" style="height:56px;--logo-a:#004d43;--logo-b:#007565">${LOGO_MARK}</span><div style="text-align:right"><b>Ricevuta n. <span class="mono">${esc(r.busta)}</span></b><br>${fmtDT(r.acc)} · ${esc(r.boutique)}</div></div>
+        <h4>Cliente</h4><p>${esc(fullName(c))}${a ? ` · ${esc(a.via)}${a.citta ? ', ' + esc(a.cap) + ' ' + esc(a.citta) : ''}` : ''}<br>CF ${esc(c.cf || '—')} · Tel. ${esc(c.tel || '—')} · ${esc(c.email || '—')}${c.pec ? ` · PEC ${esc(c.pec)}` : ''}</p>
+        <h4>Oggetto</h4><p>${esc(r.obj.tipo)} ${esc(objName(r))} · ref. ${esc(r.obj.ref || '—')}${r.obj.nc ? ` · Nc ${esc(r.obj.nc)}` : ''}${r.obj.cal ? ` · cal. ${esc(r.obj.cal)}` : ''}<br>${[r.obj.materiale, r.obj.quadrante && 'quadrante ' + r.obj.quadrante, r.obj.bracciale].filter(Boolean).map(esc).join(' · ')}<br><b>${r.foto}</b> foto scattate alla presenza del cliente</p>
+        <h4>Intervento richiesto</h4><p>${esc(r.motivo)}${r.garanzia ? ' · in garanzia' : ''} · valore dichiarato ${r.valore ? eur(+r.valore) : '—'}${r.noteCliente ? `<br>Note: ${esc(r.noteCliente)}` : ''}</p>
+        <h4>Clausole</h4><p class="faint">L'oggetto è custodito gratuitamente fino al termine ultimo di ritiro. <i>Testo definitivo delle clausole da ricevere da Verga.</i></p>
+      </div>
+      <div class="field"><span>Firma del cliente</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>`;
+    f = `<button class="vbtn" data-act="ric-print">${ic('print')}Stampa</button><button class="vbtn" data-act="m-close">Più tardi</button><button class="vbtn vbtn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
+  }
+  if (M.kind === 'etichette') {
+    const r = R(M.rid), c = RC(r.clientId);
+    h = 'Etichette per la busta';
+    b = `<div class="labels" id="print-area">
+        <div class="label-prev"><div class="lbl-k">Etichetta 1 · cliente</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(fullName(c))}</div><div>${esc(c.tel || '')}</div><div>${esc(objName(r))} · ${esc(r.obj.ref)}</div><div class="bars" aria-hidden="true"></div></div>
+        <div class="label-prev"><div class="lbl-k">Etichetta 2 · contenuto da definire</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(r.tipo)} · ${esc(r.motivo)}</div><div>${esc(AREA_OF[r.boutique] || '')} · ${fmtD(r.acc)}</div><div class="bars" aria-hidden="true"></div></div>
+      </div>
+      <p class="faint" style="margin:0;font-size:12px">Il contenuto della seconda etichetta va concordato con Verga.</p>`;
+    f = `<button class="vbtn" data-act="m-close">Più tardi</button><button class="vbtn vbtn-primary" data-act="m-save-et">${ic('print')}Stampa etichette</button>`;
+  }
+  setTimeout(initSig, 0);
+  r.innerHTML = `<div class="overlay" data-act="m-bg"><div class="vmodal" role="dialog" aria-modal="true" aria-label="${esc(h)}"><div class="modal-h"><h2>${h}</h2><button class="vbtn vbtn-ghost vbtn-sm" data-act="m-close" aria-label="Chiudi">${ic('x')}</button></div><div class="modal-b">${b}</div><div class="modal-f">${f}</div></div></div>`;
+}
+function initSig(){
+  const cv = document.getElementById('sig'); if (!cv || cv.dataset.ready) return;
+  cv.dataset.ready = '1'; const r = cv.getBoundingClientRect(); const k = window.devicePixelRatio || 1;
+  cv.width = r.width * k; cv.height = r.height * k; const g = cv.getContext('2d'); g.scale(k, k);
+  g.lineWidth = 2.2; g.lineCap = 'round'; g.strokeStyle = getComputedStyle(document.body).color;
+  let on = false;
+  const pt = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
+  cv.addEventListener('pointerdown', e => { on = true; cv.setPointerCapture(e.pointerId); g.beginPath(); g.moveTo(...pt(e)); });
+  cv.addEventListener('pointermove', e => { if (!on) return; g.lineTo(...pt(e)); g.stroke(); cv.dataset.signed = '1'; });
+  ['pointerup','pointercancel'].forEach(t => cv.addEventListener(t, () => on = false));
+}
+const others = p => pdas.filter(x => x.id !== p.id && ['aperta','preordine'].includes(x.stato) && x.brand === p.brand && x.modello === p.modello);
+/* ---------------- DRAWER NOTE ---------------- */
+function renderDrawer(){
+  const r = document.getElementById('drawer-root');
+  if (!S.notes) { r.innerHTML = ''; return; }
+  const n = NOTES[S.view] || NOTES.dashboard;
+  const titles = {login:'Login',dashboard:'Home',clienti:'Clienti e filtri',cliente:'Scheda cliente',nuovo:'Nuovo cliente',prodotti:'Catalogo',cassa:'Cassa',passaggi:'Passaggi',pda:'Manifestazioni di interesse',riparazioni:'Riparazioni','rip-new':'Nuova accettazione',busta:'Scheda busta',prev:'Preventivo online',auto:'Autoregistrazione'};
+  r.innerHTML = `<aside class="drawer" aria-label="Note di progetto"><div class="modal-h"><h2 style="font-size:20px">${titles[S.view] || ''}</h2><button class="vbtn vbtn-ghost vbtn-sm" data-act="notes" aria-label="Chiudi">${ic('x')}</button></div>
+    <div class="drawer-b"><p class="muted" style="margin:8px 0 0;font-size:13px">Da dove arriva questa schermata: appunti della call del 24/09/2026 con Dario e Vanessa.</p>
+    <h4>Cosa abbiamo raccolto</h4><ul>${n.from.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
+    <h4>Da chiarire con il cliente</h4><ul class="open">${n.open.map(x => `<li>${esc(x)}</li>`).join('')}</ul></div></aside>`;
+}
+
+/* ---------------- EVENTI ---------------- */
+document.addEventListener('click', e => {
+  const h = e.target.closest('[data-href]'); if (h) { saveStore(); window.location.href = h.dataset.href; return; }
+  const g = e.target.closest('[data-go]');
+  const a = e.target.closest('[data-act]');
+  if (a && (!g || a.contains(g) === false && g.contains(a))) return act(a, e);
+  if (g) return go(g.dataset.go, g.dataset.id || null);
+  if (a) return act(a, e);
+  if (!e.target.closest('.gsearch')) { const d = document.getElementById('gs-drop'); if (d) d.innerHTML = ''; }
+});
+function act(el, ev){ actInner(el, ev); if (!NAVIGATING) saveStore(); }
+function actInner(el, ev){
+  const k = el.dataset.act, v = el.dataset.v, id = el.dataset.id;
+  switch (k) {
+    case 'nav': S.navOpen = !S.navOpen; render(); break;
+    case 'notes': S.notes = !S.notes; renderDrawer(); break;
+    case 'logout': logout(); break;
+    case 'login': {
+      const em = document.getElementById('l-email').value.trim().toLowerCase(), pw = document.getElementById('l-pw').value, err = document.getElementById('l-err');
+      if (!em || !pw) { err.hidden = false; err.textContent = 'Inserisci email e password.'; break; }
+      el.disabled = true; el.textContent = 'Accesso…';
+      Storeden.login(em, pw, res => { if (!res || res.status == false) { el.disabled = false; el.textContent = 'Accedi'; err.hidden = false; err.textContent = 'Email o password non corrette.'; } else window.location.href = '/'; });
+      break; }
+    case 'pw-toggle': { const em = document.getElementById('l-email').value, pw = document.getElementById('l-pw').value; S.loginEmail = em; S.showPw = !S.showPw; render(); document.getElementById('l-pw').value = pw; break; }
+    case 'beta-hide': S.betaHidden = true; try { localStorage.setItem('vp_beta_hidden', '1'); } catch (_) {} render(); break;
+    /* riparazioni */
+    case 'rf-chip': S.rf.chip = v; render(); break;
+    case 'rip-for': S.rn = blankRn(id); go('rip-new', null, {keepRn:true}); break;
+    case 'rn-tipo': S.rn.tipo = v; if (v === 'Cambio pila') S.rn.motivo = 'Cambio pila'; if (v === 'CPO') S.rn.motivo = 'Valutazione CPO'; if (v === 'Quotazione') S.rn.motivo = 'Quotazione'; if (v === 'Garanzia') S.rn.garanzia = true; keepY(render); break;
+    case 'rn-pick': S.rn.clientId = id; keepY(render); break;
+    case 'rn-unpick': S.rn.clientId = null; keepY(render); break;
+    case 'rn-motivo': S.rn.motivo = v; keepY(render); break;
+    case 'rn-garanzia': S.rn.garanzia = el.checked; break;
+    case 'rn-ph-rm': S.rn.photos.splice(+el.dataset.i, 1); keepY(render); break;
+    case 'rn-att-rm': S.rn.att.splice(+el.dataset.i, 1); keepY(render); break;
+    case 'rn-save': {
+      const n = S.rn, cv = n.tipo === 'Conto vendita';
+      if (!cv && !n.clientId) { toast('Seleziona il cliente'); break; }
+      if (!n.obj.marca || !n.obj.modello.trim()) { toast('Indica marca e modello dell\'oggetto'); break; }
+      const pre = n.tipo === 'CPO' ? 'CPO' : cv ? 'CV' : 'B', num = String(++ripSeq).padStart(4, '0');
+      const r = {id:'r' + ripSeq, busta:`${pre}-2026-${num}`, tipo:n.tipo, clientId:cv ? 'vv' : n.clientId, boutique:S.boutique, by:S.operator, acc:nowISO(), obj:{...n.obj}, motivo:n.motivo, valore:cv ? n.cv.valore : n.valore, ritiro:n.ritiro, garanzia:n.garanzia || n.tipo === 'Garanzia', foto:n.photos.length, photos:[...n.photos], att:[...n.att], noteCliente:n.noteCliente, noteInterne:n.noteInterne, step:0, done:{}, tecnico:'', ubic:'Cassaforte boutique', presunta:'', owner:'cliente', prev:{stato:'bozza', voci:[]}, log:[], cv:cv ? {...n.cv} : null};
+      const t0 = rSteps(r)[0].t; ripTick(r, 0, 0); const fi = t0.findIndex(x => x.startsWith('Foto')); if (fi >= 0 && n.photos.length) ripTick(r, 0, fi);
+      ripLog(r, `Busta ${r.tipo === 'Riparazione' ? '' : r.tipo + ' '}aperta in ${S.boutique}${n.photos.length ? ` con ${n.photos.length} foto` : ''}`);
+      if (n.prom) ripLog(r, `Promemoria${n.promD ? ' per il ' + fmtD(n.promD) : ''}: ${n.prom}`);
+      repairs.push(r); S.rn = blankRn(); go('busta', r.id); toast('Busta aperta');
+      openModalAfterNav({kind:'ricevuta', rid:r.id}); break; }
+    case 'rb-task': { const r = R(id), [si, ti] = el.dataset.k.split('-').map(Number); ripTick(r, si, ti, el.checked); if (el.checked) ripLog(r, rSteps(r)[si].t[ti]); ripAdvance(r); keepY(render); break; }
+    case 'rb-ricevuta': openModal({kind:'ricevuta', rid:id}); break;
+    case 'rb-etichette': openModal({kind:'etichette', rid:id}); break;
+    case 'pv-add': { const r = R(id), d = document.getElementById('pv-d').value.trim(), pr = parseFloat(document.getElementById('pv-p').value.replace(',', '.')); if (!d || isNaN(pr)) { toast('Scrivi la voce e il prezzo'); break; } r.prev.voci.push({d, p:pr, ok:true}); keepY(render); break; }
+    case 'pv-rm': R(id).prev.voci.splice(+el.dataset.i, 1); keepY(render); break;
+    case 'pv-send': { const r = R(id); r.prev.stato = 'inviato'; r.prev.link = `verga1947.it/p/${r.busta.slice(-4)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`; rSteps(r)[r.step].t.forEach((_, ti) => { if (!r.done[tk(r.step, ti)]) ripTick(r, r.step, ti); });
+      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} al cliente: ${r.prev.voci.length} ${r.prev.voci.length === 1 ? 'voce' : 'voci'}, ${eur(prevTot(r))}`); ripAdvance(r); render(); toast('Mail con il link privato inviata al cliente'); break; }
+    case 'pv-resend': toast('Sollecito inviato al cliente con lo stesso link'); ripLog(R(id), 'Sollecito inviato al cliente'); render(); break;
+    case 'pv-refuse': ripRefuse(R(id), S.operator, 'Rifiuto registrato dal venditore (risposta scritta del cliente)'); render(); break;
+    case 'pv-sel': { const r = R(S.id); S.pv = S.pv || r.prev.voci.map(() => true); S.pv[+el.dataset.i] = el.checked; render(); break; }
+    case 'pv-print': window.print(); break;
+    case 'pv-c-ok': { const r = R(S.id), sel = S.pv || r.prev.voci.map(() => true); r.prev.voci.forEach((x, i) => x.ok = !!sel[i]); r.prev.stato = 'accettato'; r.esito = 'accettato'; ripTick(r, 2, 0);
+      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta accettata' : 'Preventivo accettato'} online: ${sel.filter(Boolean).length} ${sel.filter(Boolean).length === 1 ? 'voce' : 'voci'} su ${r.prev.voci.length} (${eur(prevTot(r, true))})`, 'Cliente');
+      if (r.tipo === 'CPO') { r.owner = 'verga'; ripLog(r, 'La busta passa a Verga: cambio intestatario', 'Sistema'); }
+      ripAdvance(r); S.pv = null; render(); window.scrollTo(0, 0); break; }
+    case 'pv-c-refuse': ripRefuse(R(S.id), 'Cliente', 'Preventivo rifiutato online'); S.pv = null; render(); window.scrollTo(0, 0); break;
+    case 'rb-avviso': { const r = R(id), n = document.getElementById('rb-sn').value.trim(), t = parseFloat(document.getElementById('rb-st').value.replace(',', '.')) || 0; if (!n) { toast('Inserisci il numero dello scontrino'); break; } r.scontrino = {n, tot:t}; ripTick(r, 4, 0); r.ubic = 'Pronto in boutique per il ritiro'; ripLog(r, `Avviso di ritiro inviato con scontrino ${n} (${eur(t)})`); render(); toast('Mail di avviso ritiro inviata al cliente'); break; }
+    case 'rb-ritiro': { const r = R(id); if (!r.done[tk(4, 0)]) { toast('Prima invia l\'avviso di ritiro con lo scontrino'); break; } ripTick(r, 4, 1); r.ritiroD = TODAY; ripLog(r, 'Orologio ritirato dal cliente'); ripAdvance(r); render(); toast('Ritiro registrato · busta chiusa'); break; }
+    case 'ric-print': window.print(); break;
+    case 'm-save-ric': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } const r = R(M.rid), i = rSteps(r)[0].t.indexOf('Ricevuta firmata dal cliente'); if (i >= 0) ripTick(r, 0, i); ripLog(r, 'Ricevuta firmata dal cliente'); ripAdvance(r); closeModal(); render(); openModal({kind:'etichette', rid:r.id}); break; }
+    case 'm-save-et': { const r = R(M.rid), i = rSteps(r)[0].t.indexOf('Etichette stampate sulla busta'); if (i >= 0 && !r.done[tk(0, i)]) { ripTick(r, 0, i); ripLog(r, 'Etichette stampate sulla busta'); } ripAdvance(r); closeModal(); render(); toast('Etichette inviate alla stampante (demo)'); break; }
+    case 'pick-b': S.boutique = v; S.operator = OPERATORS.find(o => o.b === v).name; render(); break;
+    case 'pick-op': S.operator = v; render(); break;
+    case 'pin':
+      if (v === '⌫') S.pin = S.pin.slice(0,-1); else if (S.pin.length < 4) S.pin += v;
+      if (S.pin.length === 4) { render(); setTimeout(() => { S.pin = ''; go('dashboard'); toast(`Accesso come ${S.operator} · ${S.boutique}`); }, 250); } else render();
+      break;
+    case 'tab': S.tab = v; render(); break;
+    case 'evento': openModal({kind:'evento', clientId:id || null, lock:!!id, type:'visita', fu:'', note:'', motivo:''}); break;
+    case 'm-motivo': M.motivo = M.motivo === v ? '' : v; M.note = document.getElementById('m-note').value; renderModal(); break;
+    case 'quick-ev': {
+      events.push({id:'e' + (++evSeq), clientId:id, type:el.dataset.t, date:nowISO(), operator:S.operator, boutique:S.boutique, note:''});
+      render(); toast(`${EV[el.dataset.t].label} · registrato alle ${fmtT(NOW.toISOString())}`); break; }
+    case 'pda-new': openModal({kind:'pda', clientId:id || null, lock:!!id}); break;
+    case 'assegna': openModal({kind:'assegna', pdaId:id, productId: compatible(pdas.find(p => p.id === id))[0]?.id}); break;
+    case 'to-cassa': S.cart.clientId = id; go('cassa'); break;
+    case 'pda-cassa': { const p = pdas.find(x => x.id === id); S.cart.clientId = p.clientId; if (!S.cart.items.includes(p.productId)) S.cart.items.push(p.productId); go('cassa'); toast('Pre-acquisto messo in cassa'); break; }
+    case 'fu-done': { const x = events.find(z => z.id === id); x.done = true; render(); toast('Follow-up segnato come fatto'); break; }
+    case 'clr-f': S.f[el.dataset.k] = ''; render(); break;
+    case 'clr-all': Object.keys(S.f).forEach(x => S.f[x] = ''); render(); break;
+    case 'export': toast(`${filteredClients().length} clienti pronti per l'invio a MailUp (demo)`); break;
+    case 'evf': S.evf[el.dataset.k] = v; render(); break;
+    case 'pdaf': S.pdaf = v; render(); break;
+    case 'soon': toast('Le voci degli elenchi si gestiscono dalle impostazioni (demo)'); break;
+    /* form cliente */
+    case 'celeb': S.nc.celeb = v; el.parentElement.querySelectorAll('.chip').forEach(x => x.classList.toggle('on', x === el)); break;
+    case 'noyear': S.nc.noYear = el.checked; keepForm(() => render()); break;
+    case 'nc-brand': toggle(S.nc.brands, v); keepForm(() => render()); break;
+    case 'nc-model': S.nc.modelli = S.nc.modelli || []; toggle(S.nc.modelli, v); keepForm(() => render()); break;
+    case 'nc-int': toggle(S.nc.interests, v); keepForm(() => render()); break;
+    case 'save-client': saveClient(id); break;
+    case 'rate': { const c = C(S.id); c.rating = +v; S.nc.rating = +v; render(); toast(`Valutazione ${v}/5 salvata`); break; }
+    case 'nc-rate': S.nc.rating = +v; keepForm(render); break;
+    case 'addr-add': S.nc.addr.push({label:'',via:'',cap:'',citta:'',prov:'',naz:'Italia'}); keepForm(render); break;
+    case 'addr-rm': S.nc.addr.splice(+el.dataset.i, 1); keepForm(render); break;
+    case 'add-note': { const t = document.getElementById('new-note').value.trim(); if (!t) { toast('Scrivi il testo della nota'); break; } C(id).notes.push({by:S.operator, date:nowISO(), text:t}); render(); toast('Nota aggiunta e firmata'); break; }
+    case 'soon-edit': toast('Puoi modificare solo le note scritte da te (demo)'); break;
+    case 'add-task': { const t = document.getElementById('task-text').value.trim(); if (!t) { toast('Scrivi il messaggio per il collega'); break; } const rec = document.getElementById('task-rec').value; C(id).tasks.push({to:document.getElementById('task-to').value, by:S.operator, text:t, due:document.getElementById('task-due').value, rec: rec === 'Una volta' ? '' : rec, done:false}); render(); toast('Messaggio inviato al collega'); break; }
+    case 'task-done': { const t = C(id).tasks[+el.dataset.i]; t.done = !t.done; render(); break; }
+    case 'pda-cancel': { const p = pdas.find(x => x.id === id); p.stato = 'annullata'; render(); toast('Manifestazione annullata'); break; }
+    case 'dissocia': openModal({kind:'dissocia', pdaId:id, to:'aperta'}); break;
+    case 'firma': openModal({kind:'firma', clientId:id}); break;
+    case 'bell': S.bell = !S.bell; render(); break;
+    case 'notif': { NOTIFS[+el.dataset.i].read = true; S.bell = false; go('cliente', id); break; }
+    case 'tab-legami': S.tab = 'anagrafica'; render(); document.getElementById('sec-legami').scrollIntoView({block:'center'}); document.getElementById('lk-type').focus({preventScroll:true}); break;
+    case 'lk-chip': Object.assign(S.nc.lk, {type:v, back:backOf(v)}); keepForm(render); break;
+    case 'lk-pick': S.nc.lk.otherId = id; keepForm(render); break;
+    case 'lk-unpick': S.nc.lk.otherId = null; keepForm(render); break;
+    case 'lk-quick': { const w = (S.nc.lk.q || '').trim().split(/\s+/); Object.assign(S.nc.lk, {quick:true, qn:w[0] || '', qc:w.slice(1).join(' ')}); keepForm(render); document.getElementById('lkq-nome').focus(); break; }
+    case 'lk-quick-x': S.nc.lk.quick = false; keepForm(render); break;
+    case 'lk-quick-save': {
+      const g = x => document.getElementById(x).value.trim();
+      if (!g('lkq-nome')) { toast('Inserisci almeno il nome'); break; }
+      const nc = {...blankExtra(), local:true, id:'L' + Date.now().toString(36), nome:g('lkq-nome'), cognome:g('lkq-cognome'), email:'', tel:g('lkq-tel'), indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[], modelli:[], interests:[], boutique:S.boutique, source:'Legame', incomplete:true, since:TODAY, note:''};
+      clients.push(nc); Object.assign(S.nc.lk, {otherId:nc.id, quick:false, q:''}); keepForm(render); toast(`Anagrafica creata: ${fullName(nc)}`); break; }
+    case 'lk-add': {
+      const L = S.nc.lk, back = L.back.trim() || backOf(L.type.trim());
+      const cid = S.view === 'cliente' ? S.id : null;
+      if (cid) links.push({from:cid, to:L.otherId, type:L.type.trim(), back}); else S.nc.pending.push({to:L.otherId, type:L.type.trim(), back});
+      S.nc.lk = {type:'', back:'', q:'', otherId:null, quick:false};
+      keepForm(render); toast(cid ? 'Legame salvato su entrambe le anagrafiche' : 'Legame aggiunto: verrà salvato con il cliente'); break; }
+    case 'lk-rm': links.splice(+el.dataset.i, 1); keepForm(render); toast('Legame rimosso'); break;
+    case 'lk-rm-p': S.nc.pending.splice(+el.dataset.i, 1); keepForm(render); break;
+    /* cassa */
+    case 'cart-client': S.cart.clientId = id; render(); break;
+    case 'cart-client-clear': S.cart.clientId = null; render(); break;
+    case 'add-cart': { const p = P(id); if (!S.cart.items.includes(id)) S.cart.items.push(id); if (p.reservedFor && !S.cart.clientId) S.cart.clientId = p.reservedFor; if (S.view !== 'cassa') go('cassa'); else render(); toast(`${p.brand} ${p.modello} aggiunto`); break; }
+    case 'rm-cart': S.cart.items = S.cart.items.filter(x => x !== id); render(); break;
+    case 'scan-add': { const q = document.getElementById('scan').value.trim().toLowerCase(); const p = products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && (x.ref.toLowerCase() === q || x.seriale.toLowerCase() === q)) || products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && q && `${x.ref} ${x.seriale}`.toLowerCase().includes(q)); if (p) { S.cart.items.push(p.id); render(); toast(`${p.brand} ${p.modello} aggiunto`); } else toast('Nessun prodotto disponibile con questa referenza'); break; }
+    case 'pay': S.cart.pay = v; render(); break;
+    case 'inv': S.cart.inv = v; render(); break;
+    case 'checkout': tscCheckout(); break;
+    /* autoregistrazione */
+    case 'a-brand': toggle(S.auto.brands, v); keepAuto(); break;
+    case 'a-int': toggle(S.auto.interests, v); keepAuto(); break;
+    case 'a-noyear': S.auto.noYear = el.checked; keepAuto(); break;
+    case 'a-next': {
+      const val = x => document.getElementById(x).value.trim();
+      Object.assign(S.auto, {nome:val('a-nome'), cognome:val('a-cognome'), email:val('a-email'), tel:val('a-tel')});
+      const err = document.getElementById('a-err');
+      if (!S.auto.nome || !S.auto.cognome || !S.auto.email || !S.auto.tel) { err.hidden = false; err.textContent = 'Compila nome, cognome, email e telefono per continuare.'; break; }
+      if (!/^\S+@\S+\.\S+$/.test(S.auto.email)) { err.hidden = false; err.textContent = 'Controlla l\'indirizzo email: sembra incompleto.'; break; }
+      if (!document.getElementById('a-priv').checked) { err.hidden = false; err.textContent = 'Per registrarti serve il consenso all\'informativa privacy.'; break; }
+      postToVerga('autoreg', {nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, telefono:S.auto.tel, brand:S.auto.brands.join(', '), boutique:S.boutique});
+      const nc = {...blankExtra(), local:true, id:'L' + Date.now().toString(36), nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, tel:S.auto.tel, indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[...S.auto.brands], modelli:[], interests:[], boutique:S.boutique, source:'Autoregistrazione', incomplete:true, newsletter:true, since:TODAY, note:''};
+      clients.push(nc); S.auto.createdId = nc.id; S.auto.step = 2; render(); window.scrollTo(0,0); break; }
+    case 'a-done': { const c = C(S.auto.createdId); if (c) c.interests = [...S.auto.interests]; S.auto.step = 3; render(); window.scrollTo(0,0); break; }
+    case 'a-reset': S.auto = {step:1, brands:[], interests:[], noYear:false, decade:''}; render(); break;
+    case 'a-open': { const cid = S.auto.createdId || 'c5'; S.auto = {step:1, brands:[], interests:[], noYear:false, decade:''}; go('cliente', cid); break; }
+    /* modali */
+    case 'm-bg': if (ev.target === el) closeModal(); break;
+    case 'm-close': closeModal(); break;
+    case 'm-pick': M.clientId = id; renderModal(); break;
+    case 'm-unpick': M.clientId = null; renderModal(); break;
+    case 'm-newclient': closeModal(); go('nuovo'); break;
+    case 'm-type': M.type = v; M.note = document.getElementById('m-note').value; renderModal(); break;
+    case 'm-fu': M.fu = v; M.note = document.getElementById('m-note').value; renderModal(); break;
+    case 'm-save-ev': {
+      events.push({id:'e' + (++evSeq), clientId:M.clientId, type:M.type, date:nowISO(), operator:S.operator, boutique:S.boutique, note:document.getElementById('m-note').value.trim(), followup:M.fu || null, motivo:M.motivo || ''});
+      const cid = M.clientId, n = fullName(C(cid)), newPda = M.motivo === MOTIVI[0]; closeModal(); render(); toast(`${EV[events[events.length-1].type].label}: ${n}`);
+      if (newPda) openModal({kind:'pda', clientId:cid, lock:true, stato:'aperta'}); break; }
+    case 'm-brand': M.brand = v; M.modello = ''; renderModal(); break;
+    case 'm-model': M.modello = v; renderModal(); break;
+    case 'm-pstato': M.stato = v; renderModal(); break;
+    case 'm-save-pda': {
+      const val = x => document.getElementById(x).value.trim();
+      pdas.push({id:'p' + (++pdaSeq), clientId:M.clientId, brand:M.brand, modello:M.modello, ref:val('m-ref'), quadrante:val('m-quad'), bracciale:val('m-brac'), note:val('m-pnote'), date:TODAY, operator:S.operator, stato:M.stato || 'aperta'});
+      const cid = M.clientId; closeModal();
+      if (S.view === 'cliente' && S.id === cid) render(); else go('cliente', cid);
+      toast('Manifestazione registrata · mail di presa in carico inviata al cliente'); break; }
+    case 'm-pickprod': M.productId = id; renderModal(); break;
+    case 'm-save-assign': {
+      const p = pdas.find(x => x.id === M.pdaId), pr = P(M.productId);
+      p.stato = 'assegnata'; p.productId = pr.id; pr.reservedFor = p.clientId; if (pr.stato === 'disponibile') pr.stato = 'riservato';
+      if (p.operator === S.operator) NOTIFS.unshift({text:`Il ${pr.brand} ${pr.modello} è stato associato alla manifestazione di ${fullName(C(p.clientId))}: ricontatta il cliente.`, date:nowISO(), clientId:p.clientId, read:false});
+      closeModal(); render(); toast(p.operator !== S.operator ? `Associato. ${p.operator} riceve una notifica per ricontattare ${fullName(C(p.clientId))}` : `${pr.brand} ${pr.modello} associato a ${fullName(C(p.clientId))}`); break; }
+    case 'm-open-client': closeModal(); go('cliente', id, {tab:'acquisti'}); break;
+    case 'm-invoice': M.invState = 'wait'; renderModal(); setTimeout(() => { if (M && M.kind === 'venduto') { M.invState = 'done'; renderModal(); } }, 1400); break;
+    case 'soon-print': toast('Nel portale reale si apre il PDF da stampare (demo)'); break;
+    case 'm-dto': M.to = v; renderModal(); break;
+    case 'm-save-dis': { const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId); pr.reservedFor = null; if (pr.stato === 'riservato') pr.stato = 'disponibile'; p.productId = null; p.stato = M.to; closeModal(); render(); toast('Prodotto dissociato'); break; }
+    case 'sig-clear': { const cv = document.getElementById('sig'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv.dataset.signed = ''; break; }
+    case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = TODAY; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
+  }
+}
+function toggle(arr, v){ const i = arr.indexOf(v); if (i >= 0) arr.splice(i,1); else arr.push(v); }
+/* conserva i valori digitati quando il form viene ridisegnato */
+function keepForm(fn){
+  const ids = ['f-tipo','f-nome','f-cognome','f-sesso','f-prof','f-azienda','f-email','f-email2','f-cf','f-pec','f-tel','f-lingua','f-boutique','f-rs','f-bind','f-piva','f-sdi','f-bd','f-bm','f-by','f-dec','f-polso','f-dxm','f-dxa','f-sxm','f-sxa','f-note','f-nl','new-note','task-text'];
+  const vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.type === 'checkbox' ? el.checked : el.value; });
+  const y = window.scrollY; fn(); ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] !== undefined) el[el.type === 'checkbox' ? 'checked' : 'value'] = vals[i]; }); window.scrollTo(0, y);
+}
+function keepAuto(){
+  const ids = ['a-nome','a-cognome','a-email','a-tel'], vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.value; });
+  const pv = document.getElementById('a-priv')?.checked; const y = window.scrollY; render();
+  ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] !== undefined) el.value = vals[i]; }); const p = document.getElementById('a-priv'); if (p && pv) p.checked = true; window.scrollTo(0, y);
+}
+function saveClient(id){
+  const v = x => document.getElementById(x)?.value.trim() ?? '';
+  if (!v('f-nome') || !v('f-cognome')) { toast('Inserisci almeno nome e cognome'); return; }
+  const birth = {d:+v('f-bd') || null, m:+v('f-bm') || null};
+  if (S.nc.noYear) birth.decade = v('f-dec'); else birth.y = +v('f-by') || null;
+  const addresses = S.nc.addr.filter(a => a.via || a.citta).map(a => ({...a}));
+  const data = {tipo:v('f-tipo'), nome:v('f-nome'), cognome:v('f-cognome'), sesso:v('f-sesso'), prof:v('f-prof'), azienda:v('f-azienda'), email:v('f-email').toLowerCase(), email2:v('f-email2').toLowerCase(), tel:v('f-tel'), cf:v('f-cf').toUpperCase(), pec:v('f-pec').toLowerCase(), lingua:v('f-lingua'), addresses, indirizzo:addresses[0] ? `${addresses[0].via}, ${addresses[0].citta}` : '', boutique:v('f-boutique'), birth,
+    billing:{rs:v('f-rs'), ind:v('f-bind'), piva:v('f-piva'), sdi:v('f-sdi').toUpperCase()}, misure:{polso:v('f-polso'), dxMedio:v('f-dxm'), dxAnulare:v('f-dxa'), sxMedio:v('f-sxm'), sxAnulare:v('f-sxa')}, rating:S.nc.rating,
+    brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : '', newsletter:document.getElementById('f-nl').checked};
+  if (id) { const c = C(id); Object.assign(c, data); if (c.email && c.tel) c.incomplete = false; S.tab = 'panoramica'; render(); toast('Anagrafica aggiornata'); }
+  else { postToVerga('new_customer', {...data, brands:data.brands.join(', '), interests:data.interests.join(', '), venditore:S.operator, boutique_venditore:S.boutique, addresses:JSON.stringify(data.addresses), billing:JSON.stringify(data.billing), misure:JSON.stringify(data.misure), birth:JSON.stringify(data.birth)}); const c = {...blankExtra(), local:true, id:'L' + Date.now().toString(36), source:'Negozio', since:TODAY, ...data, notes: v('f-note') ? [{by:S.operator, date:nowISO(), text:v('f-note')}] : []}; clients.push(c); const pend = S.nc.pending; pend.forEach(l => links.push({from:c.id, ...l})); go('cliente', c.id); toast(pend.length ? `Cliente registrato con ${pend.length} ${pend.length === 1 ? 'legame' : 'legami'}` : 'Cliente registrato'); }
+}
+function checkout(){
+  const c = C(S.cart.clientId); let total = 0;
+  S.cart.items.forEach(id => { const p = P(id); total += p.price; p.stato = 'venduto'; p.reservedFor = c.id;
+    purchases.push({clientId:c.id, date:TODAY, brand:p.brand, modello:p.modello, ref:p.ref, price:p.price, boutique:S.boutique, seller:S.operator});
+    pdas.filter(x => x.productId === id).forEach(x => x.stato = 'venduta'); });
+  const promoted = c.tipo === 'Prospect'; if (promoted) c.tipo = 'Cliente';
+  const inv = S.cart.inv === 'societa' && c.billing?.rs ? 'societa' : 'persona';
+  const m = {kind:'venduto', total, pay:S.cart.pay, name:fullName(c), clientId:c.id, promoted, inv, rs:c.billing?.rs, invState:''};
+  S.cart = {clientId:null, items:[], pay:'Carta', inv:'persona'}; render(); openModal(m);
+}
+/* quando si apre una scheda in modifica, carico gli elenchi del cliente nello stato del form */
+/* stato iniziale della vista, ricavato dall'URL della pagina TSC */
+function initView(view, id){
+  const lk = {type:'', back:'', q:'', otherId:null, quick:false};
+  if (view === 'nuovo') S.nc = {brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk, pending:[], addr:[{label:'Casa',via:'',cap:'',citta:'',prov:'',naz:'Italia'}], rating:0};
+  if (view === 'cliente' && id) { const c = C(id); if (c) S.nc = {brands:[...c.brands], interests:[...c.interests], modelli:[...c.modelli], noYear:!!(c.birth && c.birth.decade), decade:c.birth?.decade || '', celeb:c.celeb || 'Nessuna', lk, pending:[], addr:(c.addresses || []).map(a => ({...a})), rating:c.rating || 0}; }
+}
+/* invia a Verga (mail all'amministratore del negozio, via Twig sendEmail) i dati di un nuovo cliente */
+function postToVerga(action, data){
+  try { const fd = new FormData(); fd.append('vp_action', action); Object.entries(data).forEach(([k, v]) => fd.append(k, v == null ? '' : String(v))); fetch(window.location.pathname, {method:'POST', body:fd, credentials:'same-origin'}).catch(() => {}); } catch (_) {}
+}
+
+/* input: ricerche live senza perdere il focus */
+document.addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.f !== undefined) { S.f[t.dataset.f] = t.value; renderResults(); return; }
+  if (t.id === 'gs') return gsearch(t.value);
+  if (t.id === 'm-cs') { document.getElementById('m-cs-list').innerHTML = clientPick(t.value, 'm-pick'); return; }
+  if (t.id === 'cart-cs') { document.getElementById('cart-cs-list').innerHTML = clientPick(t.value, 'cart-client'); return; }
+  if (t.id === 'scan') { document.getElementById('scan-list').innerHTML = scanList(t.value); return; }
+  if (t.dataset.pf !== undefined && t.tagName === 'INPUT') { S.pf[t.dataset.pf] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('pf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
+  if (t.id === 'lk-q') { S.nc.lk.q = t.value; document.getElementById('lk-list').innerHTML = lkPick(t.value, S.view === 'cliente' ? S.id : null); return; }
+  if (t.id === 'lk-type') { S.nc.lk.type = t.value; if (!S.nc.lk.backEdited) { S.nc.lk.back = LINK_TYPES[t.value.trim()] || ''; document.getElementById('lk-back').value = S.nc.lk.back; } document.querySelector('[data-act="lk-add"]').disabled = !(S.nc.lk.otherId && t.value.trim()); return; }
+  if (t.id === 'lk-back') { S.nc.lk.back = t.value; S.nc.lk.backEdited = !!t.value; return; }
+  if (['f-email','f-email2','a-email','fs-email'].includes(t.id) && t.value !== t.value.toLowerCase()) { const pos = t.selectionStart; t.value = t.value.toLowerCase(); try { t.setSelectionRange(pos, pos); } catch (_) {} }
+  if (t.dataset.addr !== undefined) { const [i, k] = t.dataset.addr.split(':'); S.nc.addr[+i][k] = t.value; return; }
+  if (t.dataset.rn !== undefined) { const [a, b] = t.dataset.rn.split('.'); if (b) S.rn[a][b] = t.value; else S.rn[a] = t.value; return; }
+  if (t.id === 'rn-cs') { S.rn.q = t.value; document.getElementById('rn-cs-list').innerHTML = clientPick(t.value, 'rn-pick'); return; }
+  if (t.id === 'rf-q') { S.rf.q = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('rf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
+  if (t.dataset.dup !== undefined) return dupCheck();
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.id === 'boutique-sel') { S.boutique = t.value; try { localStorage.setItem('vp_boutique', t.value); } catch (_) {} render(); toast(`Boutique attiva: ${t.value}`); return; }
+  if (t.dataset.pf !== undefined && t.tagName === 'SELECT') { S.pf[t.dataset.pf] = t.value; render(); return; }
+  if (t.dataset.evf !== undefined) { S.evf[t.dataset.evf] = t.value; render(); return; }
+  if (t.dataset.rf !== undefined) { S.rf[t.dataset.rf] = t.value; render(); return; }
+  if (t.id === 'rn-cam' || t.id === 'rn-att') { [...t.files].forEach(f => t.id === 'rn-cam' ? S.rn.photos.push(URL.createObjectURL(f)) : S.rn.att.push(f.name)); keepY(render); return; }
+  if (t.classList.contains('rb-att')) { const r = R(t.dataset.id); r.att = r.att || []; [...t.files].forEach(f => r.att.push(f.name)); ripLog(r, `Allegati: ${[...t.files].map(f => f.name).join(', ')}`); const i = rSteps(r)[r.step].t?.findIndex(x => /scarico|certificazione con documento/i.test(x)); if (i >= 0) ripTick(r, r.step, i); ripAdvance(r); keepY(render); return; }
+  if (t.dataset.rb !== undefined) { const r = R(t.dataset.id), k = t.dataset.rb; r[k] = t.value;
+    if (k === 'tecnico' && t.value) { const st = rSteps(r)[r.step]; const i = st.t ? st.t.findIndex(x => /Presa in carico|assegnata|Prima valutazione/.test(x)) : -1; if (i >= 0 && !r.done[tk(r.step, i)]) ripTick(r, r.step, i); if (r.step === 3) r.ass = TODAY; if (t.value.startsWith('Casa madre')) { r.est = TODAY; r.ubic = 'Casa madre (riparazione esterna)'; } ripLog(r, `In mano a ${t.value}`); ripAdvance(r); }
+    if (k === 'ubic') ripLog(r, `Spostato: ${t.value}`);
+    if (k === 'presunta') ripLog(r, `Presunta consegna: ${fmtD(t.value)}`);
+    keepY(render); return; }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { if (M) closeModal(); else if (S.notes) { S.notes = false; renderDrawer(); } }
+  if (e.key === 'Enter' && ['l-email','l-pw'].includes(e.target.id)) act(document.querySelector('[data-act="login"]'), e);
+  if (e.key === 'Enter' && e.target.id === 'scan') act(document.querySelector('[data-act="scan-add"]'), e);
+});
+function gsearch(q){
+  const d = document.getElementById('gs-drop'); q = q.trim().toLowerCase();
+  if (!q) { d.innerHTML = ''; return; }
+  const cs = clients.filter(c => `${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(q)).slice(0,5);
+  const ps = products.filter(p => `${p.ref} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q)).slice(0,5);
+  d.innerHTML = `<div class="gs-drop">${cs.length ? '<div class="label">Clienti</div>' + cs.map(c => `<button class="gs-item" data-go="cliente" data-id="${c.id}">${avatar(c)}<span><b>${esc(fullName(c))}</b><br><small class="muted">${esc(c.email || 'Scheda da completare')}</small></span></button>`).join('') : ''}
+    ${ps.length ? '<div class="label">Prodotti</div>' + ps.map(p => `<button class="gs-item" data-go="prodotti" data-act-pf="${esc(p.ref)}">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}<span><b>${esc(p.brand)} ${esc(p.modello)}</b><br><small class="muted mono">${esc(p.ref)} · ${esc(p.seriale)}</small></span><span style="margin-left:auto">${prodState(p)}</span></button>`).join('') : ''}
+    ${!cs.length && !ps.length ? '<div class="empty">Nessun risultato. <button class="link" data-go="nuovo">Crea nuovo cliente</button></div>' : ''}</div>`;
+  d.querySelectorAll('[data-act-pf]').forEach(b => b.addEventListener('click', () => { S.pf.q = b.dataset.actPf; }, true));
+}
+function dupCheck(){
+  const val = x => (document.getElementById(x)?.value || '').trim().toLowerCase();
+  const n = val('f-nome'), c = val('f-cognome'), m = val('f-email'), t = val('f-tel').replace(/\s/g,'');
+  const box = document.getElementById('dup'); if (!box) return;
+  if (S.view !== 'nuovo') return;
+  const hits = clients.filter(x => (c.length > 2 && x.cognome.toLowerCase().startsWith(c) && (!n || x.nome.toLowerCase().startsWith(n[0]))) || (m.length > 4 && x.email.toLowerCase().includes(m)) || (t.length > 5 && x.tel.replace(/\s/g,'').includes(t)));
+  box.innerHTML = hits.length ? `<div class="banner">${ic('users')}<div class="grow"><p><b>Possibili duplicati:</b> controlla se il cliente è già registrato.</p><div class="tags" style="margin-top:8px">${hits.map(x => `<button class="tag brand" style="cursor:pointer;height:30px" data-go="cliente" data-id="${x.id}">${esc(fullName(x))} · ${esc(x.email || 'scheda vuota')}</button>`).join('')}</div></div></div>` : '';
+}
+
+/* ---------------- avvio ---------------- */
+(function start(){
+  const route = VPD.route || 'login', path = VPD.path || [];
+  S.view = {login:'login', auto:'auto', dashboard:'dashboard', customer:'customer', tsc:'tsc'}[route] || SLUG_VIEW[route] || 'dashboard';
+  S.id = path[3] ? decodeURIComponent(path[3]) : null;
+  if (S.view === 'cliente' && !clients.some(c => c.id === S.id) && SEL_ID) S.id = SEL_ID;
+  const q = VPD.query || {};
+  S.tab = q.tab || 'panoramica';
+  S.operator = (VPD.user && (VPD.user.fullname || VPD.user.email)) || 'Venditore';
+  try { S.boutique = localStorage.getItem('vp_boutique') || (VPD.customer && VPD.customer.custom_fields && VPD.customer.custom_fields.boutique) || BOUTIQUES[0].name; S.betaHidden = localStorage.getItem('vp_beta_hidden') === '1'; } catch (_) { S.boutique = BOUTIQUES[0].name; }
+  try { const ct = JSON.parse(sessionStorage.getItem('vp_cart') || 'null'); if (ct) S.cart = {pay:'Carta', inv:'persona', ...ct}; } catch (_) {}
+  if (S.view === 'cassa' && !S.cart.clientId && SEL_ID) S.cart.clientId = SEL_ID;
+  if (products.length) S.cart.items = S.cart.items.filter(id => products.some(p => p.id === id));
+  if (q.q) S.pf.q = q.q;
+  if (S.view === 'rip-new') S.rn = blankRn(q.cliente || null);
+  initView(S.view, S.id);
+  render();
+  try {
+    const t = sessionStorage.getItem('vp_toast'); if (t) { sessionStorage.removeItem('vp_toast'); toast(t); }
+    const m = sessionStorage.getItem('vp_modal'); if (m) { sessionStorage.removeItem('vp_modal'); openModal(JSON.parse(m)); }
+  } catch (_) {}
+})();

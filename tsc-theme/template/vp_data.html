@@ -1,0 +1,42 @@
+{# Dati reali passati al portale (window.VP). Incluso da vp_skeleton.html dentro <script>. #}
+{% set vp_orders = null %}
+{% set vp_proposals = null %}
+{% if is_agent and customer_selected and vp_route == 'cliente' %}
+    {% set vp_orders = fetchAndCache(shop_rules.fetchAndCache.order_list)|jsondecode %}
+    {% if vp_orders is empty %}{% set vp_orders = fetchAndCache(shop_rules.fetchAndCache.order_list ~ "&retry=1")|jsondecode %}{% endif %}
+    {% set vp_proposals = fetchAndCache(shop_rules.fetchAndCache.proposal_listing_customer)|jsondecode %}
+    {% if vp_proposals is empty %}{% set vp_proposals = fetchAndCache(shop_rules.fetchAndCache.proposal_listing_customer ~ "&retry=1")|jsondecode %}{% endif %}
+{% endif %}
+{% set vp_products = [] %}
+{% set vp_brands = [] %}
+{% if is_agent and vp_route in ['dashboard', 'catalogo', 'cassa'] %}
+    {% set vp_products = getItemsByFilter(null, null, {}, {'title': 1}, 0, 500) %}
+    {% set vp_brands = getBrands() %}
+{% endif %}
+{
+    "route": {{ vp_route|json|raw }},
+    "path": {{ request.path|json|raw }},
+    "query": {{ request.query|json|raw }},
+    "user": {
+        "uid": {{ user.uid|default(0)|json|raw }},
+        "fullname": {{ user.fullname|default('')|json|raw }},
+        "email": {{ user.email|default('')|json|raw }}
+    },
+    "customer": {
+        "group": {{ customer.group|default('')|json|raw }},
+        "custom_fields": {{ customer.custom_fields|default({})|json|raw }}
+    },
+    "isAgent": {{ is_agent ? 'true' : 'false' }},
+    "isSuperAgent": {{ is_super_agent ? 'true' : 'false' }},
+    "customers": {{ customers_list|default([])|json|raw }},
+    "selected": {{ customer_cookie|default({})|json|raw }},
+    "customerData": {{ customer_data|default({})|json|raw }},
+    "orders": {{ vp_orders|json|raw }},
+    "proposals": {{ vp_proposals|json|raw }},
+    "products": {{ vp_products|json|raw }},
+    "brands": {{ vp_brands|json|raw }},
+    "cart": {
+        "count": {{ cartCount()|default(0)|json|raw }},
+        "total": {{ cartTotal()|default(0)|json|raw }}
+    }
+}

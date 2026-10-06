@@ -1,0 +1,160 @@
+{# =====================================================================
+   Verga 1947 · Portale venditori
+   Skeleton del portale: sostituisce header/footer del tema quando vp_enabled e' attivo (vedi skeleton.html).
+   - utenti non loggati: login (e autoregistrazione / recupero password)
+   - agenti (venditori): portale (vp_app.html); le pagine TSC non gestite dal portale
+     (carrello, ordini, proposte, prodotto...) vengono mostrate dentro la cornice del portale
+   - clienti finali loggati: pagina di cortesia
+   ===================================================================== #}
+{# variabili che le pagine TSC standard si aspettano dallo skeleton originale #}
+{% set userB2B = false %}
+{% if b2b.enabled == true and b2b.listing != '' %}
+  {% set userB2B = true %}
+{% endif %}
+{% set show_logs = false %}
+{% set device_type = getDeviceInfo().type %}
+{% set disable_shop = theme.settings.general.settings.disable_shop == 'yes' %}
+{% set block_catalog = theme.settings.general.settings.block_catalog_navigation == 'yes' %}
+{% if request.path.1 != 'homepage' %}
+    {% set currentURL = request.script_name~request.path | join('/') %}
+{% else %}
+    {% set currentURL = request.script_name~'/' %}
+{% endif %}
+{% set shop_rules %}
+    {% include 'shop_rules.html' %}
+{% endset %}
+{% set shop_rules = shop_rules|jsondecode %}
+{% set is_agent = shop_rules.is_agent %}
+{% set is_super_agent = shop_rules.is_super_agent %}
+{% set customer_selected = shop_rules.customer_selected %}
+{% set new_customer = shop_rules.new_customer %}
+{% set customer_data = shop_rules.customer_data %}
+{% set customers_list = shop_rules.customers_list %}
+{% set customer_cookie = shop_rules.customer_cookie %}
+{% if customer_data.b2b_attribute is not empty %}
+    {% set b2b = b2b|merge({'listing': customer_data.b2b_attribute}) %}
+{% endif %}
+
+{% set p1 = request.path.1 %}
+{% set p2 = request.path.2 %}
+{% set vp_pages = ['clienti','cliente','nuovo-cliente','passaggi','manifestazioni','catalogo','cassa','riparazioni','accettazione','busta','preventivo','autoregistrazione'] %}
+
+{# ---- quale vista mostrare ---- #}
+{% set vp_route = 'tsc' %}
+{% if user.uid > 0 %}
+    {% if not is_agent %}
+        {% set vp_route = 'customer' %}
+    {% elseif p1 in ['', 'homepage'] %}
+        {% set vp_route = 'dashboard' %}
+    {% elseif p1 == 'login' %}
+        {% set vp_route = 'go-home' %}
+    {% elseif p1 == 'profile' and p2 in vp_pages %}
+        {% set vp_route = p2 %}
+    {% endif %}
+{% else %}
+    {% if p1 == 'login' and p2 == 'registration' %}
+        {% set vp_route = 'auto' %}
+    {% elseif p1 == 'login' %}
+        {% set vp_route = 'login' %}
+    {% elseif p1 in ['restore-password', 'reset-password'] %}
+        {% set vp_route = 'tsc-public' %}
+    {% else %}
+        {% set vp_route = 'go-login' %}
+    {% endif %}
+{% endif %}
+
+{# ---- invio a Verga dei nuovi clienti (POST dal portale): mail all'amministratore del negozio ---- #}
+{% if request.payload.vp_action in ['new_customer', 'autoreg'] %}
+    {% set vp_msg = "<h3>" ~ (request.payload.vp_action == 'autoreg' ? "Nuova autoregistrazione dal portale" : "Nuovo cliente registrato da " ~ user.fullname) ~ "</h3>" %}
+    {% for key, field in request.payload if key != "vp_action" %}
+        {% set vp_msg = vp_msg ~ "<b>" ~ key|upper ~ ":</b> " ~ field|e ~ "<br>" %}
+    {% endfor %}
+    {% set vp_mail = sendEmail(group.admin_email, (request.payload.vp_action == 'autoreg' ? 'Autoregistrazione cliente ' : 'Nuovo cliente dal portale ') ~ request.payload.nome ~ ' ' ~ request.payload.cognome, vp_msg, group.title, '') %}
+{% endif %}
+<!DOCTYPE html>
+<html lang="it" id="storeden-{{request.page}}">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+        <meta name="robots" content="noindex, nofollow">
+        <title>Verga · Portale venditori</title>
+        <link rel="shortcut icon" href="{{document.favicon_link}}">
+        <script>
+            var currency = {{ lang('symbol.' ~ group.currency ) | json | raw }};
+            var min_quantity_label = {{lang('item.min.quantity') | json | raw}};
+            var pieces_label = {{lang('storefront.piece') | json | raw}};
+            var steps_label = {{lang('item.steps') | json | raw}};
+            var max_quantity_label = {{lang('item.max.quantity') | json | raw}};
+            var addToCart_label = {{lang('item.add.to.cart') | json | raw}};
+            var outOfStock_label = {{ lang('item.unavailable') | json | raw}};
+            var reviews_to_check = [];
+        </script>
+        {% if userB2B %}
+            {% set taxProfiles = listTaxProfiles() %}
+            <script>
+                var objTaxProfile = JSON.parse('{{taxProfiles|json}}');
+                var labelProductTax = '{{lang("tax.label")}}';
+                var jUserB2B = true;
+                var jListB2B = '{{b2b.listing}}';
+            </script>
+        {% else %}
+            <script>var jUserB2B = false;</script>
+        {% endif %}
+        {% if vp_route == 'go-login' %}<script>window.location.replace('/login');</script>{% endif %}
+        {% if vp_route == 'go-home' %}<script>window.location.replace('/');</script>{% endif %}
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Spectral+SC:wght@400;500;600&display=swap">
+
+        {# Bootstrap e CSS del tema servono alle pagine TSC mostrate dentro il portale (carrello, ordini, proposte) #}
+        <link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/bootstrap-v5_3_2/css/bootstrap.min.css">
+        <link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/themes/blomming/fontawesome-free-5.9.0-web/css/all.swap.min.css">
+        <link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/bootstrap-select-v1_14_0_beta3/bootstrap-select.min.css">
+        <link href="https://cdn.datatables.net/v/bs5/dt-2.3.7/datatables.min.css" rel="stylesheet">
+        <link href="{{document.css_cdn_link | raw }}" type="text/css" rel="stylesheet">
+        <style>{% include 'vp_css.html' %}</style>
+
+        <script src="https://cdn.storeden.net/bootstrap-v5/js/jquery-3.7.0.min.js"></script>
+        <script src="https://cdn.storeden.net/popper-v2_11_8/popper.min.js"></script>
+        <script src="https://cdn.storeden.net/bootstrap-v5_3_2/js/bootstrap.min.js"></script>
+        <script src="https://cdn.storeden.net/restyle/js/storeden.js"></script>
+        <script src="https://cdn.datatables.net/v/bs5/dt-2.3.7/datatables.min.js"></script>
+        <script>Storeden.setAddresses({{ user.addresses | json | raw }})</script>
+        <script src="{{document.js_link | raw}}"></script>
+    </head>
+    {% flush %}
+    <body class="vp" id="{{request.path.1}}">
+        <script>window.VP = {% include 'vp_data.html' %};</script>
+
+        {% if vp_route == 'tsc' %}
+            {# pagina TSC standard, spostata dal portale dentro la sua cornice #}
+            <div id="vp-tsc-src" hidden>
+                <main id="request_page" role="main">
+                    {% include request.page %}
+                </main>
+            </div>
+        {% elseif vp_route == 'tsc-public' %}
+            <div class="vp-public">
+                <a href="/login" class="vp-public-back">&larr; Torna al login</a>
+                <main id="request_page" role="main">
+                    {% include request.page %}
+                </main>
+            </div>
+        {% endif %}
+
+        {% if vp_route != 'tsc-public' %}
+            <div id="app"></div>
+            <div id="modal-root"></div>
+            <div id="drawer-root"></div>
+            <div id="toast-root"></div>
+            {% include 'vp_logo.html' %}
+            <script>{% include 'vp_app.html' %}</script>
+        {% endif %}
+
+        {% if vp_route == 'tsc' %}
+            {% include 'modals.html' %}
+            <script src="https://cdn.storeden.net/bootstrap-select-v1_14_0_beta3/bootstrap-select.min.js"></script>
+        {% endif %}
+    </body>
+</html>

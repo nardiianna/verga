@@ -1,3 +1,10 @@
+{# ===== Portale venditori Verga =====
+   vp_enabled = true: tutto il sito diventa il portale (vp_skeleton.html).
+   Per tornare al tema originale basta mettere false. #}
+{% set vp_enabled = true %}
+{% if vp_enabled %}
+{% include 'vp_skeleton.html' %}
+{% else %}
 <!DOCTYPE html>
 {# mod B2B #}
 {% set userB2B = false %}
@@ -293,3 +300,4 @@
         
     </body>
 </html>
+{% endif %}
