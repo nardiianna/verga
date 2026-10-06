@@ -122,6 +122,9 @@
         <script src="https://cdn.datatables.net/v/bs5/dt-2.3.7/datatables.min.js"></script>
         <script>Storeden.setAddresses({{ user.addresses | json | raw }})</script>
         <script src="{{document.js_link | raw}}"></script>
+        {# variabili globali di TSC (paese di default ecc.) che il carrello si aspetta #}
+        {{document.analytics | raw }}
+        <script>if (typeof STOREDEN_COUNTRY_ID === 'undefined') { var STOREDEN_COUNTRY_ID = 0; }</script>
     </head>
     {% flush %}
     <body class="vp" id="{{request.path.1}}">
