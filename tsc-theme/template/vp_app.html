@@ -1664,7 +1664,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
-  if (t.id === 'boutique-sel') { S.boutique = t.value; try { localStorage.setItem('vp_boutique', t.value); } catch (_) {} render(); toast(`Boutique attiva: ${t.value}`); return; }
+  if (t.id === 'boutique-sel') { S.boutique = t.value; try { sessionStorage.setItem('vp_boutique', t.value); } catch (_) {} render(); toast(`Boutique attiva: ${t.value}`); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'SELECT') { S.pf[t.dataset.pf] = t.value; render(); return; }
   if (t.dataset.evf !== undefined) { S.evf[t.dataset.evf] = t.value; render(); return; }
   if (t.dataset.rf !== undefined) { S.rf[t.dataset.rf] = t.value; render(); return; }
@@ -1709,7 +1709,9 @@ function dupCheck(){
   const q = VPD.query || {};
   S.tab = q.tab || 'panoramica';
   S.operator = (VPD.user && (VPD.user.fullname || VPD.user.email)) || 'Venditore';
-  try { S.boutique = localStorage.getItem('vp_boutique') || (VPD.customer && VPD.customer.custom_fields && VPD.customer.custom_fields.boutique) || BOUTIQUES[0].name; S.betaHidden = localStorage.getItem('vp_beta_hidden') === '1'; } catch (_) { S.boutique = BOUTIQUES[0].name; }
+  const cfB = String((VPD.customer && VPD.customer.custom_fields && VPD.customer.custom_fields.boutique) || '').trim();
+  const fieldBoutique = (BOUTIQUES.find(b => b.name.toLowerCase() === cfB.toLowerCase()) || {}).name;
+  try { S.boutique = sessionStorage.getItem('vp_boutique') || fieldBoutique || BOUTIQUES[0].name; S.betaHidden = localStorage.getItem('vp_beta_hidden') === '1'; } catch (_) { S.boutique = BOUTIQUES[0].name; }
   try { const ct = JSON.parse(sessionStorage.getItem('vp_cart') || 'null'); if (ct) S.cart = {pay:'Carta', inv:'persona', ...ct}; } catch (_) {}
   if (S.view === 'cassa' && !S.cart.clientId && SEL_ID) S.cart.clientId = SEL_ID;
   if (products.length) S.cart.items = S.cart.items.filter(id => products.some(p => p.id === id));
