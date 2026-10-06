@@ -152,9 +152,15 @@
             <script>{% include 'vp_app.html' %}</script>
         {% endif %}
 
+        {# librerie che script.js del tema base usa all'avvio (menu, slider prezzo, lazy load) #}
+        <script src="https://cdn.storeden.net/themes/config_v2/nouislider/nouislider.min.js"></script>
+        <script src="https://cdn.storeden.net/themes/config_v2/jquery.smartmenus.js"></script>
+        <script src="https://cdn.storeden.net/bootstrap-select-v1_14_0_beta3/bootstrap-select.min.js"></script>
+        <script src="https://cdn.storeden.net/js/intersection-observer.min.js"></script>
+        <script src="https://cdn.storeden.net/js/lazyload.min.js"></script>
+        <script>(function(){ if (typeof LazyLoad !== 'undefined') { new LazyLoad({elements_selector: ".lazy"}); new LazyLoad({elements_selector: ".bg-async"}); } })();</script>
         {% if vp_route == 'tsc' %}
             {% include 'modals.html' %}
-            <script src="https://cdn.storeden.net/bootstrap-select-v1_14_0_beta3/bootstrap-select.min.js"></script>
         {% endif %}
     </body>
 </html>
