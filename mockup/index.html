@@ -807,7 +807,7 @@ function vLogin(){
     <p id="l-err" class="tag red" hidden style="align-self:flex-start"></p>
     <button class="btn btn-primary btn-lg" data-act="login">Accedi</button>
     <button class="link" data-act="pw-forgot" style="align-self:center;font-size:13px">Password dimenticata?</button>
-    <p class="faint" style="margin:0;font-size:12px;text-align:center;overflow-wrap:anywhere">Demo: entra con <b>nome.cognome@verga1947.it</b> di un venditore (es. marco.verdi, sara.colombo) e una password qualsiasi.</p>
+    <p class="faint" style="margin:0;font-size:12px;text-align:center;overflow-wrap:anywhere">Demo: premi <b>Accedi</b> anche senza compilare i campi. Per entrare come un altro venditore usa la sua email (es. sara.colombo@verga1947.it).</p>
   </section>
 </div>
 <button class="notes-fab" data-act="notes">${ic('info')}Note di progetto</button>`;
@@ -1898,10 +1898,9 @@ function act(el, ev){
     case 'notes': S.notes = !S.notes; renderDrawer(); break;
     case 'logout': S.pin = ''; go('login'); break;
     case 'login': {
-      const em = document.getElementById('l-email').value.trim().toLowerCase(), pw = document.getElementById('l-pw').value, err = document.getElementById('l-err');
-      const o = OPERATORS.find(x => x.email === em);
-      if (!em || !pw) { err.hidden = false; err.textContent = 'Inserisci email e password.'; break; }
-      if (!o) { err.hidden = false; err.textContent = 'Email non riconosciuta. Controlla l\'indirizzo o contatta l\'amministratore.'; break; }
+      const em = document.getElementById('l-email').value.trim().toLowerCase();
+      /* demo: si entra anche a campi vuoti; con l'email di un venditore si entra come lui */
+      const o = OPERATORS.find(x => x.email === em) || OPERATORS[0];
       Object.assign(S, {operator:o.name, boutique:o.b, loginEmail:em, showPw:false}); go('dashboard'); toast(`Accesso come ${o.name} · ${o.b}`); break; }
     case 'pw-toggle': { const em = document.getElementById('l-email').value, pw = document.getElementById('l-pw').value; S.loginEmail = em; S.showPw = !S.showPw; render(); document.getElementById('l-pw').value = pw; break; }
     case 'pw-forgot': toast('Nel portale reale parte la mail per reimpostare la password (demo)'); break;
