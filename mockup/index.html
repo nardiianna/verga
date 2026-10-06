@@ -77,6 +77,7 @@
   --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.3); --overlay:rgba(0,0,0,.6);
 }
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
@@ -301,14 +302,19 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .pay button.on{border-color:var(--accent);background:var(--brand-soft);color:var(--brand);box-shadow:inset 0 0 0 1px var(--accent)}
 
 /* login */
-.login{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);min-height:100%}
+.login{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);min-height:100vh;min-height:100dvh}
 .login-art{background:var(--side);color:var(--side-ink);display:flex;flex-direction:column;justify-content:space-between;padding:48px;gap:24px;--logo-a:#fff;--logo-b:#bfe0d6;position:relative;overflow:hidden}
 .login-art .logo{height:200px}
 .login-art .dial{position:absolute;right:-180px;bottom:-180px;width:520px;height:520px;border-radius:50%;border:1px solid rgba(255,255,255,.12)}
 .login-art .dial::before{content:"";position:absolute;inset:40px;border-radius:50%;border:1px dashed rgba(255,255,255,.12)}
 .login-art p{max-width:34ch;color:var(--side-muted);margin:0}
 .login-art h2{font-family:var(--serif);font-size:34px;line-height:1.1}
-.login-form{padding:48px;display:flex;flex-direction:column;gap:26px;justify-content:center;max-width:640px;width:100%;margin:0 auto}
+.login-form{padding:48px;display:flex;flex-direction:column;gap:20px;justify-content:center;max-width:460px;width:100%;margin:0 auto}
+.login-form h1{font-family:var(--serif);font-size:30px;line-height:1.1}
+.pw{position:relative}
+.pw .in{padding-right:48px}
+.pw button{all:unset;cursor:pointer;position:absolute;right:6px;top:6px;width:32px;height:32px;display:grid;place-items:center;color:var(--muted);border-radius:6px}
+.pw button:focus-visible{outline:2px solid var(--accent)}
 .bq{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .bq button{all:unset;box-sizing:border-box;cursor:pointer;padding:14px 16px;border-radius:10px;border:1px solid var(--line-strong);background:var(--surface);display:flex;flex-direction:column;gap:2px}
 .bq button b{font-weight:600}
@@ -383,7 +389,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
   .top{padding:10px 16px;flex-wrap:wrap}
   .top .hide-s{display:none}
   .content{padding:20px 16px}
-  .login{grid-template-columns:minmax(0,1fr)}
+  .login{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr}
   .login-art{padding:32px 24px}
   .login-art .logo{height:120px}
   .login-form{padding:32px 16px}
@@ -456,6 +462,8 @@ const I = {
   bag:'<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/>',
   truck:'<path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/>',
   bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+  eyeOff:'<path d="M9.9 4.2A10 10 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6A17 17 0 0 0 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6M14.1 14.1a3 3 0 1 1-4.2-4.2M2 2l20 20"/>',
   send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
 };
 const ic = (n, cls='') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
@@ -469,10 +477,10 @@ const BOUTIQUES = [
   {name:'Boutique Portofino', addr:'Calata Marconi 45, Portofino'},
 ];
 const OPERATORS = [
-  {name:'Marco Verdi', b:'Bottega Storica', role:'Direttore vendite'},
-  {name:'Sara Colombo', b:'Boutique Multibrand', role:'Venditrice'},
-  {name:'Luca Ferrari', b:'Boutique Patek Philippe', role:'Venditore'},
-  {name:'Giorgia Costa', b:'Boutique Portofino', role:'Venditrice'},
+  {name:'Marco Verdi', email:'marco.verdi@verga1947.it', b:'Bottega Storica', role:'Direttore vendite'},
+  {name:'Sara Colombo', email:'sara.colombo@verga1947.it', b:'Boutique Multibrand', role:'Venditrice'},
+  {name:'Luca Ferrari', email:'luca.ferrari@verga1947.it', b:'Boutique Patek Philippe', role:'Venditore'},
+  {name:'Giorgia Costa', email:'giorgia.costa@verga1947.it', b:'Boutique Portofino', role:'Venditrice'},
 ];
 const role = () => OPERATORS.find(o => o.name === S.operator)?.role || '';
 const canAssign = () => ['Direttore vendite','Titolare'].includes(role());
@@ -661,7 +669,7 @@ function go(view, id=null, extra={}){
 
 /* ---------------- note di progetto (per il team) ---------------- */
 const NOTES = {
-  login:{from:['Login del venditore: primo passo del flusso concordato in call.','La boutique è legata al login: eventi e vendite la prendono in automatico.','Ruoli: direttore vendite e titolare possono associare i prodotti alle PDA e vedono tutte le PDA aziendali (relazione tecnica di Dario). Marco Verdi è impostato come direttore vendite: entra con un altro venditore per vedere i permessi ridotti.'],open:['Login con PIN o con le credenziali TSC?','Boutique: la relazione tecnica parla di 1 boutique monomarca Rolex, 2 multimarca a Milano e Portofino stagionale; il sito elenca anche la boutique Patek Philippe. Nomi corretti da confermare.']},
+  login:{from:['Login con email e password del venditore.','La boutique si imposta in automatico da quella dell\'utente e si può cambiare dal selettore in alto: eventi e vendite la prendono da lì.','Ruoli: direttore vendite e titolare possono associare i prodotti alle PDA e vedono tutte le PDA aziendali (relazione tecnica di Dario). Marco Verdi è direttore vendite: entra con un altro venditore per vedere i permessi ridotti.'],open:['Le credenziali sono quelle degli utenti TSC o un accesso separato?','Su iPad condiviso in negozio serve un cambio utente rapido (es. PIN) oltre al login?','Boutique: la relazione tecnica parla di 1 boutique monomarca Rolex, 2 multimarca a Milano e Portofino stagionale; il sito elenca anche la boutique Patek Philippe. Nomi corretti da confermare.']},
   dashboard:{from:['L\'operatore deve fare 3 cose: gestire anagrafiche, fare la cassa, gestire gli eventi. Sono le azioni rapide in alto.','Arrivi compatibili: quando arriva un pezzo, il direttore vendite verifica a mano le PDA in sospeso di tutte le boutique e lo associa. Non c\'è controllo automatico dello stock sul gestionale.','Follow-up dopo la visita in negozio; task periodiche per compleanni e anniversari (lista requisiti Verga).'],open:['Quali numeri vuole vedere la direzione sulla home?','Collegamento con file Excel esterni (programmazione consegne Rolex): uso reale da chiarire, TSC non pianifica consegne.']},
   clienti:{from:['Ricerca su qualunque voce: nominativo, mail, cellulare, azienda, note; referenza cercata separatamente tra acquisti e manifestazioni (lista requisiti).','Filtri: brand, modello, referenza, ultimo acquisto, passaggio in negozio, tipologia, fascia, valutazione, lingua.','Venduto da: un venditore vede le sue vendite di un brand (es. "Claudia, le sue vendite Rolex").','Clienti dormienti: nessun passaggio, chiamata o mail da oltre 6 mesi.','Esportazione verso MailUp (sostituisce SALESmanago).'],open:['Filtri obbligatori richiesti dai brand.','Soglie delle fasce Bronzo/Argento/Oro/Platino per categoria.','Dopo quanto tempo un cliente è "dormiente"?']},
   cliente:{from:['Tre sezioni separate: acquisti e riparazioni letti dal gestionale, manifestazioni registrate sul CRM.','Registrazione passaggio con un clic: visita, chiamata ricevuta, chiamata fatta, mail. Motivo: nuova manifestazione, aggiornamento manifestazione, acquisto, riparazione.','Tipologia Prospect / Cliente / Commerciante: il Prospect diventa Cliente al primo ordine (relazione tecnica).','Valutazione del venditore 1-5, separata dalla fascia calcolata sugli acquisti.','Note multiple firmate con utente, data e ora; non si modificano le note degli altri.','Chat interna: messaggi e task ai colleghi legati alla scheda, anche periodici.','Privacy firmata dal cliente su iPad (fondamentale per Verga).'],open:['Relazioni: bastano quelle standard di TSC?','"Acquisti" in scheda: fatture o ordini di vendita?','La relazione tecnica segnala che TSC non consente modifiche di interfaccia: quanto di questo layout è realizzabile?']},
@@ -727,7 +735,6 @@ function shell(content){
 
 /* ---------------- LOGIN ---------------- */
 function vLogin(){
-  const b = BOUTIQUES.find(x => x.name === S.boutique);
   return `<div class="login">
   <section class="login-art">
     <span class="logo">${LOGO_FULL}</span>
@@ -738,21 +745,13 @@ function vLogin(){
     <div class="dial" aria-hidden="true"></div>
   </section>
   <section class="login-form">
-    <div class="field"><span class="label">1 · Boutique</span>
-      <div class="bq">${BOUTIQUES.map(x => `<button data-act="pick-b" data-v="${x.name}" class="${x.name === S.boutique ? 'on' : ''}"><b>${x.name}</b><small>${x.addr}</small></button>`).join('')}</div>
-    </div>
-    <div class="field"><span class="label">2 · Venditore</span>
-      <div class="ops">${OPERATORS.map(o => `<button data-act="pick-op" data-v="${o.name}" class="${o.name === S.operator ? 'on' : ''}"><span class="av">${opInitials(o.name)}</span>${o.name}</button>`).join('')}</div>
-    </div>
-    <div class="field"><span class="label">3 · PIN</span>
-      <div style="display:flex;gap:28px;align-items:center;flex-wrap:wrap">
-        <div class="pad">${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k => k === '' ? '<span></span>' : `<button data-act="pin" data-v="${k}" aria-label="${k === '⌫' ? 'Cancella' : k}">${k}</button>`).join('')}</div>
-        <div style="display:flex;flex-direction:column;gap:14px">
-          <div class="pin" aria-label="PIN">${[0,1,2,3].map(i => `<i class="${i < S.pin.length ? 'f' : ''}"></i>`).join('')}</div>
-          <p class="muted" style="margin:0;max-width:26ch">Demo: inserisci 4 cifre qualsiasi per entrare in <b>${b.name}</b>.</p>
-        </div>
-      </div>
-    </div>
+    <div><div class="label">Accesso riservato</div><h1 style="margin-top:6px">Accedi al portale</h1></div>
+    <label class="field"><span>Email</span><input class="in" id="l-email" type="email" autocomplete="username" autocapitalize="none" placeholder="nome.cognome@verga1947.it" value="${esc(S.loginEmail || '')}"></label>
+    <label class="field"><span>Password</span><div class="pw"><input class="in" id="l-pw" type="${S.showPw ? 'text' : 'password'}" autocomplete="current-password"><button type="button" data-act="pw-toggle" aria-label="${S.showPw ? 'Nascondi password' : 'Mostra password'}">${ic(S.showPw ? 'eyeOff' : 'eye')}</button></div></label>
+    <p id="l-err" class="tag red" hidden style="align-self:flex-start"></p>
+    <button class="btn btn-primary btn-lg" data-act="login">Accedi</button>
+    <button class="link" data-act="pw-forgot" style="align-self:center;font-size:13px">Password dimenticata?</button>
+    <p class="faint" style="margin:0;font-size:12px;text-align:center;overflow-wrap:anywhere">Demo: entra con <b>nome.cognome@verga1947.it</b> di un venditore (es. marco.verdi, sara.colombo) e una password qualsiasi.</p>
   </section>
 </div>
 <button class="notes-fab" data-act="notes">${ic('info')}Note di progetto</button>`;
@@ -1464,6 +1463,14 @@ function act(el, ev){
     case 'nav': S.navOpen = !S.navOpen; render(); break;
     case 'notes': S.notes = !S.notes; renderDrawer(); break;
     case 'logout': S.pin = ''; go('login'); break;
+    case 'login': {
+      const em = document.getElementById('l-email').value.trim().toLowerCase(), pw = document.getElementById('l-pw').value, err = document.getElementById('l-err');
+      const o = OPERATORS.find(x => x.email === em);
+      if (!em || !pw) { err.hidden = false; err.textContent = 'Inserisci email e password.'; break; }
+      if (!o) { err.hidden = false; err.textContent = 'Email non riconosciuta. Controlla l\'indirizzo o contatta l\'amministratore.'; break; }
+      Object.assign(S, {operator:o.name, boutique:o.b, loginEmail:em, showPw:false}); go('dashboard'); toast(`Accesso come ${o.name} · ${o.b}`); break; }
+    case 'pw-toggle': { const em = document.getElementById('l-email').value, pw = document.getElementById('l-pw').value; S.loginEmail = em; S.showPw = !S.showPw; render(); document.getElementById('l-pw').value = pw; break; }
+    case 'pw-forgot': toast('Nel portale reale parte la mail per reimpostare la password (demo)'); break;
     case 'pick-b': S.boutique = v; S.operator = OPERATORS.find(o => o.b === v).name; render(); break;
     case 'pick-op': S.operator = v; render(); break;
     case 'pin':
@@ -1654,6 +1661,7 @@ document.addEventListener('change', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (M) closeModal(); else if (S.notes) { S.notes = false; renderDrawer(); } }
+  if (e.key === 'Enter' && ['l-email','l-pw'].includes(e.target.id)) act(document.querySelector('[data-act="login"]'), e);
   if (e.key === 'Enter' && e.target.id === 'scan') act(document.querySelector('[data-act="scan-add"]'), e);
 });
 function gsearch(q){
