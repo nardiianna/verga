@@ -1,0 +1,37 @@
+<div class="row">
+	<div class='col-12 col-sm-4 col-md-3 third-column-product'>	
+		{% include 'menu_profile.html' %}
+	</div>
+	<div class="col-12 col-sm-8 col-md-9  col-xs-12 profileLeft">
+		<h2>{{lang('profile.agent.customer_review')}}</h2>
+		{% if customer_selected or new_customer %}
+    	    <p><b>{{lang('digital.invoice.company.business.name')}}:</b> {{customer_data.billing.fullname}}</p>
+    	    <p><b>{{lang('front.register.addr1')}}:</b> {{customer_data.billing.address}} - {{customer_data.billing.zipcode}} {{customer_data.billing.city}} ({{customer_data.billing.district}}) {{customer_data.billing.country}}</p>
+    	    {% if customer_data.billing.fiscalcode != "" %}<p><b>{{lang('digital.invoice.person.tax_number')}}:</b> {{customer_data.billing.fiscalcode}}</p>{% endif %}
+    	    {% if customer_data.billing.vatnumber != "" %}<p><b>{{lang('digital.invoice.company.vat_number')}}:</b> {{customer_data.billing.vatnumber}}</p>{% endif %}
+    	    {% if customer_data.billing.sdi != "" %}<p><b>{{lang('digital.invoice.company.unique_code')}}:</b> {{customer_data.billing.sdi}}</p>{% endif %}
+    	    {% if customer_data.billing.pec != "" %}<p><b>{{lang('digital.invoice.company.pec_address')}}:</b> {{customer_data.billing.pec}}</p>{% endif %}
+    	    {% if customer_data.billing.phone != "" %}<p><b>{{lang('register.phone')}}:</b> {{customer_data.billing.phone}}</p>{% endif %}
+    	    {% if customer_data.billing.email != "" %}<p><b>{{lang('register.email')}}:</b> {{customer_data.billing.email}}</p>{% endif %}
+    	    
+    	    {% if customer_data.payment != "" %}<p><b>{{lang('order.payment')}}:</b> {{customer_data.payment}}</p>{% endif %}
+    	    
+    	    <h4 class="mt-5 mb-3">{{lang('shipping.addresses')}} ({{customer_data.shipping|length}})</h4>
+    	    
+    	    {% for x in customer_data.shipping %}
+    	        <div class="mb-4 border-start ps-3 border-3 border-secondary">
+    	            <p><b>{{lang('digital.invoice.company.business.name')}}:</b> {{x.fullname}}</p>
+            	    <p><b>{{lang('front.register.addr1')}}:</b> {{x.address}} - {{x.zipcode}} {{x.city}} ({{x.district}}) {{x.country}}</p>
+            	    {% if x.phone != "" %}<p><b>{{lang('register.phone')}}:</b> {{x.phone}}</p>{% endif %}
+            	    {% if x.email != "" %}<p><b>{{lang('register.email')}}:</b> {{x.email}}</p>{% endif %}
+        	    </div>
+    	    {% endfor %}
+
+    	    
+	    {% else %}
+	        <div class="alert alert-warning" role="alert">
+                {{lang('profile.agent.no_customer_selected')}}
+            </div>
+	    {% endif %}
+	</div>
+</div>

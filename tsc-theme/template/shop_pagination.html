@@ -1,0 +1,53 @@
+{% set countItems = product_count %}
+	{% if numPages > 0 %}
+		<ul class="pagination justify-content-center">
+            <li>{# Serve solo per evitare bordi arrotondati al primo e ultimo elemento #}</li>
+            
+			{% set prevPage = currentPage-1%}
+			{% set nextPage = currentPage+1%}
+
+			{% if currentPage > 2 %}
+				<li class="page-item"><a class="page-link" href="{{urlPagination}}&page=1" rel="prev" aria-label="{{lang('acc_act.first_page')}}"><i class="fa fa-angle-double-left"></i></a></li>
+			{% endif %}
+
+			{% if currentPage > 1 %}
+				<li class="page-item"><a class="page-link" href="{{urlPagination}}&page={{prevPage}}" rel="prev" aria-label="{{lang('acc_act.prev_page')}}"><i class="fa fa-angle-left"></i></a></li>
+			{% endif %}
+
+			{% set fromPage = currentPage-2%}
+			{% if fromPage < 1 %} 
+				{% set fromPage = 1 %}
+			{% endif %}
+
+			{% set toPage = currentPage+2%}
+			{% if numPages < toPage %} 
+				{% set toPage = numPages %}
+			{% endif %}
+
+			{% if currentPage > 4 %}
+				<li class="page-item disabled"><span class="page-link">...</span></li>
+			{% endif %}
+
+			{% for i in fromPage..toPage  %}
+				{% if i == currentPage %}
+					<li class="page-item active"><a class="page-link">{{i}}</a></li>
+				{% else %}
+					<li class="page-item"><a class="page-link" href="{{urlPagination}}&page={{i}}" rel="next" aria-label="{{lang('acc_act.to_page')|replace({"[n]":i, "[tot]":toPage})}}">{{i}}</a></li>
+				{% endif %}
+			{% endfor %}
+			
+			{% if toPage < numPages %}
+				<li class="page-item disabled"><span class="page-link">...</span></li>
+			{% endif %}
+
+			{% if currentPage < numPages %}
+				<li class="page-item"><a class="page-link" href="{{urlPagination}}&page={{nextPage}}" rel="next" aria-label="{{lang('acc_act.next_page')}}"><i class="fa fa-angle-right"></i></a></li>
+			{% endif %}
+			
+			{% if numPages - currentPage > 1 %}
+				<li class="page-item"><a class="page-link" href="{{urlPagination}}&page={{numPages}}" rel="next" aria-label="{{lang('acc_act.last_page')}}"><i class="fa fa-angle-double-right"></i></a></li>
+			{% endif %}
+			
+            <li>{# Serve solo per evitare bordi arrotondati al primo e ultimo elemento #}</li>
+		</ul>
+	{% endif %}

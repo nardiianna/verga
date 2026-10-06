@@ -1,0 +1,22 @@
+<section class="section template_banner_image" id="section_{{vars.section.id}}_banner_image">
+	<div class="{{vars.layout}} text-center">
+		{% if attribute(vars.section.settings, 'link_'~locale)  != '' %}
+			<a href="{{attribute(vars.section.settings, 'link_'~locale)}}"
+			   rel="{{vars.section.settings.link_REL}}"
+			   target="{{vars.section.settings.link_TARGET}}"
+			   title="{{attribute(vars.section.settings, 'link_TITLE_'~locale)}}" >
+		{% endif %}
+			{% set src_val = attribute(vars.section.settings, 'image_'~locale) %}
+			{% if src_val == ''%}
+				{% set src_val = placeholders.banner_image %}
+			{% endif %}
+			<img src="{{src_val}}" 
+				 data-editor="{{vars.section.data_editor}}_image_{{locale}}" 
+				 alt="{{attribute(vars.section.settings, 'image_ALT')|default("Banner image")}}"
+				 data-placeholder="{{placeholders.banner_image}}"
+				 loading="lazy">
+		{% if attribute(vars.section.settings, 'link_'~locale) != '' %}
+			</a>		
+		{% endif %}
+	</div>
+</section>

@@ -1,0 +1,75 @@
+<div class="row">
+	<div class='col-12 col-sm-4 col-md-3 third-column-product'>	
+		{% include 'menu_profile.html' %}
+	</div>
+	<div class="col-12 col-sm-8 col-md-9  col-xs-12 profileLeft">
+		
+		<div class="row">
+			<div class="col-12 col-sm-6 col-md-6">
+				<div class="heading">{{lang('user.addresses')}}</div>
+			</div>
+			{% if request.path[3] == '' and shop_rules.new_shipping_address %}
+			<div class="col-12 col-sm-6 col-md-6 text-end xs-text-start">
+				<a href="{{request.script_name}}/profile/addresses/add" class="dn-btn dn-btn-brand-1 dn-btn-outline">{{lang('cart.add.address')}}</a>
+			</div>
+			{% endif %}
+		</div>
+		
+		<div class="addresses-container row">
+
+			{% if request.path[3] == '' %}
+				{% set addresses = user.addresses %}
+				{% for add in addresses %}
+				{% if not add.hidden %}
+					<div class="col-12 col-sm-6 col-md-6 wrap-well-address" id="{{add._id}}">
+						<div class="well well-address">
+							<p class="well-single-address">
+								<span class="name strong">{{add.fullname}}</span><br>
+								<span class="addr1">{{add.addr1}}</span> 
+								<span class="zip">{{add.zip}}</span> <span class="city">{{add.city}}</span> - <span class="state">{{add.stateName}}</span>
+								<span class="nation">{{add.countryName}}</span><br>
+								<span class="email">{{add.email}}</span>
+								<span class="phone">{{add.phone}}</span><br>
+								<span class="vat">{{add.vat}}</span>
+								{% if add.principal == 1%}	
+								<br><span class="text-success strong"><i class="fa fa-check"></i> {{lang('address.principal')}}</span>
+								{% else %}
+								<br>
+								<button type="button" class="set-main dn-btn-clear dn-text-info" data-id="{{add._id}}">{{lang('make.address.principal')}}</button>
+								{% endif %}
+							</p>
+							<p class="well-address-bottom">
+								<a href="{{request.script_name}}/profile/addresses/edit/{{add._id}}" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('admin.edit')}}</a>
+								<a class="dn-btn dn-btn-brand-1 dn-btn-filled remove-address {% if add.principal == 1 %}d-none{% endif %}" data-id="{{add._id}}">{{lang('admin.remove')}}</a>
+							</p>
+						</div>
+					</div>
+				{% endif %}
+			{% endfor %}
+
+			{% else %}
+				{% set addID = request.path.4 %}
+				{% if addID != ''%}
+					{% set add = getAddressById(addID) %}
+				{% endif %}
+				<div class="col-12">
+					<form id="address_profile">
+						{% include 'form_address_profile.html' %}
+						<div class="clearfix"></div>
+						<div id="address_error" class="alert alert-danger d-none">
+							{{lang('address.not.modified')}}
+						</div>
+						<div class="clearfix"></div>
+						<div class="text-end">
+							{% if addID != ''%}
+							<button type="submit" id="editAddress" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('admin.edit')}}</button>
+							{% else %}
+							<button type="submit" id="addAddress" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('admin.add')}}</button>
+							{% endif %}
+						</div>
+					</form>
+				</div>
+			{% endif %}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,41 @@
+<section class="section template_three_columns_box" id="section_{{vars.section.id}}_three_columns_box">
+	<div class="{{vars.layout}}">
+		<div class="row">
+		
+			{% set positions = ['left','center','right'] %}
+			{% for position in positions%}
+			
+				<div class="col-12 col-md-4 col-sm-4">
+					<div class="single_box text-center">
+
+					{% if attribute(vars.section.settings, position~'_link_'~locale)  != '' %}
+						<a href="{{attribute(vars.section.settings, position~'_link_'~locale)}}"
+						   rel="{{attribute(vars.section.settings, position~'_link_REL') }}"
+						   target="{{attribute(vars.section.settings, position~'_link_TARGET') }}"
+						   title="{{attribute(vars.section.settings, position~'_link_TITLE_'~locale)}}" >
+					{% endif %}
+
+						{% set src_val = attribute(vars.section.settings, position~'_image_'~locale) %}
+						{% if src_val == ''%}
+							{% set src_val = placeholders.image %}
+						{% endif %}
+
+						<img src="{{src_val}}" 
+							 data-editor="{{vars.section.data_editor}}_{{position}}_image_{{locale}}" 
+							 alt="{{attribute(vars.section.settings, position~'_image_ALT_'~locale)|default("Image " ~ position)}}"
+							 data-placeholder="{{placeholders.image}}"
+							 loading="lazy">
+
+					{% if attribute(vars.section.settings, position~'_link_'~locale) != '' %}
+						</a>		
+					{% endif %}
+
+					</div>
+				</div>
+
+			{% endfor %}
+			
+			<div class="clearfix"></div>
+		</div>
+	</div>
+</section>

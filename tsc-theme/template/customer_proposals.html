@@ -1,0 +1,191 @@
+<div class="row">
+	<div class='col-12 col-sm-4 col-md-3 third-column-product'>	
+		{% include 'menu_profile.html' %}
+	</div>
+	<div class="col-12 col-sm-8 col-md-9  col-xs-12 profileLeft">
+		{% if customer_selected or agent_selected or (user.uid > 0 and not is_agent) %}
+    		{% if request.query.n != "" %}
+    		    {% set n = request.query.n %}
+    		    
+                {% set proposal_details = fetchAndCache(shop_rules.fetchAndCache.proposal_details_customer ~ n)|jsondecode.detail %}
+				
+				{% for i in 1..3 if proposal_details is empty %}
+                    {% set proposal_details = fetchAndCache(shop_rules.fetchAndCache.proposal_details_customer ~ n~"&retry="~i)|jsondecode.detail %}
+                    <script>
+            		    console.log("Ripetizione F&C proposal details n° {{i}}");
+            		</script>
+                {% endfor %}
+        		
+        		<script>
+        		    console.log("proposal_details:", {{proposal_details|json}});
+        		</script>
+    		    <a href="/profile/proposals" class="mb-2 d-block"><i class="fas fa-angle-left"></i> {{lang('front.back')}}</a>
+    		    <h1 class="heading">{{lang('profile.agent.customer_quote')}} n°{{n}}</h1>
+    		    <div class="row row-gap-4 mb-5">
+    		        <div class="col-12 col-md-6"><h4>{{lang('profile.agent.quotes.heading.2')}}</h4> {{proposal_details.date|replace({" ":"T"})|date("d/m/Y - H:i")}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('profile.agent.quotes.heading.4')}}</h4> {{lang('proposal.status.' ~ proposal_details.pre_order_status)}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('order.payment')}}</h4> {{proposal_details.payment_method}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('invoice.shipping.method')}}</h4> {{proposal_details.shipping_method}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('shipping.address')}}</h4> {{proposal_details.delivery.del_fullname}}<br>{{proposal_details.delivery.del_address}},<br>{{proposal_details.delivery.del_zip}} {{proposal_details.delivery.del_city}} ({{proposal_details.delivery.del_state}}) {{proposal_details.delivery.del_country}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('billing.address')}}</h4> {{proposal_details.billing.bil_fullname}}<br>{{proposal_details.billing.bil_address}},<br>{{proposal_details.billing.bil_zip}} {{proposal_details.billing.bil_city}} ({{proposal_details.billing.bil_state}}) {{proposal_details.billing.bil_country}}</div>
+    		        {% if proposal_details.order_id > 0 %}
+    		            {% if is_agent and shop_rules.agent_can_see_customer_orders %}
+        		            <div class="col-12 col-md-6">
+        		                <h4>{{lang('pda.transformed_in_order')}}</h4>
+        		                N° {{proposal_details.order_id}} <a href="/profile/orders?n={{proposal_details.order_id}}" class="ms-2 dn-text-underline">{{lang('pda.open')}}</a>
+    		                </div>
+    		            {% else %}
+        		            <div class="col-12 col-md-6">
+        		                <h4>{{lang('pda.transformed_in_order')}}</h4>
+        		                N° {{proposal_details.order_id}} <a href="/order/{{proposal_details.order_id}}" class="ms-2 dn-text-underline">{{lang('pda.open')}}</a>
+    		                </div>
+    		            {% endif %}
+	                {% endif %}
+    		        <div class="col-12 col-md-6"><h4>{{lang('message.to.store')}}</h4> {{proposal_details.message}}</div>
+    		    </div>
+    		    
+    		    <div class="row row-gap-3 mb-4">
+    		        <div class="col-6 h4 border-bottom border-secondary pb-2">{{lang('cart.item')}}</div>
+    		        <div class="col-2 h4 border-bottom border-secondary pb-2">{{lang('item.price')}}</div>
+    		        <div class="col-2 h4 border-bottom border-secondary pb-2">{{lang('item.quantity')}}</div>
+    		        <div class="col-2 h4 border-bottom border-secondary pb-2">{{lang('cart.subtotal')}}</div>
+    		        
+    		        {% for x in proposal_details.items %}
+        		        <div class="col-6 border-bottom pb-2">
+        		            <h5>{{x.title}}</h5>
+        		            <small>{{lang('item.sku')}}: {{x.sku}}</small>
+        		            {% if x.options != "" %}<br><small>{{lang('item.variants')}}: {{x.options}}</small>{% endif %}
+    		            </div>
+        		        <div class="col-2 border-bottom pb-2">
+        		            {% if x.lis_price != x.price %}
+        		                <s>{{x.lis_price| number_format(2, ',', '.')}} {{currency|raw}}</s><br>{{x.cust.sconto}}<br>
+    		                {% endif %}
+    		                {{x.price| number_format(2, ',', '.')}} {{currency|raw}}
+    		            </div>
+        		        <div class="col-2 border-bottom pb-2">{{x.count}}</div>
+        		        <div class="col-2 border-bottom pb-2">{{(x.price * x.count)| number_format(2, ',', '.')}} {{currency|raw}}</div>
+    		        {% endfor %}
+    		    </div>
+    		    
+    		    <div class="text-end">
+            	    <h5>{{lang('total')}}</h5>{{proposal_details.total| number_format(2, ',', '.')}} {{currency | raw }} 
+            	</div>
+    		{% else %}
+        		{% set proposal_listing = fetchAndCache(shop_rules.fetchAndCache.proposal_listing_customer)|jsondecode %}
+				
+				{% for i in 1..3 if proposal_listing is empty %}
+                    {% set proposal_listing = fetchAndCache(shop_rules.fetchAndCache.proposal_listing_customer~"&retry="~i)|jsondecode %}
+                    <script>
+            		    console.log("Ripetizione F&C proposal listing n° {{i}}");
+            		</script>
+                {% endfor %}
+        		
+        		<script>
+        		    console.log("proposal_listing:", {{proposal_listing|json}});
+        		</script>
+        		
+        		<h1 class="heading">{{lang('profile.agent.customer_quotes')}}</h1>
+        		<table id="quotes-table" class="table list-proposals mb-5 list-table">
+        		    <thead>
+        			    <tr>
+        				    <th class="first-row p-2 p-md-3 text-start" style="width:20%">{{lang('profile.agent.quotes.heading.1')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.2')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.3')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.4')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.5')}}</th>
+        				    <th class="first-row p-2 p-md-3 text-center" style="width:20%">{{lang('profile.agent.details')}}</th>
+        			    </tr>
+        		    </thead>
+        		    <tbody>
+        		        {% for x in proposal_listing.list %}
+            		        <tr>
+                                <td class="p-2 p-md-3 cell text-start">{{x.pre_order_id}}</td> 
+                                <td class="p-2 p-md-3 cell">{{x.date|split(" ")|first|date("d/m/Y")}}</td>
+                                <td class="p-2 p-md-3 cell">{{x.total| number_format(2, ',', '.')}} {{currency|raw}}</td>
+                                <td class="p-2 p-md-3 cell">{{lang('proposal.status.' ~ x.pre_order_status)}}</td>
+                                <td class="p-2 p-md-3 cell">{{x.customer_fullname}}</td>
+                                <td class="p-2 p-md-3 text-center cell">
+                			        <a href="/profile/proposals?n={{x.pre_order_id}}" class="button-underline">{{lang('profile.agent.details')}}</a>
+                		        </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+            	</table>
+        	{% endif %}
+    	{% else %}
+    	    <div class="alert alert-warning" role="alert">
+                {{lang('profile.agent.no_customer_selected')}}
+            </div>
+    	{% endif %}
+	</div>
+</div>
+{% if customer_data.customer_id != "" %}
+    <script>
+        $(document).ready(function() {
+			//Se ci sono date in formato gg/mm/aaaa
+            $.extend(DataTable.ext.type.order, {
+                "date-eu-pre": function (date) {
+                    if (!date) return 0;
+                    const parts = date.split('/');
+                    if (parts.length !== 3) return 0;
+                    // parts[2] = anno, parts[1] = mese, parts[0] = giorno
+                    return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+                }
+            });
+
+            const quotesTable = new DataTable('#quotes-table', {
+                responsive: {
+                    details: {
+                        type: 'inline'   // dettagli sotto la riga (migliore su mobile)
+                    }
+                },
+                order: [[1, 'desc']],
+                displayLength: 25,
+				{% if locale == "it_IT" %}
+                language: {
+                    processing:     "Caricamento in corso...",
+                    search:         "Cerca",
+                    lengthMenu:     "_MENU_ elementi per pagina",
+                    info:           "Elementi: _TOTAL_",
+                    infoEmpty:      "",
+                    infoFiltered:   "",
+                    infoPostFix:    "",
+                    loadingRecords: "Caricamento...",
+                    zeroRecords:    "",
+                    emptyTable:     "",
+                    paginate: {
+                        first:      "Prima",
+                        previous:   "Precedente",
+                        next:       "Prossima",
+                        last:       "Ultima"
+                    },
+                },
+				{% endif %}
+                columnDefs: [
+                    {
+                        searchable: false,
+                        orderable:false,
+                        target: 5
+                    },
+                    {% if customer.custom_fields.role != "area_manager" %}{
+                        visible: false,
+                        target: 4
+                    },
+                    {% endif %}
+                    {
+                        targets: 1,
+                        type: 'date-eu',
+                    }
+                ],
+                layout: {
+                    top: null,
+                    topStart: 'info',
+                    topEnd: 'search',
+                    bottom: 'paging',
+                    bottomStart: null,
+                    bottomEnd: null
+                }
+            });
+        });
+    </script>
+{% endif %}

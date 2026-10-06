@@ -1,0 +1,193 @@
+{% set itemLink = '/product/'~item.uid~'/'~item.slug %}
+
+{% set minQuantity = item.data.minQuantity %}
+{% if minQuantity < 1 %}
+	{% set minQuantity = 1 %}
+{% endif %}
+					 
+{% set step = item.data.step %}
+{% if step < 1 %}
+	{% set step = 1 %}
+{% endif %}
+
+{% set variants = item.variants %}
+						
+{% if item.usevariants == 1 %}
+	
+	{% set tot = 0 %}
+	{% set exausted = true %}								
+	
+	{% if item.data.unlimited == 1 %}
+		{% set exausted = false %}
+	{% else %}
+		{% set countExausted = 0 %}
+		{% set countVars = variants | length %}
+		{% for var in variants %}
+			{% if var.available < minQuantity %}
+				{% set countExausted = countExausted + 1 %}
+			{% endif %}
+		{% endfor %}
+
+		{% if countExausted < countVars %}
+			{% set exausted = false %}
+		{% endif %}
+	{% endif %}
+
+{% else %}
+	
+	{% set exausted = true %}
+	{% if item.stockCount >= minQuantity or item.data.unlimited  %}
+		{% set exausted = false %}
+	{% endif %}
+
+{% endif %}
+
+<div class="product_preview d-flex flex-column justify-content-between">
+	<a href="{{itemLink}}" title="{{item.title}}">
+		<div class="product_preview_img">
+			<img class="lazy" src="{{placeholders.lazy}}" data-src="https://cdn.storeden.net/secache/{{item.image_id|default(shop_rules.placeholder)}}" alt="{{item.title}}">
+			{% if item.sale > 0 and theme.settings.general.product_preview.show_sale_ribbon =="yes" and not userB2B %}
+				<span class="ribbon {{theme.settings.general.product_preview.sale_ribbon_position}}">
+					-{{item.sale|round}}%
+				</span>
+			{% endif %}
+		</div>
+	</a>
+	<div class="product_preview_details flex-grow-1">
+		
+		<p class="product_preview_title"><strong>{{item.title}}</strong></p>
+		
+		{% if shop_rules.view_listing_prices %}
+			<p class="product_preview_price">
+				{% if userB2B %}
+                    {% set vat_value = getTaxProfile() %}
+                    {% set tax = getTaxProfile(item.taxprofile) %}
+                    {% set tax_value = tax.value %}
+                    {% if tax_value == 0 %}
+                      {% set tax_value = 22 %}
+                    {% endif %}
+                    {% set tax_value = 1 + (tax_value / 100) %}
+                    {% set product_price = attribute( item.attributes, b2b.listing) | replace(',', '.') %}
+                    {% set product_price = product_price / tax_value %}
+                    <span class="final_price">{{ product_price | nfx }} {{currency | raw }} {{lang('tax.label')}}</span>
+                {% else %}
+    				{% if item.sale > 0 %}
+    					<span class="price"><s>{{ item.price | nfx }} {{currency | raw }}</s></span>
+    				{% endif %}
+    				<span class="final_price">{{ item.final_price | nfx }} {{currency | raw }}</span>
+    			{% endif %}
+			</p>
+		{% endif %}
+		{% set hideDescription = '' %}
+		{% if theme.settings.general.product_preview.hide_description == 'yes' %}
+			{% set hideDescription = 'd-none' %}
+		{% endif %}
+		<p class="product_preview_description {{hideDescription}}">
+			{{ item.description | striptags | raw }}
+		</p>
+		
+		<div class="prod_rev rev_{{item.uid}} text-center">
+			<div class="product_preview_review d-none align-items-center justify-content-center">
+			    <div>
+				    <span class="product_review_{{item.uid}}"></span> 
+				</div>
+				<div class="small">
+					&nbsp;(<span class="product_count product_review_count_{{item.uid}}"></span>)
+				</div>
+			</div>
+			{% set item_reviews = getReviewsByType(item.uid, true) %}
+			<script>
+			    reviews_to_check[{{item.uid}}] = { count: '{{item_reviews.count}}', average: '{{item_reviews.average}}'};
+			</script>
+		</div>
+	</div>
+	
+	<div class="product_preview_button text-center">
+		{% if shop_rules.buy_from_listing %}
+			{% if exausted %}
+				<button type="button" class="dn-btn dn-btn-disabled dn-btn-filled disabled">
+					{{lang('item.unavailable')|capitalize}}
+				</button>
+			{% else %}
+				<button type="button" class="dn-btn dn-btn-brand-1 dn-btn-filled show-add-to-cart" 
+						data-uid="{{item.uid}}"
+						data-variants="{% if item.usevariants == 1 %}true{%else%}false{%endif%}">
+						{{lang('item.add.to.cart')}}
+				</button>
+			{% endif %}
+		{% else %}
+			<a href="{{itemLink}}" title="{{item.title}}" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('item.go_to_product')}}</a>
+		{% endif %}
+		
+		{% if user.uid > 0%}
+			
+			{% set hasWish = hasWish(item.uid) %}
+			{% if hasWish %}
+				{% set wishClass = 'fas fa-heart' %}
+			{% else %}
+				{% set wishClass = 'far fa-heart' %}
+			{% endif %}
+			<div class="text-center">
+				<button type="button" class="btn-wishlist dn-btn-clear" data-uid="{{item.uid}}">
+					<i class="{{wishClass}}"></i>
+					{{lang('front.wishlist')}}
+				</button>
+			</div>
+		{% endif %}
+	</div>
+
+	{% if exausted == false %}
+		<div class="product_quantity_select" aria-hidden="true" inert>
+			<button type="button" aria-label="{{lang('admin.close')}}" class="close_q dn-btn-clear"><i class="far fa-times-circle"></i></button>
+			<div class="quantity_select quantity_select_{{item.uid}}" data-uid="{{item.uid}}">
+
+				{% if item.usevariants == 1 %}
+
+					<div class="variants_add_to_cart_{{item.uid}}">
+						<div class="target"></div>
+					</div>
+
+				{% else %}
+
+					<p class="product_preview_price">
+						{% if userB2B %}
+								<span class="price add-to-price">{{product_price|nfx}}</span> {{currency|raw}}
+						{% else %}
+								<span class="price add-to-price">{{item.final_price|nfx}}</span> {{currency|raw}}
+						{% endif %}
+					</p>
+					{% if minQuantity > 1 or step > 1%}		
+						<p>
+							<small>
+								{{lang('item.min.quantity')}}  <strong>{{minQuantity}}</strong> {{lang('storefront.piece')}}<br>
+								{{lang('item.steps')}}  <strong>{{step}}</strong> {{lang('storefront.piece')}}
+							</small>
+						</p>
+					{% endif %}	
+					
+					<div class="btn-group product_quantity" data-min="{{minQuantity}}" data-step="{{step}}" data-unlimited="{{item.data.unlimited}}">
+						<button type="button" class="btn button-white qt-down" aria-label="{{lang('acc_act.decrease_qty')}}">-</button>
+						<button type="button" class="btn button-white quantity">{{minQuantity}}</button>
+						<button type="button" class="btn button-white qt-up" aria-label="{{lang('acc_act.increase_qty')}}">+</button>
+					</div>
+					<div class="clearfix"></div>
+					<button class="dn-btn dn-btn-brand-1 dn-btn-filled add-to-cart" data-uid="{{item.uid}}" data-variants="false">
+						{{lang('item.add.to.cart')}}
+					</button>
+
+				{% endif %}
+
+				<div class="alert alert-success d-none">
+					<p>{{lang('item.in.cart')}}</p>
+					<a href="/cart">{{lang('go.to.cart')}} <i class="fa fa-angle-right"></i></a>
+				</div>
+
+				<div class="alert alert-warning d-none">
+					<p>{{lang('max.quantity.reached')}}</p>
+					<a href="/cart">{{lang('go.to.cart')}} <i class="fa fa-angle-right"></i></a>
+				</div>
+
+			</div>
+		</div>
+	{% endif %}	
+</div>

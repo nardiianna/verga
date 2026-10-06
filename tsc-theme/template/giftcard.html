@@ -1,0 +1,556 @@
+{% set giftOptions = getGiftCardOptions() %}
+{% set giftOptionsCount = giftOptions | length %}
+
+{% if giftOptionsCount < 1 %}
+    <div class="container">
+    	<h3>{{lang('no.giftcard.option.available')}}</h3>
+    	<p>{{lang('no.giftcard.option.available.p')}}</p>
+    </div>
+{% else %}
+
+<div class="container" id="buy_giftcard_page">
+	<h1>{{lang('front.gift.card')}}</h1>
+	<div class="row">
+		<div class="col-12 col-sm-5 col-md-6">
+			<div class="padd">
+				<div id="giftcard-preview">
+				    <div id="gitcard-top" class="text-center">
+						<i class="fa fa-gift" id="gift-symb"></i> <span id="giftcard-name"></span>
+					</div>
+					<div id="giftcard-bottom">
+						<div class="row">
+							<div class="col-12 col-sm-6">
+								<div id="giftcard-text">
+									<h1>{{lang('front.gift.card')}} <span></span></h1>
+									<div class="clearfix"></div>
+									<h2 style="display:none">{{currency|raw}} <span id="gift-card-import">0,00</span></h2>
+								</div>
+							</div>
+							<div class="col-12 col-sm-6">
+								<div id="giftcard-user">
+									<span id="user_fullname"></span>
+									<br><span id="email_user"></span>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="col-12 col-sm-7 col-md-6" id="choose_card">
+			<h3>{{lang('choose.giftcard.size')}}</h3>
+			<p>{{lang('choose.giftcard.size.text')}}</p>
+			<div id="choose-gift-size">
+				{% for gift in giftOptions %}
+					<button class="btn btn-lg data-size" data-name="{{gift.name}}" data-id="{{gift._id}}" data-price="{{gift.price | nfx}}" data-value="{{gift.value | nfx}}">{{ gift.price | nfx }} &euro;</button>
+				{% endfor %}
+			</div>
+			<h3>{{lang('giftcard.choose.destination')}}</h3>
+			<p>{{lang('choose.destination')}}</p>
+			<div class="row">
+				<div class="col-12 col-sm-6">
+					<div class="form-group">
+						<label>{{lang('name')}}</label>
+						<input type="text" class="form-control" id="firstname" required  />
+					</div>
+				</div>
+				<div class="col-12 col-sm-6" id="destination_username">
+					<div class="form-group">
+						<label>{{lang('surname')}}</label>
+						<input type="text" class="form-control" id="lastname" required/>
+					</div>
+				</div>
+				<input type="hidden" class="form-control" name="gift[fullname]" id="giftcard_fullname" />
+			</div>
+			<div class="form-group">
+				<label>{{lang('email')}}</label>
+				<input type="email" class="form-control" name="gift[email]" id="destination_email" required/>
+			</div>
+		</div>
+	</div>
+	<div class="clearfix"></div>
+	<hr>
+	<div class="row">
+		<div class="col-12 col-sm-4">
+			<h3>{{lang('giftcard.billing.address')}}</h3>
+			<p>{{lang('giftcard.billing.address.text')}}</p>
+			<p class="text-danger">* {{lang('front.required.fields')}}</p>
+		</div>
+		{% set main_address = null %}
+		{% if user.addresses | length > 0 %}
+			{% for address in user.addresses %}
+				{% if address.principal == 1 %}
+					{% set main_address = address %}
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		<div class="col-12 col-sm-8" id="billng_data">
+			<div class="address_form">
+				<div class="row">
+				<input type="hidden" name="address_id" id="add_id" >
+				<div class="col-12 col-sm-12 col-md-6">
+					<div class="form-group">
+						<label>{{lang('register.fullname')}} <span class="text-danger">*</span></label>
+						<input type="text" name="fullname" class="form-control fullname" value="{{main_address.fullname}}" required>
+					</div>
+				</div>
+				<div class="col-12 col-sm-12 col-md-6">
+					<div class="form-group">
+						<label>{{lang('register.email')}} <span class="text-danger">*</span></label>
+						<input type="email" name="email" class="form-control email" value="{{main_address.email}}" required>
+					</div>
+				</div>
+				<div class="col-12 col-sm-12 col-md-6">
+					<div class="form-group">
+						<label>{{lang('register.phone')}} <span class="text-danger">*</span></label>
+						<input type="text" name="phone" class="form-control phone" value="{{main_address.phone}}" required>
+					</div>
+				</div>
+				<div class="col-12 col-sm-12 col-md-6">
+					<div class="form-group">
+						<label>{{lang('register.vat')}} <span class="text-danger">*</span></label>
+						<input type="text" name="vat" class="form-control vat" value="{{main_address.vat}}" required>
+					</div>
+				</div>
+				<div class="col-8">
+					<div class="form-group">
+						<label>{{lang('front.register.addr1')}} <span class="text-danger">*</span></label>
+						<input type="text" name="addr1" class="form-control addr1" value="{{main_address.addr1}}" required>
+					</div>
+				</div>
+				<div class="col-4">
+					<div class="form-group">
+						<label>{{lang('register.zip')}} <span class="text-danger">*</span></label>
+						<input type="text" name="zip" class="form-control zip" value="{{main_address.zip}}" required>
+					</div>
+				</div>
+			</div>
+			<div class="row list-country-state"> <!-- wrapper needed -->
+			    <div class="col-12 col-sm-12 col-md-4">
+					<div class="form-group">
+						<label>{{lang('register.city')}} <span class="text-danger">*</span></label>
+						<input type="text" name="city" class="form-control city" value="{{main_address.city}}" required>
+					</div>
+				</div>
+				<div class="col-12 col-sm-12 col-md-4">
+					<div class="form-group">
+						<label>{{lang('register.country')}} <span class="text-danger">*</span></label>
+						<select name="country" class="form-control listCountry country" data-current="{{main_address.nation}}" required>
+						</select>
+					</div>
+				</div>
+				<div class="col-12 col-sm-12 col-md-4">
+					<div class="form-group">
+						<label>{{lang('register.state')}} <span class="text-danger">*</span></label>
+						<select name="state" class="form-control listStates state" required data-current="{{main_address.state}}" data-current-country="">
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+	<div class="clearfix"></div>
+	<hr>
+	<div class="row">
+		<div class="col-md-4 col-sm-4 col-xs-12">
+			<h3>{{lang('giftcard.payment.method')}}</h3>
+			<p>{{lang('giftcard.payment.method.text')}}</p>
+		</div>
+		<div class="col-md-8 col-sm-8 col-xs-12">
+				<div id="payments_labels"><i class="fa fa-spin fa-rotate fa-lg fa-spinner"></i></div>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+	<hr>
+	<div class="row">
+		<div class="col-md-4 col-sm-4 col-xs-12">
+			<h3>{{lang('giftcard.destination.message')}}</h3>
+			<p>{{lang('giftcard.destination.message.text')}}</p>
+		</div>
+		<div class="col-md-8 col-sm-8 col-xs-12">
+				<textarea rows="5" class="form-control" id="gift_message"></textarea>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+	<hr>
+	<div class="row">
+		<div class="col-md-4 col-sm-4 col-xs-12">
+			<h3>{{lang('giftcard.order.confirm')}}</h3>
+			<p>{{lang('giftcard.order.confirm.text')}}</p>
+		</div>
+		<div class="col-md-8 col-sm-8 col-xs-12">
+				<p>
+					{{lang('giftcard.order.review')}} {{currency|raw}} <strong id="gift_card_total"><span class="text-danger missingData" data-target="choose_card">{{lang('gift.select.giftcard')}}</span></strong>
+					<br>{{lang('gift.card.price')}} {{currency|raw}} <strong id="gift_card_price"></span>
+				</p>
+				<div class="clearfix"></div>
+				<div id="terms">
+					<div id="conditions" class="form-group">
+						<p><strong>{{lang('admin.conditions')}}</strong></p>
+						<div id="box_conditions" class="well"></div>
+					</div>
+					<div class="form-group">
+						<p class="legalLinks">{{lang('store.conditions.cart') | raw}}</p>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+
+				<div id="errors">
+					<div id="gift_id_error" data-dismiss="alert" class="d-none alert alert-danger missingData" data-target="choose_card">
+						{{lang('gift.select.giftcard')}}
+						<span aria-hidden="true"><i class="fa fa-angle-up fa-lg"></i></span>
+					</div>
+					<div id="destination_username_error" data-dismiss="alert" class="d-none alert alert-danger missingData" data-target="destination_username">
+						{{lang('gift.provide.username')}}
+						<span aria-hidden="true"><i class="fa fa-angle-up fa-lg"></i></span>
+					</div>
+					<div id="address_error" data-dismiss="alert" class="d-none alert alert-danger missingData" data-target="billng_data">
+						{{lang('gift.provide.valid.billing')}}
+						<span aria-hidden="true"><i class="fa fa-angle-up fa-lg"></i></span>
+					</div>
+					<div id="payment_error" data-dismiss="alert" class="d-none alert alert-danger missingData" data-target="payments_labels">
+						{{lang('gift.provide.payment.method')}}
+						<span aria-hidden="true"><i class="fa fa-angle-up fa-lg"></i></span>
+					</div>
+					<div id="general_error" data-dismiss="alert" class="d-none alert alert-danger">
+						{{lang('gift.checkout.error')}}
+					</div>
+				</div>
+
+				<div class="text-center">
+					<button id="buyGiftCard" class="btn btn-lg btn-primary button">{{lang('giftcard.confirm.purchase')|upper}}</button>
+				</div>
+
+		</div>
+	</div>
+
+</div>
+<script>
+
+	var btn_original = '';
+	var doCheckout = false;
+	var checkoutErrors = 0;
+	var giftID = '';
+
+	$(document).on('click', '#buyGiftCard', function(){
+		if (!doCheckout){
+			checkoutErrors = 0;
+			doCheckout = true;
+			btn_original = $(this).html();
+			$(this).html('<i class="fa fa-2x fa-circle-o-notch fa-spin"></i>');
+			$(this).addClass('disabled');
+			validateFields();
+			validateAddress();
+			validatePaymentMethod();
+			if (checkoutErrors == 0){
+				var fullname = $('#billng_data').find('.fullname').val();
+				var email = $('#billng_data').find('.email').val();
+				var phone = $('#billng_data').find('.phone').val();
+				var vat = $('#billng_data').find('.vat').val();
+				var addr1 = $('#billng_data').find('.addr1').val();
+				var city = $('#billng_data').find('.city').val();
+				var state = $('#billng_data').find('.state').val();
+				var zip = $('#billng_data').find('.zip').val();
+				var country = $('#billng_data').find('.country').val();
+				addGiftAddress(fullname, addr1, city, zip, state, country, email, phone, vat, function(res){
+					if (typeof res === 'undefined'){
+							$('#address_error').removeClass('d-none');
+							$(this).html(btn_original);
+							$(this).removeClass('disabled');
+							doCheckout = false;
+						} else {
+							if (res.result == 'success'){
+								$('#billng_data #add_id').val(res._id.$id);
+								var address = $('#add_id').val();
+								var firstname = $('#firstname').val();
+								var lastname = $('#lastname').val();
+								var email = $('#destination_email').val();
+								var message = $('#gift_message').val();
+								var payment_profile = $('input[name="payment"]:checked').val();
+								var attachments = [];
+								Storeden.buyGiftCard(giftID, address, firstname+' '+lastname, email, message, payment_profile, attachments, buyGiftCardCallback);
+							} else {
+								$('#address_error').removeClass('d-none');
+								$(this).html(btn_original);
+								$(this).removeClass('disabled');
+								doCheckout = false;
+							}
+						}
+				})
+			} else {
+				$(this).html(btn_original);
+				$(this).removeClass('disabled');
+				doCheckout = false;
+			}
+			doCheckout = false;
+			errors = 0;
+		}
+	})
+
+	function buyGiftCardCallback(res){
+		if (res.redirect_url != '' && res.redirect_url != null) {
+				window.location = res.redirect_url;
+	  } else {
+			$('#general_error').removeClass('d-none');
+			$(this).html(btn_original);
+			$(this).removeClass('disabled');
+			doCheckout = false;
+		}
+	}
+
+	function addGiftAddress(fullname, addr1, city, zip, state, country, email, phone, vat, callback){
+		Storeden.addAddress(fullname, addr1, city, zip, state, country, email, phone, vat, callback);
+	}
+
+	function validateGiftEmail(email) {
+	  var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+	  return re.test(email);
+	}
+
+
+	function validateFields(){
+
+		var firstname = $('#firstname').val();
+		var lastname = $('#lastname').val();
+		var email = $('#destination_email').val();
+		var user_errors = 0;
+
+		if (giftID == ''){
+			$('#gift_id_error').removeClass('d-none');
+			checkoutErrors++;
+		} else {
+			$('#gift_id_error').addClass('d-none');
+		}
+
+		if (firstname == ''){
+			$('#firstname').parent().addClass('has-error');
+			checkoutErrors++;
+			user_errors++;
+		} else {
+			$('#firstname').parent().removeClass('has-error');
+		}
+
+		if (lastname == ''){
+			$('#lastname').parent().addClass('has-error');
+			checkoutErrors++;
+			user_errors++;
+		} else {
+			$('#lastname').parent().removeClass('has-error');
+		}
+
+		if (email == '' || !(validateGiftEmail(email)) ){
+			$('#destination_email').parent().addClass('has-error');
+			checkoutErrors++;
+			user_errors++;
+		} else {
+			$('#destination_email').parent().removeClass('has-error');
+		}
+
+		if (user_errors > 0){
+			$('#destination_username_error').removeClass('d-none');
+		} else {
+			$('#destination_username_error').addClass('d-none');
+		}
+
+	}
+
+	function validatePaymentMethod(){
+		var p = $('input[name="payment"]:checked').val();
+		if (p == ''){
+			$('#payment_error').removeClass('d-none');
+			checkoutErrors++;
+		} else {
+			$('#payment_error').addClass('d-none');
+		}
+	}
+
+	function validateAddress(){
+		var fullname = $('#billng_data').find('.fullname').val();
+		var email = $('#billng_data').find('.email').val();
+		var phone = $('#billng_data').find('.phone').val();
+		var vat = $('#billng_data').find('.vat').val();
+		var addr1 = $('#billng_data').find('.addr1').val();
+		var city = $('#billng_data').find('.city').val();
+		var state = $('#billng_data').find('.state').val();
+		var zip = $('#billng_data').find('.zip').val();
+		var country = $('#billng_data').find('.country').val();
+		var errors = checkGiftAddressErrors(fullname, email, phone, vat, addr1, city, state, zip, country);
+		if (errors > 0){
+			checkoutErrors += errors;
+			$('#address_error').removeClass('d-none');
+		}
+	}
+
+	$(document).on('change paste keyup', '.has-error input, .has-error select', function(){
+		$(this).closest('.has-error').removeClass('has-error');
+	})
+
+	function checkGiftAddressErrors(fullname, email, phone, vat, addr1, city, state, zip, country){
+
+		var errors = 0;
+		var container = $('#billng_data');
+		var vat_required = true;
+
+		if (vat == '' && vat_required ){
+			++errors;
+			container.find('.vat').parent().addClass('has-error');
+		} else {container.find('.vat').parent().removeClass('has-error');}
+
+		if (fullname == ''){
+			++errors;
+			container.find('.fullname').parent().addClass('has-error');
+		}else {container.find('.fullname').parent().removeClass('has-error');}
+
+		if (phone == ''){
+			++errors;
+			container.find('.phone').parent().addClass('has-error');
+		}else {container.find('.phone').parent().removeClass('has-error');}
+
+		if (addr1 == ''){
+			++errors;
+			container.find('.phone').parent().addClass('has-error');
+		}else {container.find('.phone').parent().removeClass('has-error');}
+
+		if (city == ''){
+			++errors;
+			container.find('.city').parent().addClass('has-error');
+		}else {container.find('.city').parent().removeClass('has-error');}
+
+		if (state == ''){
+			++errors;
+			container.find('.state').parent().addClass('has-error');
+		}else {container.find('.state').parent().removeClass('has-error');}
+
+		if (zip == ''){
+			++errors;
+			container.find('.zip').parent().addClass('has-error');
+		}else {container.find('.zip').parent().removeClass('has-error');}
+
+		if (country == ''){
+			++errors;
+			container.find('.country').parent().addClass('has-error');
+		}else {container.find('.country').parent().removeClass('has-error');}
+
+		if (email == '' || !(validateGiftEmail(email)) ){
+			++errors;
+			container.find('.email').parent().addClass('has-error');
+		}else {container.find('.email').parent().removeClass('has-error');}
+
+		return errors;
+	}
+
+	var billing_country = '{{main_address.nation}}';
+
+	$(document).ready(function(){
+		 Storeden.getConditions(function(res){
+			 $('#conditions #box_conditions').html(res.text);
+		 });
+	})
+
+	$(document).on('change', '.listCountry', function(){
+		billing_country = $(this).val();
+		$('#payments_labels').html('<i class="fa fa-2x fa-circle-o-notch fa-spin"></i>');
+		getGiftcard_Payments();
+	})
+
+	$(document).ready(function(){
+		getGiftcard_Payments();
+	})
+
+	function getGiftcard_Payments(){
+		Storeden.getGiftCardPayments(function(payments){
+			var destination = $('#payments_labels');
+			var html = '';
+			var count = 0;
+			for (var i in payments) {
+				var payment = payments[i];
+				if (payment['available'] == 1) {
+					var active = '';
+					var checked = '';
+					if (count == 0) {
+						active = 'active';
+						checked = 'checked="checked"';
+					}
+					++count;
+					html += '<label class="payment_label '+active+' btn btn-block button-white" id="payment_'+i+'">';
+					html += '<input type="radio" name="payment" value="'+i+'" '+checked+'>';
+					html += '<div class="row">';
+					html += '<div class="col-md-8 col-sm-7 col-xs-12 text-start">';
+					html +=  '<p class="payment_name">'+payment['label']+'</p>';
+					html += '</div>';
+					html += '<div class="col-md-4 col-sm-5 col-xs-12 text-end xs-text-start">';
+					if (payment['cost'] > 0) {
+						var price = parsePrice(payment['cost']);
+						html += '<p>{{currency | raw }} <span class="payment_cost" data-cost="'+payment['cost']+'">'+price+'</span></p>';
+					} else {
+						html += '<p><span class="payment_cost d-none" data-cost="0">0</span></p>';
+					}
+					html += '</div>';
+					html += '</div>';
+					html += '</label>';
+				}
+			}
+			destination.html(html);
+			//$('.payment_label')[0].trigger("click")
+		}, billing_country);
+	}
+
+	$(document).on('change paste keyup', '#lastname, #firstname', function(){
+		var f = $('#firstname').val();
+		var l = $('#lastname').val();
+		$('#giftcard_fullname').val(f+' '+l);
+		$('#user_fullname').html(f+' '+l);
+		$('#gift_card_user').html(f+' '+l);
+	})
+	$(document).on('change paste keyup', '#destination_email', function(){
+		$('#email_user').html($(this).val());
+		$('#gift_card_email').html($(this).val());
+	})
+	{% if giftOptions|length > 0 %}
+		$(document).ready(function(){
+			($('.data-size')[0]).trigger("click")
+		})
+	{% endif %}
+	$(document).on('click', '.data-size', function(e){
+		$('.data-size.active').removeClass('active');
+		$('#gift_id_error').addClass('d-none');
+		$(this).addClass('active');
+		var that = this;
+		giftID = $(this).attr('data-id');
+		$('.data-size').removeClass('btn-primary').addClass('btn-default');
+		$(this).removeClass('btn-default').addClass('btn-primary');
+		$('#gift-card-import').html($(this).attr('data-value'));
+		$('#gift_card_total').html($(this).attr('data-value'));
+		$('#gift_card_price').html($(this).attr('data-price'));
+		$('#gift-card-import').parent().fadeIn();
+		$('#giftcard-name').html($(this).attr('data-name'));
+	});
+	$(document).ready(function(){
+		Storeden.getCountries(getCountries);
+	})
+	$(document).on('change', '.payment_label input', function(){
+	 	var checked = $(this).is(':checked');
+		if (checked){
+			$('.payment_label.active').removeClass('active');
+			$(this).parent().addClass('active');
+		} else {
+			$(this).parent().removeClass('active');
+		}
+	})
+
+	function scrollToTarget(id){
+		$("html, body").animate({
+			scrollTop: $('#'+id).offset().top - 20
+		}, 500);
+	}
+	$(document).on('click', '.missingData', function(){
+		scrollToTarget($(this).attr('data-target'));
+	})
+
+
+</script>
+{% endif %}

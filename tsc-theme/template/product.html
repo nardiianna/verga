@@ -1,0 +1,624 @@
+<script src="https://static-cdn.storeden.com/html5/js/lightbox.js"></script>
+<link href="https://static-cdn.storeden.com/html5/css/lightbox.css" type="text/css" rel="stylesheet" />
+<script>
+	var variants = {{product.variants | json | raw}}; 
+	var minQuantity = parseInt({{product.data.minQuantity}});
+	var steps = parseInt({{product.data.step}});
+	var main_image = 'https://egress.storeden.net/gwebp/{{product.image_id}}';
+	var main_sku = '{{product.code}}';
+	var main_ean = '{{product.data.ean13}}';
+</script>
+
+{% set first_available = null %}
+{% set product_image = 'https://egress.storeden.net/gwebp/'~product.image_id|default(shop_rules.placeholder) %}
+{% for var in product.variants %}
+	{% if var.quantity >= product.data.minQuantity or product.data.unlimited == 1 %}
+		{% set countAvailable = countAvailable + 1 %}
+		{% if first_available == null %}
+			{% set first_available = var %}
+			{% if  first_available.image != '' %}
+				{% set product_image = first_available.image %}
+			{% endif %}
+		{% endif %}
+	{% endif %}
+{% endfor %}
+
+<div class="container" id="product_page" data-b2b="{% if userB2B %}true{% else %}false{% endif %}" itemscope itemtype="http://schema.org/Product">
+	
+	<div class="row">
+		
+		<div class="col-12 col-md-6 product_left_column">
+			<div class="swiper-container gallery-top swiper">
+    			<div class="swiper-wrapper">
+    			    {#<div class="swiper-slide" style="background-image:url('{{product_image}}')"></div>#}
+					<div class="swiper-slide text-center">
+						<a href="{{product_image}}" class="smart-lazy-wrapper" data-lightbox="item-pictures" data-gallery="{{product_image}}" aria-label="{{lang('acc_act.expand_image')}}">
+							<img
+								src="https://cdn.storeden.net/secache/{{product.image_id}}"
+								data-src="{{product_image}}"
+								class="swiper-fit smart-lazy-image is-loading"
+								itemprop="image"
+								alt="{{product.title|e}} - {{lang('acc_act.main_img')}}"
+								fetchpriority="high"
+								decoding="async"
+							>
+						</a>
+					</div>
+    			    
+    			    {% for img in product.related %}
+				    	{% if not img.is_main %}
+							<div class="swiper-slide text-center">
+								<a href="{{img.original}}" class="smart-lazy-wrapper" data-lightbox="item-pictures" data-gallery="{{img.original}}" aria-label="{{lang('acc_act.expand_image')}}">
+									<img
+										src="{{img.small|replace({'http:': 'https:'})}}"
+										data-src="{{img.original|replace({'http:': 'https:'})}}"
+										class="swiper-fit smart-lazy-image is-loading"
+										loading="lazy"
+										decoding="async"
+										alt="{{product.title|e}} - {{lang('acc_act.additional_img')}}{{loop.index}}"
+									>
+								</a>
+							</div>
+						{% endif %}
+					{% endfor %}
+    			</div>
+    			<!-- Add Arrows -->
+    			<div class="swiper-button-next swiper-button-white"></div>
+    			<div class="swiper-button-prev swiper-button-white"></div>
+    		</div>
+    		{% if product.related|length > 1 %}
+				<div class="swiper-container gallery-thumbs swiper">
+					<div class="swiper-wrapper">
+						<div class="swiper-slide">
+							<img src="https://cdn.storeden.net/secache/{{product.image_id}}" class="swiper-fit-thumb" alt="{{product.title|e}} {{lang('acc_act.thumbnail')}}" loading="lazy">
+						</div>
+						{% for img in product.related %}
+							{% if not img.is_main %}
+								<div class="swiper-slide">
+									<img src="{{img.small|replace({'http:': 'https:'})}}" class="swiper-fit-thumb" alt="{{product.title|e}} {{lang('acc_act.thumbnail')}}" loading="lazy">
+								</div>
+							{% endif %}
+						{% endfor %}
+					</div>
+				</div>
+			{% endif %}
+            <script>
+				function loadSmartGalleryImage(slide) {
+					if (!slide) {
+						return;
+					}
+
+					const image = slide.querySelector('.smart-lazy-image');
+
+					if (!image) {
+						return;
+					}
+
+					if (
+						image.dataset.loaded === 'true' ||
+						image.dataset.loading === 'true'
+					) {
+						return;
+					}
+
+					const fullImageUrl = image.dataset.src;
+
+					if (!fullImageUrl) {
+						image.classList.remove('is-loading');
+						return;
+					}
+
+					image.dataset.loading = 'true';
+
+					const loader = new Image();
+
+					loader.onload = function () {
+						const completeImageReplacement = function () {
+							image.src = fullImageUrl;
+
+							image.dataset.loaded = 'true';
+							image.dataset.loading = 'false';
+
+							image.classList.remove('is-loading');
+							image.classList.add('is-loaded');
+						};
+
+						if (typeof loader.decode === 'function') {
+							loader.decode()
+								.catch(function () {
+									/*
+									* Il file è stato caricato ma decode() non è riuscito.
+									* Si procede comunque con la sostituzione.
+									*/
+								})
+								.then(completeImageReplacement);
+						} else {
+							completeImageReplacement();
+						}
+					};
+
+					loader.onerror = function () {
+						image.dataset.loading = 'false';
+
+						/*
+						* Mantiene visibile la miniatura e ferma lo shimmer.
+						*/
+						image.classList.remove('is-loading');
+					};
+
+					loader.src = fullImageUrl;
+				}
+
+				function loadSmartGallerySlide(swiper, index) {
+					if (
+						!swiper ||
+						!swiper.slides ||
+						!swiper.slides[index]
+					) {
+						return;
+					}
+
+					loadSmartGalleryImage(swiper.slides[index]);
+				}
+
+				function loadSmartGalleryActiveSlide(swiper) {
+					if (!swiper) {
+						return;
+					}
+
+					const currentIndex = swiper.activeIndex;
+
+					loadSmartGallerySlide(swiper, currentIndex);
+				}
+
+                {% if product.related|length > 1 %}
+					const galleryThumbs = new Swiper('.gallery-thumbs', {
+						spaceBetween: 10,
+						slidesPerView: 4,
+						freeMode: true,
+						watchSlidesVisibility: true,
+						watchSlidesProgress: true,
+					});
+				{% endif %}
+                const galleryTop = new Swiper('.gallery-top', {
+                    spaceBetween: 10,
+            
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev'
+                    },
+            
+                    {% if product.related|length > 1 %}
+                    thumbs: {
+                        swiper: galleryThumbs
+                    },
+                    {% endif %}
+            
+                    on: {
+                        init: function () {
+                            loadSmartGalleryActiveSlide(this);
+                        },
+                    
+                        slideChange: function () {
+                            loadSmartGalleryActiveSlide(this);
+                        }
+                    }
+                });
+            </script>
+		</div>
+		
+		<div class="col-12 col-md-6 product_right_column" >
+			
+			<h1 itemprop="name" class="heading">{{product.title}}</h1>
+			
+			{% if product.code != '' or first_available.sku != '' %}
+			    <div class="mb-3 {% if theme.settings.product.show_sku != 'yes'%}d-none{% endif %}">
+					{{lang('item.sku')}} 
+					<span id="sku" itemprop="sku">
+						{% if first_available == null or first_available.sku == '' %}
+							{{product.code}}
+						{% else %}
+							{{first_available.sku}}
+						{% endif %}
+					</span>
+				</div>
+			{% endif %}
+			
+			<div class="row d-flex flex-row-reverse">
+				
+				<div class="col-12" itemprop="offers" itemscope itemtype="http://schema.org/Offer">
+				    <meta itemprop="url" content="{{document.seo.canonical}}">
+					<div class="product_quantity_select mb-3">
+            			
+            			{% if shop_rules.view_product_page_prices %}
+    						<div class="h2 product_price" id="product_page_price">
+    							{% if userB2B %}
+                                    {% set tax = getTaxProfile(product.taxprofile) %}
+                                    {% set tax_value = tax.value %}
+                                    {% if tax_value == 0 %}
+                                      {% set tax_value = 22 %}
+                                    {% endif %}
+                                    {% set tax_value = 1 + (tax_value / 100) %}
+                                    {% set product_price = attribute( product.attributes, b2b.listing) | replace(',', '.') %}
+                                    {% set product_price = product_price / tax_value %}
+                                    <span class="final_price add-to-price"><span>{{ product_price | nfx | replace({",":"."})}} {{lang('tax.label')}}</span> {{currency | raw }}</span>
+                                    <meta itemprop="price" content="{{ product_price | nfx | replace({",":"."})}}" />
+                                    <meta itemprop="priceCurrency" content="{{group.currency}}" />
+                                {% else %}
+        							{% if first_available == null %}
+    									{% if product.sale > 0 %}
+    									    <span class="price"><s><span>{{ product.price | nfx }}</span> {{currency | raw }}</s></span>
+    									{% endif %}
+    									<span class="final_price add-to-price"><span>{{ product.final_price | nfx }}</span> {{currency | raw }}</span>
+    									<meta itemprop="price" content="{{ product.final_price | nfx | replace({",":"."})}}" />
+    									<meta itemprop="priceCurrency" content="{{group.currency}}" />
+    								{% else %}
+    									{% if product.sale > 0 and not userB2B %}
+    										<span class="price"><s><span>{{ first_available.price | nfx }}</span> {{currency | raw }}</s></span>
+    									{% endif %}
+    									<span class="final_price add-to-price"><span>{{ first_available.final_price | nfx }}</span> {{currency | raw }}</span>
+    									<meta itemprop="price" content="{{ first_available.final_price | nfx | replace({",":"."})}}" />
+    									<meta itemprop="priceCurrency" content="{{group.currency}}" />
+    								{% endif %}
+        						{% endif %}
+    						</div>
+						{% else %}
+						    <div class="alert alert-warning text-center" role="alert">
+								<a href="/login">
+									{{lang('content_not_allowed')}}
+								</a>
+                            </div>
+						{% endif %}
+				
+						<div class="quantity_select quantity_select_{{product.uid}}" data-uid="{{product.uid}}">
+					
+						{% set available = false %}
+
+						{% if product.usevariants == 1 %}
+							{% set tot = 0 %}
+
+							{% if product.data.unlimited == 1 %}
+								{% set available = true %}
+							{% else %}
+
+								{% set countAvailable = 0 %}
+								{% set countVars = product.variants | length %}
+								{% for var in product.variants %}
+									{% if var.quantity >= product.data.minQuantity %}
+										{% set countAvailable = countAvailable + 1 %}
+									{% endif %}
+								{% endfor %}
+
+								{% if countAvailable > 0 %}
+									{% set available = true %}
+								{% endif %}
+							{% endif %}
+						
+							{% set current_keys = first_available.superkey | split('_') %}
+
+							<div class="variants_container row">
+							{% for key,value in product.vars %}
+								{% set index = loop.index - 1 %}	
+								{% set options = value.options %}
+								<div class="col-md-12 col-sm-12 col-xs-12">
+									<div class="form-group variation">
+										<div class="variation_title"><strong>{{value.title}}</strong></div>
+										<select id="var_{{formatKey(key)}}" class="form-select var_select" aria-label="{{lang('acc_act.choose_variant')}} {{key}}">
+											{% for option in options %}
+											<option value="{{option.option | lower}}"
+													{% if attribute(current_keys, index)|lower == option.option|lower%}
+														selected="selected"
+													{% endif %}
+													>{{option.title}}</option>
+											{% endfor %}
+										</select>
+									</div>
+								</div>
+								<div class="clearfix"></div>
+							{% endfor %}
+							</div>
+
+							{% else %}
+								{% if product.stockCount >= product.data.minQuantity or product.data.unlimited %}
+									{% set available = true %}
+								{% endif %}
+							{% endif %}
+							
+							{% if shop_rules.buy_from_product_page %}
+								<div class="btn-group product_quantity" id="product_quantity" data-min="{{product.data.minQuantity}}" 
+									data-step="{{product.data.step}}" data-unlimited="{{product.data.unlimited}}">
+									<button type="button" class="btn button-white qt-down" aria-label="{{lang('acc_act.decrease_qty')}}">-</button>
+									<button type="button" class="btn button-white quantity">{{product.data.minQuantity}}</button>
+									<button type="button" class="btn button-white qt-up" aria-label="{{lang('acc_act.increase_qty')}}">+</button>
+								</div>
+							{% endif %}
+							<div class="clearfix"></div>
+
+                            {% if available %}
+                        		<meta itemprop="availability" content="InStock" />
+                        	{% else %}
+                        		<meta itemprop="availability" content="OutOfStock" />
+                        	{% endif %}
+
+							{% if available %}
+                    			
+                    			{% if shop_rules.buy_from_product_page %}
+                        			<button class="dn-btn dn-btn-brand-1 dn-btn-filled add-to-cart" id="add-to-cart" data-uid="{{product.uid}}" 
+    										data-variants="{% if product.usevariants == 1 %}true{%else%}false{%endif%}">
+    										{{lang('item.add.to.cart')}}
+    								</button>
+								{% endif %}
+							{% else %}
+								<button class="dn-btn dn-btn-disabled dn-btn-filled add-to-cart disabled" id="add-to-cart" data-uid="{{product.uid}}"
+										data-variants="{% if product.usevariants == 1 %}true{%else%}false{%endif%}">
+										{{lang('item.unavailable')}}
+								</button>
+							{% endif %}
+
+							<div class="alert alert-success d-none">
+								<p>{{lang('item.in.cart')}}</p>
+								<a href="/cart">{{lang('go.to.cart')}} <i class="fa fa-angle-right"></i></a>
+							</div>
+
+							<div class="alert alert-warning d-none">
+								<p>{{lang('max.quantity.reached')}}</p>
+								<a href="/cart">{{lang('go.to.cart')}} <i class="fa fa-angle-right"></i></a>
+							</div>
+
+
+							{% if (product.data.minQuantity > 1 or product.data.step > 1) or theme.settings.product.show_shipping_cost == 'yes' or theme.settings.product.show_delivery_date == 'yes' or gift_option.active == 1 %}	
+								<p>
+
+								{% if product.data.minQuantity > 1 or product.data.step > 1%}		
+									{{lang('item.min.quantity')}}  <strong>{{product.data.minQuantity}}</strong> {{lang('storefront.piece')}}<br>
+									{{lang('item.steps')}}  <strong>{{product.data.step}}</strong> {{lang('storefront.piece')}}
+									<br>	
+								{% endif %}
+								
+							    {% if theme.settings.product.show_shipping_cost == 'yes' and product.shipping_id_calculated != null %}
+									{% if product.shipping_cost_calculated  > 0 %}
+										{{lang('front.item.start.shipping')}} 
+											<span class="btn-tooltip" data-placement="bottom" title="" data-container="body" data-original-title="{{lang('front.shipping.calculated.info') | replace({'%minQuantity%':  product.data.minQuantity }) }}">
+												<strong>{{ product.shipping_cost_calculated | nfx }} {{currency | raw}}</strong>
+											</span>
+										<br>
+									{% else %}
+										{{lang('front.item.shipping')}}
+											<span class="btn-tooltip" data-placement="bottom" title="" data-container="body" data-original-title="{{lang('front.shipping.calculated.info') | replace({'%minQuantity%':  product.data.minQuantity }) }}">
+											{{lang('front.item.freeshipping')}}
+											</span>
+										<br>
+									{% endif %}
+								{% endif %}
+							
+								{% if theme.settings.product.show_delivery_date == 'yes' and theme.settings.product.show_delivery_date != null %}
+									<span id="estimated-delivery">
+										{% set ext_del = getEstimatedDelivery(product.packageTime, product.shipping_delivery_calculated) %}
+										{{ lang('estimated.delivery') }} {{ lang('from.delivery') }} 
+										<strong> {{ lang(ext_del.fromID)}} {{ ext_del.from }} </strong> 
+										{{ lang('to.delivery') }} <strong>{{ lang(ext_del.toID)}} {{ ext_del.to }}</strong>
+										<br>
+									</span>
+								{% endif %}
+
+								{% if gift_option.active == 1%}
+									{{lang('front.gift.option.available')}}<br>
+								{% endif %}
+
+							</p>
+						{% endif %}
+					
+					
+						{% if user.uid > 0%}
+							{% set hasWish = hasWish(product.uid) %}
+							{% if hasWish %}
+            					{% set wishClass = 'fas fa-heart' %}
+            				{% else %}
+            				    {% set wishClass = 'far fa-heart' %}
+            				{% endif %}
+							<button type="button" class="dn-btn-clear btn-wishlist pointer" data-uid="{{product.uid}}">
+								<i class="{{wishClass}}"></i>
+								{{lang('front.wishlist')}}
+							</button>
+						{% endif %}
+					
+						</div>
+					</div>
+				</div>
+				
+				<div class="col-12">
+					{% if theme.settings.general.reviews.reviews_product == 'yes' and product.reviews.single_count > 0 %}
+						<div id="product_reviews">
+							<p class="text-muted">
+								<span id="product-stars"></span>&nbsp;
+								<a href="#showProductReviews" data-bs-toggle="modal"  data-uid="{{product.uid}}" id="showProductReviewsLink">
+									{{lang('front.view.store.reviews') | lower }} ({{product.reviews.single_count}})
+								</a>
+								<script>
+									printStars({{product.reviews.single_average}}, '', $('#product-stars'));
+								</script>
+							</p>
+						</div>
+					{% endif %}
+    		    
+    		        {% if product.reviews.single_count > 0 %}
+    					<span class="d-none" itemprop="aggregateRating" itemscope itemtype="https://schema.org/AggregateRating">
+                            <span itemprop="ratingValue">{{product.reviews.single_average}}</span>
+                            <span itemprop="ratingCount">{{product.reviews.single_count}}</span>
+                            <span itemprop="itemReviewed">{{product.title}}</span>
+                            <span itemprop="author">Storeden</span>
+    						<span itemprop="bestRating">5</span>
+                        </span>
+                    {% endif %}
+			
+    			    {% set brand = null %}
+			        {% if product.brandUID > 0 %}
+						{% set brand = getBrand(product.brandUID) %}
+						<p class="{% if theme.settings.product.show_brand != 'yes'%}d-none{%endif%}" >
+						    <meta itemprop="brand" content="{{brand.name}}">
+						    <a href="/shop/brand/{{brand.uid}}/{{brand.slug}}" title="{{brand.name}}" class="dn-text-brand-1">{{ brand.name }}</a>
+					    </p>
+					{% endif %}
+					
+					<div id="product_details">
+						<p>
+							{% if product.data.ean13 != '' or first_available.ean13 != '' %}
+							    <span class="{% if theme.settings.product.show_ean != 'yes'%}d-none{% endif %}">
+    								{{lang('item.ean')}} 
+    								<span id="ean" itemprop="gtin13">
+    									{% if first_available == null or first_available.ean13 == '' %}
+    										{{product.data.ean13}}
+    									{% else %}
+    										{{first_available.ean13}}
+    									{% endif %}
+    								</span><br>
+    							</span>
+							{% endif %}
+							
+							{% if product.data.mpn != '' or first_available.mpn != '' %}
+							    <span class="{% if theme.settings.product.show_mpn != 'yes'%}d-none{% endif %}">
+    								{{lang('item.mpn')}} 
+    								<span id="mpn" itemprop="mpn">
+    									{% if first_available == null or first_available.ean13 == '' %}
+    										{{product.data.mpn}}
+    									{% else %}
+    										{{first_available.mpn}}
+    									{% endif %}
+    								</span><br>
+    							</span>
+							{% endif %}
+							
+						</p>
+					</div>
+					
+					{% if product.description != '' %}
+						<div id="product_main_description" itemprop="description">
+							{{ product.description|raw }}
+						</div>
+					{% endif %}
+					{% if theme.settings.product.show_share == "yes" %}
+    					<div class="clearfix" id="item_sharing">
+    						<span class="share-title"><i class="fa fa-share-alt"></i> {{lang('share')}} </span>
+    						{% set url = 'http://'~group.friendlyURL~'/product/'~product.uid %}
+    						<a href="https://www.facebook.com/sharer/sharer.php?u={{url}}&image={{post.ext_img}}" class="openPopup btn button-white fb" id="share_fb"><i class="fab fa-facebook-f"></i></a>
+    						<a href="https://twitter.com/home?status={{url}}" class="btn button-white tw" target="_blank"><i class="fab fa-twitter"></i></a>
+    						<a href="https://pinterest.com/pin/create/button/?url={{url}}&media={{post.ext_img}}" class="openPopup btn button-white pin"><i class="fab fa-pinterest"></i></a>
+    					</div>
+					{% endif %}
+					
+					{% if theme.settings.product.show_tags == 'yes' and product.tags | length > 1 %}
+						<p>
+							<i class="fa fa-tag"></i> {{lang('page.tags')}}&nbsp;&nbsp;
+							{% for tag in product.tags %}
+							<a href="/shop/tags/{{tag}}">#{{tag}}</a>&nbsp;
+							{% endfor %}
+						</p>
+					{% endif %}
+				</div>
+				
+			</div>
+		</div>
+		
+		<div class="clearfix"></div>
+		
+		{% set tabs = getItemTabDescription(product.uid) %}
+		
+		{% set show_extra_description = false %}
+		{% set countParam =  product.parameters | length %}
+		
+		{% if tabs | length > 0 or (theme.settings.product.show_paramters == 'yes' and countParam > 0 ) %}
+			{% set show_extra_description = true %}
+		{% endif %}
+		
+		<div class="col-md-12">
+			<div id="product_extra_description">
+				
+				{% if show_extra_description %}
+					
+						<ul class="nav nav-tabs" role="tablist">
+							
+							{% set c = 0 %}
+							
+							{% if theme.settings.product.show_paramters == 'yes' and countParam > 0 %}
+								{% set c = c+1 %}
+								<li role="presentation" class="nav-item" >
+									<a class="nav-link {% if c == 1%} active {% endif %}" href="#parameters" aria-controls="parameters" role="tab" data-toggle="tab">
+										<span data-editor="settings_product_show_paramters_title_{{locale}}">
+											{{attribute(theme.settings.product, 'show_paramters_title_'~locale)}}
+										</span>
+									</a>
+								</li>
+							{% endif %}
+							
+							{% for i, tab in tabs %}
+								{% if tab.description != '' %}
+									{% set c = c+1 %}
+									<li role="presentation" class="nav-item" >
+										<a class="nav-link {% if c == 1%} active {% endif %}" href="#tab_{{i}}" role="tab" data-toggle="tab">
+											{{tab.title}}
+										</a>
+									</li>
+								{% endif %}
+							{% endfor %}
+						</ul>
+				
+						
+						<div class="tab-content">
+							
+							{% set c = 0 %}
+							
+							{% if theme.settings.product.show_paramters == 'yes' and countParam > 0 %}
+								{% set c = c+1 %}
+								<div role="tabpanel" class="tab-pane {% if c == 1%} active {% endif %}" id="parameters">
+									<div class="row">
+										{% for param in product.parameters %}
+											<div class="col-md-4 col-sm-6 col-xs-12">
+												{{ param.entry_key |replace({'-': " "}) }}: {{ param.entry_value }}
+											</div>
+										{% endfor %}
+									</div>
+								</div>
+							{% endif %}
+							
+							{% for i, tab in tabs %}
+								{% if tab.description != '' %}
+									{% set c = c+1 %}
+									<div role="tabpanel" class="tab-pane {% if c == 1%} active {% endif %}" id="tab_{{i}}">
+										{{ tab.description|raw }}
+									</div>
+								{% endif %}
+							{% endfor %}
+							
+						</div>
+				
+				{% endif %}
+				
+			</div>
+		</div>
+		
+	</div>
+</div>
+
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'product')%}
+	{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>
+
+<div class="modal fade" id="showProductReviews">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<div class="heading">{{lang('item.reviews')}}</div>
+			</div>
+			<div class="modal-body">
+				<div id="review-list"></div>
+			</div>
+			<div class="modal-footer">
+				<button class="btn button pull-right" data-bs-dismiss="modal" id="item-details-fast">{{lang('admin.close')}}</button>
+			</div>
+		</div>
+	</div>
+</div>

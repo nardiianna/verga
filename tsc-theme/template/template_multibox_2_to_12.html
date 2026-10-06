@@ -1,0 +1,101 @@
+<style>
+    #section_{{vars.section.id}}_multibox_2_to_12 .multi-columns-grid{
+        display:grid;
+        grid-template-columns: repeat( {{vars.section.settings.desk_col}}, 1fr);
+        gap:{{vars.section.settings.desk_gap}}px;
+    }
+    @media(max-width: 767px){
+        #section_{{vars.section.id}}_multibox_2_to_12 .multi-columns-grid{
+	        grid-template-columns: repeat( {{vars.section.settings.mob_col}}, 1fr);
+	        gap:{{vars.section.settings.mob_gap}}px;
+	    }
+    }
+</style>
+<section class="section template_multibox_2_to_12" id="section_{{vars.section.id}}_multibox_2_to_12">
+	<div class="{{vars.layout}}">
+		{% set top_text_present = false %}
+	    {% if attribute(vars.section.settings, 'title_'~locale) != "" %}
+	        {% set top_text_present = true %}
+		    <div class="heading {{vars.section.settings.title_position}} mb-0" role="heading" aria-level="2">{{attribute(vars.section.settings, 'title_'~locale)}}</div>
+	    {% endif %}
+	    {% if attribute(vars.section.settings, 'subtitle_'~locale) != "" %}
+	        {% set top_text_present = true %}
+		    <div class="subtitle dn-text-secondary {{vars.section.settings.title_position}}">{{attribute(vars.section.settings, 'subtitle_'~locale)}}</div>
+	    {% endif %}
+		<div class="multi-columns-grid {% if top_text_present %}mt-3{% endif %}">
+    		{% for position in 1..12 %}
+    		    {% if attribute(vars.section.settings, 'show_banner_'~position) == "yes" and attribute(vars.section.settings, 'blank_banner_'~position) != "yes" %}
+                    <div class="single_box">
+                        {% if attribute(vars.section.settings, 'link_'~position)  != '' %}
+                            <a href="{{attribute(vars.section.settings, 'link_'~position)}}"
+                            rel="{{attribute(vars.section.settings, 'link_'~position~'_REL') }}"
+                            target="{{attribute(vars.section.settings, 'link_'~position~'_TARGET') }}"
+                            title="{{attribute(vars.section.settings, 'link_'~position~'_TITLE')}}" >
+                        {% endif %}
+                        
+                        {% set src_val = attribute(vars.section.settings, 'image_'~position) %}
+                        {% set src_val_alt = attribute(vars.section.settings, 'image_alt_'~position) %}
+                        {% if src_val == ''%}
+                            {% set src_val = placeholders.image %}
+                        {% endif %}
+                        
+                        <div class="banner_element">
+                            {% if attribute(vars.section.settings, 'svg_'~ position) != "" %}
+                                <div class="svg-container text-center">{{attribute(vars.section.settings, 'svg_'~ position)}}</div>
+                            {% else %}
+                                {% if src_val_alt %}
+                                    <div class="alt-img-container" style="background-image:url({{src_val_alt}});">
+                                {% endif %}
+                                <img src="{{src_val}}" 
+                                    data-editor="{{vars.section.data_editor}}_{{position}}_image" 
+                                    alt="{{attribute(vars.section.settings, 'image_'~position~'_ALT')|default(attribute(vars.section.settings, 'text_'~position~'_'~locale))}}"
+                                    data-placeholder="{{placeholders.image}}"
+                                    class="w-100"
+                                    loading="lazy">
+                                {% if src_val_alt %}
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+                            
+                            {% if attribute(vars.section.settings, 'text_'~position~'_'~locale) != '' %}
+                                <div class="caption-title mt-2 {% if attribute(vars.section.settings, 'button_'~position~'_position') == "full" %}text-center{% else %}{{attribute(vars.section.settings, 'button_'~position~'_position')}}{% endif %}"
+                                    data-editor="{{vars.section.data_editor}}_text_{{position}}_{{locale}}">
+                                    {{attribute(vars.section.settings, 'text_'~position~'_'~locale)|raw}}
+                                </div>
+                            {% endif %}
+                            {% if attribute(vars.section.settings, 'text_b_'~position~'_'~locale) != '' %}
+                                <div class="caption mt-2 dn-text-secondary" 
+                                    data-editor="{{vars.section.data_editor}}_text_b_{{position}}_{{locale}}">
+                                    {{attribute(vars.section.settings, 'text_b_'~position~'_'~locale)|raw}}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if attribute(vars.section.settings, 'link_'~position)  != '' %}
+                            </a>		
+                        {% endif %}
+                        {% if attribute(vars.section.settings, 'button_'~position~'_yn_'~locale) == "yes" %}
+                            <div class="mt-4 {% if attribute(vars.section.settings, 'button_'~position~'_position') != "full" %}{{attribute(vars.section.settings, 'button_'~position~'_position')}}{% endif %}">
+                                <a href="{{attribute(vars.section.settings, 'button_'~position~'_link')}}" class="dn-btn dn-btn-brand-1 dn-btn-filled {% if attribute(vars.section.settings, 'button_'~position~'_position') == "full" %}w-100{% endif %}" >{{attribute(vars.section.settings, 'button_'~position~'_text_'~locale)}}</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% elseif attribute(vars.section.settings, 'show_banner_'~position) == "yes" and attribute(vars.section.settings, 'blank_banner_'~position) == "yes" %}
+                    <div class="single_box text-center"></div>
+                {% endif %}
+    		{% endfor %}
+		</div>
+    	
+		{% if vars.section.settings.button_yn == "yes" %}
+    		<div class="text-center mt-3">
+    		    <a href="{{attribute(vars.section.settings, 'button_link')}}"
+                    rel="{{attribute(vars.section.settings, 'button_link_REL') }}"
+                    target="{{attribute(vars.section.settings, 'button_link_TARGET') }}"
+                    title="{{attribute(vars.section.settings, 'button_link_TITLE')}}"
+                    class="dn-btn dn-btn-brand-1 dn-btn-filled">
+        		    {{attribute(vars.section.settings, 'button_text_'~locale)}}
+        	    </a>
+    	    </div>
+	    {% endif %}
+	</div>
+</section>

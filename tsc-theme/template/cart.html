@@ -1,0 +1,2414 @@
+{% if shop_rules.checkout_type == "proposal" %}
+    {% include 'cart_proposal.html' %}
+{% elseif shop_rules.checkout_type == "standard" %}
+    {% include 'cart_standard_tsc.html' %}
+{% else %}
+
+    {% set page_sections = attribute(theme_sections, 'cart')%}
+    {% set items = cartItems() %}
+    {% set countItems = cartCount() %}
+    {% set cartTotal = cartTotal() %}
+    <script>
+        var pagamentoExtra = '{{customer.custom_fields.metodopagamento}}';
+        if(pagamentoExtra == "---"){ pagamentoExtra = "" };
+        var taxOk = true;
+    </script>
+    {% set difference = 0 %}
+    {% set minAmount = group.props.checkoutlimit %}
+    {% if minAmount > 0 %}
+    	{% set difference = minAmount - cartTotal%}
+    {% endif %}
+    
+    {% set cart_user = user.uid%}
+    {% if cart_user == ''%}
+    	{% set cart_user = 0 %}
+    {% endif %}
+    
+    {% set haveBilling = false %}
+    
+    <div class="container">
+        
+        <div id="box_empty_cart" {% if countItems > 0 %} style="display:none" {% endif %}>
+        	<p>{{lang('yout.cart.is.empty') | raw }}</p>	
+        	<a href="/shop" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('back.to.shop')}}</a>
+        </div>
+        
+        {% if countItems > 0 %}
+            <div class="row d-none">
+                <div class="col-12 col-sm-4">
+                    <div class="h1" id="completeOrderSection">{{lang('complete.order')}}</div>
+                </div>
+                <div class="col-12 col-sm-8">
+                    <div id="cart_steps">
+        				<ul class="cart-steps {% if user.uid == 0 %}cart-steps_guest{% endif %}">
+        					{% if user.uid == 0 %}
+        					<li id="step_0">
+        						<span class="line"></span>
+        						<span class="label">{{lang('cart.step.login')}}</span>
+        						<span class="number current"><i class="fa fa-check"></i></span>
+        					</li>
+        					{% endif %}
+        					<li id="step_1">
+        						<span class="line"></span>
+        						<span class="label">{{lang('cart.step.addresses')}}</span>
+        						<span class="number {% if user.uid > 0 %}current{%endif%}"><i class="fa fa-check"></i></span>
+        					</li>
+        					<li id="step_2">
+        						<span class="line"></span>
+        						<span class="label">{{lang('cart.step.shipping')}}</span>
+        						<span class="number"><i class="fa fa-check"></i></span>
+        					</li>
+        					<li id="step_3">
+        						<span class="line"></span>
+        						<span class="label">{{lang('cart.step.payment')}}</span>
+        						<span class="number"><i class="fa fa-check"></i></span>
+        					</li>
+        					<li id="step_4">
+        						<span class="line"></span>
+        						<span class="label">{{lang('cart.step.confirm')}}</span>
+        						<span class="number"><i class="fa fa-check"></i></span>
+        					</li>
+        				</ul>
+        			</div>
+        		</div>
+            </div>
+            <div class="row">
+                <div class="col-12 col-sm-6">
+                    {% set cart_review = "" %}
+                	<form method="POST" action="/cart" id="formCartQuantity">
+                		<table class="cart_table table table-condensed">
+                			<tbody>
+            			    {% set cart_sku = {} %}
+                			{% for k,item in items %}
+                				{% set dataOptions = '' %}
+                				
+                				{% set totalItem = item.price*item.count  %}
+                				{% set exp = explode('#|#', k) %}
+                				{% set itemUID = exp.0 %}
+                				
+                				{% set options = explode('_', exp.1) %}
+                				
+                				{% if exp.1 != '' %}
+                					{% set dataOptions = exp.1 %}
+                				{% else%}
+                					{% set options = '' %}
+                				{% endif %}
+                
+                				{% set product = getCompleteItem(itemUID, false, true, false) %}
+                
+                				{% set available = product.stockCount %}
+                				{% if product.data.unlimited %}
+                					{% set available = 'unlimited' %}
+                				{% elseif product.usevariants == 1 %}
+                					{% for var in product.variants %}
+                						{% if var.superkey | replace({"." : "-DOT-"}) == exp.1 %}
+                							{% set available = var.available %}
+                						{% endif %}
+                					{% endfor %}
+                				{% endif %}
+                				
+                				{% if product.title == ''%}
+                				{% set productTitle = item.title %}
+                				{% else %}
+                				{% set productTitle = product.title %}
+                				{% endif %}
+                
+                				{% set minQuantity = product.data.minQuantity %}
+                				{% if minQuantity < 1 %}
+                					{% set minQuantity = 1 %}
+                				{% endif %}
+                
+                				{% set step = product.data.step %}
+                				{% if step < 1 %}
+                					{% set step = 1 %}
+                				{% endif %}
+                			
+                				{% set optionClear = exp.1 |replace({'*': "asterix"}) %}
+                				{% set rowID = 'row_'~itemUID~'_'~optionClear %}
+                				
+                				{% set tax = getTaxProfile(product.taxprofile) %} {% set tax_value = tax.value %}
+                                {% if tax_value == 0 %}
+                                    {% set tax_value = 22 %}
+                                {% endif %}
+                                {% set tax_value = 1 + (tax_value / 100) %}
+                                {% set product_price = attribute( product.attributes, b2b.listing) | replace(',', '.') %} {% set imponibile = product_price / tax_value %}
+                                {% set product_taxes = product_price - imponibile %}
+                				
+                                {% set cart_sku = cart_sku | merge({("_"~product.code) : product.categoryUID}) %}
+                        
+                				<tr id="{{rowID}}" class="row_{{k}} cart_single_row {% if professional_blocked %}not-purchasable{% endif %}" data-class="row_{{k}}" data-id="{{rowID}}" data-sku="{{product.code}}">
+                					<td data-th="{{lang('cart.item')}}">
+                						<div class="row cart_table_row">
+                							<div class="col-sm-3 col-md-3 col-3 cart_table_image noPaddingLeft">
+                								<img src="https://cdn.storeden.net/secache/{{product.image_id|default(shop_rules.placeholder)}}" class="img-responsive" alt="{{productTitle}} - {{lang('acc_act.main_img')}}">
+                							</div>
+                							<div class="col-sm-9 col-md-9 col-9 cart_table_content">
+                								<a class="strong item-name" href="{{request.script_name}}/product/{{itemUID}}/{{product.slug}}">{{productTitle}}</a><br>{{product.code}}
+                								{% set l = options | length %}
+                								{% if l > 0 %}
+                									<br><span class="options">
+                										{% for option in options%}
+                										    {% set option_found = false %}
+                											{% for k, vars in product.vars if not option_found %}
+                												{% for j,value in vars.options%}
+                													{% if value.option | lower | replace({'.':'-dot-'}) == option | lower%}
+                														{{vars.title}}:
+                														{{ value.title}}
+                														{% set option_found = true %}
+                													{% endif %}
+                												{% endfor %}
+                											{% endfor %}
+                										{% endfor %}
+                									</span>
+                								{% endif %}
+                								{% if minQuantity > 1 or step > 1%}		
+                									<br>{{lang('item.min.quantity')}}  {{minQuantity}} {{lang('storefront.piece')}}, 
+                									{{lang('item.steps')}} {{step}} {{lang('storefront.piece')}}
+                								{% endif %}
+                								<div class="price">
+                								    <span>{{lang('price')}}: </span> <span class="item_single_price" data-product-price="{{imponibile | round(2)}}">{{item.price | nfx}}</span> {{currency |raw}}
+                            						<span class="tax-row d-none" data-product-taxes="{{product_taxes | round(2)}}">
+                            							 - <small>{{lang('tax')}} {{currency | raw }} <span></span> </small>
+                            						</span>
+                								</div>
+                								<div class="quantity_select quantity_select_{{k}}" data-uid="{{product.uid}}">
+                        							<div class="btn-group product_quantity" 
+                        								 data-min="{{minQuantity}}" 
+                        								 data-step="{{step}}" 
+                        								 data-unlimited="{{product.data.unlimited}}"
+                        								 data-key="{{k}}"
+                        								 data-max="{{available}}"
+                        								 >
+                        								<button type="button" class="btn button-white qt-down fromCart">-</button>
+                        								<button type="button" class="btn button-white quantity">{{item.count}}</button>
+                        								<button type="button" class="btn button-white qt-up fromCart">+</button>
+                        								<input type="hidden" name="quantity[{{k}}]" class="quantity_input" value="{{item.count}}">
+                        							</div>
+                        							<button class="btn button-white remove_item remove_item_{{k}}" data-key="{{k}}" aria-label="{{lang('admin.item.remove')}}"><i class="fas fa-trash-alt"></i></button>
+                        							<p class="text-danger overquantity">{{lang('max.quantity.reached')}}</p>
+                        						</div>
+                        						
+                        						{% set cart_review = cart_review ~ "<div class='col-9'><p>"~productTitle %}
+                        						{% if item.count > 1 %}
+                        						    {% set cart_review = cart_review ~"<br><span class='mx-4'>"~item.count~" X "~item.price | nfx ~ " " ~ currency ~ "</span></p></div><div class='col-3 text-end'><br>"%}
+                        						{% else %}
+                        						    {% set cart_review = cart_review ~ "</p></div><div class='col-3 text-end'>" %}
+                        						{% endif %} 
+                                                {% set cart_review = cart_review ~ " "~(item.price*item.count)|nfx ~ " " ~ currency ~ "</div>" %}
+                    						
+                    						</span>
+                							</div>
+                						</div>
+                					</td>
+        
+                				</tr>	
+                			
+                			{% endfor %}
+                			
+                			<script>console.log("cart_sku", {{cart_sku|json}})</script>
+                			
+                			{% if gift_option.active == 1%}
+                				<tr id="gift_option">
+                					<td colspan="3">
+                						<div class="row">
+                							<div class="col-md-5 col-sm-5 col-12">
+                								<div class="cart_switch">
+                									<span class="switch" id="gift-switch">
+                										<input type="checkbox" value="1" id="isGift" name="isGift">
+                									</span>
+                									<span class="switch-label">{{lang('front.gift.option')}}</span> 
+                								</div>
+                							</div>
+                							<div class="col-md-7 col-sm-7 col-12">
+                								<div class="d-none" id="giftMessage">
+                									<div class="clearfix"></div>
+                									<p>{{lang('front.gift.option.message')}}</p>
+                									<textarea class="form-control" name="giftOptionMessage" id="giftOptionMessage" rows="4"></textarea>	
+                								</div>
+                							</div>
+                						</div>
+                					</td>
+                					<td class="text-center  xs-d-none" id="giftPriceCell">
+                						<div class="d-none" id="giftPrice">
+                							<span id="gift_price_wrap" class="{%if gift_option.price == 0%}d-none{%endif%}">
+                								{{currency | raw }} 
+                								<span id="gift_price" data-price="{{gift_option.price}}">
+                									{{ gift_option.price | nfx }} 
+                								</span>
+                							</span>
+                							<span id="gift_free" class="{%if gift_option.price > 0%}d-none{%endif%}">{{lang('free')}}</span>
+                						</div>
+                					</td>
+                					<td  class="xs-d-none"></td>
+                				</tr>
+                			{% endif %}
+                				
+                			</tbody>
+                		</table>
+                	</form>
+                	<div class="text-end"><b>{{lang('cart.subtotal')}}:</b> {{cartTotal|nfx}} {{currency|raw}}</div>
+                	{% include 'cart_review.html' %}
+                </div>
+                <div class="col-sm-6 col-12">
+        			<div id="steps_content">
+        			    <input type="hidden" value="" name="shipping_address" id="shipping_address_id">
+        			    <input type="hidden" value="" name="billing_address" id="billing_address_id">
+        				{% if request.path.2 not in ['checkout','invoice'] %}
+        				    <div id="step_0_content" class="step_content active" data-count="0">
+        				    {% if user.uid  == 0 %}
+        						<div class="heading">{{lang('guest.login.title')}}</div>
+        						<p>{{lang('guest.login.text')}}</p>
+        						<p>{{lang('please.choose.one')}}:</p>
+        						<div class="row row-gap-3 justify-content-center" id="guest_options">
+        							<div class="col-6">
+        								<label class="guest_label btn btn-light btn-block w-100" for="login_checkout">
+        									<input type="radio" value="signin" name="guest_cart_action" id="login_checkout" 
+        										   data-target="guest_signin"> {{lang('sign.in')}}
+        								</label>
+        							</div>
+        							<div class="col-6">
+        								<label class="guest_label btn btn-light btn-block w-100" for="register_checkout">
+        									<input type="radio" value="register" name="guest_cart_action" id="register_checkout" 
+        										   data-target="guest_register" > {{lang('register')}}
+        								</label>
+        							</div>
+        							<div class="col-6">
+        								<label class="guest_label btn-light btn btn-block w-100" for="guest_checkout">
+        									<input type="radio" value="skip" name="guest_cart_action" id="guest_checkout" 
+        										   data-target="guest_proceed"> 
+        									{{lang('front.proceed.as.guest')}}
+        								</label>
+        							</div>
+        						</div>
+        						
+        						{# Scelta se si vuole fattura per i NON loggati #}
+        						<div class="guest_panel" id="guest_proceed">
+    								<div class="formChooseInvoice">
+    									<div class="heading">{{lang('guest.proceed')}}</div>
+    									<p>{{lang('front.need.invoice')}}</p>
+    									<div class="yes_no_choice d-flex">
+                						    <div class="w-50 px-1"><a href="/{{request.path.1}}/invoice" class="dn-btn dn-btn-brand-1 dn-btn-filled btn_move_step_large">{{lang('yes')}}</a></div>
+                						    <div class="w-50 px-1"><a href="/{{request.path.1}}/checkout" class="dn-btn dn-btn-brand-1 dn-btn-filled btn_move_step_large">{{lang('no')}}</a></div>
+                						</div>
+    								</div>
+        						</div>
+        
+        						<div class="guest_panel" id="guest_register">
+        							<div class="formRegistration">
+        								
+        								<a href="/login/registration" class="dn-btn dn-btn-brand-1 dn-btn-filled w-100 py-3">{{lang('cart.go_to_registration')|upper}}</a>
+        								{#<div class="heading">{{lang('register')}}</div>
+        								<div class="row">
+        									<div class="col-md-6 col-sm-6 col-12">
+        										<a href="{{document.fb_login}}" class="btn btn-facebook btn-block social_button"><i class="fa fa-facebook"></i> Facebook Connect</a>
+        									</div>
+        									<div class="col-md-6 col-sm-6 col-12">
+        										<a href="{{document.google_login}}" class="btn btn-google-plus btn-block social_button"><i class="fa fa-google-plus"></i> Google Connect</a>
+        									</div>
+        									<div class="clearfix"></div>
+        								</div>
+        								<p>{{lang('new.account.text') | raw}}</p>
+        								<input type="hidden" name="language" class="language" value="{{locale}}">
+        								<div class="row">
+        									<div class="col-md-6 col-sm-6">
+        										<div class="form-group">
+        											<label>{{lang('name.and.surname')}} <span class="text-danger">*</span></label>
+        											<input type="fullname" name="fullname" class="fullname form-control"/>
+        										</div>
+        									</div>
+        									<div class="col-md-6 col-sm-6">
+        										<div class="form-group">
+        											<label>{{lang('signup.email')}} <span class="text-danger">*</span></label>
+        											<input type="email" name="email" class="email form-control registration_email"/>
+        										</div>
+        									</div>
+        									<div class="col-md-6 col-sm-6">
+        										<div class="form-group">
+        											<label>{{lang('signup.password')}} <span class="text-danger">*</span></label>
+        											<input type="password" name="password" class="password form-control"/>
+        										</div>
+        									</div>
+        									<div class="col-md-6 col-sm-6">
+        										<div class="form-group">
+        											<label>{{lang('signup.password.rewrite')}} <span class="text-danger">*</span></label>
+        											<input type="password" name="repassword" class="repassword form-control"/>
+        										</div>
+        									</div>
+        								</div>
+        								<div id="error_different_pw" class="alert alert-danger" style="display:none;">
+        									{{lang('different.pw')}}
+        								</div>
+        								<div id="error_chars_pw" class="alert alert-danger" style="display:none;">
+        									{{lang('6.chars')}}
+        								</div>
+        								<div id="error_registration_email" class="alert alert-danger" style="display:none;">
+        									{{lang('address.duplicated')}}
+        								</div>
+        								<div id="error_registration" class="alert alert-danger" style="display:none;">
+        									{{lang('registration.error')}}
+        								</div>
+        								<div class="form-group">
+        									<p class="legalLinks">
+        										{{lang('registration.conditions') | raw }} {{group.description | title}}.
+        									</p>
+        								</div>
+        								<div class="form-group form-submit text-center">
+        									<div class="btn button login_register_button register-from-cart">{{lang('register')|upper}}</div>
+        								</div>#}
+        							</div>
+        						</div>
+        
+        						<div class="guest_panel" id="guest_signin">
+    								<div class="formLogin">
+    									<div class="heading">{{lang('sign.in')}}</div>
+    									<p>{{lang('login.with.credentials')}}</p>
+    									{#<p>{{lang('before.newsite.accout')}}.</p>#}
+    									<div class="row">
+    										<div class="col-md-6 col-sm-6 col-12">
+    											<div class="form-group">
+    												<label>{{lang('signup.email')}}</label>
+    												<input id="inputEmail" type="email" name="email" class="email form-control"/>
+    											</div>
+    										</div>
+    										<div class="col-md-6 col-sm-6 col-12">
+    											<div class="form-group">
+    												<label>{{lang('signup.password')}}</label>
+    												<input type="password" name="password" class="password form-control"/>
+    											</div>
+    										</div>
+    									</div>
+    									<div id="error_login" class="alert alert-danger" style="display:none;">
+    										{{lang('signin.error')}}<br>{#<p>{{lang('before.newsite.accout')}}.</p>#}{#{lang('signin.error.check')}#}
+    									</div>
+    									<p>{{lang('pw.dont.remember')}}, <a href="/restore-password" target="_blank">{{lang('pw.dont.remember.click')}}.</a></p>
+    									<div class="form-group form-submit text-center">	
+    										<div class="dn-btn dn-btn-brand-1 dn-btn-filled login_register_button login-from-cart">{{lang('sign.in')|upper}}</div>
+    									</div>
+    								</div>
+        						</div>
+        					{% else %}
+        					    {# Scelta se si vuole fattura per i loggati #}
+        					    <div class="formChooseInvoice">
+            						<div class="heading">{{lang('front.need.invoice')}}</div>
+            						<div class="yes_no_choice d-flex">
+            						    <div class="w-50 px-1"><a href="/{{request.path.1}}/invoice" class="dn-btn dn-btn-brand-1 dn-btn-filled btn_move_step_large">{{lang('yes')}}</a></div>
+            						    <div class="w-50 px-1"><a href="/{{request.path.1}}/checkout" class="dn-btn dn-btn-brand-1 dn-btn-filled btn_move_step_large">{{lang('no')}}</a></div>
+            						</div>
+        						</div>
+        					{% endif %}
+        				    </div>
+        				{% endif %}
+        				
+        				{% if request.path.2 == "checkout" %}
+        
+        				    <div id="step_1_content" class="step_content active" data-count="1">
+        
+            					<div class="heading d-flex flex-wrap justify-content-between align-items-center">
+            					    <span>{{lang('shipping.address')}}</span>
+            					    <a href="/{{request.path.1}}/invoice" class="btn btn-outline-dark btn-sm">{{lang('cart.need_invoice')}}</a>
+    					        </div>
+        						<div class="row">
+        							<div class="col-md-6 col-sm-6 col-12">
+        								<select name="shipping_address_select" class="form-control selectpicker {% if user.uid == '' %}d-none{%endif%}" id="shipping_address_select" aria-label="{{lang('acc_act.choose_addr')}}">
+        									{% if user.uid > 0 %}
+        										{% for address in user.addresses %}
+        											<option value="{{address._id}}" 
+        												{% if address.principal == 1%}selected="selected"{%endif%}>	
+        												{{address.fullname}} - {{address.addr1}} {{address.city}} - 
+        												{{getState(address.state)}} - {{getCountry(address.nation)}}
+        											</option>
+        										{% endfor %}
+        									{% endif %}
+        									<option value="add_new" {% if user.addresses | length == 0%}selected="selected"{% endif %}>
+        										+ {{lang('admin.add')}}
+        									</option>
+        								</select>
+        							</div>
+        						</div>
+            
+            					<div class="clearfix address_form_container" id="shipping_address_form" data-type="shipping">
+            						<div id="shipping_well">
+            							{% include 'form_address.html' %}
+            						</div>
+            						<div class="alert alert-danger cart_alert" id="error_shipping_address_save">{{lang('front.shipping.save.error')}}</div>
+            					</div>
+            					
+            					<div class="d-none" id="billing_address_wrap">
+            
+            						<div class="heading">{{lang('billing.address')}}</div>
+            
+            						<div class="row">
+            							<div class="col-md-6 col-sm-6 col-12">
+            								<select name="billing_address_select" class="form-control selectpicker {% if user.uid == '' %}d-none{%endif%}" 
+            										id="billing_address_select">
+            									{% if user.uid > 0 %}
+            										{% for address in user.addresses %}
+            										   	<option value="{{address._id}}" 
+            												{% if address.principal == 1%}selected="selected"{%endif%}>	
+            												{{address.fullname}} - {{address.addr1}} {{address.city}} - 
+            												{{getState(address.state)}} {{getCountry(address.nation)}}
+            											</option>
+            										{% endfor %}
+            									{% endif %}
+            									<option value="add_new" {% if user.addresses | length == 0%}selected="selected"{% endif %}>
+            										+ {{lang('admin.add')}}
+            									</option>
+            								</select>
+            							</div>
+            							
+            						</div>
+            
+            						<div class="clearfix address_form_container" id="billing_address_form" data-type="billing">
+            							<div id="billing_well">
+            								{% include 'form_address.html' %}	
+            							</div>
+            							<div class="alert alert-danger cart_alert" id="error_billing_address_save">{{lang('front.billing.save.error')}}</div>
+            						</div>
+            
+            				    </div>
+                            
+                            </div>
+                       
+                        {% elseif request.path.2 == "invoice" %}
+                        
+                            <div id="step_1_content" class="step_content active" data-count="1">
+                                
+                                <div id="addresses_option">
+                                    <div class="cart_switch d-none" id="invoice_option" >
+                                		<span class="switch active" data-bs-toggle="collapse" data-bs-target="#invoice-data" aria-expanded="false" aria-controls="invoice-data">
+                                			<input type="checkbox" value="1" id="invoiceOption" checked="checked">
+                                		</span>
+                                		<span class="switch-label">{{lang('front.need.invoice')}}</span>
+                                	</div>
+                                    {# Vedere bene qui #}
+                                    <div class="collapse show" id="invoice-data">
+                                        {% include 'cart_invoice_embed.html' %}
+                                    </div>
+        					    </div>
+        					
+        					
+        						<p class="heading">{{lang('billing.address')}}</p>
+        
+        						{% if user.uid > 0 %}
+        							{% for address in user.addresses if address.principal %}
+        							    <div value="{{address._id}}" class="p-0 d-none"
+        									{% if address.principal == 1%}selected="selected"{%endif%}>	
+        									<p class="well-single-address">
+												<span class="addr1">{{address.addr1}}</span> 
+												<span class="zip">{{address.zip}}</span> <span class="city">{{address.city}}</span> - <span class="state">{{getState(address.state)}}</span>
+												<span class="nation">{{getCountry(address.nation)}}</span><br>
+												<script>const billingPrefix={{address.nation}}</script>
+											</p>
+        								</div>
+        								{% set haveBilling = true %}
+        							{% endfor %}
+        						{% endif %}
+                                
+                                
+        						<div class="clearfix address_form_container" id="billing_address_form" data-type="billing">
+        							<div id="billing_well">
+        								{% include 'form_address.html' %}
+        							</div>
+        							<div class="alert alert-danger cart_alert" id="error_billing_address_save">{{lang('front.billing.save.error')}}</div>
+        						</div>
+                                
+                                <div id="diginvtarget" class="d-none"></div>
+                                
+            					<div class="heading d-flex flex-wrap justify-content-between align-items-center">
+            					    <span>{{lang('shipping.address')}}</span>
+            					    <button id="same_address" class="btn btn-outline-dark btn-sm">{{lang('address.copy_data')}}</button>
+    					        </div>
+            					
+        						<select name="shipping_address_select" class="form-control selectpicker {% if user.uid == '' %}d-none{%endif%}" id="shipping_address_select" aria-label="{{lang('acc_act.choose_addr')}}">
+        							{% if user.uid > 0 %}
+        								{% for address in user.addresses if address.principal==0  %}
+        									<option value="{{address._id}}" 
+        										{% if address.principal == 1%}selected="selected"{%endif%}>	
+        										{{address.fullname}} - {{address.addr1}} {{address.city}} - 
+        										{{getState(address.state)}} - {{getCountry(address.nation)}}
+        									</option>
+        								{% endfor %}
+        							{% endif %}
+        							<option value="add_new" {% if user.addresses | length == 0%}selected="selected"{% endif %}>
+        								+ {{lang('admin.add')}}
+        							</option>
+        						</select>
+            
+            					<div class="clearfix address_form_container" id="shipping_address_form" data-type="shipping">
+            						<div id="shipping_well">
+            							{% include 'form_address.html' %}
+            						</div>
+            						<div class="alert alert-danger cart_alert" id="error_shipping_address_save">{{lang('front.shipping.save.error')}}</div>
+            					</div>
+            
+            				</div>
+                        
+                        {% endif %}
+                        
+                        
+        				<div id="step_2_content" class="step_content" data-count="2">
+        					<div class="heading">
+        						{{lang('invoice.shipping.method')}}
+        						<a href="#" data-bs-toggle="tooltip" data-bs-title="{{lang('shipping.method.guide')}}" aria-label="{{lang('acc_act.info')}}"><i class="fa fa-info-circle"></i></a>
+        					</div>	
+        					<div class="alert alert-warning" id="shipping_unavailable" style="display:none">
+        						{{lang('no.shipping.available.for.address')}}
+        					</div>							
+        					<div id="shipping_results"></div>
+        				</div>
+        
+        				<div id="step_3_content" class="step_content" data-count="3">
+        					<div class="heading">
+        						{{lang('order.payment')}}
+        						<a href="#" data-bs-toggle="tooltip" data-bs-title="{{lang('payment.method.guide')}}" aria-label="{{lang('acc_act.info')}}"><i class="fa fa-info-circle"></i></a>
+        					</div>	
+        					<p>{{lang('select.payment.method')}}</p>
+        					<div id="payments_labels"></div>
+        				</div>
+        
+        				<div id="step_4_content" class="step_content" data-count="4">
+        
+        					<label for="sale_code" class="heading noMarginBottom">{{lang('sale.code')}}</label>
+        					<p>{{lang('sale.code.text')}}</p>
+        					<div class="row">
+        						<div class="col-md-4 col-sm-4 col-12">
+        							<div class="form-group">
+        								<input type="text" name="sale-code" id="sale_code" value="" class="form-control" >
+        							</div>
+        						</div>
+        						<div class="col-md-6 col-sm-6 col-12 coupon_buttons">
+        							<button type="button" class="dn-btn dn-btn-brand-1 dn-btn-filled" id="applyCoupon">{{lang('apply')}} <i class="fa fa-angle-right fa-lg"></i></button>
+        							<button type="button" class="btn button-white d-none" id="removeCoupon"><i class="fa fa-remove"></i> {{lang('remove.coupon')}}</button>
+        						</div>
+        					</div>
+        					<div class="alert alert-danger alert-coupon d-none" id="sale-not-found">
+        						{{lang('sale.code.wrong')}}
+        					</div>
+        					<div class="alert alert-danger alert-coupon d-none" id="sale-expired">
+        						{{lang('sale.code.expired')}}
+        					</div>
+        					<div class="alert alert-danger alert-coupon d-none" id="sale-min-total">
+        						{{lang('sale.code.min.sum')}}
+        					</div>
+        					<div class="alert alert-danger alert-coupon d-none" id="sale-already-used">
+        						{{lang('sale.code.already.used')}}
+        					</div>
+        					<br>
+        					<label for="messageTextarea" class="heading noMarginBottom">{{lang('write.message.to.seller')}}</label>
+        					<p>{{lang('message.to.seller.text')}}</p>
+        					<div class="form-group">
+        						<textarea name="message" value="" class="form-control" rows="4" id="messageTextarea"></textarea>
+        					</div>
+        
+        					<div id="terms">
+        						<div id="conditions" class="form-group">
+        							<br><div class="heading">{{lang('admin.conditions')}}</div>
+        							<div id="box_conditions" class="well"></div>
+        						</div>
+        						<div class="form-group">
+        							<p class="legalLinks">{{lang('store.conditions.cart') | raw}}</p>
+        						</div>
+        					</div>
+        
+        				</div>
+        				
+        				{% if request.path.2 in ['checkout','invoice'] %}
+            				<div class="text-center" style="padding-right:20px; padding-left:20px">
+                        		<div {% if cart_user == 0%}style=""{%endif%} class="cart_actions cart_actions_desktop">
+                        			<div class="text-center cart_summary_overlay">
+                        				<i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                        			</div>
+                        			<div class="text-center checkout-work-in-progress">
+                        				<i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+                        				<h2><small>{{lang('checkout.waiting')}}</small></h2>
+                        			</div>
+                        			<div class="alert alert-danger checkout-main-error" style="display:none">{{lang('checkout.impossibile.incomplete.data')}}</div>
+                        			<div class="checkout_errors">
+                        				<div data-move="1" class="alert alert-danger alert-checkout d-none error_shipping_id">{{lang('cart.no.shipping.selected')}}</div>
+                        				<div data-move="1.1" class="alert alert-danger alert-checkout d-none error_billing_id">{{lang('cart.no.billing.selected')}}</div>
+                        				<div data-move="2" class="alert alert-danger alert-checkout d-none error_shipping_method">{{lang('cart.no.carrier.selected')}}</div>
+                        				<div data-move="3" class="alert alert-danger alert-checkout d-none error_payment_method">{{lang('cart.no.payments.selected')}}</div>
+                        			</div>
+                        			<div class="checkout_btn_move checkout_btn_move_desktop d-none_prev">
+                        				<button type="button" class="btn button-white move-to-step btn-prev btn_move_step_large" aria-label="{{lang('front.back')}}">
+                        					<i class="fa fa-angle-left fa-lg"></i>
+                        				</button>
+                        				<button type="button" class="dn-btn dn-btn-brand-1 dn-btn-filled move-to-step btn-next btn_move_step_large">
+                        					{{lang('next')}} <i class="fa fa-angle-right  fa-lg"></i>
+                        				</button>
+                        				<button id="wait-checkout" class="btn button-checkout btn-block d-none disabled float-end">
+                        				    {{lang('item.tax.calculating')}}
+                        					<div class="spinner-border text-secondary mt-2 float-end" role="status">
+                                              <span class="sr-only">Please wait...</span>
+                                            </div>
+                        				</button>
+                        				<button class="btn button-checkout btn-block d-none disabled doCheckout">
+                        					{{lang('confirm.order')|upper}} &nbsp;&nbsp;&nbsp;<i class="fa fa-angle-right fa-lg"></i>
+                        				</button>
+                        			</div>
+                        		</div>
+                        	</div>
+                    	{% endif %}
+        
+        				<div class="clearfix"></div>
+        				{#<div id="mobile_cart_review" class="d-block d-sm-block d-md-block d-lg-none">
+        					{% include 'cart_review.html' %}
+        				</div>#}
+        				<div id="cart_errors">
+        					<div class="alert alert-danger cart_alert" id="error_shipping_address">{{lang('cart.no.shipping.selected')}}</div>
+        					<div class="alert alert-danger cart_alert" id="error_billing_address">{{lang('cart.no.billing.selected')}}</div>
+        					<div class="alert alert-danger cart_alert" id="error_shipping_method">{{lang('cart.no.carrier.selected')}}</div>
+        					<div class="alert alert-danger cart_alert" id="error_payment_method">{{lang('cart.no.payments.selected')}}</div>
+        				</div>
+        				<div class="clearfix"></div>
+        				
+        			</div>
+        		</div>
+        	</div>
+        	
+        	{% if difference > 0 and minAmount > 0 %}
+        
+        		<div class="text-center" >
+        			<div class="alert alert-warning">
+        				<br>
+        				{% set b = lang('front.minimum.amount.not.reached') %}
+        				{% set b = b | replace({ "{minAmount}": group.props.checkoutlimit, "{currency}": lang('symbol.' ~ group.currency) })%}
+        				{{ b | raw }}
+        				<br>
+        				{% set b = lang('front.minimum.amount.not.reached.difference') %}
+        				{% set b = b | replace({ "{difference}": difference, "{currency}": lang('symbol.' ~ group.currency) })%}
+        				{{ b | raw }}
+        				<br><br>
+        			</div>
+        			<a class="dn-btn dn-btn-brand-1 dn-btn-filled" href="/shop">{{lang('back.to.shop')}}</a>
+        		</div>
+        
+        	{% else  %}
+        	
+        
+        	    <div class="clearfix"></div>
+        	
+        	{% endif %}
+        	
+        	<script>
+        	/* cart script */
+        	 var cart = {};
+        	 
+        	 let text = `{% include 'states.json' %}`;
+        	 
+        	 const vatPrefixes = JSON.parse(text);
+        	 
+        	 cart.init = function(id, addresses, total, userUID, items){ 
+        	   
+        		 cart.current_step = 1;
+        		 {#if (userUID>0){
+        			 cart.current_step = 1;
+        		 }#}
+        
+        		 cart.id = id;
+        		 cart.is_guest = false;
+        		 cart.userUID = userUID;
+        		 cart.items = items;
+        
+        		 if (userUID <= 0){
+        			 cart.is_guest = true;
+        		 }
+        		 {%if request.path.2 == "invoice" %}
+        		    cart.same_address = false;
+        		    var needInvoice = true;
+        		 {%else%}
+        		    cart.same_address = true;
+        		 {% endif %}
+        		 cart.addresses = [];
+        
+        		 if (addresses != null && addresses.length > 0) {
+        
+        			 cart.addresses = addresses;
+        			 var main_add_id = Storeden.getDefaultAddress()[0];
+        			 var shippingAddress = $('#shipping_address_select option').first().val();
+        			 if(typeof main_add_id==="undefined"){
+        			    main_add_id = addresses[0];
+        			 }
+        			 {%if request.path.2 != "invoice" %}
+        			    var shippingAddress = main_add_id._id.$id;
+        			 {% endif %}
+        			 if (typeof main_add_id !== 'undefined') {
+        				 main_add_id = main_add_id._id.$id;
+        				 $('#shipping_address_id').val(shippingAddress);
+        				 $('#billing_address_id').val(main_add_id);
+        			 } else {
+        			 	main_add_id = 'add_new';
+        			 }
+        			 
+        			 cart.setShippingAddress(shippingAddress);
+        			 cart.setBillingAddress(main_add_id);
+        			 cart.prepareAddressForm('shipping', shippingAddress);
+        			 cart.prepareAddressForm('billing', main_add_id);
+        
+        		 } else {
+        
+        			 cart.setShippingAddress('add_new');
+        			 cart.setBillingAddress('add_new');
+        			 cart.prepareAddressForm('shipping', 'add_new');
+        			 cart.prepareAddressForm('billing', 'add_new');
+        
+        		 }
+        		 
+        		{% if customer.custom_fields.tipologia == "azienda" %}
+                    console.log("predispongo il billing");
+                    {% if customer.fullname != "" %}
+                        $('#billing_well .fullname').val('{{customer.fullname}}').prop('disabled', true);
+                    {% endif %}
+                    {% if user.email != "" %}
+                        $('#billing_well .email').val('{{user.email}}').prop('disabled', true);
+                    {% endif %}
+                    {% if customer.custom_fields.telefono != "" %}
+                        $('#billing_well .phone').val('{{customer.custom_fields.telefono}}').prop('disabled', true);
+                    {% endif %}
+                    {% if customer.custom_fields.partitaiva != "" %}
+                        $('#billing_well .vat').val('{{customer.custom_fields.partitaiva}}').prop('disabled', true);
+                    {% endif %}
+                    {% if customer.custom_fields.indirizzo != "" %}
+                        $('#billing_well .addr1').val("{{customer.custom_fields.indirizzo}}").prop('disabled', true);
+                    {% endif %}
+                    {% if customer.custom_fields.cap != "" %}
+                        $('#billing_well .zip').val('{{customer.custom_fields.cap}}').prop('disabled', true);
+                    {% endif %}
+                    {% if customer.custom_fields.comune != "" %}
+                        $('#billing_well .city').val("{{customer.custom_fields.comune}}").prop('disabled', true);
+                    {% endif %}
+                    
+                    $('#billing_well .country').trigger('change');
+                    
+                    {% if customer.custom_fields.tldprovincia > 0 %}
+                        $(document).ready(function(){
+                            $('#billing_well .state').val('{{customer.custom_fields.tldprovincia}}').html('<option value="{{customer.custom_fields.tldprovincia}}">{{ getState(customer.custom_fields.tldprovincia) }}</option>').prop('disabled', true);
+                        });
+                    {% endif %}
+                    
+                    $('select[name="digital_invoice[type]"]').val('company').trigger('change').prop('disabled', true);
+                    {% if customer.custom_fields.codicefiscale != "" %}
+                        $('input[name="digital_invoice[company_vat_number]"]').val('{{customer.custom_fields.partitaiva}}').trigger('change').prop('disabled', true);
+                    {% endif %}
+                    {% if customer.custom_fields.codicefiscale != "" %}
+                        $('input[name="digital_invoice[company_tax_number]"]').val('{{customer.custom_fields.codicefiscale}}').trigger('change');
+                    {% endif %}
+                    {% if customer.custom_fields.denominazione != "" %}
+                        $('input[name="digital_invoice[company_business_name]"]').val("{{customer.custom_fields.denominazione|replace({"\"":"'"})}}").trigger('change').prop('disabled', true);
+                    {% endif %}
+                    {% if customer.custom_fields.partitaiva != "" %}
+                        $('#shipping_well .vat').val('{{customer.custom_fields.partitaiva}}').trigger('change');
+                    {% endif %}
+        		{% endif %}
+        		
+        		{% if customer.custom_fields.tipologia == "privato" %}
+        		    $('select[name="digital_invoice[type]"]').val('person').trigger('change').prop('disabled', true);
+        		    {% if customer.custom_fields.codicefiscale != "" %}
+            		    $('#shipping_well .vat').val('{{customer.custom_fields.codicefiscale}}').trigger('change');
+            		    $('#dig_invoice_person input[name="digital_invoice[person_tax_number]"]').val('{{customer.custom_fields.codicefiscale}}').prop('disabled', true).trigger('change');
+        		    {% endif %}
+        		{% endif %}
+        		
+        		 cart.shipping_method_id = '';
+        		 cart.shipping_method = '';
+        		 cart.shipping_amount = 0;
+        
+        		 cart.payment_method_id = '';
+        		 cart.payment_method = '';
+        		 cart.payment_amount = 0;
+        
+        		 cart.tax_amount = 0;
+        
+        		 cart.coupon_amount = 0;
+        		 cart.coupon_code = '';
+        		 cart.coupon_name = '';
+        
+        		 cart.is_gift = false;
+        		 cart.gift_amount = 0;
+        
+        		 cart.need_invoice = false;
+        		 cart.vat_required = {% if theme.settings.cart.require_vat == 'yes'%}true{%else%}false{%endif%};
+        	 	 cart.subtotal = parseFloat(total);
+        		 cart.updateTotal();
+        	  	 $('.cart_summary_overlay').delay(1500).fadeOut();
+        
+        	}
+        
+        	/* cart functions */
+        
+        	cart.updateTotal = function(){
+        
+        		var subtotal = cart.subtotal.toFixed(2).toString();
+        		$('.cart_totals .toSum').html(subtotal.replace('.', ','));
+        
+        		if (cart.is_gift) {
+        			if (cart.gift_amount > 0){
+        				var amount = cart.gift_amount.toFixed(2).toString();
+        				$('.cartReview_gift_option_price .toSum').html(amount.replace('.', ','));
+        			} else {
+        				$('.cartReview_gift_option_price .toSum').html('0,00');
+        			}
+        			$('.cartReview_gift_option_price').removeClass('d-none');
+        		} else {
+        			$('.cartReview_gift_option_price .toSum').html(0);
+        			$('.cartReview_gift_option_price').addClass('d-none');
+        		}
+        
+        		if (cart.shipping_method_id != '') {
+        			$('.cartReview_shipping_cost .toFillText').html('<br><span>'+cart.shipping_method+'</span>');
+        			if (cart.shipping_amount > 0){
+        				var amount = cart.shipping_amount.toFixed(2).toString();
+        				$('.cartReview_shipping_cost .toSum').html(amount.replace('.', ','));
+        			} else {
+        				$('.cartReview_shipping_cost .toSum').html('0,00');
+        			}
+        			$('.cartReview_shipping_cost').removeClass('d-none');
+        		} else {
+        			$('.cartReview_hipping_cost .toFillText').html('');
+        			$('.cartReview_shipping_cost .toSum').html(0);
+        			$('.cartReview_shipping_cost').addClass('d-none');
+        		}
+        
+        		if (cart.payment_method_id != '') {
+        			$('.cartReview_payment_cost .toFillText').html('<br><span>'+cart.payment_method+'</span>');
+        			if (cart.payment_amount > 0){
+        				var amount = cart.payment_amount.toFixed(2).toString();
+        				$('.cartReview_payment_cost .toSum').html(amount.replace('.', ','));
+        				$('.cartReview_payment_cost .currency').show();
+        			} else {
+        				$('.cartReview_payment_cost .toSum').html('');
+        				$('.cartReview_payment_cost .currency').hide();
+        			}
+        			$('.cartReview_payment_cost').removeClass('d-none');
+        		} else {
+        			$('.cartReview_payment_cost .toSum').html(0);
+        			$('.cartReview_payment_cost').addClass('d-none');
+        		}
+        
+        		if (cart.coupon_code != '') {
+        			$('.cartReview_sale_discount .toFillText').html('<br><span>'+cart.coupon_code+'</span>');
+        			if (cart.coupon_name != '' && cart.coupon_amount > 0){
+        				var amount = cart.coupon_amount.toFixed(2).toString();
+        				$('.cartReview_sale_discount .toSum').html('-'+amount.replace('.', ','));
+        				$('.cartReview_sale_discount .currency').show();
+        				$('.cartReview_sale_discount').removeClass('d-none');
+        			} else {
+        				$('.cartReview_sale_discount .toSum').html(0);
+        				$('.cartReview_sale_discount .currency').hide();
+        				$('.cartReview_sale_discount').addClass('d-none');
+        			}
+        		} else {
+        			// remove coupon code
+        			$('.cartReview_sale_discount .toFillText').html('');
+        			$('.cartReview_sale_discount .toSum').html(0);
+        			$('.cartReview_sale_discount .currency').hide();
+        			$('.cartReview_sale_discount').addClass('d-none');
+        		}
+        		var b_name = '';
+        		if(taxOk){
+            		if (cart.tax_amount > 0) {
+            			var amount = cart.tax_amount.toFixed(2).toString();
+            			$('.cartReview_tax_value .toSum').html(amount.replace('.', ','));
+            			$('.cartReview_tax_value').removeClass('d-none');
+            			$('.cartReview_tax_value_included').addClass('d-none');
+            			$('.cartReview_tax_calculating').addClass('d-none');
+            		} else {
+            			$('.cartReview_tax_value .toSum').html(0);
+            			$('.cartReview_tax_value').addClass('d-none');
+            			$('.cartReview_tax_value_included').removeClass('d-none');
+            			$('.cartReview_tax_calculating').addClass('d-none');
+            			//$('.cartReview_tax_value_temp').addClass('d-none');
+            		}
+        		}else{
+            		$('.cartReview_tax_value').addClass('d-none');
+            		$('.cartReview_tax_value_included').addClass('d-none');
+            		$('.cartReview_tax_calculating').removeClass('d-none');
+        		}
+        
+        		cart.total = cart.subtotal + cart.tax_amount + cart.shipping_amount + cart.payment_amount - cart.coupon_amount + cart.gift_amount;
+        		var t = cart.total.toFixed(2).toString();
+        		$('.cartReview_checkout_total .final_sum').html(t.replace('.', ','));
+        
+        	}
+        
+        	cart.updateField = function(field,value){
+        		cart[field] = value;
+        	}
+        
+        	cart.prepareAddressForm = function(type, address_id) {
+        		var container = $('#'+type+'_address_form');
+        		if (address_id == 'add_new'){
+        			cart.emptyAddressForm(container);
+        		} else if (address_id != null && address_id != '') {
+        			var address = cart.getAddressObject(address_id)[0];
+        			cart.fillAddressForm(container, address);
+        		}
+        	}
+        
+        	cart.setShippingAddress = function(address_id){
+        	    //console.log(address_id);
+        		var event_obj = { 'address_id' :  address_id };
+        		$(document).trigger('storeden.cart.setShippingAddress', [event_obj]);
+        
+        		var container = $('#shipping_address_form');
+        		var address = cart.getAddressObject(address_id)[0];
+        		$('.checkout_errors .error_shipping_id').addClass('d-none');
+        		if (address_id == null || address_id == '' || address_id == 'add_new'){
+        			cart.updateField('shipping_address', null);
+        			cart.updateField('shipping_country', STOREDEN_COUNTRY_ID);
+        			cart.updateField('shipping_city', 0);
+        		} else {
+        			cart.updateField('shipping_address', address_id);
+        			cart.updateField('shipping_country', address.nation);
+        			cart.updateField('shipping_city', address.state);
+        		}
+        		if (cart.same_address){
+        			cart.updateField('billing_address', cart.shipping_address);
+        			cart.updateField('billing_country', cart.shipping_country);
+        		}
+        		//cart.calculateTax();
+        	}
+        
+        	cart.setBillingAddress = function(address_id){
+        
+        		var event_obj = { 'address_id' :  address_id };
+        		$(document).trigger('storeden.cart.setBillingAddress', [event_obj]);
+        
+        		var container = $('#billing_address_form');
+        		var address = cart.getAddressObject(address_id)[0];
+        		$('.checkout_errors .error_billing_id').addClass('d-none');
+        		if (address_id == null || address_id == '' || address_id == 'add_new'){
+        			cart.updateField('billing_address', null);
+        			cart.updateField('billing_country', STOREDEN_COUNTRY_ID);
+        		} else {
+        			cart.fillAddressForm(container, address);
+        			cart.updateField('billing_address', address_id);
+        			cart.updateField('billing_country', address.nation);
+        		}
+        		//cart.calculateTax();
+        	}
+        
+        
+        
+        	cart.emptyAddressForm = function(container){
+        		container.find('input').val('');
+        		container.find('select').val('');
+        		//var current = STOREDEN_COUNTRY_ID;
+        		var current = '{{customer.custom_fields.tldnazione}}';
+        		Storeden.getCountries(function(res){
+        			var target = container.find('.country');
+        			var options = '<option></option>';
+        			for (var i in res) {
+        				var country = res[i];
+        				{% if customer.custom_fields.tldnazione > 0 %}
+            				if(country['uid'] == {{customer.custom_fields.tldnazione}}){
+            				    options += '<option value="'+country['uid']+'" selected="selected">'+country['name']+'</option>';
+            				}
+        				{% else %}
+            				if (current != '' && current == country['uid']) {
+            					options += '<option value="'+country['uid']+'" selected="selected">'+country['name']+'</option>';
+            				} else { 
+            					options += '<option value="'+country['uid']+'">'+country['name']+'</option>';
+            				}
+        				{% endif %}
+        			}
+        			target.html(options);
+        		});
+        		container.find('.state').html('');
+        		if($('#billing_address_form').is(container) && '{{customer.custom_fields.tldprovincia}}' != ''){
+        		    currentState = '{{customer.custom_fields.tldprovincia}}';
+        		    $('#billing_address_form .state').prop('disabled', true);
+        		}else{
+        		    currentState = '';
+        		}
+        		Storeden.getStates(current, function(res){
+        			var target = container.find('.state');
+        			var options = '<option></option>';
+        			for (var i in res) {
+        				var state = res[i];
+        				if (currentState != '' && currentState == state['uid']) {
+        					options += '<option value="'+state['uid']+'" selected="selected">'+state['name']+'</option>';
+        					console.log("Metto " + currentState + " come default per il container", container);
+        				} else { 
+        					options += '<option value="'+state['uid']+'">'+state['name']+'</option>';
+        				}
+        			}
+        			target.html(options);
+        		});
+        	}
+        
+        	cart.fillAddressForm = function(container, address){
+        	    console.log("funzione fillAddressForm: Compilo ", container);
+        		container.find('.address_id').val(address._id.$id);
+        		container.find('.fullname').val(address.fullname);
+        		container.find('.addr1').val(address.addr1);
+        		container.find('.email').val(address.email);
+        		container.find('.phone').val(address.phone);
+        		container.find('.vat').val($('#VatToCheck').val());
+        		container.find('.zip').val(address.zip);
+        		container.find('.city').val(address.city);
+        		var current = address.nation;
+        		if('{{customer.custom_fields.tldnazione}}' != ''){
+        		    current = '{{customer.custom_fields.tldnazione}}';
+        		}
+        		
+        		Storeden.getCountries(function(res){
+        			var target = container.find('.country');
+        			var options = '<option></option>';
+        			for (var i in res) {
+        				var country = res[i];
+        				{% if customer.custom_fields.tldnazione > 0 %}
+            				console.log("precompilo con la nazione CCF");
+            				if(country['uid'] == {{customer.custom_fields.tldnazione}}){
+            				    options += '<option value="'+country['uid']+'" selected="selected">'+country['name']+'</option>';
+            				}
+        				{% else %}
+            				console.log("Metto tutte le nazioni, la nazione current è:", current);
+            				if (current != '' && current == country['uid']) {
+            					options += '<option value="'+country['uid']+'" selected="selected">'+country['name']+'</option>';
+            				} else { 
+            					options += '<option value="'+country['uid']+'">'+country['name']+'</option>';
+            				}
+        				{% endif %}
+        			}
+        			target.html(options);
+        		});
+        		var currentState = address.state;
+        		
+        		if($('#billing_address_form').is(container) && '{{customer.custom_fields.tldprovincia}}' != ''){
+        		    currentState = '{{customer.custom_fields.tldprovincia}}';
+        		}
+        		Storeden.getStates(current, function(res){
+        			var target = container.find('.state');
+        			var options = '<option></option>';
+        			for (var i in res) {
+        				var state = res[i];
+        				if (currentState != '' && currentState == state['uid']) {
+        					options += '<option value="'+state['uid']+'" selected="selected">'+state['name']+'</option>';
+        					console.log("Metto " + currentState + " come default per il container", container);
+        				} else { 
+        					options += '<option value="'+state['uid']+'">'+state['name']+'</option>';
+        				}
+        			}
+        			target.html(options);
+        		});
+        	}
+        
+        	cart.getNextStep = function(){
+        		var next = parseInt(cart.current_step)+1;
+        		if (next>5) {
+        			return 5;
+        		} else {
+        			return next;
+        		}
+        	}
+        
+        	cart.getPrevStep = function(){
+        		var prev = parseInt(cart.current_step)-1;
+        		if ( prev == 0 && cart.userUID>0 ) {
+        			return 1;
+        		} else if ( prev == -1 && cart.userUID <= 0)  {
+        			return 0;
+        		} 
+        		return prev;
+        	}
+        
+        	cart.addAddressObject = function(address){
+        		cart.addresses.push(address);
+        	}
+        
+        	cart.updateAddressObject = function(address_id, address){
+        		for (var i = 0; i < cart.addresses.length; ++i){
+        			var add = cart.addresses[i];
+        			if (address_id == add._id.$id){
+        				cart.addresses.splice(i, 1);
+        				cart.addresses.push(address);
+        			}
+        		}
+        	}
+        
+        	cart.getAddressObject = function(address_id){
+        		return cart.addresses.filter(function (add) {
+        			return add._id.$id == address_id;
+        		});
+        	}
+        	
+        	cart.consoleCallback = function(res){
+        	    console.log(res);
+        	}
+        	
+        	cart.fillAddressInReview = function(addressId, type){
+        	    var address = cart.getAddressObject(addressId)[0];
+        	    var vat = "";
+        	    
+        	    if(needInvoice){
+        	        vat = $('#VatToCheck').val();
+        	        //console.log(addressId,' - ',type,' - ',needInvoice,' - ',vat);
+        	        var currentPrefix = "";
+        	        var billingCountry = $('#billing_well select[name="country"]').val();
+        	        if(billingCountry==null){billingCountry=billingPrefix}
+        	        var shippingCountry = $('#shipping_well select[name="country"]').val();
+        	        if(shippingCountry==119){
+        	           currentPrefix == "IT"; 
+        	        }else{
+            	        for (var countryVat of vatPrefixes ){
+            	            if(countryVat.uid == billingCountry){
+            	                currentPrefix = countryVat.tld;                 
+            	            }
+            	        }
+        	        }
+        	        if(vat.toUpperCase().startsWith(currentPrefix)){
+        	            
+        	        }else{
+        	            vat = currentPrefix + vat;
+        	        }
+        	        if(address.vat != vat){
+        	            //console.log(addressId,' - ',type,' - ',needInvoice,' - ',vat);
+        	            var consoleCallback = cart.consoleCallback;
+        	            editAddress(addressId,address.fullname,address.addr1,address.city,address.zip,address.state,address.nation,address.email,address.phone,vat,consoleCallback)
+        	        }
+        	    }
+        	    var address_html = "";
+                address_html += address.fullname + '<br>';
+                address_html += address.addr1 + '<br>';
+                if(address.addr2 !== null && address.addr2 !== undefined && address.addr2 != ""){
+                    address_html += address.addr2 + '<br>';
+                }
+                address_html += address.city + ' ';
+                address_html += address.zip + '<br>';
+                address_html += address.stateName + ' - ';
+                address_html += address.countryName + '<br>';
+                address_html += address.email + '<br>';
+                address_html += address.phone;
+                $('#review_address_'+type).html(address_html);
+        	}
+        
+        	cart.removeItem = function(element) {
+        		var key = element.attr('data-key');
+        		var event_obj = { 'key' : key  };$(document).trigger('storeden.cart.removeItemFromCart', [event_obj]);
+        		$(document).trigger('storeden.cart.removeItemFromCart', [event_obj]);
+        		Storeden.removeItem(key, function(){
+        			window.location = '/cart';
+        		});
+        	}
+            
+            cart.prepareCheckout = function(){
+                $('#wait-checkout').removeClass('d-none');
+        		$('.btn-next').hide(1);
+        		$('#review_cart').prop('disabled', false).removeClass('d-none');
+        		$('#formCartQuantity').prop('disabled', false).removeClass('disabled').addClass('d-none');
+        		$('#cart-totals-review').addClass('d-none');
+        		$('#cart-waiting').removeClass('d-none');
+        	}
+        
+        	cart.enableCheckoutButton = function(){
+        	    $('#wait-checkout').addClass('d-none');
+        		$('.btn-next').hide(1);
+        		$('.doCheckout').prop('disabled', false).removeClass('disabled').removeClass('d-none');
+        		$('#review_cart').prop('disabled', false).removeClass('disabled').removeClass('d-none');
+        		$('#cart-totals-review').removeClass('d-none');
+        		$('#cart-waiting').addClass('d-none');
+        		$('#formCartQuantity').prop('disabled', false).removeClass('disabled').addClass('d-none');
+        	}
+        
+        	cart.disableCheckoutButton = function(){
+        		$('.doCheckout').prop('disabled', true).addClass('disabled').addClass('d-none');
+        		$('#review_cart').prop('disabled', false).removeClass('disabled').addClass('d-none');
+        		$('#formCartQuantity').prop('disabled', false).removeClass('disabled').removeClass('d-none');
+        		$('#cart-totals-review').addClass('d-none');
+        		$('#cart-waiting').removeClass('d-none');
+        		$('.btn-next').show(1);
+        	}
+        
+        	cart.moveBetweenSteps = function (from,to){
+        		cart.updateField('current_step', to);
+        
+        		$('#step_'+from+'_content').fadeOut(1, function(){$('#step_'+to+'_content').fadeIn();});
+        
+        		var action = 'next';
+        		if (from > to){ action = 'prev'; } 
+        
+        		var event_obj = { 'from' :  from, 'to' : to };
+        		$(document).trigger('storeden.cart.move.step', [event_obj]);
+        
+        		if (action == 'next') {
+        
+        			$('#step_'+from+' .number').addClass('active').removeClass('current');
+        			$('#step_'+to+' .number').addClass('current');
+        			$('#step_'+from+'_content').removeClass('active');
+        			$('#step_'+to+'_content').addClass('active');
+        
+        			if (from == 0) {
+        				// need to show buttons
+        				$('.cart_actions').fadeIn();
+        				$('.cart_actions .checkout_btn_move').removeClass('hide_prev');
+        			} else if (to == 2) {
+        			    cart.getShippingMethods($('#shipping_address_id').val());
+        			}
+        			else if (to == 3) {
+        			    cart.printPaymentMethods();}
+        			else if (to == 4) {
+        			    cart.prepareCheckout();
+        			    cart.calculateTax();
+        			    if($('#free-shipping-alert').length){
+        			        $('#free-shipping-alert').fadeOut();
+        			    }
+        			}
+        			if (!cart.is_guest){
+        				$('.cart_actions .checkout_btn_move').removeClass('hide_prev');
+        			}
+        
+        		} else {
+        
+        			$('#step_'+to+' .number').addClass('current').removeClass('active');
+        			$('#step_'+from+' .number').removeClass('current');
+        			$('#step_'+from+'_content').addClass('active');
+        			$('#step_'+to+'_content').removeClass('active');
+        
+        			if (to == 0) {
+        				// reset guest option selected 
+        				$('.guest_label.active').find('input').prop('checked', false);
+        				$('.guest_label.active').removeClass('active');
+        				// need to hide buttons
+        				$('.cart_actions').fadeOut();
+        				$('.cart_actions .checkout_btn_move').addClass('hide_prev');
+        			} 
+        			if (to == 1 && !cart.is_guest) {
+        				$('.cart_actions .checkout_btn_move').addClass('hide_prev');
+        			}if (to < 4){
+        				cart.disableCheckoutButton();
+        			}
+        		}
+        
+        		if (to <= 4) {
+        			//scrollToElement('checkoutContainer');
+        			if($('#free-shipping-alert').length){
+        			        $('#free-shipping-alert').fadeIn();
+        			    }
+        		}
+        		
+        	}
+        	
+        	function moveToTwo(){
+        	    needInvoice = $('#invoiceOption').is(':checked')
+        	    var itsOk = true;
+        	    var vat ="";
+        	    if(needInvoice){
+        	        itsOk = applyInvoice();
+        	    }
+        	    if(itsOk){
+            	    console.log("Log 9");
+            	    cart.fillAddressInReview($('#billing_address_id').val(),'billing');
+            	    cart.fillAddressInReview($('#shipping_address_id').val(),'shipping');
+            	    cart.moveBetweenSteps(1,2);
+        	    }else{
+        	        console.log("Log 10");
+        	        scrollToElement('digital_invice_request_body');
+        	        
+        	    }
+        	}
+        
+        	cart.validateStep = function(step){
+        
+        		// continue as guest
+        		if (step == 0) return true;
+        
+        		if (step == 2) { 
+        			//shipping method
+        			var c = false;
+        			c = ! (cart.shipping_method == '');
+        			if (c) {
+        				$('#error_shipping_method').fadeOut();
+        				return true;
+        			} else {
+        				$('#error_shipping_method').fadeIn();
+        				scrollToElement('step_2_content');
+        				return false;
+        			}
+        		}
+        		if (step == 3) { 
+        			//payment method
+        			var c = false;
+        			c = ! (cart.payment_method_id == '');
+        			if (c) {
+        				$('#error_payment_method').fadeOut();
+        				return true;
+        			} else {
+        				$('#error_payment_method').fadeIn();
+        				scrollToElement('step_3_content');
+        				return false;
+        			}
+        		}
+        
+        		return false;
+        	}
+
+        	cart.saveAddress = function(type, container){
+        
+        		var id = container.find('.address_id').val();
+        		var fullname = container.find('.fullname').val();
+        		var email = container.find('.email').val();
+        		var phone = container.find('.phone').val();
+        		var vat = $('#VatToCheck').val() ?? "";
+        		var addr1 = container.find('.addr1').val();
+        		var city = container.find('.city').val();
+        		var state = container.find('.state').val();
+        		var zip = container.find('.zip').val();
+        		var country = container.find('.country').val();
+        
+        		var callback = cart.shippingAddressCallback;
+        		if (type == 'billing') {
+        			callback = cart.billingAddressCallback;
+        		}else{
+        		    
+        		}
+        
+        		if (id == '') {
+        			var action = 'add';
+        		} else {
+        			if (type == 'billing' && ! cart.same_address ){
+        				var action = 'add';
+        			} else {
+        				var action = 'edit';
+        			}
+        		}
+        
+        		if (action == 'add') {
+        			addAddress(fullname, addr1, city, zip, state, country, email, phone, vat, callback );
+        		} else {
+        			editAddress(id,fullname, addr1, city, zip, state, country, email, phone, vat, callback );
+        		}
+        
+        	}
+        
+        	cart.validateAddress = function(type, container){
+                var address_html = "";
+        		var errors = 0;
+        		
+        		var fullname = container.find('.fullname').val();
+        		address_html += fullname + '<br>';
+        		if (fullname == "") {
+        			++errors;
+        			container.find('.fullname').parent().addClass('has-error');
+        		}
+        		
+        		var email = container.find('.email').val();
+        		if (email == '' || !(validateEmail(email)) ) {
+        			++errors;
+        			container.find('.email').parent().addClass('has-error');
+        		}
+        
+        		var phone = container.find('.phone').val();
+        		if (phone == '') {
+        			++errors;
+        			container.find('.phone').parent().addClass('has-error');
+        		}
+                {% if group.props.digitalinvoice == 'no' %}
+            		var vat = container.find('.vat').val();
+            		if (vat == '' && cart.vat_required ) {
+            			++errors;
+            			container.find('.vat').parent().addClass('has-error');
+            		}
+        		{% endif %}
+        
+        		var addr1 = container.find('.addr1').val();
+        	    address_html += addr1 + '<br>';
+        		if (addr1 == '') {
+        			++errors;
+        			container.find('.addr1').parent().addClass('has-error');
+        		}
+        
+        		var city = container.find('.city').val();
+        		address_html += city + ' ';
+        		if (city == '') {
+        			++errors;
+        			container.find('.city').parent().addClass('has-error');
+        		}
+        
+        		var state = container.find('.state').val();
+        		if (state == '') {
+        			++errors;
+        			container.find('.state').parent().addClass('has-error');
+        		}
+        		
+        		var zip = container.find('.zip').val();
+        		address_html += zip + '<br>';
+        		if (zip == '') {
+        			++errors;
+        			container.find('.zip').parent().addClass('has-error');
+        		}
+        
+        		var country = container.find('.country').val();
+        		if (country == '') {
+        			++errors;
+        			container.find('.country').parent().addClass('has-error');
+        		}
+                
+                address_html += container.find('.state option:selected').html()+' - ';
+                address_html += container.find('.country option:selected').html() + '<br>';
+                address_html += email + '<br>';
+                address_html += phone;
+                
+                if (errors>0){
+                    console.log("validateAddress error!")
+        			$("#error_"+type+"_address_save").fadeIn().delay(5000).fadeOut();
+        			scrollToElement(type+"_address_form");
+        			return false;
+        		} else {
+        		    $('#review_address_'+type).html(address_html);
+        			return true;
+        		}
+        	}
+        	
+        	cart.getShippingMethods = function(address){
+        		$('#shipping_results').html('Loading... <div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>');
+        		address = cart.getAddressObject(address)[0];
+				if (cart.shipping_country>0){
+        			Storeden.checkShipping(cart.id, cart.shipping_city, cart.shipping_country, cart.printShippingMethod, address );
+        		}
+        	}
+        
+        	cart.printPaymentMethods = function(){
+        		$('#payments_labels').html('Loading... <div class="spinner-border spinner-border-sm" role="status"><span class="visually-hidden">Loading...</span></div>');
+        		Storeden.getPayments( function createPaymentsLabel(payments){
+        			var destination = $('#payments_labels');
+        			var preselect = "";
+        			var html = '';
+        			for (var i in payments) { 
+        				var payment = payments[i];
+        				if ((payment['available'] == 1)&&(i!="65a8e56fe39ee1470ee12074")) { 
+        					html += '<label class="payment_label btn btn-block button-white w-100" id="payment_'+i+'">';
+        					html += '<input type="radio" name="payment" value="'+i+'">';
+        					html += '<div class="row">';
+        					html += '<div class="col-md-8 col-sm-7 col-12 text-start">';
+        					html +=  '<p class="payment_name">'+payment['label']+'</p>';
+        					html += '</div>';
+        					html += '<div class="col-md-4 col-sm-5 col-12 text-end ">';
+        					if (payment['cost'] > 0) {
+        						var price = parsePrice(payment['cost']);
+        						html += '<p>{{currency | raw }} <span class="payment_cost" data-cost="'+payment['cost']+'">'+price+'</span></p>';
+        					} else {
+        						html += '<p><span class="payment_cost d-none" data-cost="0">0</span></p>';
+        					}
+        					html += '</div>';
+        					html += '</div>';
+        					html += '</label>';
+        				}
+        				else if ((payment['available'] == 1)&&(pagamentoExtra!="")) { 
+        				    var payLabel = "";
+        				    for (var ind in custom_fields){
+        				        if(custom_fields[ind].name=="metodopagamento"){
+        				            for(var optionID in custom_fields[ind].options){
+        				                if (custom_fields[ind].options[optionID].value==pagamentoExtra){
+        				                    payLabel = custom_fields[ind].options[optionID].label_{{locale}};
+        				                }
+        				            }
+        				        }
+        				    }
+        				    preselect = i;
+        					html += '<label class="payment_label btn btn-block button-white active w-100" id="payment_'+i+'">';
+        					html += '<input type="radio" name="payment" value="'+i+'">';
+        					html += '<div class="row">';
+        					html += '<div class="col-md-8 col-sm-7 col-12 text-start">';
+        					html +=  '<p class="payment_name">'+payLabel+'</p>';
+        					html += '</div>';
+        					html += '<div class="col-md-4 col-sm-5 col-12 text-end ">';
+        					if (payment['cost'] > 0) {
+        						var price = parsePrice(payment['cost']);
+        						html += '<p>{{currency | raw }} <span class="payment_cost" data-cost="'+payment['cost']+'">'+price+'</span></p>';
+        					} else {
+        						html += '<p><span class="payment_cost d-none" data-cost="0">0</span></p>';
+        					}
+        					html += '</div>';
+        					html += '</div>';
+        					html += '</label>';
+        				}
+        			}
+        			destination.html(html);
+        			if (payments.length == 1) {
+        				$('.payment_label').trigger('click');
+        			}
+        			if (preselect != '' ) { 
+        				$('input[value="'+preselect+'"]').parent().trigger('click');
+        				//cart.moveBetweenSteps(3,4);
+        			} 
+        		}, cart.id, cart.shipping_country, cart.shipping_city, cart.billing_country);
+        	}
+        
+        	cart.printShippingMethod = function(shippings){
+        		if (shippings.length == 0 ) {
+        			$('#shipping_results').html('');
+        			$('#shipping_unavailable').fadeIn();
+        			cart.resetShippingMethod();
+        		} else {
+        			$('#shipping_unavailable').fadeOut();
+        			var html = '';
+        			var found = false;
+        			for (var i in shippings) { 
+        				var shipping = shippings[i];
+        				if (shipping['shipping_id'] == cart.shipping_method_id ){
+        					found = true;	
+        				}
+        				html += '<label class="shipping_label button-white btn btn-block w-100" for="shipping_'+shipping['shipping_id']+'">';
+        				html += '<input type="radio" name="shipping_method" value="'+shipping['shipping_id']+'" id="shipping_'+shipping['shipping_id']+'">';
+        				html +=  '<div class="row">';
+        				html += '<div class="col-md-8 col-sm-7 col-12 text-start">';
+        				html += '<p><strong class="shipping_name">'+shipping['name']+'</strong>';
+        				if (shipping['time'] != null && shipping['time'] !=''){
+        					html +=  '<br>'+shipping['timeLang'];
+        				}
+        				html += '</p>';
+        				html += '</div>';
+        				html += '<div class="col-md-4 col-sm-5 col-12 text-end ">';
+        				var price = parsePrice(shipping['price']);
+        				if (Storeden.parsePrice(shipping['price']) > 0) {	
+        					html += '<p>{{currency | raw }} <span class="shipping_cost" data-cost="'+shipping['price']+'">'+price+'</span></p>';
+        				} else  {
+        					html += '<p class="d-none">{{currency | raw }} <span class="shipping_cost" data-cost="0"></span></p>';
+        					html += '<p>{{lang('front.item.freeshipping')}}</p>';
+        				}
+        				html += '</div><div class="clearfix"></div>';
+        				html += '</div>';
+        				html += '</label>';
+        			}
+        			$('#shipping_results').html(html); 
+        			if (shippings.length == 1) {
+        				$('.shipping_label').trigger('click');
+        			}
+        			if (cart.shipping_method_id != '' ) { 
+        				$('input[value="'+cart.shipping_method_id+'"]').parent().trigger('click');
+        				//cart.moveBetweenSteps(2,3);
+        			} 
+        		}  
+        	}
+        
+        	cart.resetShippingMethod = function(){
+        		cart.updateField('shipping_method', '');
+        		cart.updateField('shipping_method_id', '');
+        		cart.updateField('shipping_amount', 0);
+        		cart.updateTotal();
+        	}
+        
+        	cart.shippingAddressCallback = function(res){
+        		var container = $('#shipping_address_form');
+        		var select = $('#shipping_address_select');
+        		var billing_select = $('#billing_address_select');
+        		
+        		if ( typeof res === 'undefined') {
+        			$('#shipping_address_id').val('');
+        			$("#error_shipping_address_save").fadeIn().delay(5000).fadeOut();
+        			scrollToElement("error_shipping_address_save");
+        			cart.setShippingAddress(null);
+        			if (cart.same_address){
+        				cart.setBillingAddress(null);
+        			}
+        		} else { 
+        			if (res.result == 'success'){
+        				var address = res.response;
+        				var address_id = address._id['$id'];
+        				container.find('.address_id').val(address_id);
+        				var check = select.find("option[value='"+address_id+"']");
+        				var label = address.fullname+' - '+address.addr1+' '+address.city+' - '+address.stateName+' - '+address.countryName;
+        				if (check.length <= 0){
+        				    cart.addAddressObject(address);
+        				    select.selectpicker('deselectAll'); 
+        					var option = '<option value="'+address_id+'" selected="selected">'+label+'</option>';
+        					select.prepend(option);
+        					select.selectpicker('val', address_id);
+        					select.selectpicker('refresh');
+        					if (cart.same_address) { 
+        						billing_select.selectpicker('deselectAll'); 
+        						billing_select.prepend(option);
+        						billing_select.selectpicker('val', address_id);
+        						billing_select.selectpicker('refresh');
+        					}
+        				} else {
+        					check.html(label);
+        					select.selectpicker('refresh');
+        					if (cart.same_address) {
+        						var billing_check = select.find("option[value='"+address_id+"']");
+        						billing_check.html(label);
+        						billing_select.selectpicker('refresh');
+        					}
+        					cart.updateAddressObject(address_id, address);
+        				}
+        				$('#shipping_address_id').val(address_id);
+        				cart.setShippingAddress(address_id);
+        				var test = cart.shipping_address == cart.billng_address;
+        				if (cart.same_address) {
+        					$('#billing_address_id').val(address_id);
+        					cart.prepareAddressForm('billing', address_id);
+        					cart.setBillingAddress(address_id);
+        					moveToTwo();
+        				} else {
+        					// save also billing address before move to step 2
+        					{% if not haveBilling %}
+        					    cart.saveAddress('billing', $('#billing_address_form') );
+        					{% else %}
+        					    moveToTwo();
+        					{% endif %}
+        				}
+        			} else {
+        				var errors = 0;
+        				var types = res.types;
+        				for (var i in types) {
+        					var type = types[i];
+        					++errors;
+        					container.find('.'+type).parent().addClass('has-error');
+        				}
+        				if (errors > 0){
+        					console.log("errors: " + errors);
+        					$('#shipping_address_id').val('');
+        					$("#error_shipping_address_save").fadeIn().delay(5000).fadeOut();
+        					scrollToElement('step_1_content');
+        					cart.setShippingAddress(null);
+        					if (cart.same_address){
+        						cart.setBillingAddress(null);
+        					}
+        				}
+        			}
+        
+        		} 
+        	}
+        
+        	cart.billingAddressCallback = function(res){
+        		var container = $('#billing_address_form');
+        		var select = $('#billing_address_select');
+        		var shipping_select = $('#shipping_address_select');
+        		if ( typeof res === 'undefined') {
+        			$('#billing_address_id').val('');
+        			$("#error_billing_address_save").fadeIn().delay(5000).fadeOut();
+        			console.log("errore 1");
+        			scrollToElement('billing_address_wrap');
+        			cart.setBillingAddress(null);
+        		} else { 
+        			if (res.result == 'success'){
+        				var address = res.response;
+        				var address_id = address._id['$id'];
+        				container.find('.address_id').val(address_id);
+        				var check = select.find("option[value='"+address_id+"']");
+        				var label = address.fullname+' - '+address.addr1+' '+address.city+' - '+address.stateName+' - '+address.countryName;
+        				if (check.length <= 0){
+        				    cart.addAddressObject(address);
+        					select.selectpicker('deselectAll'); 
+        					var option = '<option value="'+address_id+'" selected="selected">'+label+'</option>';
+        					select.prepend(option);
+        					select.selectpicker('val', address_id);
+        					select.selectpicker('refresh');
+        				} else {
+        					check.html(label);
+        					select.selectpicker('refresh');
+        					cart.updateAddressObject(address_id, address);
+        				}
+                        $('#billing_address_id').val(address_id);
+        				cart.setBillingAddress(address_id);
+        				if(cart.is_guest){
+        				    moveToTwo();
+        				}
+        				else{
+        				    Storeden.setMainAddress(address_id,moveToTwo);
+        				}
+        			} else {
+        			    
+        			    var errors = 0;
+        				var types = res.types;
+        				for (var i in types) {
+        					var type = types[i];
+        					++errors;
+        					container.find('.'+type).parent().addClass('has-error');
+        				}
+        				if (errors > 0){
+        					$('#billing_address_id').val('');
+        					$("#error_billing_address_save").fadeIn().delay(1000).fadeOut();
+        					console.log("errore 2");
+        					scrollToElement('billing_address_wrap');
+        					cart.setBillingAddress(null);
+        				}
+        			}
+        
+        		} 
+        
+        	}
+        
+        	cart.calculateTax = function(){
+        	    taxOk = false;
+        	    //console.dir(cart);
+        		Storeden.getTaxAmount(cart.id, cart.billing_country, function(res){
+        			var items = res.items;
+        			var new_subtotal = 0;
+        			var tax_amount = 0;
+        			for (var k in items) {
+        				var item = items[k];
+        				k = k.split('#|#');
+        				if (typeof k[1] === 'undefined')
+        					var id = 'row_'+k[0]+'_';
+        				else {
+        					var options = k[1];
+        					options = options.replace(/\*/g, 'asterix').replace(/\./g,'-DOT-')
+        					var id = 'row_'+k[0]+'_'+options;
+        				}
+        				var row = $('.cart_single_row[data-id="'+id+'"]');
+        				if (item.item_tax > 0 || jUserB2B) {
+                            var prodTaxes = row.find('.tax-row').data('product-taxes');
+                            var prodPrice = row.find('.item_single_price').data('product-price');
+                            var prodQty = row.find('.quantity_input').val();
+                            var totPriceValue = prodQty * prodPrice;
+                            var totTaxValue = prodQty * prodTaxes; 
+                            row.find('.tax-row').removeClass('hide');
+                            row.find('.tax-row span').html(parsePrice(prodTaxes)); 
+                            row.find('.item_single_price').html(parsePrice(prodPrice)); 
+                            row.find('.item_total_price').html(parsePrice(totPriceValue+totTaxValue)); 
+                            tax_amount += totTaxValue;
+                            new_subtotal += totPriceValue;
+                        } else {
+                            $('.tax-row').addClass('hide');
+                            row.find('.tax-row span').html(''); 
+                            row.find('.item_single_price').html(parsePrice(item.item_price)); 
+                            row.find('.item_total_price').html(parsePrice(item.total_item_price)); 
+                            new_subtotal += item.total_item_price;
+                        }
+        			}
+        			
+        			/*cart.updateField('payment_amount', 0);
+        			cart.updateField('payment_method_id', '');
+        			cart.updateField('payment_method', '');*/
+        			cart.updateField('subtotal', new_subtotal);
+        			cart.updateField('tax_amount', tax_amount);
+        			taxOk = true;
+        			cart.updateTotal();
+        			cart.enableCheckoutButton();
+        			
+        		}, cart.shipping_country );
+        	}
+        
+        	cart.applyCouponCallback = function(res){
+        
+        		if (! (typeof res === 'undefined')){
+        
+        			var coupon_amount = 0;
+        			var coupon_name = '';
+        			var coupon_code = '';
+        			if (res.error == '') {
+        				$('#applyCoupon').addClass('d-none');
+        				$('#removeCoupon').removeClass('d-none');
+        				$('.alert-coupon').addClass('d-none');
+        				coupon_name = res.name;
+        				coupon_amount = res.value;
+        				coupon_code = res.metadata.sales.code;
+        			} else {
+        				$('.alert-coupon').addClass('d-none');
+        				$('#'+res.error).removeClass('d-none');
+        				$('#removeCoupon').addClass('d-none');
+        				$('#applyCoupon').removeClass('d-none');
+        			}
+        
+        			cart.updateField('coupon_amount', coupon_amount);
+        			cart.updateField('coupon_name', coupon_name);
+        			cart.updateField('coupon_code', coupon_code);
+        			cart.updateTotal();
+        
+        			var event_obj = { 'result' :  res };
+        			$(document).trigger('storeden.cart.apply.coupon-callback', [event_obj]);
+        
+        		}
+        	}
+        
+        	cart.couponValue = function(couponName, callback){
+        		cart.updateField('coupon_code', couponName);
+        		Storeden.couponValue(cart.id, couponName, cart.total, callback);
+        	}
+        
+        	cart.resetCoupon = function(){
+        		$('#applyCoupon').removeClass('d-none');
+        		$('#removeCoupon').addClass('d-none');
+        		$('#sale_code').val('');
+        		cart.updateField('coupon_code', '');
+        		cart.updateField('coupon_name', '');
+        		cart.updateField('coupon_amount', 0);
+        		cart.updateTotal();
+        	}
+        
+        	cart.verifyCheckout = function(){
+        		var isValid = false;
+        
+        		//shipping_address
+        		var a = false;
+        		var valA = $('#shipping_address_id').val();
+        		a = ! (typeof $('#shipping_address_id').val() == 'undefined' || $('#shipping_address_id').val() == '');
+        
+        		//billing_address
+        		var b = false;
+        		var valB = $('#billing_address_id').val();
+        		b = ! (typeof $('#billing_address_id').val() == 'undefined' || $('#billing_address_id').val() == '');
+        
+        		//shipping method
+        		var c = false;
+        		var valC = $('input[name="shipping_method"]:checked').val();
+        		c = ! (typeof $('input[name="shipping_method"]:checked').val() == 'undefined' || $('input[name="shipping_method"]:checked').val() == '');
+        
+        		//payment method
+        		var d = false;
+        		var valD = $('input[name="payment"]:checked').val();
+        		d = ! (typeof $('input[name="payment"]:checked').val() == 'undefined' || $('input[name="payment"]:checked').val() == '');
+        
+        		if (!a){
+        			$('.error_shipping_id').removeClass('d-none');
+        		} else {
+        			$('.error_shipping_id').addClass('d-none');
+        		}
+        		if (!b){
+        			$('.error_billing_id').removeClass('d-none');
+        		} else {
+        			$('.error_billing_id').addClass();
+        		}
+        		if (!c){
+        			$('.error_shipping_method').removeClass('d-none');
+        		} else {
+        			$('.error_shipping_method').addClass('d-none');
+        		}
+        		if (!d){
+        			$('.error_payment_method').removeClass('d-none');
+        		} else {
+        			$('.error_payment_method').addClass('d-none');
+        		}
+        
+        		var isValid =  a & b & c & d;
+        
+        		if ((isValid)&&(taxOk)){
+        			cart.doCheckout();
+        		} else {
+        			$('.checkout_btn_move .btn').prop('disabled', false);
+        			$('.checkout_btn_move .btn').removeClass('disabled');
+        			$('.checkout_btn_move').removeClass('d-none');
+        			$('.checkout-work-in-progress').fadeOut();
+        		}
+        	}
+        
+        	cart.doCheckout = function(){
+        
+        		var shipping = $('#shipping_address_id').val();
+        		var billing = $('#billing_address_id').val();
+        		var shipping_profile = $('input[name="shipping_method"]:checked').val();
+        		var payment_profile = $('input[name="payment"]:checked').val();
+        		var coupon = $('#sale_code').val();
+        		var message = $('#messageTextarea').val();
+        
+        		var giftMessage = '';
+        		var isGift = false;
+        		{% if gift_option.active == 1%}
+        		isGift = $('#isGift').is(':checked');
+        		 if (isGift) {
+        			 giftMessage = $('#giftOptionMessage').val();
+        		 }
+        		 {% endif %}	
+        
+        		 {% if invoice_option == true %}
+        		 var needInvoice = $('#invoiceOption').is(':checked');
+        		  {% else %}
+        		  var needInvoice = null;
+        		   {% endif %}
+        
+        		   if (cart.is_guest){
+        			   Storeden.guestCheckout('{{cart_id}}', billing, shipping, shipping_profile, payment_profile, coupon, message, false, '', '', cart.checkoutCallback, isGift, giftMessage,needInvoice);
+        		       //var billingData = $(".digital-invoice-data").serializeArray();
+        			   //console.dir(billingData);
+        		       //console.log('{{cart_id}}',' - ', billing,' - ',  shipping,' - ',  shipping_profile,' - ',  payment_profile,' - ',  coupon,' - ',  message,' - ',  cart.checkoutCallback,' - ',  isGift,' - ',  giftMessage,' - ',  needInvoice);
+        		       
+        		   } else {
+        			  Storeden.checkout('{{cart_id}}', billing, shipping, shipping_profile, payment_profile, coupon, message, cart.checkoutCallback, isGift, giftMessage, needInvoice);
+        			  //var billingData = $(".digital-invoice-data").serializeArray();
+        			  //console.dir(billingData);
+        			  //console.log('{{cart_id}}',' - ', billing,' - ',  shipping,' - ',  shipping_profile,' - ',  payment_profile,' - ',  coupon,' - ',  message,' - ',  cart.checkoutCallback,' - ',  isGift,' - ',  giftMessage,' - ',  needInvoice); 
+        		   }		
+        		   }
+        
+        		   cart.checkoutCallback = function(res){
+        			   if (! (typeof res === 'undefined')) {
+        				   if (res.orderID != null && res.response == 'success') {
+        					   if (res.response == 'success') {
+        						   if (res.redirect != '' && res.redirect != null) {
+        							   window.location = res.redirect;
+        						   } else {  
+        							   cart.checkoutError(res.error);
+        						   }
+        					   } else {
+        						   cart.checkoutError(res.error);
+        					   }
+        				   } else {
+        					   cart.checkoutError(res.error);
+        				   }
+        			   } else {
+        				   cart.checkoutError(0);
+        			   }
+        		   }
+        	 	
+        	    /* cart initialize */
+        		cart.init('{{cart_id}}', Storeden.USER_ADDRESS, {{cartTotal}}, {{cart_user}}, {{items | json | raw}}  );
+        		   
+        		/* cart events to handle */
+        		
+        		$(document).on('click', '#applyCoupon', function(e){
+        			e.preventDefault();
+        			var couponName = $('#sale_code').val();
+        			var event_obj = { 'coupon' :  couponName };
+        			$(document).trigger('storeden.cart.apply.coupon', [event_obj]);
+        			if (typeof couponName != 'undefined' && couponName != '' && couponName != ' ') {
+        				cart.couponValue(couponName, cart.applyCouponCallback);
+        			}
+        		});
+        		
+        		$(document).on('click', '#removeCoupon', function(e){
+        			cart.resetCoupon();
+        		})
+        		
+        		$(document).on('click', '.checkout_errors .alert', function(e){
+        			var from = cart.current_step;
+        			var to = $(this).attr('data-move');
+        			var scrolltoBilling = false;
+        			if (to == '1.1'){
+        				to = 1;
+        				scrolltoBilling = true;
+        			}
+        			cart.moveBetweenSteps(from,to);
+        			if (scrolltoBilling){
+        				scrollToElement('billing_address_wrap');
+        			}
+        		})
+        		
+        		$(document).on('click', '.move-to-step', function(e){
+        			
+        			e.preventDefault;
+        			var from = cart.current_step;
+        			var action = 'next';
+        			var to = cart.getNextStep();
+        			if ($(this).hasClass('btn-prev')){
+        				var to = cart.getPrevStep();
+        				action = 'prev';
+        			}
+        			console.log("Log 1");
+        			// reset pending erros
+        			$('#cart_errors .alert').hide();
+        			$('.checkout_errors .alert').addClass('d-none');
+        			
+        			var validate = true;
+        			if (action == 'next') {
+        				// move forward
+        				console.log("Log 2");
+        				if (from == 0){
+        					// user is guest, then move to next step 
+        					console.log("Log 3");
+        					cart.moveBetweenSteps(from,to);
+        				} else if (to <= 4) {
+        				    console.log("Log 4");
+        					// check if current step is valid then move on
+        					if (from != 1 && cart.validateStep(from)){
+        						console.log("Log 5");
+        						cart.moveBetweenSteps(from,to);
+        					} 
+        					if (from == 1 ){
+        						// validate shipping address before moving
+        						console.log("Log 6");
+        						valid_input = true;
+        						{% if request.path.2 == "invoice" and not haveBilling%}
+        						    valid_input = cart.validateAddress('billing', $('#billing_address_form'));
+        						    console.log("Log 6.5 valid input: " + valid_input);
+        						{% endif %}
+        						console.log("Log 7");
+        						var valid_input = valid_input && cart.validateAddress('shipping', $('#shipping_address_form'));
+        						if (valid_input){
+        							// save address, moving is done in save address callback
+        							console.log("Log 8");
+        							cart.saveAddress('shipping', $('#shipping_address_form') );
+        						}
+        					}
+        				} else {
+        					// not valid step number
+        				}
+        			} else {
+        				// move backward
+        				if (to >= 1) {
+        					cart.moveBetweenSteps(from,to);
+        				}else{}
+        			}
+        			
+        		});
+        		
+        	 $(document).on('click', '.remove_item', function(e){
+				e.preventDefault();
+				cart.removeItem($(this));
+        	 })
+        	 
+            {% if user.uid == 0 %}
+                $(document).on('change', '#billing_well .listCountry', function(){
+            		 $('#shipping_well .listCountry').val($(this).val()).trigger('change').prop('disabled', true);
+            	 })
+            {% endif %}
+        
+        	 $(document).on('changed.bs.select', '#shipping_address_select', function(){
+        		 cart.setShippingAddress($(this).val());
+        		 cart.prepareAddressForm('shipping', $(this).val());
+        		 if ( cart.same_address ) {
+        			 if ( $(this).val() != 'add_new' ) {
+        				 $('#billing_address_select').selectpicker('deselectAll'); 
+        				 $('#billing_address_select').selectpicker('val', $(this).val());
+        				 cart.prepareAddressForm('billing', $(this).val());
+        				 cart.setBillingAddress($(this).val());
+        			 }
+        		 } 
+        	 })
+        		
+        	 $(document).on('click', '.doCheckout', function(e){
+        		 e.preventDefault();
+        		 $('.checkout_btn_move .btn').prop('disabled', true);
+        		 $('.checkout_btn_move .btn').addClass('disabled');
+        		 $('.checkout_btn_move').addClass('d-none');
+        		 $('.checkout-work-in-progress').fadeIn();
+        		 cart.verifyCheckout();
+        	 })
+        		
+        	 $(document).on('changed.bs.select', '#billing_address_select', function(){
+        		 cart.prepareAddressForm('billing', $(this).val());
+        		 cart.setBillingAddress($(this).val());
+        	 })
+        		
+        	 $(document).on('change', '.switch #sameAddress', function(e){
+        		 var checked = $(this).is(':checked');
+        		 if (checked){
+        			 cart.updateField('same_address', true);
+        			 $('#billing_address_wrap').addClass('d-none');
+        			 scrollToElement('step_1_content');
+        		 } else {
+        			 cart.updateField('same_address', false);
+        			 $('#billing_address_wrap').removeClass('d-none');
+        			 scrollToElement('billing_address_wrap');
+        		 }
+        	 })
+        
+        	 $(document).on('change paste keyup', '.address_form_container .form-control', function(e){
+        
+        		 var parent = $(this).parent();
+        		 var is_required = ($(this).attr('required') == "required");
+        		 var val =  $(this).val();
+        		 var type = $(this).attr('type');
+        
+        		 if (is_required) {
+        			 if (type == 'email') {
+        				 if (val == '' || !(validateEmail(val)) ) {
+        					 parent.addClass('has-error');
+        				 } else {
+        					 parent.removeClass('has-error');
+        				 }
+        			 } else {
+        				 if (val != '') {
+        					 parent.removeClass('has-error');
+        					 if ($(this).hasClass('country')){
+        						 parent.closest('.list-country-state').find('.state').parent().removeClass('has-error');
+        					 }
+        				 } else {
+        					 parent.addClass('has-error');
+        					 if ($(this).hasClass('country')){
+        						 parent.closest('.list-country-state').find('.state').parent().addClass('has-error');
+        					 }
+        				 }
+        			 }
+        		 }
+        	 })
+        		
+        	 $(document).on('change', '.guest_label input', function(){
+        		 var checked = $(this).is(':checked');
+        		 if (checked){
+        			 $('.guest_label.active').removeClass('active');
+        			 $(this).parent().addClass('active');
+        		 } else {
+        			 $(this).parent().removeClass('active');
+        		 }
+        		 var target = $(this).attr('data-target');
+        		 var guest_action = $(this).val();
+        		 guestOption(target, guest_action);
+        	 })
+        		
+        	 function guestOption(target, action){
+        		 if (target == 'guest_proceed') {
+        			 $('#guest_signin').hide();
+        			 $('#guest_register').hide();
+        			 $('#guest_proceed').fadeIn();
+        			 scrollToElement('guest_proceed');
+        		 } else if (target == 'guest_register') {
+        		     $('#guest_proceed').hide();
+        			 $('#guest_signin').hide();
+        			 $('#guest_register').fadeIn();
+        			 scrollToElement('guest_register');
+        		 } else if (target == 'guest_signin') {
+        		     $('#guest_proceed').hide();
+        			 $('#guest_register').hide();
+        			 $('#guest_signin').fadeIn();
+        			 scrollToElement('guest_signin');
+        		 }
+        	 }
+        
+        	 $(document).on('change', '#invoiceOption', function(){
+        		 var checked = $(this).is(':checked');
+        		 var event_obj = { 'checked' :  checked };
+        		 $(document).trigger('storeden.cart.invoice.option', [event_obj]);
+        	 })
+        			 
+        	 $(document).on('change', '.shipping_label input', function(){
+        
+        		 var id = $(this).val();
+        		 var event_obj = { 'shipping_method' :  id };
+        		 $(document).trigger('storeden.cart.setShippingMethod', [event_obj]);
+        
+        		 $('#error_shipping_method').fadeOut();
+        		 $('.checkout_errors .error_shipping_method').addClass('d-none');
+        		 var checked = $(this).is(':checked');
+        		 if (checked){
+        			 $('.shipping_label.active').removeClass('active');
+        			 $(this).parent().addClass('active');
+        		 } else {
+        			 $(this).parent().removeClass('active');
+        		 }
+        
+        		 var cost = $(this).parent().find('.shipping_cost').attr('data-cost');
+        		 var name = $(this).parent().find('.shipping_name').html();
+        		 if (typeof cost === 'undefined'){
+        			 cost = 0;
+        		 }
+        		 cart.updateField('shipping_amount', parseFloat(cost.replace(',', '.')));
+        		 cart.updateField('shipping_method_id', id);
+        		 cart.updateField('shipping_method', name);
+        		 cart.updateTotal();
+        	 })
+        		
+        	 $(document).on('change', '.payment_label input', function(){
+        		
+        		 var id = $(this).val();
+        		 var event_obj = { 'payment_method' :  id };
+        		 $(document).trigger('storeden.cart.setPaymentMethod', [event_obj]);
+        
+        		 $('#error_payment_method').fadeOut();
+        		 $('.checkout_errors .error_payment_method').addClass('d-none');
+        		 var checked = $(this).is(':checked');
+        		 if (checked){
+        			 $('.payment_label.active').removeClass('active');
+        			 $(this).parent().addClass('active');
+        		 } else {
+        			 $(this).parent().removeClass('active');
+        		 }
+        		 var cost = $(this).parent().find('.payment_cost').attr('data-cost');
+        		 var name = $(this).parent().find('.payment_name').html();
+        		 if (typeof cost === 'undefined'){
+        			 cost = 0;
+        		 }
+        		 cart.updateField('payment_amount', parseFloat(cost.replace(',', '.')));
+        		 cart.updateField('payment_method_id', id);
+        		 cart.updateField('payment_method', name);
+        		 cart.updateTotal();
+        	 })
+        
+        	 $(document).ready(function(){
+        		 $('.selectpicker').selectpicker({
+        			 style: 'button-white',
+        		 });
+        	 })
+        		
+        	 $(document).on('change', '#shipping_address_form .listCountry', function(){
+        		 $('#shipping_unavailable').hide();
+        		 cart.resetShippingMethod();
+        	 })
+        
+        	 function moveCartReview(){
+        		 var el = $('#review_cart');
+        		 var elpos_original = el.offset().top;
+        		 $(window).scroll(function(){
+        			 var elpos = el.offset().top; 
+        			 var windowpos = $(window).scrollTop();
+        			 var finaldestination = windowpos;
+        			 //var stophere = ( $('#stop_here').offset().top ) ;
+        			 if(windowpos<elpos_original){// || windowpos>=stophere) {
+        				 finaldestination = elpos_original;
+        				 el.stop().animate({'top':0});
+        			 } else {
+        				 var totalFromTop = parseInt($('#review_cart').css('top').replace('px',''));
+        				 var totalHeight = totalFromTop+el.height();
+        				 var moveHere = finaldestination-elpos_original+10;
+        				 var container_height = parseInt($('#cart_height').height());
+        				 var maxTop = container_height - el.height();
+        				 if ( moveHere > maxTop  ){} 
+        				 else {		
+        					 el.stop().animate({'top':moveHere},300);
+        				 }
+        			 }
+        		 }); 
+        	 }
+        		
+        	 /*$(window).resize(function(){
+        		 var w = $(window).width();
+        		 if (w > 767){
+        			 moveCartReview();
+        		 } else {
+        			 $('#review_cart').stop().animate({'top':0});
+        		 }
+        	 })*/
+        						 
+        	 $(document).ready(function(){
+        		 Storeden.getConditions(function(res){
+        			 $('#conditions #box_conditions').html(res.text);
+        		 });
+        		 /*var w = $(window).width();
+        		 if (w > 767){
+        			 moveCartReview();
+        		 } else {
+        			 $('#review_cart').stop().animate({'top':0});
+        		 }*/
+        		 
+        		 
+        		 /* Se sono loggato il calcolo dell'iva parte subito quindi verifico se sono nel secondo step sostituisco subito il testo nel cart_preview per scrivere che il calcolo delle tasse è in corso */
+        		 /*
+        		 if(cart.current_step == 1){
+        		     //$('.cartReview_tax_value>div:first-child').text("{{lang('tax.calculating')}}");
+        		 }*/
+        	 })
+        
+        	 $(document).on('change', '#isGift', function(e){
+        		 var checked = $(this).is(':checked');
+        		 var gift_amount = $('#gift_price').attr('data-price');
+        		 var w = $(window).width();
+        		 cart.updateField('is_gift', checked);
+        		 cart.updateField('gift_amount', parseFloat(gift_amount.replace(',', '.')));
+        		 if (checked) {
+        			 $('#giftMessage').removeClass('d-none');
+        			 $('#giftPrice').removeClass('d-none');
+        		 } else {
+        			 $('#giftMessage').addClass('d-none');
+        			 $('#giftPrice').addClass('d-none');
+        		 }
+        		 cart.updateTotal();
+        	 }) 
+            {% if user.uid == 0 %}
+                $(document).on('change', '.listCountry', function(e){
+                    let container = $(this).closest('.address_form');
+                    Storeden.getStates($(this).val(), function(res){
+                        var target = container.find('.state');
+                        var options = '<option></option>';
+                        for (var i in res) {
+                            var state = res[i];
+                            options += '<option value="'+state['uid']+'">'+state['name']+'</option>';
+                        }
+                        target.html(options);
+                    });
+                })
+            {% endif %}
+        		   
+        	 $('#checkoutForm input').on('keypress keydown keyup', function(e){
+        		if(e.keyCode == 13) { e.preventDefault(); }
+        	 });   
+        	 
+        	  $('#same_address').on('click', function(){
+        	        var billing_address = $('#billing_well .address_form');
+        	        var fullname = billing_address.find('.fullname').val();
+            		$('#shipping_well .address_form .fullname').val(fullname);
+            		var name = billing_address.find('.name').val();
+            		$('#shipping_well .address_form .name').val(name);
+            		var surname = billing_address.find('.surname').val();
+            		$('#shipping_well .address_form .surname').val(surname);
+            		var email = billing_address.find('.email').val();
+            		$('#shipping_well .address_form .email').val(email);
+            		var phone = billing_address.find('.phone').val();
+            		$('#shipping_well .address_form .phone').val(phone);
+            		var vat = billing_address.find('.vat').val();
+            		$('#shipping_well .address_form .vat').val(vat);
+            		var addr1 = billing_address.find('.addr1').val();
+            		$('#shipping_well .address_form .addr1').val(addr1);
+            		var city = billing_address.find('.city').val();
+            		$('#shipping_well .address_form .city').val(city);
+            		var stateOptions = billing_address.find('.state').html();
+            		$('#shipping_well .address_form .state').html(stateOptions);
+            		var state = billing_address.find('.state').val();
+            		$('#shipping_well .address_form .state').val(state);
+            		var zip = billing_address.find('.zip').val();
+            		$('#shipping_well .address_form .zip').val(zip);
+            		var country = billing_address.find('.country').val();
+            		$('#shipping_well .address_form .country').val(country);
+        	    })
+        	    
+                {% if user.uid == 0  %}
+                    function checkCodiceFiscale(billingName, billingSurname, codFisc) {
+                        function getCodiceSurname(surname) {
+                            const consonants = surname.replace(/[^BCDFGHJKLMNPQRSTVWXYZ]/gi, '').toUpperCase();
+                            const vowels = surname.replace(/[^AEIOU]/gi, '').toUpperCase();
+                            const code = (consonants + vowels + "XXX").substring(0, 3);
+                            return code;
+                        }
+                    
+                        function getCodiceName(name) {
+                            const consonants = name.replace(/[^BCDFGHJKLMNPQRSTVWXYZ]/gi, '').toUpperCase();
+                            const vowels = name.replace(/[^AEIOU]/gi, '').toUpperCase();
+                            let code = consonants;
+                    
+                            // Gestione eccezione per nomi con più di 3 consonanti
+                            if (consonants.length > 3) {
+                                code = consonants[0] + consonants[2] + consonants[3]; // Prendi la 1ª, 3ª e 4ª consonante
+                            }
+                    
+                            code += vowels;
+                            code = (code + "XXX").substring(0, 3);
+                            return code;
+                        }
+                    
+                        const surnameCode = getCodiceSurname(billingSurname);
+                        const nameCode = getCodiceName(billingName);
+                    
+                        // Controlla che i primi 6 caratteri del codice fiscale corrispondano
+                        return codFisc.toUpperCase().startsWith(surnameCode + nameCode);
+                    }
+                    
+                    $(document).ready(function() {
+                        // Aggiunge un evento di input solo ai campi visibili all'interno dei rispettivi contenitori
+                        $('#shipping_well, #billing_well').each(function() {
+                            var container = $(this);
+                            var nameField = container.find('.name');
+                            var surnameField = container.find('.surname');
+                            var fullnameField = container.find('.fullname');
+                    
+                            // Aggiunge un evento di input ai campi name e surname all'interno del container corrente
+                            nameField.add(surnameField).on('input', function() {
+                                // Legge i valori dei campi name e surname
+                                var name = nameField.val();
+                                var surname = surnameField.val();
+                    
+                                // Concatenazione dei valori
+                                var fullname = name + ' ' + surname;
+                    
+                                // Scrive il valore concatenato nel campo hidden
+                                fullnameField.val(fullname).trigger('change');
+                            });
+                        });
+                        
+                        var billingName = $('#billing_well .name');
+                        var billingSurname = $('#billing_well .surname');
+                        var codFisc = $('input[name="digital_invoice[person_tax_number]"]');
+                        
+                        billingName.add(billingSurname).add(codFisc).on('input', function() {
+                            console.log("Avvio fase iniziale controllo");
+                            if(billingName.val().length >= 3 && billingSurname.val().length >= 3 && codFisc.val().length == 16){
+                                if (checkCodiceFiscale(billingName.val(), billingSurname.val(), codFisc.val())) {
+                                    $('#billing_well .name-cf-not-match').addClass('d-none');
+                                } else {
+                                    $('#billing_well .name-cf-not-match').removeClass('d-none');
+                                }
+                            }
+                        })
+                    });
+                {% endif %}
+        	</script>
+        {% endif %}
+    </div>
+{% endif %}
+
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'cart')%}
+	{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>

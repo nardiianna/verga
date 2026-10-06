@@ -1,0 +1,75 @@
+<nav class="main-nav" role="navigation">
+	{# Utile solo se serve da mobile
+	<input id="main-menu-state" class="menu-state" type="checkbox" />#}
+	<ul id="main-menu" class="sm sm-clean menu">
+
+	{% if theme.settings.header.show_home == 'yes' %}
+		<li>
+			<a href="/" class="{% if request.path.1 == '' or request.path.1 == 'homepage'%}active{%endif%}">
+				{{lang('page.home')}}
+			</a>
+		</li>
+	{% endif %}
+		
+	{% if theme.settings.header.show_shop == 'yes' %}
+		{% if disable_shop == false %}
+			<li>
+				<a href="/shop" class="{% if request.path.1 == 'shop' and request.path.2 == '' %}active{%endif%}">
+					{{lang('page.shop')}}
+				</a>
+			</li>
+		{% endif %}
+	{% endif %}
+
+	{% if theme.settings.header.show_categories == 'yes' %}
+		{% if theme.settings.header.show_categories_submenu != 'yes' %}
+			{% set vars = { 'categoryList': categorytree() , 'request': request} %}
+			{% include "menu_categories.html" with vars %}
+		{% else %}
+			<li class="{% if request.path.1 == 'shop' %}active{%endif%}">
+				<a href="/shop" class="{% if request.path.1 == 'shop' and request.path.2 == '' %} active{%endif%}">
+				 {{lang('page.all.items')}}
+				</a>
+				<ul>
+					{% set vars = { 'categoryList': categorytree() , 'request': request} %}
+					{% include "menu_categories.html" with vars %}
+				</ul>
+			</li>
+		{% endif %}
+	{% endif %}
+	
+	{% set menuName = attribute(theme.settings.header, 'custom_menu_' ~ locale) %}
+	{% if menuName != ''%}
+		{% set mainmenulist = getNavigation(menuName) %}
+		{% if mainmenulist.sections | length > 0 %}
+			{% set vars = { 'menulist': mainmenulist , 'currentURL': currentURL} %}
+			{% include 'custom_menu.html' with vars%}
+		{% endif %}
+	{% endif %}	
+		
+	{% if theme.settings.header.show_about_us == 'yes' %}
+		<li>
+			<a href="/about-us" class="{% if request.path.1 == 'about-us' %}active{%endif%}">
+				{{lang('page.aboutus')}}
+			</a>
+		</li>
+	{% endif %}
+	
+	{% if theme.settings.header.show_contact_us == 'yes' %}
+		<li>
+			<a href="/contact-us" class="{% if request.path.1 == 'contact-us' %}active{%endif%}">
+				{{lang('page.contactus')}}
+			</a>
+		</li>
+	{% endif %}
+		
+	{% if theme.settings.header.show_blog == 'yes' %}
+		<li>
+			<a href="/blog" class="{% if request.path.1 == 'blog' or request.path.1 == 'post' %}active{%endif%}">
+				{{lang('page.blog')}}
+			</a>
+		</li>
+	{% endif %}
+
+	</ul>
+</nav>

@@ -1,0 +1,86 @@
+{% set blog_categories = getBlogCategories(locale) %}
+
+{% set layout_box = "col-md-12 col-sm-12-col-xs-12" %}
+{% set blog_preview_class = 'blog_preview_1' %}
+
+{% set content_width = 'col-md-9 col-sm-9 col-xs-12' %}
+{% set left_col_width = 'col-md-3 col-sm-3 col-xs-12' %}
+
+{% if theme.settings.post.show_categories != 'yes' or blog_categories | length == 0  %}
+	{% set content_width = 'col-md-12 col-sm-12 col-xs-12' %}
+	{% set left_col_width = 'd-none' %}
+{% endif %}
+
+{% set show_image = true %}
+{% if theme.settings.post.show_post_image != 'yes' %}
+	{% set show_image = false %}
+{% endif %}
+
+<div class="container">
+	
+	<div class="row">
+		
+		<div class="{{left_col_width}}">
+			{% if blog_categories | length > 0 %}
+				<div class="navigation-block">
+					<nav class="blog-nav" role="navigation">
+						<input id="blog-menu-state" data-target="#blog-menu" class="menu-state" type="checkbox" />
+						<label class="main-menu-btn" for="blog-menu-state">
+							<span class="main-menu-btn-icon"></span>
+						</label>
+						<span class="nav-brand nav-title xs-show"><a href="#"><strong>{{lang('blog.categories')}}</strong></a></span>
+						<ul id="blog-menu" class="sm sm-vertical sm-clean menu vertical-menu">
+							<li class="{% if request.path.3 == '' %}active{%endif%}">
+								<a href="{{ request.script_name }}/blog">{{lang('front.all.categories')}}</a>
+							</li>
+							{% for blog_cat in blog_categories %}
+								<li class="{% if request.path.3 == blog_cat._id%}active{%endif%}" >
+									<a href="/blog/category/{{blog_cat._id}}/{{blog_cat.slug}}"  
+									   class="{%if blog_cat._id == request.path.3%}active{%endif%}">{{blog_cat.name}}</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</nav>
+				</div>
+			{% endif %}	
+		</div>
+		
+		<div class="{{content_width}}">
+			<h1 class="heading noMarginBottom">{{ post.title }}</h1>
+			<p class="noMarginBottom">{{ post.ts.sec | date("d/m/Y") }}</p>
+			<div id="post_page_content">
+				{% if show_image == true %}
+					<img id="main_img" src="{{post. ext_img}}" loading="lazy"/>
+				{% endif %}
+				<div id="post_content" class="clearfix">{{ post.content | raw }}</div>
+			</div>
+			
+			<div class="clearfix" id="item_sharing">
+				<span class="share-title"><i class="fa fa-share-alt"></i> {{lang('share')}} </span>
+				{% set url = document.canonical %}
+				<a href="https://www.facebook.com/sharer/sharer.php?u={{url}}&image={{post.ext_img}}" class="openPopup btn button-white fb" id="share_fb"><i class="fa fa-facebook"></i></a>
+				<a href="https://twitter.com/home?status={{url}}" class="btn button-white tw" target="_blank"><i class="fa fa-twitter"></i></a>
+				<a href="https://pinterest.com/pin/create/button/?url={{url}}&media={{post.ext_img}}" class="openPopup btn button-white pin"><i class="fa fa-pinterest"></i></a>
+				<a href="https://plus.google.com/share?url={{url}}" class="openPopup btn button-white gp"><i class="fa fa-google-plus"></i></a>
+			</div>
+			
+			{% if theme.settings.post.show_post_tags == 'yes' and post.tags | length > 1 %}
+				{% for tag in post.tags %}
+					<a href="/blog/tags/{{tag}}">#{{tag}}</a>
+				{% endfor %}
+			{% endif %}
+			<br><br>
+			
+		</div>
+		
+		
+	</div>
+</div>
+
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'post')%}
+		{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>

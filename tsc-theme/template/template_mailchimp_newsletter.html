@@ -1,0 +1,46 @@
+<section class="section template_mailchimp_newsletter" id="section_{{vars.section.id}}_mailchimp_newsletter">
+	<div class="{{vars.layout}}">
+		<div class="row">
+			<div class="col-md-6 col-sm-6 col-12">
+				<div class="heading" data-editor="{{vars.section.data_editor}}_title_{{locale}}">
+					{{attribute(vars.section.settings, 'title_'~locale)}}
+				</div>
+				<div class="text" data-editor="{{vars.section.data_editor}}_text_{{locale}}">
+					<p>{{attribute(vars.section.settings, 'text_'~locale)|raw}}</p>
+				</div>
+				<div class="mailchimp_container" data-editor="{{vars.section.data_editor}}_embed_form_{{locale}}">
+					{{attribute(vars.section.settings, 'embed_form_'~locale)|raw}}
+				</div>
+				<script>
+					$(document).ready(function(){
+						$('.mailchimp_container input[type="submit"]').addClass('btn button');
+						$('.mailchimp_container .email').css('marginBottom', '15px');
+						$('.mailchimp_container .email').addClass('form-control');
+					})
+				</script>
+			</div>
+			<div class="col-md-6 col-sm-6 col-12">
+				
+				{% set src_val = vars.section.settings.image %}
+				{% if src_val == ''%}
+					{% set src_val = placeholders.newsletter %}
+				{% endif %}
+				
+				{% if attribute(vars.section.settings, 'link_'~locale) != '' %}
+					<a href="{{attribute(vars.section.settings, 'link_'~locale)}}"
+					   rel="{{vars.section.settings.link_REL}}"
+					   target="{{vars.section.settings.link_TARGET}}"
+					   title="{{attribute(vars.section.settings, 'link_TITLE_'~locale)}}">
+				{% endif %}
+				<img src="{{src_val}}" 
+					 data-editor="{{vars.section.data_editor}}_image" 
+					 data-placeholder="{{placeholders.newsletter}}" 
+					 alt="{{attribute(vars.section.settings, 'image_ALT')}}" 
+					 class="img-responsive">
+				{% if attribute(vars.section.settings, 'link_'~locale) != '' %}
+					</a>
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</section>

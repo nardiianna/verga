@@ -1,0 +1,320 @@
+{% set query = request.query %}
+
+{% set currentPage = query.page %}
+{% if currentPage == '' or currentPage == 0 %}
+	{% set currentPage = 1 %}
+{% endif %}
+
+{% set itemsPerPage = attribute(query, 'product-page') %}
+{% if itemsPerPage == '' %}
+	{% set itemsPerPage = defaultItemsPerPage %}
+{% endif %}
+
+{% set numPages = product_count / itemsPerPage %}
+{% set numPages = numPages | round(0, 'ceil') %}
+
+{% set orderField = attribute(query, 'sort-order-field') %}
+{% set orderType = attribute(query, 'sort-order-type') %}
+{% set orderKey = orderField~'_'~orderType %}
+
+{% set categoryUID = '-' %}
+{% set brandUID = '-' %}
+{% set paramUrl = '' %}
+
+<script>
+    if(orderField === undefined){
+        var orderField = "{{orderField}}";
+    }
+    if(orderType === undefined){
+        var orderType = "{{orderType}}";
+    }
+    if(perpage === undefined){
+        var perpage = "{{itemsPerPage}}";
+    }
+</script>
+
+{% set has_filters = false %}
+
+{% if request.path.2 != 'complex' %}
+	{% if request.path.2 not in ['tags', 'search'] %}
+			
+			{% set urlPagination = request.script_name~'/shop' %}
+			{% set urlJs = request.script_name~'/shop' %}
+			{% if request.path.2 == 'category' %}
+
+				{% set urlPagination = urlPagination~'/category/'~request.path.3 %}
+				{% set urlJs = urlJs~'/category/'~request.path.3 %}
+				{% set categoryUID = request.path.3 %}
+				{% set brandUID = '-'%}
+
+			{% endif %}
+
+			{% if request.path.2 == 'brand' %}
+
+				{% set urlPagination = urlPagination~'/brand/'~request.path.3 %}
+				{% set urlJs = urlJs~'/brand/'~request.path.3 %}
+				{% set categoryUID = '-' %}
+				{% set brandUID = request.path.3%}
+
+			{% endif %}
+
+			{% set urlPagination = urlPagination~'?sort-order-field='~orderField~'&sort-order-type='~orderType~'&product-page='~itemsPerPage %}
+
+		{% else %}
+
+			{% set urlPagination = request.script_name~'/shop/tags/'~request.path.3 %}
+			{% set urlPagination = urlPagination~'?product-page='~itemsPerPage %}
+			{% set categoryUID = '-' %}
+			{% set brandUID = '-' %}
+
+	{%  endif %}
+
+{% else %}
+	
+	{% if request.path.4 > 0 %}
+		{% set categoryUID = request.path.4 %}
+	{% endif %}
+	
+	{% if request.path.6 > 0 %}
+		{% set brandUID = request.path.6%}
+		{% set has_filters = true %}
+	{% endif %}
+
+	{% if (request.query.price_high != '' and max > request.query.price_high) or request.query.price_low > 0 or document.active_filter | length > 0 %}
+		{% set has_filters = true %}
+	{% endif %}
+
+	{% set queryUrl = '?' %}
+	{% set ln = request.query | length %}
+	{% for key,value in request.query %}
+		{% if key != 'page' and key != '_' %}
+			{% set queryUrl = queryUrl~key~'='~value %}
+			{% if loop.index < ln-1 %}
+				{% set queryUrl = queryUrl~'&' %}
+			{% endif %}
+		{% endif %}
+	{% endfor %}
+
+	{% if categoryUID == ''%}
+		{% set categoryUID = '-' %}
+	{% endif %}
+
+	{% if brandUID == ''%}
+		{% set brandUID = '-' %}
+	{% endif %}
+			
+	{% set current_parametrs = [] %}
+	
+	{% for index, value in request.path%}	
+		{% if index > 6 %}
+			{% set paramUrl = paramUrl ~ '/' ~ value %}
+			{% if index is not divisible by(2) %}
+				{% set options = attribute(request.path, index+1) | split('~') %}
+				{% set current_parametrs = current_parametrs | merge({ (value) : options }) %}
+			{% endif %}
+		{% endif %}
+	{% endfor %}
+				
+	{% set urlPagination = request.script_name~'/shop/complex/category/'~categoryUID~'/brand/'~brandUID %}
+	{% set urlPagination = urlPagination~paramUrl~queryUrl %}
+		 
+{% endif %}
+
+
+<div class="container">
+	
+	{% set countItems = productlist | length %}
+	{% set pageImage = ''%}
+	{% if request.path.2 == '' %}
+		{% set pageH1 = attribute(theme.settings.shop, 'shop_h1_'~locale) %}
+		{% set pageDescription = attribute(theme.settings.shop, 'shop_description_'~locale) %}
+		{% set pageImage = attribute(theme.settings.shop, 'shop_image_'~locale) %}
+	{% elseif request.path.2 == 'search' %}
+		{% set pageH1 = lang('search') %}
+		{% set pageDescription = '<small> '~request.path.3~'</small>' %}
+	{% elseif request.path.2 == 'tags' %}
+		{% set pageH1 = lang('page.tags') %}
+		{% set pageDescription = '<small> '~request.path.3~'</small>' %}
+	{% elseif (request.path.2 == 'category' and categoryUID != '-' and categoryUID != '') or
+		(request.path.2 == 'complex' and categoryUID != '-' and categoryUID != '')
+		%}
+		{% set category = getCategory(categoryUID) %}
+		{% set pageH1 = translate_resource(category._id, '', category.name) %}
+		{% set pageDescription = translate_resource(category._id, 'description', category.description) %}
+		{% set pageImage = categoryimage(category.uid) %}	
+	{% elseif request.path.2 == 'brand' and brandUID != '-' and brandUID != '' or
+		(request.path.2 == 'complex' and categoryUID == '-' and brandUID != '-')
+		%}
+		{% set brand = getBrand(brandUID)  %}
+		{% set pageH1 = translate_resource(brand._id, '', brand.name) %}
+		{% set pageDescription = translate_resource(brand._id, 'description', brand.description) %}
+		{% set pageImage = categoryimage(brand.uid) %}	
+	{% endif %}
+	
+	<div class="row">
+
+		{% set shop_width = 'col-12 col-sm-12 col-md-9' %}
+		{% if request.path.2 in ['tags', 'search'] %}
+			{% set shop_width = 'col-12' %}
+		{% endif %}
+		
+		{% if request.path.2 not in ['tags', 'search'] %}
+			<div class="col-12 col-sm-12 col-md-3 shop_left_column">
+				
+				<div id="shop_filters_toggle" class="d-none btn button mb-3">
+				    <i class="fa fa-filter"></i> {{lang('filter.by')}}...
+				</div>
+				
+				<div id="shop_filters_wrapper">
+					
+					{% if (brandUID != '' and brandUID != '-') or (paramUrl != '' and paramUrl != '/') or request.query.price_high > 0 or tags_list_active | length > 0 %}
+                		
+                		<div class="remove_filters">	
+                			
+                			{% if brandUID > 0 %}
+                				{% set brand = getBrand(brandUID)  %}
+                			    <span class="filter_all">
+                    				<a href="/shop/complex/category/{{categoryUID}}/brand/-{{paramUrl}}{{queryUrl}}">
+                    					<span class="filter_current_name">{{lang('admin.brand')}}: {{brand.name}}</span>
+                    					<span data-feather="x" height="16"></span>
+                    				</a>
+                            	</span>
+                			{% endif %}
+                			
+                			{% if paramUrl != '' %}
+                			    {% set params = getParameters() %}
+                                {% for value in params %}
+                                    {% set key = value.key %}
+                                    {% set is_in = attribute(current_parametrs, key)%}
+                                    {% if is_in != null %}
+                                        {% for opt in is_in %}
+                                         {% set original = attribute(value.values, opt)%}
+                                            <span class="filter_all">
+                                               <span data-key="{{key}}" data-value="{{opt}}" id="param_{{key}}_{{opt}}" class="filter">
+                                                    <span class="filter_current_name">
+                                                        {{translate_resource(value._id, 'key', key) }}: {{	translate_resource(value._id, 'string-'~opt, original)  }}
+                                                    </span>
+                                                    <span data-feather="x" height="16"></span>
+                                               </span>
+                                            </span>
+                                        {% endfor %}
+                                    {% endif %}
+                                {% endfor %}
+                			{% endif %}
+                			
+                			{% if request.query.price_high > 0 and request.query.price_high != theme.settings.shop.price_filter_max and request.query.price_low != 0 %}
+                    			{% set currentMax = request.query.price_high %}
+                    			{% set currentMin = request.query.price_low %}
+                    			{% set new_queryUrl = '?' %}
+                    			{% for i,k in request.query %}	
+                    				{% if i == 'price_high' or i == 'price_low' %}
+                    				{% else %}
+                    					{% set new_queryUrl = new_queryUrl ~ '&'~i~'='~k %}
+                    				{% endif %}
+                    			{% endfor %}
+                    			<span class="filter_all remove_price_filter">
+                    				<a href="/shop/complex/category/{{categoryUID}}/brand/-{{paramUrl}}{{new_queryUrl}}">
+                    					<span class="filter_current_name">{{lang('price')}}: 
+                    					    {{currentMin|number_format(0)}}-{{currentMax|number_format(2)}} {{currency}}
+                    					</span>
+                    					<span data-feather="x" height="16"></span>
+                    				</a>
+                    			</span>
+                    		{% endif %}
+                		</div>
+                	{% endif %}
+					
+					{% set vars = {'categoryUID': categoryUID, 'brandUID': brandUID, 'param' : paramUrl, 'query' : queryUrl  } %}
+
+					<div class="navigation-block">
+						{% if theme.settings.shop.show_categories == 'yes' %}
+							{% include 'shop_categories.html' with vars %}
+						{% endif %}
+					</div>
+
+					<div class="navigation-block">
+						{% if theme.settings.shop.show_brands == 'yes' %}
+							{% include 'shop_brands.html' with vars %}
+						{% endif %}
+					</div>
+
+					{% include 'shop_filters.html' with vars %}
+					
+					<script>
+					    {# Serve per far aprire i filtri cliccando invio da tastiera (per l'accessibilità) #}
+					    $(document).on('keydown', '.main-menu-label', function (e) {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault(); // blocca scroll su Space
+                                this.click();       // attiva il label → checkbox
+                            }
+                        });
+					</script>
+					
+					<div class="clearfix"></div>
+				</div>
+				
+				{% if theme.settings.general.reviews.reviews_shop == 'yes' %}
+					<div class="navigation-block shop_reviews">
+						{% include 'reviews.html' %}
+					</div>
+				{% endif %}
+				
+			</div>
+		{% endif %}
+
+		<div class="{{shop_width}} shop_right_column">
+			
+			{% if pageDescription != '' or pageH1 != '' or pageImage != '' %}
+			    <div class="row shop_head">
+			        {% set desc_w = 'col-12' %}
+			        {% if pageImage != '' %}
+			            {% set desc_w = 'col-12 col-sm-8 col-md-8' %}
+			            <div class="col-12 col-sm-4 col-md-4">
+    			            <img src="{{placeholders.lazy}}" data-src="{{pageImage}}" class="lazy w-100">
+    		            </div>
+			        {% endif %}
+			        <div class="{{desc_w}}">
+    			        <h1 class="heading">{{pageH1|raw}}</h1>
+        				{% if pageDescription != '' %}
+        					<div class="shop_description">
+        						{{pageDescription|raw}}
+        					</div>
+        				{% endif %}
+        			</div>
+			    </div>
+    		{% endif %}
+			
+			{% if countItems > 0 and request.path.2 not in ['tags', 'search'] %}
+        		{% include 'shop_toolbar.html' %}
+        	{% endif %}
+			
+			<div id="shop_products">
+				{% if countItems > 0 %}
+					<div class="product_container shop_product_container row d-flex flex-wrap align-items-stretch row-gap-3">
+						{% for item in productlist  %}
+							<div class="product_wrapper col-6 col-sm-6 col-lg-4 col-md-4">
+								{% include 'product_preview.html' %}
+							</div>
+						{% endfor %}
+					</div>
+				{% else %}
+						<p><strong>{{lang('search.no.items.found')}}</strong></p>
+						<a href="{{request.script_name}}/shop" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('back.to.shop')}}</a>
+				{% endif %}
+			</div>
+			
+			{% if numPages > 1 and request.path.2 not in ['tags', 'search'] %}
+				{% include 'shop_pagination.html' %}
+			{% endif %}
+			
+		</div>
+	</div>
+</div>
+
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'shop')%}
+	{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>

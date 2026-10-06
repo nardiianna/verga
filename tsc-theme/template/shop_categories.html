@@ -1,0 +1,44 @@
+<nav class="categories-nav" role="navigation">
+	<input id="categories-menu-state" data-target="#categories-menu" class="menu-state" type="checkbox" aria-hidden="true" tabindex="-1"/>
+	<label class="main-menu-btn" for="categories-menu-state">
+		<span class="main-menu-btn-icon"></span>
+	</label>
+	{#<span class="nav-categories nav-title"><a href="#"><strong>{{lang('categories')}}</strong></a></span>#}
+    <label for="categories-menu-state" class="nav-categories nav-title main-menu-label" tabindex="0" role="button" aria-controls="categories-menu">
+        <strong>{{lang('categories')}}</strong>
+    </label>
+
+	<ul id="categories-menu" class="sm sm-vertical sm-clean menu vertical-menu">
+		{% set new_vars = { 'catree': categorytree() , 'new_vars' : vars } %}
+		{% include "categories.html" with new_vars %}
+	</ul>
+</nav>
+<script>
+	$(document).ready(function(){
+		function setActiveToParent(active){
+			var li = active.parent().parent().parent();
+			if (li.prop('tagName') == 'LI') {
+				var link = li.find('> a');
+				console.log(link);
+				link.addClass('active');
+				link.trigger("click")
+				setActiveToParent(link);
+			}
+		}
+		var active = $('#categories-menu .active');
+		setActiveToParent(active);
+
+		//Espando anche la categoria attuale se ha sottocategorie
+		var menu = $('#categories-menu').data('smartmenus');
+
+        $('#categories-menu a.active').each(function(){
+    
+            var submenu = $(this).next('ul');
+    
+            if(submenu.length){
+                menu.menuShow(submenu);
+            }
+    
+        });
+	});
+</script>

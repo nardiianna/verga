@@ -1,0 +1,19 @@
+{% for category in categoryList %}
+	{% if request.path[3] == category.catUID %}
+		{% set activeClass = 'active' %}
+	{% else %}
+		{% set activeClass = '' %}
+	{% endif %}
+	{% set length = category.subcategory | length %}
+	{% if length > 0 and not noSubcategories %}
+		<li class="{{activeClass}}"> 
+			<a href="{{getCategoryURL(category.catUID)}}">{{ category.name }}</a>
+			<ul>
+				{% set vars = { 'categoryList': category.subcategory , 'request': request} %}
+				{% include 'menu_categories.html' with vars only %}
+			</ul>
+		</li>
+	{% else%}
+		<li class="{{activeClass}}"><a href="{{getCategoryURL(category.catUID)}}">{{ category.name }}</a></li>
+	{% endif %}
+{% endfor %}

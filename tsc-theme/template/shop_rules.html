@@ -1,0 +1,175 @@
+{# Qui vanno settate tutte le abilitazioni, anche in base al singolo utente se è un agente, se ha un certo gruppo etc...
+Di standard lasciare tutto true, in base al caso specifico direttamente o via twig si cambiano i valori #}
+
+{% set is_agent = false %}
+{% if customer.custom_fields.role == "agent" %}
+    {% set is_agent = true %}
+{% endif %}
+
+{% set is_super_agent = false %}
+{% if customer.group == "ID GRUPPO SUPERAGENTI" %}
+    {% set is_super_agent = true %}
+{% endif %}
+
+{% set codes = {
+	"main_id": "",
+	"hash": "",
+	"js_func": "",
+	"pda_data": "",
+	"order_data": "",
+    "customer_get":""
+} %}
+
+{% set main_domain = "https://pda2-shared.duckynetwork.tech/pda2_shared/" %}
+
+{% set view_this_page = true %}
+{% if (request.path.1 in ["", "homepage"] and false) or
+      (request.path.1 in ["shop"] and false) or
+      (request.path.1 in ["product"] and false) or
+      (request.path.1 in ["cart"] and false) or
+      (request.path.1 == "login" and request.path.2 == "registration" and false) %}
+    {% set view_this_page = false %}
+{% endif %}
+
+{% set customer_selected = false %}
+{% set new_customer = false %}
+{% set customer_data = "" %}
+{% set customers_list = "" %}
+{% set customer_cookie = readCookieValue('customer_info')|jsondecode|first %}
+
+{% if customer_cookie.id != "" %}
+    {% set customer_selected = true %}
+{% elseif customer_cookie.companyName != "" %}
+    {% set new_customer = true %}
+{% endif %}
+
+{% set agent_selected = false %}
+{% set agent_data = "" %}
+{% set agent_cookie = readCookieValue('agent_info')|jsondecode|first %}
+
+{% if agent_cookie.id != "" %}
+    {% set agent_selected = true %}
+{% endif %}
+
+{% set active_subject = "customer" %}
+{% set active_subject_id = customer.id %}
+
+{% if agent_selected %}
+    {% set active_subject = "agent" %}
+    {% set active_subject_id = agent_cookie.id %}
+{% endif %}
+
+{% if customer_selected or new_customer %}
+    {% set active_subject = "customer" %}
+    {% set active_subject_id = customer_cookie.id %}
+{% endif %}
+
+{# SE SERVE CONSIDERARE CLIENTI AMMESSI SOLO QUELLI APPARTENENTI A UNO O PIU' GRUPPI #}
+{% set allowed_customers_groups = [''] %}
+{% set allowed_customer = false %}
+{#% if customer.group in allowed_customers_groups %}
+    {% set allowed_customer = true %}
+{% endif %#}
+{% if user.uid > 0 %}
+    {% set allowed_customer = true %}
+{% endif %}
+
+
+{% if is_agent %}
+    {% if customer_selected %}
+        {# SE SERVONO DATI FITTIZI:: #}
+        {#% set customer_data = {"customer_id":"27","billing":{"customerid":"27","addressid":"0","fullname":"ALLOTEX CIS NOLA S.R.L.","address":"ISOLA 3, N° 327/328/329","zipcode":"80035","city":"NOLA","district":"NA","district_code":12211,"country":"IT","country_code":119,"phone":"081/51.08.451","vatnumber":"08449431215","fiscalcode":"08449431215","sdi":"WY7PJ6K","pec":"allotexcisnola@pec.it","email":"allotexsrlcis@libero.it"},"shipping":[{"customerid":"27","addressid":"0","fullname":"ALLOTEX CIS NOLA S.R.L.","address":"ISOLA 3, N° 327/328/329","zipcode":"80035","city":"NOLA","district":"NA","district_code":12211,"country":"IT","country_code":119,"phone":"081/51.08.451","vatnumber":"08449431215","fiscalcode":"08449431215","sdi":"WY7PJ6K","pec":"allotexcisnola@pec.it","email":"allotexsrlcis@libero.it"},{"customerid":"27","addressid":"1","fullname":"ALLOTEX CIS NOLA S.R.L.","address":"VIA ROMA, 45","zipcode":"20121","city":"MILANO","district":"MI","district_code":15100,"country":"IT","country_code":119,"phone":"081/51.08.451","vatnumber":"08449431215","fiscalcode":"08449431215","sdi":"WY7PJ6K","pec":"allotexcisnola@pec.it","email":"allotexsrlcis@libero.it"},{"customerid":"27","addressid":"2","fullname":"ALLOTEX CIS NOLA S.R.L.","address":"VIA GARIBALDI, 12","zipcode":"50122","city":"FIRENZE","district":"FI","district_code":14801,"country":"IT","country_code":119,"phone":"081/51.08.451","vatnumber":"08449431215","fiscalcode":"08449431215","sdi":"WY7PJ6K","pec":"allotexcisnola@pec.it","email":"allotexsrlcis@libero.it"}],"payment":"NR.01 RB 90 FM SCONTO 5+5%","agent_id":"A7"} %#}
+
+        {% set customer_id_hash = fetchAndCache(main_domain ~"hash_string.php?verifycode="~codes.hash~'&identity='~codes.main_id~"&strtohash="~customer_cookie.id) %}
+        {% set customer_data = fetchAndCache(main_domain ~ "customer_get.php?verifycode="~codes.customer_get~"&identity="~codes.main_id~"&customer_id="~customer_cookie.id~"&customer_id_hash="~customer_id_hash~"&mode=customerdata")|jsondecode %}
+        
+    {% elseif new_customer %}
+        {% set customer_data = customer_cookie %}
+    {% endif %}
+    
+    {% if agent_selected %}
+        {% set agent_id_hash = fetchAndCache(main_domain ~"hash_string.php?verifycode="~codes.hash~'&identity='~codes.main_id~"&strtohash="~agent_cookie.id) %}
+        {% set agent_data = fetchAndCache(main_domain ~ "customer_get.php?verifycode="~codes.customer_get~"&identity="~codes.main_id~"&customer_id="~agent_cookie.id~"&customer_id_hash="~agent_id_hash~"&mode=customerdata")|jsondecode %}
+    {% endif %}
+    
+    {% if is_super_agent %}
+        {% set customers_list = parseJSON('NOME SITO', 'customers_list.json', "data") %}
+    {% elseif agent_selected %}
+        {% set customers_list = agent_data.associations|jsondecode %}
+    {% else %}    
+        {% set customers_list = customer.custom_fields.associations|jsondecode %}
+    {% endif %}
+
+{% elseif user.uid > 0 %}
+    {% set customer_data = {
+    	"customer_id": customer.custom_fields.customer_id,
+    	"billing": customer.custom_fields.billing|jsondecode(true),
+    	"shipping": customer.custom_fields.shipping|jsondecode(true),
+    	"payment": customer.custom_fields.payment,
+        "agent_id":customer.custom_fields.agent_id
+    } %}
+    
+{% endif %}
+
+{% if user.uid > 0 %} {# protezione troppe chiamate #}
+    {% set customer_id_hash = fetchAndCache(main_domain~'hash_string.php?verifycode='~codes.hash~'&identity='~codes.main_id~'&strtohash='~active_subject_id) %}
+    {% set shop_id_hash = fetchAndCache(main_domain~'hash_string.php?verifycode='~codes.hash~'&identity='~codes.main_id~'&strtohash='~group.uid) %}
+{% endif %}
+
+
+{
+    "view_this_page": {% if view_this_page %}true{% else %}false{% endif %},
+    
+    "enable_registration_link": true, {# Serve solo  per nascondere all'evenienza il tasto per la registrazione, per bloccare la pagina vedere le impostazioni sopra #}
+    "registration_type": "standard", {# standard / b2b #}
+    
+    "view_listing_prices": {% if allowed_customer or is_agent %}true{% else %}false{% endif %},{# Solo utenti loggati e appartenenti ad un gruppo oppure agenti #}
+    "view_product_page_prices": {% if allowed_customer or is_agent %}true{% else %}false{% endif %},{# Solo utenti loggati e appartenenti ad un gruppo oppure agenti #}
+    
+    "buy_from_listing": {% if allowed_customer or is_agent %}true{% else %}false{% endif %},{# Solo utenti loggati e appartenenti ad un gruppo oppure agenti #}
+    "buy_from_product_page": {% if allowed_customer or is_agent %}true{% else %}false{% endif %},{# Solo utenti loggati e appartenenti ad un gruppo oppure agenti #}
+    
+    "new_shipping_address": {% if is_agent %}false{% else %}true{% endif %}, {# Solo per proposte, da verificare #}
+    "edit_billing_address": {% if is_agent %}false{% else %}false{% endif %}, {# Solo per proposte, da verificare #}
+    
+    "checkout_type": "proposal", {# proposal / standard / standard-b2b #}
+
+    "proposal_coupon": false, {# Attivare o disattivare i coupon nel carrello proposte #}
+    
+    "is_agent": {% if is_agent %}true{% else %}false{% endif %},
+    "agent_can_make_new_customers": true, {# Da verificare #}
+    "agent_can_see_customer_orders" : true,
+    
+    "customer_selected": {% if customer_selected %}true{% else %}false{% endif %},
+    "new_customer": {% if new_customer %}true{% else %}false{% endif %},
+    "customer_data": {{customer_data|json}},
+    "customers_list" : {{customers_list|json}},
+    "customer_cookie" : {{customer_cookie|json}},
+    
+    "agent_selected": {% if agent_selected %}true{% else %}false{% endif %},
+    "agent_data": {{agent_data|json}},
+    "agent_cookie" : {{agent_cookie|json}},
+    
+    "active_subject": "{{active_subject}}",
+    
+    "order_data": {{readCookieValue('order_data')|jsondecode|first|json}},
+
+    "placeholder": "{{theme.settings.general.settings.placeholder|split('/')|last}}",
+    
+    {# proposal_config: stampa uno script con le funzioni per l'invio di proposta. Credo vada stampato in proposal.html #}
+    {# proposal_listing_customer: F&C per ottenere la lista delle proposte di un cliente #}
+    {# proposal_details_customer: F&C per ottenere i dettagli di una proposta di un cliente #}
+    
+    "fetchAndCache": {
+        "proposal_config": "{{ main_domain }}proposal_frontend_config.php?verifycode={{codes.js_func}}&customer_id={{active_subject_id}}&customer_id_hash={{ customer_id_hash }}&shop_id={{ group.uid }}&shop_id_hash={{ shop_id_hash }}&identity={{codes.main_id}}&levels=a~l",
+        
+        "proposal_listing_customer": "{{ main_domain }}proposal_frontend.php?verifycode={{codes.pda_data}}&customer_id={{active_subject_id}}&customer_id_hash={{ customer_id_hash }}&shop_id={{ group.uid }}&shop_id_hash={{ shop_id_hash }}&subject={{active_subject}}&type=listing&random={{random()}}&identity={{codes.main_id}}",
+        "proposal_details_customer": "{{ main_domain }}proposal_frontend.php?verifycode={{codes.pda_data}}&customer_id={{active_subject_id}}&customer_id_hash={{ customer_id_hash }}&shop_id={{ group.uid }}&shop_id_hash={{ shop_id_hash }}&subject={{active_subject}}&type=detail&random={{random()}}&identity={{codes.main_id}}&pre_order_id=",
+        
+        "order_list":"{{ main_domain }}order_frontend.php?verifycode={{codes.order_data}}&identity={{codes.main_id}}&customer_id={{active_subject_id}}&customer_id_hash={{customer_id_hash}}&subject={{active_subject}}&shop_id={{group.uid}}&shop_id_hash={{shop_id_hash}}&type=listing&order_limit=100&random={{random()}}",
+        "order_details":"{{ main_domain }}order_frontend.php?verifycode={{codes.order_data}}&identity={{codes.main_id}}&customer_id={{active_subject_id}}&customer_id_hash={{customer_id_hash}}&subject={{active_subject}}&shop_id={{group.uid}}&shop_id_hash={{shop_id_hash}}&type=detail&random={{random()}}&order_id=",
+        
+        "hash_string": "{{main_domain}}hash_string.php?verifycode={{codes.hash}}&identity={{codes.main_id}}&strtohash="
+    }
+
+}

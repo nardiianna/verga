@@ -1,0 +1,61 @@
+{# Serve solo per avvisare della copia negli appunti delle classi #}
+<div class="toast-container position-fixed bottom-0 start-0 p-3">
+    <div id="copyToast" class="toast align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body">
+                Classi copiate negli appunti!
+                <div class="target"></div>
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<section class="section template_test" id="section_{{vars.section.id}}_test">
+	<div class="container">
+	    <div class="heading" role="heading" aria-level="2">DUCKYSTRAP - Clicca i pulsanti per copiare le classi </div>
+	    
+	    {% set styles = ["filled", "outline", "underline", "text"] %}
+	    {% set colors = ["primary","secondary","tertiary","disabled","error","success","warning","info","brand-1","brand-2"] %}
+	    
+	    <div class="row">
+            {% for color in colors %}
+                <div class="col-12 col-md-6 border p-3">
+                    <div class="h2">Bottoni <b>{{color}}</b></div>
+                    {% for style in styles %}
+                        <a href="/shop" class="dn-btn dn-btn-{{color}} dn-btn-{{style}} me-4" data-click-and-copy="dn-btn dn-btn-{{color}} dn-btn-{{style}}">{{style|capitalize}}</a>
+                    {% endfor %}
+                </div>
+                <div class="col-12 col-md-6 border p-3">
+                    <div class="h2">Testo <b>{{color}}</b></div>
+                    <a href="/shop" class="dn-text-{{color}}" data-click-and-copy="dn-text-{{color}}">Lorem ipsum</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<script>
+    $(document).on('click', '.template_test a', function (e) {
+        e.preventDefault();
+    
+        const textToCopy = $(this).attr('data-click-and-copy');
+        if (!textToCopy) return;
+    
+        navigator.clipboard.writeText(textToCopy).then(() => {
+    
+            // Inserisce il testo copiato dentro il toast
+            $('.toast-container #copyToast .target').text(textToCopy);
+    
+            // Mostra il toast
+            const toastEl = document.getElementById('copyToast');
+            const toast = bootstrap.Toast.getOrCreateInstance(toastEl);
+            toast.show();
+    
+        }).catch(err => {
+            console.error('Errore copia:', err);
+        });
+    });
+
+
+</script>

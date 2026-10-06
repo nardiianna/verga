@@ -1,0 +1,35 @@
+<div class="row">
+	<div class='col-md-3 col-sm-4 third-column-product'>	
+		{% include 'menu_profile.html' %}
+	</div>
+	<div class="col-md-9 col-sm-8  col-xs-12 profileLeft">
+		<h1 class="heading">{{lang('edit.password')}}</h1>
+		<div class="well">
+			<form id="formPassword">
+				<div class="form-group row">
+					<div class="col-md-4 col-sm-4"><label>{{lang('register.email')}}</label></div>
+					<div class="col-md-8 col-sm-8 email-user"><p class="user_fixed_email">{{user.email}}</p>
+						<input type="hidden" name="email" id="emailCheck" value="{{user.email}}"/></div>
+				</div>
+				<div class="form-group row">
+					<div class="col-md-4 col-sm-4"><label>{{lang('profile.current.password')}}</label></div>
+					<div class="col-md-8 col-sm-8"><input type="password" name="oldpassword" class="oldpassword form-control" required aria-label="{{lang('profile.current.password')}}"/></div>
+				</div>
+				<div class="form-group row">
+					<div class="col-md-4 col-sm-4"><label>{{lang('profile.new.password')}}</label></div>
+					<div class="col-md-8 col-sm-8"><input type="password" name="password" class="password form-control" required aria-label="{{lang('profile.new.password')}}"/></div>
+				</div>
+				<div class="form-group row">
+					<div class="col-md-4 col-sm-4"><label>{{lang('signup.password.rewrite')}}</label></div>
+					<div class="col-md-8 col-sm-8"><input type="password" pattern=".{8,}" name="repassword" class="repassword form-control" required aria-label="{{lang('signup.password.rewrite')}}"/></div>
+				</div>
+				<div class="alert alert-danger alert-pw" id="no-match">{{lang('different.pw')}}.</div>
+				<div class="alert alert-danger alert-pw" id="wrong-pw">{{lang('wrong.current.pw')}}.</div>	
+				<div class="alert alert-success alert-pw" id="success">{{lang('change.pw.success')}}.</div>	
+				<div class="form-group form-submit text-end">	
+					<button type="submit" class="btn button">{{lang('admin.save')}}</button>
+				</div>			
+			</form>	
+		</div>
+	</div>
+</div>

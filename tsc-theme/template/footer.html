@@ -1,0 +1,144 @@
+<footer id="section_footer" class="main_section">
+	<div class="container">
+		<div class="row row-gap-4">
+		    <div class="col-12 col-md-3">
+		        {% if theme.settings.footer.footer_logo != "" %}
+		            <img src="{{theme.settings.footer.footer_logo}}" alt="{{theme.settings.footer.footer_logo_ALT|default("Logo " ~ group.title)}}" class="mb-3 footer-logo" loading="lazy">
+                {% else %}
+                    <div class="heading">{{group.title}}</div>
+                {% endif %}
+                
+                <div class="d-flex gap-2 mb-2">
+            	    <div><i class="fas fa-industry"></i></div>
+            	    <div>{{lang('store.vat')}} {{group.piva}}</div>
+            	</div>
+                
+                {# Contatti #}
+        	    {% set contacts = [
+                    {
+                        "id":"tel",
+        	            "icon":'<i class="fas fa-phone-alt"></i>',
+        	            "link":"tel:",
+        	            "label":lang('acc_act.contact.phone')
+    	            },
+    	            {
+    	                "id":"wa",
+    	                "icon":'<i class="fab fa-whatsapp"></i>',
+    	                "link":"https://wa.me/",
+        	            "label":lang('acc_act.contact.wa')
+                    },
+                    {
+                        "id":"email",
+                        "icon":'<i class="fas fa-envelope-open-text"></i>',
+                        "link":"mailto:",
+        	            "label":lang('acc_act.contact.email')
+                    },
+                    {
+                        "id":"address",
+                        "icon":'<i class="fas fa-map-marker-alt"></i>',
+                        "link":"https://www.google.com/maps/search/?api=1&query=",
+        	            "label":lang('acc_act.contact.address')
+                    }
+                ] %}
+            	{% for contact in contacts %}
+                	{% set data = attribute(theme.settings.footer, 'footer_'~contact.id~'_'~locale) %}
+                	{% if data != "" %}
+                    	<div class="d-flex gap-2 mb-2">
+                    	    <div>{{contact.icon}}</div>
+                    	    <a  href="{{contact.link}}{% if contact.id == "address" %}{{data|striptags|e('url')}}{% else %}{{data|replace({" ":""})}}{% endif %}"
+                    	        target="_blank"
+                    	        data-editor="settings_footer_footer_{{contact.id}}_{{locale}}"
+                    	        aria-label="{{contact.label}} {{data|striptags|e}} {{lang('link.open_new_tab')}}">{{data}}</a>
+                    	</div>
+                	{% endif %}
+            	{% endfor %}
+            	
+            	{% include 'social.html' %}
+		    </div>
+		    
+		    <div class="col-12 col-md-9">
+		        <div class="row row-gap-4">
+		            {% set columns = 0 %}
+        		    {% for x in 1..4 if attribute(theme.settings.footer, 'footer_menu_'~x~'_yn_'~locale) == "yes" %}
+        		        {% set columns = columns + 1 %}
+        		    {% endfor %}
+        		    
+        		    {% set desktop_col = 4 %}
+        		    {% if columns >= 4 %}
+        		        {% set desktop_col = 3 %}
+        		    {% endif %}
+		    
+		            {% for x in 1..4 if attribute(theme.settings.footer, 'footer_menu_'~x~'_yn_'~locale) == "yes" %}
+		                <div class="col-12 col-md-{{desktop_col}}">
+    		                {% if device_type != "desktop" %}<button class="dn-btn-clear p-0" type="button" data-bs-toggle="collapse" data-bs-target="#footer_menu_{{x}}" aria-expanded="false" aria-controls="footer_menu_{{x}}">{% endif %}
+                                <div class="heading" data-editor="settings_footer_footer_menu_{{x}}_title_{{locale}}" role="heading" aria-level="2">
+        							{{attribute(theme.settings.footer, 'footer_menu_'~x~'_title_'~locale)}}
+        						</div>
+    						{% if device_type != "desktop" %}</button>{% endif %}
+    						<div class="collapse {% if device_type == "desktop" %}show{% else %}ps-3{% endif %}" id="footer_menu_{{x}}">
+        						<ul class="simple_link_list">
+        							{% set menuName = attribute(theme.settings.footer, 'footer_menu_'~x~'_' ~ locale) %}
+        							{% if menuName != "" %}
+        							    {% set menulist = getNavigation(menuName) %}
+        							    {% include 'menulist.html'%}
+    							    {% endif %}
+        						</ul>
+    						</div>
+						    <div>
+						        {{attribute(theme.settings.footer, 'footer_menu_'~x~'_html_'~locale)}}
+						    </div>
+    		            </div>
+		            {% endfor %}
+		            
+		            {% set columns = 0 %}
+        		    {% for x in 1..4 if attribute(theme.settings.footer, 'footer_image_'~x~'_yn_'~locale) == "yes" %}
+        		        {% set columns = columns + 1 %}
+        		    {% endfor %}
+        		    
+        		    {% set desktop_col = 4 %}
+        		    {% if columns >= 4 %}
+        		        {% set desktop_col = 3 %}
+        		    {% endif %}
+		    
+		            {% for x in 1..4 if attribute(theme.settings.footer, 'footer_image_'~x~'_yn_'~locale) == "yes" %}
+		                <div class="col-6 col-md-{{desktop_col}}">
+    		                <div class="heading" data-editor="settings_footer_footer_image_{{x}}_title_{{locale}}" role="heading" aria-level="2">
+    							{{attribute(theme.settings.footer, 'footer_image_'~x~'_title_'~locale)}}
+    						</div>
+    						{% if attribute(theme.settings.footer, 'footer_image_'~x~'_link') != "" %}
+    						    <a href="{{attribute(theme.settings.footer, 'footer_image_'~x~'_link')}}"
+    						       rel="{{attribute(theme.settings.footer, 'footer_image_'~x~'_link_REL')}}"
+    						       target="{{attribute(theme.settings.footer, 'footer_image_'~x~'_link_TARGET')}}"
+    						       title="{{attribute(theme.settings.footer, 'footer_image_'~x~'_link_TITLE')}}">
+    						{% endif %}
+    						{% if attribute(theme.settings.footer, 'footer_image_'~x) != "" %}
+    						    <img src="{{attribute(theme.settings.footer, 'footer_image_'~x)}}"
+						             alt="{{attribute(theme.settings.footer, 'footer_image_'~x~'_ALT')|default(attribute(theme.settings.footer, 'footer_image_'~x~'_title_'~locale))}}"
+						             loading="lazy">
+    						{% endif %}
+    						{% if attribute(theme.settings.footer, 'footer_image_'~x~'_link') != "" %}
+						        </a>
+    						{% endif %}
+    		            </div>
+		            {% endfor %}
+		        </div>
+		    </div>
+	    </div>
+    </div>
+    <hr>
+    <div class="container">
+        <div class="footer_bottom text-center">	
+            <span>
+                Copyright &copy; {{ "now"|date("Y") }} {{group.title}}. All rights reserved.
+            </span>
+            <a href="/page/page-privacy">{{lang('admin.privacy')}}</a>
+            {% if disable_shop == false %}
+                <a href="/page/page-conditions">{{lang('admin.conditions')}}</a>
+            {% endif %}
+            <a href="/page/cookies-law">{{lang('admin.cookies')}}</a>
+            {{document.gdpr|raw}}
+            <span>Powered by <a target="_blank" href="https://www.teamsystemcommerce.com/" rel="noopener noreferrer nofollow">TeamSystem Commerce</a></span>
+            <span>Developed by <a target="_blank" href="https://duckynetwork.com" rel="noopener noreferrer nofollow">Ducky Network S.r.l.</a></span>
+		</div>
+    </div>
+</footer>

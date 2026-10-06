@@ -1,0 +1,77 @@
+<div class="address_form">
+	<div class="row">
+		<input type="hidden" name="address_id" class="address_id" value="" >
+		
+		<div class="{% if group.props.digitalinvoice == 'no' or request.path.1 == "cart" %}col-md-6 col-sm-6{% endif %} col-12">
+			<div class="form-group">
+				<label>{{lang('register.fullname')}} <span class="text-danger">*</span></label>
+				<input type="text" name="fullname" class="form-control fullname" required aria-label="{{lang('register.fullname')}}">
+			</div>
+		</div>
+
+		<div class="col-md-6 col-sm-6 col-12">
+			<div class="form-group">
+				<label>{{lang('register.email')}} <span class="text-danger">*</span></label>
+				<input type="email" name="email" class="form-control email" required aria-label="{{lang('register.email')}}">
+			</div>
+		</div>
+
+		<div class="col-md-6 col-sm-6 col-12">
+			<div class="form-group">
+				<label>{{lang('register.phone')}} <span class="text-danger">*</span></label>
+				<input type="text" name="phone" class="form-control phone" required aria-label="{{lang('register.phone')}}">
+			</div>
+		</div>
+
+		<div class="col-md-6 col-sm-6 col-12 {% if group.props.digitalinvoice == 'yes' %}d-none{% endif %}">
+			<div class="form-group">
+				<label>{{lang('register.vat')}} {% if theme.settings.cart.require_vat == 'yes' and group.props.digitalinvoice == 'no' %}<span class="text-danger">*</span> {%endif%}</label>
+				<input type="text" name="vat" class="form-control vat" aria-label="{{lang('register.vat')}}" {% if theme.settings.cart.require_vat == 'yes' and group.props.digitalinvoice == 'no' %}required{%endif%}>
+			</div>
+		</div>
+
+		<div class="col-md-8 col-sm-9 col-12">
+			<div class="form-group">
+				<label>{{lang('front.register.addr1')}} <span class="text-danger">*</span></label>
+				<input type="text" name="addr1" class="form-control addr1" required aria-label="{{lang('front.register.addr1')}}">
+			</div>
+		</div>
+
+		<div class="col-md-4 col-sm-3 col-12">
+			<div class="form-group">
+				<label>{{lang('register.zip')}} <span class="text-danger">*</span></label>
+				<input type="text" name="zip" class="form-control zip" required aria-label="{{lang('register.zip')}}">
+			</div>
+		</div>
+	</div>
+
+	<div class="row list-country-state">
+
+		<div class="col-md-4 col-sm-4 col-12">
+			<div class="form-group">
+				<label>{{lang('register.city')}} <span class="text-danger">*</span></label>
+				<input type="text" name="city" class="form-control city" required aria-label="{{lang('register.city')}}">
+			</div>
+		</div>
+
+		<div class="col-md-4 col-sm-4 col-12">
+			<div class="form-group">
+				<label>{{lang('register.country')}} <span class="text-danger">*</span></label>
+				<select name="country" class="form-select listCountry country" data-current="" required aria-label="{{lang('register.country')}}">
+				</select>
+			</div>
+		</div>
+
+		<div class="col-md-4 col-sm-4 col-12">
+			<div class="form-group">
+				<label>{{lang('register.state')}} <span class="text-danger">*</span></label>
+				<select name="state" class="form-select listStates state" required data-current="" data-current-country="" aria-label="{{lang('register.state')}}">
+				</select>
+			</div>
+		</div>
+
+	</div>
+
+	<p class="text-danger">* {{lang('front.required.fields')}}</p>
+
+</div>

@@ -1,0 +1,39 @@
+{% if vars.section.settings.anchor != "" %}<a name="{{vars.section.settings.anchor}}"></a>{% endif %}
+<section class="section template_collapse_row {% if vars.section.settings.margin_top == "no" %}mt-0{% endif %}" id="section_{{vars.section.id}}_collapse">
+    <div class="container">
+        <a
+            href="#collapse-{{vars.section.id}}"
+            class="{% if vars.section.settings.opened == "no" %}collapsed{% endif %} link heading"
+            data-bs-toggle="collapse"
+            role="button"
+            aria-expanded="false"
+            aria-controls="collapse-{{vars.section.id}}"
+            data-editor="{{vars.section.data_editor}}_title_{{locale}}">
+            {{attribute(vars.section.settings, "title_"~locale)}}
+            {% if vars.section.settings.chevron == "yes" %}<i class="fa fa-chevron-down"></i>{% endif %}
+        </a>
+        <div class="collapse {% if vars.section.settings.opened == "yes" %}show{% endif %}" id="collapse-{{vars.section.id}}">
+            <div class="content" data-editor="{{vars.section.data_editor}}_content_{{locale}}">
+                {{attribute(vars.section.settings, "content_"~locale)}}
+            </div>
+        </div>
+    </div>
+</section>
+<script>
+    //Valutare se riscrivere la funzione per dichiararla una sola volta
+    function showCollapse{{vars.section.id}}(){
+        $('#collapse-{{vars.section.id}}').collapse('show');
+    }
+    
+    $(document).ready(function() {
+        if(window.location.hash == '#{{vars.section.settings.anchor}}'){
+            showCollapse{{vars.section.id}}();
+        }
+    });
+    
+    window.addEventListener('hashchange', function() {
+        if(window.location.hash == '#{{vars.section.settings.anchor}}'){
+            showCollapse{{vars.section.id}}();
+        }
+    })
+</script>

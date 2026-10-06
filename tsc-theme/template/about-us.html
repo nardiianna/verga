@@ -1,0 +1,7 @@
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'about-us')%}
+	{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>

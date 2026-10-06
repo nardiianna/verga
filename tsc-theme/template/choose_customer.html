@@ -1,0 +1,92 @@
+<div class="row">
+	<div class='col-12 col-sm-4 col-md-3 third-column-product'>	
+		{% include 'menu_profile.html' %}
+	</div>
+	<div class="col-12 col-sm-8 col-md-9  col-xs-12 profileLeft">
+		<h2>{{lang('profile.agent.choose_customer')}}</h2>
+		<p>{{lang('profile.agent.search_note')}}</p>
+		<div style="max-width:550px;">
+		    <input type="text" class="form-control" id="customer-search" placeholder="{{lang('profile.agent.search_placeholder')}}" onkeyup="searchCustomer(this.value)">
+    		<div class="my-4 scrollable-radio-list" id="customer-list">
+    		    {% for x in customers_list %}
+    		        {% set billing_data = x.billing %}
+    		        {% set address = billing_data.address ~ ' ' ~ billing_data.zipcode ~ ' ' ~ billing_data.city ~ ' (' ~ billing_data.district ~ ') ' ~ billing_data.country %}
+    		        <div class="customer item">
+                        <div class="d-flex align-items-center">
+                            <input class="form-check-input" type="radio" name="customer" id="customer-{{x.customer_id}}" value="{{billing_data.fullname}} - {{address}} - {{billing_data.vatnumber}} - {{x.customer_id}}" data-bs-name="{{billing_data.fullname}}" data-bs-id="{{x.customer_id}}" data-bs-toggle="modal" data-bs-target="#confirm-customer">
+                            <label class="form-check-label" for="customer-{{x.customer_id}}">{{billing_data.fullname}}<br><span>{{address}}</span></label>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="alert alert-info" role="alert">
+                        {{lang('profile.agent.no_customers')}}
+                    </div>
+    		    {% endfor %}
+    	    </div>
+    	    <div class="d-flex justify-content-between align-items-center flex-wrap">
+    	        {% if shop_rules.agent_can_make_new_customers %}<a href="/profile/new-customer" class="btn button">{{lang('profile.agent.add_new_customer')}}</a>{% endif %}
+    	        {% if customer_selected or new_customer %}<a href="#" onclick="setCookieSession('customer_info', ''); location.reload();" class="btn btn-outline-dark">{{lang('profile.agent.close_customer')}}</a>{% endif %}
+            </div>
+        </div>
+	</div>
+</div>
+
+<div class="modal fade" id="confirm-customer" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="confirm-customer-label" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirm-customer-label">{{lang('profile.agent.change_client.modal_title')}}</h5>
+                {#<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>#}
+            </div>
+            <div class="modal-body">
+                
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" onclick="$('#customer-list input:checked').prop( 'checked', false );">{{lang('front.agent.change')}}</button>
+                <button type="button" class="btn button" onclick="chooseClient()" data-bs-dismiss="modal">{{lang('cart.step.confirm')}}</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const confirmCustomerModal = document.getElementById('confirm-customer');
+    confirmCustomerModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var name = button.getAttribute('data-bs-name');
+        var customer_id = button.getAttribute('data-bs-id')
+        var modalBodyInput = confirmCustomerModal.querySelector('.modal-body');
+        modalBodyInput.innerHTML = '{{lang('profile.agent.change_client.you_selected')}}: ' + name + ' <br><br><b>{{lang('profile.agent.change_client.confirm_question')}}</b>'
+    })
+    
+    
+    function searchCustomer(searchKey){
+        if(searchKey.length >= 3){
+            $('#customer-list input').each(function() {
+                let val = $(this).val();
+                if(val.toLowerCase().indexOf(searchKey.toLowerCase()) >= 0){
+                    $(this).closest('.customer').fadeIn();
+                }else{
+                    $(this).closest('.customer').fadeOut();
+                }
+            });
+        }else{
+            $('#customer-list .customer').fadeIn();
+        }
+    }
+    function locationReplaceChooseCustomer(){
+        window.location.replace("{{request.script_name}}/");
+    }
+    function chooseClient(){
+        let customer_id = $('#customer-list input:checked').attr('data-bs-id');
+        let customer_name = $('#customer-list input:checked').attr('data-bs-name');
+        let array = [];
+        let element = {"id":customer_id, "name":customer_name};
+        array.push(element);
+        setCookieAllsite('customer_info', JSON.stringify(array), 3);
+        setCookieSession('order_data', '');
+        
+        //window.location.href = "/profile/customer-review";
+        window.location.href = "/shop";
+    }
+</script>

@@ -1,0 +1,26 @@
+{% for category in categoryList %}
+	{% if request.path[3] == category.catUID %}
+		{% set activeClass = 'active' %}
+	{% else %}
+		{% set activeClass = '' %}
+	{% endif %}
+	{% set length = category.subcategory | length %}
+	{% if length > 0 %}
+	    <li class="{{activeClass}} level-{{level}}">
+		    {# Versione aggiornata, il + per espandere il collapse è un tasto separato dal nome della categoria che se cliccato naviga verso la categoria invece di aprire il collapse #}
+		    <a href="{{getCategoryURL(category.catUID)}}" class="me-3 overflow-hidden">{{ category.name }}</a>
+		    <a href="#" role="button" title="{{category.name | trim }}" class="pointer collapsed position-absolute end-0 top-0" data-bs-toggle="collapse" data-bs-target="#collapse-{{category.catUID}}" aria-expanded="false" aria-controls="collapse-{{category.catUID}}"></a>
+		    {# versione standard
+		    <a title="{{category.name | trim }}" class="pointer collapsed" data-bs-toggle="collapse" data-bs-target="#collapse-{{category.catUID}}" aria-expanded="false" aria-controls="collapse-{{category.catUID}}">{{ category.name }}</a>#}
+    		{#<script>console.log("category: ", {{category|json_encode}});</script>#}
+    		<div class="collapse sub-element" id="collapse-{{category.catUID}}">
+    		    <ul>
+        			{% set vars = { 'categoryList': category.subcategory , 'request': request, 'level': (level + 1)} %}
+        			{% include 'menu_categories_collapse.html' with vars only %}
+        		</ul>
+    		</div>
+		</li>
+	{% else%}
+		<li class="{{activeClass}} level-{{level}}"><a href="{{getCategoryURL(category.catUID)}}">{{ category.name }}</a></li>
+	{% endif %}
+{% endfor %}

@@ -1,0 +1,13 @@
+{% set menulist = getNavigation(mainsection.url) %}
+{% set length = menulist.sections | length %}
+{% if length > 0 %}
+	<li> 
+		<a rel="{{menulist.rel}}" title="{{menulist.title | trim }}" class="pointer" href="#">{{ menulist.title }}</a>
+		<ul>
+			{% set vars = { 'menulist': menulist , 'currentURL': currentURL} %}
+			{% include 'custom_menu.html' with vars only %}
+		</ul>
+	</li>
+{% else%}
+	<li><a class="pointer">{{ menulist.title }}</a></li>
+{% endif %}

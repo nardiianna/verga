@@ -1,0 +1,5 @@
+<section class="section template_free_html" id="section_{{vars.section.id}}_free_html">
+    {% if vars.section.settings.container_yn == "yes" %}<div class="container">{% endif %}
+        {{attribute(vars.section.settings, 'html_'~locale)}}
+    {% if vars.section.settings.container_yn == "yes" %}</div>{% endif %}
+</section>

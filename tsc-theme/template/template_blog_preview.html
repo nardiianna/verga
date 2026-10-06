@@ -1,0 +1,113 @@
+<section class="section template_blog_preview" id="section_{{vars.section.id}}_blog_preview">
+	<div class="{{vars.layout}}">
+		<div class="d-flex align-items-center flex-wrap mb-3 gap-2">
+    		<div class="heading mb-0"
+    			 data-editor="{{vars.section.data_editor}}_title_{{locale}}"
+    			 role="heading" aria-level="2"
+    			 >{{attribute(vars.section.settings, 'title_'~locale)}}</div>
+    		{% if attribute(vars.section.settings, 'button_text_'~locale) != "" %}
+    			<div>
+    			    <a  href="{{attribute(vars.section.settings, 'button_link')}}"
+    			        class="dn-btn dn-btn-info dn-btn-text"
+    			        rel="{{vars.section.settings.button_link_REL}}"
+    				    target="{{vars.section.settings.button_link_TARGET}}"
+    				    title="{{attribute(vars.section.settings, 'button_link_TITLE_'~locale)}}">{{attribute(vars.section.settings, 'button_text_'~locale)}}</a>
+    			</div>
+    		{% endif %}
+		</div>
+		
+		{% set show_image = '' %}
+		{% if vars.section.settings.show_image != 'yes' %}
+			{% set show_image = 'post_no_image' %}
+		{% endif %}
+		
+		{% set count = vars.section.settings.count %}
+		{% set layout_box = "col-12 col-md-4 col-sm-4" %}
+		{% set blog_preview_class = 'blog_preview_'~count %}
+		
+		{% if count == 1 %}
+			{% set layout_box = 'col-12 col-md-12 col-sm-12'%}
+		{% elseif count == 2 %}
+			{% set layout_box = 'col-12 col-md-6 col-sm-6'%}
+		{% elseif count == 6 %}
+			{% set blog_preview_class = 'blog_preview_1' %}
+			{% set layout_box = 'col-12 col-md-6 col-sm-12'%}
+		{% else %}
+			{% set count = 3 %}
+			{% set blog_preview_class = 'blog_preview_'~count %}
+		{% endif %}
+		
+		{% set langs = [locale]%}
+		{% set in_languages = [] %}
+		{% set in_languages = in_languages | merge({'$in' : langs }) %}
+		{% set filter = []%}
+		{% set filter = filter | merge({'languages' : in_languages }) %}
+		
+		{% if vars.section.settings.use_tag == 'yes' and vars.section.settings.tag != '' %}
+			{% set tag = vars.section.settings.tag %}
+			{% set filter = filter | merge({'tags' : tag }) %}
+		{% endif %}
+		
+		{% set blog_handler = getBlogPosts(filter,0,count) %}
+		{% set posts = blog_handler.posts %}
+		
+		{% if posts | length > 0 %}
+			
+			<div class="{{blog_preview_class}} row">
+				{% for post in posts %}
+					<div class="{{layout_box}}">
+						<div class="blog_placeholder blog_post {{show_image}}">
+							<a href="{{ postUrl(post) }}" title="{{post.title|e}}">
+								<div class="blog_img">
+									{% if post.ext_img%}
+										<img loading="lazy" src="{{post.ext_img}}" alt="{{post.title|e}}">
+								    {% endif %}
+								</div>
+								<div class="blog_content">
+									<p> 
+										{% if vars.section.settings.show_date == "yes" %}
+										    {{ post.ts.sec | date("d/m/Y") }}<br>
+										{% endif %}
+										<strong class="post_title">{{post.title}}</strong>
+										<span class="post_extract">{{ post.extract }}</span>
+									</p>
+									<div class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('link.read.more')}} <i class="fa fa-angle-right"></i></div>
+								</div>
+							</a>
+						</div>
+					</div>
+					{% if count == 6 and (loop.index == 2 or loop.index == 4) %}
+						<div class="clearfix"></div>
+					{% endif %}
+				{% endfor %}
+			</div>
+		
+		{% else %}
+			
+			<div class="row">
+				<div class="{{blog_preview_class}}">
+					{% for i in range(1,count) %}
+						<div class="{{layout_box}}">
+							<div class="blog_placeholder blog_post {{show_image}}">
+								<div class="blog_img">
+									<img src="{{placeholders.blog}}">
+								</div>
+								<div class="blog_content">
+									<p> 
+										12/2/2017<br>
+										<strong> Lore ipsum dolor sit amet</strong> <br>
+										Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor 
+										incididunt ut labore et dolore magna aliqua. 
+									</p>
+									<div class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('link.read.more')}} <i class="fa fa-angle-right"></i></div>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+			</div>
+		
+		{% endif %}
+		
+	</div>
+</section>

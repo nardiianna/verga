@@ -1,0 +1,411 @@
+<style>
+    /* Stile generico dei pannelli laterali */
+    .lateral-panel{
+        position:fixed;
+        z-index:99999;
+        top:0;
+        width:100vw;
+        bottom:0;
+        left:-100vw;
+        background:white;
+        transition:all 0.4s;
+        overflow:auto;
+        box-shadow: none;
+        color:black;
+    }
+    .lateral-panel:not(.lateral-panel-right).show{
+        left:0!important;
+    }
+    .lateral-panel.lateral-panel-right{
+        right:-100vw;
+        left:unset;
+    }
+    .lateral-panel-right.show{
+        right:0!important;
+    }
+    
+    /* Stili particolari per i collapse e altri elementi all'interno dei pannelli */
+    .lateral-panel .mobile-menu,
+    .lateral-panel .top-section,
+    .lateral-panel .bottom-section{
+        padding:20px;
+        text-align:left;
+        position:relative;
+        margin:0;
+    }
+    .lateral-panel .buttons{
+        padding:20px;
+    }
+    .lateral-panel .mobile-menu ul{
+        padding:0 15px 0 15px;
+    }
+    .lateral-panel .mobile-menu li{
+        list-style: none;
+        box-shadow: 0 1px 0 #d2d2d2;
+        position:relative;
+    }
+    .lateral-panel .mobile-menu a{
+        font-size: 18px;
+        font-weight: 500;
+        line-height: 1em;
+        display: block;
+        padding: 15px 0;
+        text-transform: uppercase;
+        position: relative;
+        color: var(--standard-text-color);
+    }
+    .lateral-panel .mobile-menu li.level-2 a{
+        font-size: 16px;
+        line-height: 1em;
+        padding: 12px 0;
+    }
+    .lateral-panel .mobile-menu a[data-bs-toggle="collapse"]:after,
+    .lateral-panel .mobile-menu button[data-bs-toggle="collapse"]:after{
+        content: '+';
+        display: inline-block;
+        position: absolute;
+        right: 0;
+        font-weight: 100;
+        font-size: 1.3em;
+        transition-duration:200ms;
+    }
+    .lateral-panel .mobile-menu a[data-bs-toggle="collapse"]:not(.collapsed):after,
+    .lateral-panel .mobile-menu button[data-bs-toggle="collapse"]:not(.collapsed):after{
+        transform:rotate(45deg);
+    }
+    /*.lateral-panel .sub-element{
+        box-shadow:-1px 0 0 #d2d2d2;
+    }*/
+    .lateral-panel .blank-space{
+        flex-grow:1;
+    }
+    .lateral-panel .bottom-section a{
+        color: var(--standard-text-color);
+    }
+    .lateral-panel .bottom-section a.active{
+        font-weight:bold;
+    }
+    
+    
+</style>
+
+{% set language_svg = '<svg width="24" height="24" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><g><path d="M16 28C22.6274 28 28 22.6274 28 16C28 9.37258 22.6274 4 16 4C9.37258 4 4 9.37258 4 16C4 22.6274 9.37258 28 16 28Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M11 15.9999C11 20.6824 12.6662 24.8649 15.285 27.6862C15.376 27.7851 15.4865 27.8641 15.6096 27.9181C15.7326 27.9722 15.8656 28.0001 16 28.0001C16.1344 28.0001 16.2674 27.9722 16.3904 27.9181C16.5135 27.8641 16.624 27.7851 16.715 27.6862C19.3338 24.8649 21 20.6824 21 15.9999C21 11.3174 19.3338 7.13491 16.715 4.31366C16.624 4.21471 16.5135 4.13572 16.3904 4.08169C16.2674 4.02766 16.1344 3.99976 16 3.99976C15.8656 3.99976 15.7326 4.02766 15.6096 4.08169C15.4865 4.13572 15.376 4.21471 15.285 4.31366C12.6662 7.13491 11 11.3174 11 15.9999Z" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16H28" stroke="black" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></g></svg>' %}
+{% set user_mobile_svg = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M19 21V19C19 17.9391 18.5786 16.9217 17.8284 16.1716C17.0783 15.4214 16.0609 15 15 15H9C7.93913 15 6.92172 15.4214 6.17157 16.1716C5.42143 16.9217 5 17.9391 5 19V21" stroke="black" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 11C14.2091 11 16 9.20914 16 7C16 4.79086 14.2091 3 12 3C9.79086 3 8 4.79086 8 7C8 9.20914 9.79086 11 12 11Z" stroke="black" stroke-linecap="round" stroke-linejoin="round"/></svg>' %}
+{% set menu_svg = '<svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><g><path id="Vector" d="M33.7495 3.84961H2.24954C2.07276 3.84961 1.92812 3.99425 1.92812 4.17104V6.74247C1.92812 6.91925 2.07276 7.0639 2.24954 7.0639H33.7495C33.9263 7.0639 34.071 6.91925 34.071 6.74247V4.17104C34.071 3.99425 33.9263 3.84961 33.7495 3.84961ZM33.7495 28.921H2.24954C2.07276 28.921 1.92812 29.0657 1.92812 29.2425V31.8139C1.92812 31.9907 2.07276 32.1353 2.24954 32.1353H33.7495C33.9263 32.1353 34.071 31.9907 34.071 31.8139V29.2425C34.071 29.0657 33.9263 28.921 33.7495 28.921ZM33.7495 16.3853H2.24954C2.07276 16.3853 1.92812 16.53 1.92812 16.7068V19.2782C1.92812 19.455 2.07276 19.5996 2.24954 19.5996H33.7495C33.9263 19.5996 34.071 19.455 34.071 19.2782V16.7068C34.071 16.53 33.9263 16.3853 33.7495 16.3853Z" fill="black"/></g></svg>' %}
+{% set close_svg = '<svg width="24" height="24" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg"><g><path d="M20.0807 17.9981L30.6275 5.42624C30.8043 5.21731 30.6557 4.8999 30.3824 4.8999H27.1762C26.9874 4.8999 26.8066 4.98428 26.682 5.12892L17.9833 15.499L9.28468 5.12892C9.16414 4.98428 8.98334 4.8999 8.79048 4.8999H5.58423C5.31102 4.8999 5.16236 5.21731 5.33914 5.42624L15.886 17.9981L5.33914 30.57C5.29954 30.6166 5.27414 30.6735 5.26594 30.7341C5.25775 30.7947 5.26711 30.8563 5.29291 30.9118C5.31872 30.9672 5.35988 31.014 5.41152 31.0467C5.46316 31.0795 5.5231 31.0967 5.58423 31.0963H8.79048C8.97932 31.0963 9.16013 31.012 9.28468 30.8673L17.9833 20.4972L26.682 30.8673C26.8025 31.012 26.9833 31.0963 27.1762 31.0963H30.3824C30.6557 31.0963 30.8043 30.7789 30.6275 30.57L20.0807 17.9981Z" fill="black"/></g></svg>' %}
+
+<button
+    class="item lateral-panel-button text-center dn-btn-clear d-md-none"
+    id="main-lateral-button"
+    aria-controls="main-lateral"
+    aria-expanded="false"
+    aria-haspopup="dialog"
+    aria-label="{{lang('acc_act.open_lateral')}}"
+    onclick="toggleLateral('main-lateral');"
+    type="button"
+>
+    <span class="lateral-open">{{menu_svg}}</span>
+</button>
+
+<div id="main-lateral" class="lateral-panel" role="dialog" aria-hidden="true" aria-labelledby="main-lateral-button">
+    <div class="h-100 d-flex flex-column ">
+        <div class="top-section d-flex align-items-center justify-content-between">
+            <div class="element">
+                {% if theme.settings.header.show_logo == 'yes' %}
+    				<a href="/" title="{{group.title}}" class="logo_wrap text-start">
+						{% if theme.settings.header.logo != '' %}
+    					    <img src="{{theme.settings.header.logo}}"
+    						 data-editor="settings_header_logo"
+    						 data-placeholder="https://tcdn.storeden.com/store/{{groupUID}}"
+    						 alt="{{theme.settings.header.logo_ALT}}"
+    						 class="logo">
+						{% elseif theme.settings.header.logo_svg != "" %}
+						    {{theme.settings.header.logo_svg}}
+					    {% endif %}
+    				</a>
+    			{% else %}
+    				<div class="heading logo_wrap">
+    					<a href="/" title="{{group.title}}">{{group.title|upper}}</a>
+    				</div>
+    			{% endif %}
+            </div>
+            <button
+                class="element lateral-close dn-btn-clear"
+                type="button"
+                aria-label="{{lang('acc_act.close_lateral')}}"
+                onclick="toggleLateral('main-lateral');"
+            >
+                {{close_svg}}
+            </button>
+        </div>
+        <ul class="mobile-menu">
+            {# PAGINA SHOP #}
+            {% if theme.settings.header.show_shop == 'yes' %}
+    			{% if disable_shop == false %}
+    				<li class="level-1">
+    					<a href="/shop" class="{% if request.path.1 == 'shop' and request.path.2 == '' %}active{%endif%}">
+    						{{lang('page.shop')}}
+    					</a>
+    				</li>
+    			{% endif %}
+    		{% endif %}
+            
+            {# MENù PERSONALIZZATO #}
+            {% set menuName = attribute(theme.settings.header, 'custom_menu_' ~ locale) %}
+        	{% if menuName != ''%}
+        	    {% set mainmenulist = getNavigation(menuName) %}
+        		{% if mainmenulist.sections | length > 0 %}
+        		    {% set vars = { 'menulist': mainmenulist , 'currentURL': currentURL} %}
+        		    {% include 'custom_menu_collapse.html' with vars%}
+        		{% endif %}
+        	{% endif %}
+        	
+        	{# LINK ABOUT US #}
+        	{% if theme.settings.header.show_about_us == 'yes' %}
+    			<li>
+    				<a href="/about-us" class="{% if request.path.1 == 'about-us' %}active{%endif%}">
+    					{{lang('page.aboutus')|upper}}
+    				</a>
+    			</li>
+    		{% endif %}
+    		
+    		{# LINK CONTACT US #}
+    		{% if theme.settings.header.show_contact_us == 'yes' %}
+    			<li>
+    				<a href="/contact-us" class="{% if request.path.1 == 'contact-us' %}active{%endif%}">
+    					{{lang('page.contactus')|upper}}
+    				</a>
+    			</li>
+    		{% endif %}
+    		
+    		{# LINK BLOG #}
+    		{% if theme.settings.header.show_blog == 'yes' %}
+    			<li>
+    				<a href="/blog" class="{% if request.path.1 == 'blog' or request.path.1 == 'post' %}active{%endif%}">
+    					{{lang('page.blog')|upper}}
+    				</a>
+    			</li>
+    		{% endif %}
+		</ul>
+		<ul class="mobile-menu">
+    		
+    		{# MENU CATEGORIE #}
+        	{% if theme.settings.header.show_categories == 'yes' %}
+        	    <li class="level-1">
+        	        <a href="#" class="pointer collapsed" data-bs-toggle="collapse" data-bs-target="#collapse-categories" aria-expanded="false" aria-controls="collapse-categories">{{lang('page.all.items')|upper}}</a>
+            		<div class="collapse sub-element" id="collapse-categories">
+            		    <ul>
+            		        {% set vars = { 'categoryList': categorytree() , 'request': request, 'level':2} %}
+        		            {% include "menu_categories_collapse.html" with vars %}
+                		</ul>
+            		</div>
+                </li>
+            {% endif %}
+        	
+        </ul>
+        <div class="blank-space"></div>
+        
+        <ul class="mobile-menu">
+            <li>
+                <a class="pointer collapsed" data-bs-toggle="collapse" href="#mobile-contacts-collapse" role="button" aria-expanded="false" aria-controls="mobile-contacts-collapse">
+                    {{lang('mobile.collapse_contacts')}}
+                </a>
+                <div class="collapse" id="mobile-contacts-collapse">
+                    {# Contatti #}
+            	    {% set contacts = [
+                        {
+                            "id":"tel",
+            	            "icon":'<i class="fas fa-phone-alt"></i>',
+            	            "link":"tel:",
+            	            "label":lang('acc_act.contact.phone')
+        	            },
+        	            {
+        	                "id":"wa",
+        	                "icon":'<i class="fab fa-whatsapp"></i>',
+        	                "link":"https://wa.me/",
+            	            "label":lang('acc_act.contact.wa')
+                        },
+                        {
+                            "id":"email",
+                            "icon":'<i class="fas fa-envelope-open-text"></i>',
+                            "link":"mailto:",
+            	            "label":lang('acc_act.contact.email')
+                        }
+                    ] %}
+                    <ul>
+                    	{% for contact in contacts %}
+                        	{% set num = attribute(theme.settings.header, 'top_message_'~contact.id~'_'~locale) %}
+                        	{% if num != "" %}
+                            	    <li class="level-2">
+                            	        <a  href="{{contact.link}}{{num|replace({" ":""})}}"
+                                	        target="_blank"
+                                	        data-editor="settings_header_top_message_{{contact.id}}_{{locale}}"
+                                	        aria-label="{{contact.label}} {{num|striptags|e}} {{lang('link.open_new_tab')}}">{{contact.icon}} {{num}}</a>
+                        	        </li>
+                        	{% endif %}
+                    	{% endfor %}
+                	</ul>
+            	</div>
+            </li>
+        </ul>
+        
+        <ul class="mobile-menu">
+            {# MENU ACCOUNT #}
+            <li>
+                <a href="#" class="pointer collapsed" data-bs-toggle="collapse" data-bs-target="#collapse-account" aria-expanded="false" aria-controls="collapse-account">
+                    {{user_mobile_svg}}
+                    {% if user.uid > 0 %}
+                        {{user.fullname}}
+                    {% else %}
+                        {{lang('account')}}
+                    {% endif %}
+                </a>
+                <div class="collapse sub-element" id="collapse-account">
+                    <ul>
+        				{% if is_agent %}
+        				    <li class="level-2"><a href="/profile">{{lang('agent.profile')}}</a></li>
+        					{% if customer_selected %}
+        					    <li class="level-2"><hr></li>
+        					    <li class="level-2"><p class="fw-bold">{{customer_data.billing.fullname[:15]}}{% if customer_data.billing.fullname|length > 15 %}&hellip;{% endif %}</p></li>
+        					    <li class="level-2"><a href="/profile/customer-review">{{lang('profile.agent.customer_review')}}</a></li>
+        					    <li class="level-2"><a href="/profile/proposals">{{lang('profile.agent.customer_proposals')}}</a></li>
+        					    <li class="level-2"><a href="/profile/choose-customer">{{lang('front.agent.change_long')}}</a></li>
+        				    {% elseif new_customer %}
+        				        <li class="level-2"><hr></li>
+        				        <li class="level-2"><p class="fw-bold">{{customer_data.companyName[:15]}}{% if customer_data.companyName|length > 15 %}&hellip;{% endif %}</p></li>
+        				        <li class="level-2"><a href="/profile/customer-review">{{lang('profile.agent.customer_review')}}</a></li>
+        				        <li class="level-2"><a href="/profile/choose-customer">{{lang('front.agent.change_long')}}</a></li>
+        				    {% else %}
+        				        <li class="level-2"><a href="/profile/choose-customer">{{lang('profile.agent.choose_customer')}}</a></li>
+        				    {% endif %}
+        					<li class="level-2"><hr></li>
+        				{% elseif user.uid > 0 %}
+        				    <li class="level-2"><a href="/order_status">{{lang('page.order.status')}}</a></li>
+        					<li class="level-2"><a href="/orders">{{lang('user.orders')}}</a></li>
+        					<li class="level-2"><a href="/profile">{{lang('user.profile')}}</a></li>
+        					<li class="level-2"><a href="/wishlist">{{lang('front.wishlist')}}</a></li>
+        					<li class="level-2"><a href="/messages">{{lang('store.messages')}}</a></li>
+        				{% else %}
+        					<li class="level-2"><a href="/login">{{lang('sign.in')}}</a></li>
+        					{% if shop_rules.enable_registration_link %}
+        					    <li class="level-2"><a href="/login/registration">{{lang('register')}}</a></li>
+    					    {% endif %}
+        					<li class="level-2"><a href="/order_status">{{lang('page.order.status')}}</a></li>
+        				{% endif %}
+        				
+        				{% if user.uid > 0 %}
+        					<li class="level-2"><a href="/logout?callback=/?logged-out=1">{{lang('admin.logout')}}</a></li>
+        				{% endif %}
+                    </ul>
+                </div>
+            </li>
+        </ul>
+        <div class="bottom-section">
+            {# SELETTORE LINGUA  #}
+        	{% set countLang = group.props.languages | length %}
+    		{% if countLang > 1 %}
+    		    <div id="lang_menu_mobile" class="text-start">
+    				{% for lang in group.props.languages %}
+    					{% set locationurl = request.script_name %}
+    					{% if document.alternates[lang] > '' %}
+    						{%  set locationurl = document.alternates[lang] %}
+    					{% endif %}
+    					<a href="{{locationurl}}?lang={{lang}}" class="language-link {% if locale == lang %}active{% endif %} me-3 d-inline-block" title="{{ languages[lang] | slice(0, 2) }}" >
+    						{{ lang | slice(0, 2) | upper }}
+    					</a>
+    				{% endfor %}
+    			</div>
+    		{% endif %}
+        </div>
+    </div>
+</div>
+
+
+   
+<script>
+    function toggleLateral(whichone) {
+        const $panel = $('#' + whichone);
+        const $button = $('#' + whichone + '-button');
+        const isOpen = $panel.hasClass('show');
+        const $body = $(document.body);
+        const $mainContent = $('#request_page');
+        const focusableSelector = 'a, button, input, textarea, select, [tabindex]:not([tabindex="-1"])';
+    
+        // Chiudo eventuali altri pannelli aperti
+        $(".lateral-panel")
+            .not($panel)
+            .removeClass('show')
+            .attr('aria-hidden', 'true')
+            .attr('inert', '');
+    
+        if (!isOpen) {
+            // --- APERTURA ---
+            $panel
+                .addClass('show')
+                .attr({
+                    'aria-hidden': 'false',
+                    'aria-modal': 'true',
+                    'role': 'dialog'
+                })
+                .removeAttr('inert');
+    
+            $body.addClass('modal-open');
+            $mainContent.attr('aria-hidden', 'true').attr('inert', '');
+    
+            // Sposta il focus nel pannello
+            const focusable = $panel.find(focusableSelector).first();
+            if (focusable.length) focusable.focus();
+    
+            // Focus trap (TAB resta dentro al pannello)
+            const focusableEls = $panel.find(focusableSelector);
+            const firstEl = focusableEls.first()[0];
+            const lastEl = focusableEls.last()[0];
+    
+            $(document).on('keydown.lateralPanel', function (e) {
+                if (e.key === 'Escape') {
+                    toggleLateral(whichone);
+                } else if (e.key === 'Tab' && focusableEls.length > 0) {
+                    if (e.shiftKey && document.activeElement === firstEl) {
+                        e.preventDefault();
+                        lastEl.focus();
+                    } else if (!e.shiftKey && document.activeElement === lastEl) {
+                        e.preventDefault();
+                        firstEl.focus();
+                    }
+                }
+            });
+    
+            // Aggiorna aria-expanded
+            $button.attr('aria-expanded', 'true');
+        } else {
+            // --- CHIUSURA ---
+            $panel.removeClass('show').attr('aria-hidden', 'true').attr('inert', '');
+            $body.removeClass('modal-open');
+            $mainContent.attr('aria-hidden', 'false').removeAttr('inert');
+    
+            if ($button.length) $button.focus();
+    
+            $('.collapse').collapse('hide');
+            $(document).off('keydown.lateralPanel');
+    
+            // Aggiorna aria-expanded
+            $button.attr('aria-expanded', 'false');
+        }
+    }
+    
+    // Disattiva il focus e l'accesso ai pannelli laterali all'avvio
+    $(document).ready(function() {
+        $(".lateral-panel").each(function() {
+            const $panel = $(this);
+            // Applica solo se il pannello non è aperto di default
+            if (!$panel.hasClass('show')) {
+                $panel.attr({
+                    'aria-hidden': 'true',
+                    'inert': ''
+                });
+            }
+        });
+    });
+ 
+	 
+</script>

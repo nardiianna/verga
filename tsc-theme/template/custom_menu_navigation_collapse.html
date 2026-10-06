@@ -1,0 +1,15 @@
+{% set menulist = getNavigation(mainsection.url) %}
+{% set length = menulist.sections | length %}
+{% if length > 0 %}
+	<li class="level-{{level}}"> 
+		<a class="pointer collapsed" data-bs-toggle="collapse"  rel="{{menulist.rel}}" href="#collapse-{{menulist._id}}" aria-expanded="false" aria-controls="collapse-{{menulist._id}}" title="{{menulist.title | trim }}">{{ menulist.title }}</a>
+		<div class="collapse sub-element" id="collapse-{{menulist._id}}">
+		    <ul>
+    			{% set vars = { 'menulist': menulist , 'currentURL': currentURL, 'level':(level + 1)} %}
+    			{% include 'custom_menu_collapse.html' with vars only %}
+    		</ul>
+		</div>
+	</li>
+{% else%}
+	<li class="level-{{level}}"><a class="pointer">{{ menulist.title }}</a></li>
+{% endif %}

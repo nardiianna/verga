@@ -1,0 +1,30 @@
+{% for mainsection in menulist.sections %}
+		{% set element = mainsection.url | trim %}
+		{% if mainsection.type == 'navigation' %}
+			{% set menulist = { 'menulist': mainsection, 'currentURL': currentURL, 'level':level} %}
+			{% include 'custom_menu_navigation_collapse.html' with menulist %}
+		{%  elseif mainsection.type == 'page'  %}
+			{% set pageid = element  %}
+			{% set vars = { 'pageid': pageid , 'currentURL': currentURL} %}
+			{% include 'custom_menu_pages.html' with vars %}
+		{% else %}{% if mainsection.type == 'product' %}
+					{% set p = getItem(element)%}
+					{% set url = request.script_name~'/product/'~element~'/'~p.slug %}
+				{% elseif mainsection.type == 'category' %}
+					{% set url = request.script_name~getCategoryURL(element) %}
+				{% elseif mainsection.type == 'post' %}
+					{% set post = getPost(element)%}
+					{% set url = postUrl(post)  %}
+				{% elseif mainsection.type == 'brand' %}
+					{% set url = request.script_name~getBrandURL(element)  %}
+				{% else %}
+					{% set url = element %}
+				{% endif %}
+			{% if currentURL == url %}
+			{% set active = "active"%}
+			{% else %}
+			{% set active = ""%}
+			{%endif%}
+			<li class="level-{{level}}"><a href="{{url}}" target="{{mainsection.target}}" rel="{{mainsection.rel}}" class="{{active}}" title="{{mainsection.title}}">{{mainsection.title}}</a></li>
+		{%endif%}
+{% endfor %}

@@ -1,0 +1,32 @@
+<section class="section template_google_map" id="section_{{vars.section.id}}_google_map">
+	<div class="{{vars.layout}}">
+		<div class="row">
+			<div class="col-md-4 col-sm-4 col-12">
+				<div class="heading" data-editor="{{vars.section.data_editor}}_title_{{locale}}" role="heading" aria-level="2">
+					{{attribute(vars.section.settings, 'title_'~locale)}}
+				</div>
+				<div class="text" data-editor="{{vars.section.data_editor}}_text_{{locale}}">
+					{{attribute(vars.section.settings, 'text_'~locale)|raw}}
+				</div>
+			</div>
+			<div class="col-md-8 col-sm-8 col-12">
+				<div class="google_map" data-editor="{{vars.section.data_editor}}_map_iframe">
+					{{ vars.section.settings.map_iframe | raw }}
+				</div>
+				<script>
+					{% if vars.section.settings.map_iframe != '' %}
+						function sizeMap(){
+							var w = $('#section_{{vars.section.id}}_google_map .google_map').width();
+							w = (w/3)*2;
+							$('#section_{{vars.section.id}}_google_map .google_map iframe').css('height', w);
+							var src = $('#section_{{vars.section.id}}_google_map .google_map iframe').attr('src');
+							$('#section_{{vars.section.id}}_google_map .google_map iframe').attr('src',src);
+						}
+						$(document).ready(function(){ sizeMap(); })
+						$(window).resize(function(){ sizeMap(); })
+					 {% endif %}
+				</script>
+			</div>
+		</div>
+	</div>
+</section>

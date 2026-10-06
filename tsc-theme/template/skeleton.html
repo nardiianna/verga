@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+{# mod B2B #}
+{% set userB2B = false %}
+{% if b2b.enabled == true and b2b.listing != ''%}
+  {% set userB2B = true %}
+{% endif %}
+{% set show_logs = true %}
+<html id="storeden-{{request.page}}" class="disable-analytics-on-cart">
+    <head>
+        <meta charset="UTF-8">
+        <script>
+            var currency = {{ lang('symbol.' ~ group.currency ) | json | raw }};
+            var min_quantity_label = {{lang('item.min.quantity') | json | raw}};
+            var pieces_label = {{lang('storefront.piece') | json | raw}};
+            var steps_label = {{lang('item.steps') | json | raw}};
+            var max_quantity_label = {{lang('item.max.quantity') | json | raw}};
+            var addToCart_label = {{lang('item.add.to.cart') | json | raw}};
+            var outOfStock_label = {{ lang('item.unavailable') | json | raw}};
+            var reviews_to_check = [];
+        </script>
+        
+        <link href="https://fonts.googleapis.com" rel="preconnect" crossorigin>
+		<link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+		<link href="https://egress.storeden.net" rel="preconnect" crossorigin>
+		<link href="https://cdn.storeden.net" rel="preconnect" crossorigin>
+		<link href="https://tcdn.storeden.com" rel="preconnect" crossorigin>
+		{#<link href="https://code.jquery.com" rel="preconnect" crossorigin>#}
+		
+		<title>{{document.seo.title}}</title>
+		<meta name="description" content="{{ document.seo.description }}"/>
+		<meta name="keywords" content="{{ document.seo.keywords }}"/>
+		{% if document.seo.canonical | length > 0 %}
+		    <link rel="canonical" href="{{document.seo.canonical}}" />
+		{% endif %}
+		{{document.open.graph}}
+		
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+		
+		<link rel="shortcut icon" href="{{document.favicon_link}}">
+		
+		
+		<link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/bootstrap-v5_3_2/css/bootstrap.min.css" >
+		
+		<link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/themes/blomming/fontawesome-free-5.9.0-web/css/all.swap.min.css">
+		
+		{# La v. 1.0.1 di smartmenus ha problemi di accessibility, ho chiesto a TSC se ne hanno una versione aggiornata, intanto uso jsdelivr#}
+		<link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/themes/config_v2/jquery.smartmenus.css?reset=2020" />
+		{# La versione 1.2 mi scombina parecchie robe, lascio la 1.0 #}
+		{#<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/smartmenus@1.2.0/dist/css/sm-core-css.css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/smartmenus@1.2.0/dist/css/sm-clean/sm-clean.min.css">#}
+
+		<link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/storeden/css/storeden_font.css">
+		<link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/bootstrap-select-v1_14_0_beta3/bootstrap-select.min.css" >
+		<link type="text/css" rel="stylesheet" href="https://cdn.storeden.net/themes/config_v2/nouislider/nouislider.min.css" >
+		
+		<link href="https://cdn.datatables.net/v/bs5/dt-2.3.7/datatables.min.css" rel="stylesheet">
+		<link rel="stylesheet" href="https://cdn.datatables.net/responsive/3.0.8/css/responsive.dataTables.min.css">
+
+		{# New slider 'Swiper Slider' #}
+        {% include 'swiper_9.html' %}
+        {# End new slider #}
+		
+		<!-- theme/theme.style -->
+   		<link href="{{document.css_cdn_link | raw }}" type="text/css" rel="stylesheet" /> 
+		
+		
+		<script src="https://cdn.storeden.net/bootstrap-v5/js/jquery-3.7.0.min.js"></script>		        
+        <script src="https://cdn.storeden.net/popper-v2_11_8/popper.min.js"></script>		
+        <script src="https://cdn.storeden.net/bootstrap-v5_3_2/js/bootstrap.min.js"></script>        
+        <script src="https://cdn.storeden.net/restyle/js/storeden.js"></script>
+		<script src="https://cdn.datatables.net/v/bs5/dt-2.3.7/datatables.min.js"></script>
+        <script src="https://cdn.datatables.net/responsive/3.0.8/js/dataTables.responsive.min.js"></script>
+		
+		<script>Storeden.setAddresses({{ user.addresses | json | raw }})</script>
+		<!-- asset/script.js -->
+		<script src="{{document.js_link | raw}}"></script>
+		
+		{{document.analytics | raw }}
+		
+		<!--[if IE]>
+			<script src="https://cdn.storeden.net/restyle/html5.js"></script>
+			<script src="https://cdn.storeden.net/restyle/respond.min.js"></script>
+		<![endif]-->
+		
+		{% if request.path.1 == 'homepage' %}
+		    {% set url = document.seo.canonical %}
+		    {% if url == '' %}
+		        {% set url = 'http://'~group.friendlyURL~'/' %}
+		    {% endif %}
+			{% if theme.settings.general.settings.customercare_phone != '' %}
+				<script type="application/ld+json">
+					{ 
+					  "@context": "http://schema.org", 
+					  "@type": "Organization", 
+					  "url": "{{url}}", 
+					  "contactPoint": [{ "@type": "ContactPoint", "telephone": "{{theme.settings.general.settings.customercare_phone}}", "contactType": "Customer Care" }] 
+					}
+				</script>
+			{% endif %}
+			<script type="application/ld+json">
+				{ 
+					"@context" : "http://schema.org", 
+					"@type" : "WebSite", 
+					"name" : "{{group.title}}", 
+					"alternateName" : "Shop Online {{group.title}}", 
+					"url" : "{{url}}", 
+					"potentialAction" : { 
+						"@type": "SearchAction", 
+						"target": "{{url}}shop/search/{search_term_string}", 
+						"query-input": "required name=search_term_string" } 
+				}
+			</script>
+		{% endif %}
+		
+		{# mod B2B #}
+		{% if userB2B %}
+            {% set taxProfiles = listTaxProfiles() %}
+            <script>
+                var objTaxProfile = jQuery.parseJSON('{{taxProfiles|json}}');
+                var labelProductTax = '{{lang("tax.label")}}';
+                var jUserB2B = true;
+                var jListB2B = '{{b2b.listing}}';
+            </script>
+        {% else %}
+            <script>
+                var jUserB2B = false;
+            </script>
+        {% endif %}
+	</head>
+	{% flush %}
+	<body id="{{request.path.1}}">
+	    <a href="#request_page" class="skip-link">{{lang('acc_act.jump_to_main_content')}}</a>
+        <a href="#section_footer" class="skip-link">{{lang('acc_act.jump_to_footer')}}</a>
+	    	
+		{% if request.path.1 != 'homepage'%}
+			{% set currentURL = request.script_name~request.path | join('/') %}
+		{% else %}
+			{% set currentURL = request.script_name~'/' %}
+		{% endif %}
+		
+		{% set device_type = getDeviceInfo().type %}
+		
+		{% set disable_shop = false %}
+		{% if theme.settings.general.settings.disable_shop == 'yes' %}
+			{% set disable_shop = true %}
+		{% endif %}
+		{% set block_catalog = false %}
+		{% if theme.settings.general.settings.block_catalog_navigation == 'yes' %}
+			{% set block_catalog = true %}
+		{% endif %}
+		
+		{# MODIFICHE B2B - AGENTE - PROPOSTE #}
+		{% set shop_rules %}
+		    {% include 'shop_rules.html' %}
+		{% endset %}
+		{% set shop_rules = shop_rules|jsondecode %}
+		
+		{% set is_agent = shop_rules.is_agent %}
+		{% set is_super_agent = shop_rules.is_super_agent %}
+		
+		{% set customer_selected = shop_rules.customer_selected %}
+		{% set new_customer = shop_rules.new_customer %}
+		{% set customer_data = shop_rules.customer_data %}
+		{% set customers_list = shop_rules.customers_list %}
+		{% set customer_cookie = shop_rules.customer_cookie %}
+
+		{% if customer_data.b2b_attribute is not empty %}
+		    {% set b2b = b2b|merge({'listing': customer_data.b2b_attribute}) %}
+		{% endif %}
+		
+		{% if show_logs %}
+			<script>
+				{% if shop_rules %}
+					console.log("shop_rules ok");
+				{% else %}
+					console.log("shop_rules *** ERR ***");
+				{% endif %}
+				console.log("customer:", {{customer|json}});
+				console.log("user:", {{user|json}});
+				console.log("is_agent:", {{is_agent|json}});
+				console.log("customers_list:", {{customers_list|json}});
+				console.log("customer_selected:", {{customer_selected|json}});
+				console.log("customer_data:", {{customer_data|json}});
+				console.log("customer_cookie:", {{customer_cookie|json}});
+				console.log("new_customer:", {{new_customer|json}});
+			</script>
+		{% endif %}
+
+		{# Redirect scelta utente se si logga un agente #}
+        {% if is_agent and not customer_selected and not new_customer and request.path.1 != "profile" %}
+            <script>
+                window.location.href = "/profile/choose-customer";
+            </script>
+        {% endif %}
+        
+        {# Cancello il cliente selezionato al logout #}
+        {% if request.query['logged-out'] == 1 %}
+            <script>
+                setCookieSession('customer_info', '');
+                setCookieSession('order_data', '');
+            </script>
+        {% endif %}
+	    
+	    {# FINE MODIFICHE B2B - AGENTE - PROPOSTE #}
+		
+		{#
+			SDK DI FACEBOOK, forse serve per il login con facebook. Da problemi di caricamento infinito. Riabilitare se serve. Occhio alla versione, questa, la 2 è molto vecchia. una recente è la 18
+		<div id="fb-root"></div>
+		<script>(function(d, s, id) {
+		  var js, fjs = d.getElementsByTagName(s)[0];
+		  if (d.getElementById(id)) return;
+		  js = d.createElement(s); js.id = id;
+		  js.src = "//connect.facebook.net/it_IT/sdk.js#xfbml=1&appId=207743002628345&version=v2.0";
+		  fjs.parentNode.insertBefore(js, fjs);
+		}(document, 'script', 'facebook-jssdk'));</script>#}
+		
+		{% include 'header.html' %}
+		
+		{% if disable_shop == true %}
+			{% if block_catalog and ( request.path.1 == 'cart' or request.path.1 == 'shop' or request.path.1 == 'product' ) %}
+				<script> window.location = '/'; </script>
+			{% elseif  request.path.1 == 'cart' %}
+				<script> window.location = '/'; </script>
+			{% else %}
+				{% include 'breadcrumbs.html' %}
+				{# Blocco la visualizzazione di alcune pagine in base alle shop_rules #}
+    			{% if shop_rules.view_this_page %}
+        			<main id="request_page" role="main">
+        				{% include request.page %}
+        			</main>
+    			{% else %}
+    			    <div class="container">
+    			        <div class="alert alert-warning text-center my-5" role="alert">
+                            {{lang('content_not_allowed')}}
+                        </div>
+                    </div>
+    			{% endif %}
+			{% endif %}
+		{% else %}
+			{% include 'breadcrumbs.html' %}
+			
+			{# Blocco la visualizzazione di alcune pagine in base alle shop_rules #}
+			{% if shop_rules.view_this_page %}
+    			<main id="request_page" role="main">
+    				{% include request.page %}
+    			</main>
+			{% else %}
+			    <div class="container">
+			        <div class="alert alert-warning text-center my-5" role="alert">
+                        {{lang('content_not_allowed')}}
+                    </div>
+                </div>
+			{% endif %}
+		{% endif %}
+		
+		{% include 'footer.html' %}
+		{% include 'modals.html' %}
+		
+		<script src="https://cdn.storeden.net/themes/config_v2/nouislider/nouislider.min.js"></script>
+		{# La v. 1.0.1 di smartmenus ha problemi di accessibility, ho chiesto a TSC se ne hanno una versione aggiornata, intanto uso jsdelivr#}
+		<script src="https://cdn.storeden.net/themes/config_v2/jquery.smartmenus.js"></script>
+		{# La versione 1.2 mi scombina parecchie robe, lascio la 1.0 #}
+		{#<script src="https://cdn.jsdelivr.net/npm/smartmenus@1.2.0/dist/jquery.smartmenus.min.js"></script>#}
+		
+		<script src="https://cdn.storeden.net/bootstrap-select-v1_14_0_beta3/bootstrap-select.min.js"></script>
+		<!-- lazy load -->
+		<script src="https://cdn.storeden.net/js/intersection-observer.min.js"></script>
+		<script src="https://cdn.storeden.net/js/lazyload.min.js"></script>
+		
+		<script>
+		    (function(){
+		       var ll = new LazyLoad({
+					elements_selector: ".lazy"
+				});
+				var lb = new LazyLoad({
+					elements_selector: ".bg-async"
+				}); 
+		    })();
+		    $(document).ready(function(){
+		        $.each(reviews_to_check, function(uid, data){
+		            if ('undefined' !== typeof data && data.count > 0){
+    					$('.product_review_count_'+uid).html(data.count);
+    					printStars( data.average , '', $('.product_review_'+uid));
+    					$('.rev_'+uid+' .product_preview_review').removeClass('d-none').addClass('d-flex');
+    				}    
+		        })
+			})
+		</script>
+		
+		<div id="cookie-warning">
+			<span> {{ lang('cookie.text') }}</span>
+		</div>
+        
+    </body>
+</html>

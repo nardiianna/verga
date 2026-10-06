@@ -1,0 +1,161 @@
+<div class="modal fade" id="privacyModal" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5>{{lang('admin.privacy')}}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button class="btn button pull-right" data-bs-dismiss="modal" >{{lang('admin.close')}}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="conditionsModal" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5>{{lang('admin.conditions')}}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+			</div>
+			<div class="modal-footer">
+				<button class="btn button pull-right" data-bs-dismiss="modal">{{lang('admin.close')}}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="storedenConditionsModal" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5>{{lang('front.store.conditions')}}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="storeden_conditions"></div>
+			<div class="modal-footer">
+				<button class="btn button pull-right" data-bs-dismiss="modal">{{lang('admin.close')}}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" id="storedenPrivacyModal" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5>{{lang('front.store.privacy')}}</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body" id="storeden_privacy"></div>
+			<div class="modal-footer">
+				<button class="btn button pull-right" data-bs-dismiss="modal">{{lang('admin.close')}}</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+{# Modale riutilizzabile #}
+{# Richiamabile così:
+    const res = await confirmModal({
+        title: 'Elimina elemento',
+        body: '<strong>Attenzione:</strong> operazione irreversibile.',
+        required: true
+    });
+    
+    if (res === 'confirm') {
+        elimina();
+    }
+    
+    const res = await confirmModal({
+        title: 'Salvare le modifiche?',
+        body: 'Hai modifiche non salvate.',
+        buttons: [
+            { id: 'save', text: 'Salva', class: 'btn-primary' },
+            { id: 'discard', text: 'Non salvare', class: 'btn-danger' },
+            { id: 'cancel', text: 'Annulla', class: 'btn-secondary' }
+        ]
+    });
+    
+    console.log(res); // save | discard | cancel | null
+#}
+<div class="modal fade" id="appConfirmModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body"></div>
+            <div class="modal-footer"></div>
+        </div>
+    </div>
+</div>
+<script>
+    function confirmModal({
+        title = 'Conferma',
+        body = '',
+        buttons = [
+            { id: 'cancel', text: 'Annulla', class: 'btn-secondary' },
+            { id: 'confirm', text: 'Conferma', class: 'btn-danger' }
+        ],
+        required = false
+    } = {}) {
+    
+        return new Promise((resolve) => {
+    
+            const $modal = $('#appConfirmModal');
+            const modalEl = $modal[0];
+    
+            // Titolo e contenuto
+            $modal.find('.modal-title').html(title);
+            $modal.find('.modal-body').html(body);
+    
+            // Pulsanti
+            const $footer = $modal.find('.modal-footer').empty();
+            buttons.forEach(btn => {
+                $('<button>', {
+                    type: 'button',
+                    class: `btn ${btn.class}`,
+                    text: btn.text,
+                    'data-result': btn.id
+                }).appendTo($footer);
+            });
+    
+            // Header (chiusura obbligatoria?)
+            $modal.find('.btn-close').toggle(!required);
+    
+            // Istanza Bootstrap
+            const modal = new bootstrap.Modal(modalEl, {
+                backdrop: required ? 'static' : true,
+                keyboard: !required
+            });
+    
+            let resolved = false;
+    
+            // Click sui pulsanti
+            $footer.off('click').on('click', 'button', function () {
+                resolved = true;
+                resolve($(this).data('result'));
+                modal.hide();
+            });
+    
+            // Chiusura senza scelta
+            $modal.off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                if (!resolved) resolve(null);
+            });
+    
+            modal.show();
+        });
+    }
+</script>
+
+
+{% if shop_rules.checkout_type == "standard" %}
+    {% include 'cart_invoice.html' %}
+{% endif %}

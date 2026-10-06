@@ -1,0 +1,36 @@
+<section class="section template_youtube_video" id="section_{{vars.section.id}}_youtube_video">
+	<div class="{% if vars.section.settings.container == "yes" %}{{vars.layout}}{% endif %}">
+		<div class="video-container {% if vars.section.settings.video_id==''%}has_not_video{%endif%}">
+			
+			{% set video_url = 'https://www.youtube.com/embed/' ~ vars.section.settings.video_id ~ '?nothing=1' %}
+			{% if vars.section.settings.autoplay == "yes" %}
+			    {% set video_url = video_url ~ '&autoplay=1&mute=1&playsinline=1' %}
+		    {% endif %}
+		    {% if vars.section.settings.loop == "yes" %}
+		        {% set video_url = video_url ~ '&loop=1&playlist=' ~ vars.section.settings.video_id %}
+	        {% endif %}
+		    {% if vars.section.settings.controls == "no" %}
+		        {% set video_url = video_url ~ '&controls=0' %}
+	        {% endif %}
+	        {% if vars.section.settings.showinfo == "no" %}
+		        {% set video_url = video_url ~ '&showinfo=0' %}
+	        {% endif %}
+	        {% if vars.section.settings.modestbranding == "yes" %}
+		        {% set video_url = video_url ~ '&modestbranding=1' %}
+	        {% endif %}
+	        {% if vars.section.settings.rel == "no" %}
+		        {% set video_url = video_url ~ '&rel=0' %}
+	        {% endif %}
+	        
+			<iframe data-editor="{{vars.section.data_editor}}_link" 
+					frameborder="0" 
+					data-type="video"
+					src="{{video_url}}" 
+					width="100%"
+					allow="autoplay"
+					title="Youtube video"
+					allowfullscreen></iframe>
+			<img src="{{placeholders.video}}" class="placeholder">
+		</div>
+	</div>
+</section>

@@ -1,0 +1,29 @@
+<section class="section template_about_us" id="section_{{vars.section.id}}_about_us">
+	<div class="{{vars.layout}}">
+		<div class="row">
+			
+			<div class="col-md-12 col-sm-12 col-xs-12">	
+				{% if attribute(vars.section.settings, 'link_'~locale) != '' %}
+					<a href="{{attribute(vars.section.settings, 'link_'~locale)}}"
+					   rel="{{vars.section.settings.link_REL}}"
+					   target="{{vars.section.settings.link_TARGET}}"
+					   title="{{attribute(vars.section.settings, 'link_TITLE_'~locale)}}">
+				{% endif %}
+				{% if attribute(vars.section.settings, 'title_'~locale) != "" %}
+    				<h1 class="heading" data-editor="{{vars.section.data_editor}}_title_{{locale}}">
+    					{{attribute(vars.section.settings, 'title_'~locale)}}
+    				</h1>
+				{% endif %}
+				{% if attribute(vars.section.settings, 'content_'~locale) != "" %}
+    				<div class="text" data-editor="{{vars.section.data_editor}}_content_{{locale}}">
+    					{{attribute(vars.section.settings, 'content_'~locale)|raw}}
+    				</div>
+				{% endif %}
+				{% if attribute(vars.section.settings, 'link_'~locale) != '' %}
+					</a>
+				{% endif %}
+			</div>
+				
+		</div>
+	</div>
+</section>

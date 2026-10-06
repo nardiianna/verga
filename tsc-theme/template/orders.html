@@ -1,0 +1,137 @@
+<div class="container">
+	
+	{% if user.uid > 0 %}
+		
+		{% set time = ''%}
+		{% set status = ''%}
+		{% set query = request.query  %}
+		{% set time = query.time %}
+		{% set status = query.status %}
+		{% set orderStatusList = getOrdersStatus() %}
+		{% set ordersCount = getOrdersCount(time, status)%}
+		{% set limit = 10 %}
+		{% set pages = ordersCount / limit %}
+		{% set page = request.path.2 %}
+		{% set pages = pages | round(0, 'ceil') %}
+		{% if page == 0%}
+			{% set skip = 0%}
+		{% else %}
+			{% set skip = page * limit %}
+		{% endif %}
+		{% set orders = getOrders(skip, limit, time, status) %}
+		
+		<script>
+			var orders_status = '{{status}}';
+			var orders_time = '{{time}}';
+		</script>
+	
+	    <div class="row">
+    		<div class='col-12 col-sm-4 col-md-3 third-column-product'>	
+        		{% include 'menu_profile.html' %}
+        	</div>
+        	<div class="col-12 col-sm-8 col-md-9 profileLeft">
+				<h1 class="heading">{{lang('profile.orders')}}  <small>{{ ordersCount }} {{lang('found.m.plural')}}</small></h1>
+				<div class="toolbar d-flex flex-wrap align-items-center mb-4">
+					<span class="toolbar-item dropdown">
+						<button data-bs-toggle="dropdown" class="btn button-white">
+							{{lang('profile.orders.period')}}
+						</button>
+						<div class="dropdown-menu" id="select_time">
+							<li class="dropdown-item {%if time == ''%}active{%endif%}" data-value=""><a>{{lang('search.order.status.all.times')}}</a></li>
+							<li class="dropdown-item {%if time == 30%}active{%endif%}" data-value="30"><a>{{lang('search.order.last.30.days')}}</a></li>
+							<li class="dropdown-item {%if time == 90%}active{%endif%}" data-value="90"><a>{{lang('search.order.last.90.days')}}</a></li>
+							<li class="dropdown-item {%if time == 180%}active{%endif%}" data-value="180"><a>{{lang('search.order.last.180.days')}}</a></li>
+							<li class="dropdown-item {%if time == 'older'%}active{%endif%}" data-value="older"><a>{{lang('search.order.previous')}}</a></li>
+						</div>
+					</span>
+					<span class="toolbar-item dropdown">
+						<button data-bs-toggle="dropdown" class="btn button-white">
+							{{lang('order.status')}}
+						</button>
+						<ul class="dropdown-menu" id="ording-type">
+							{% for i,name in orderStatusList%}
+								<li data-value="{{i}}" class="dropdown-item {%if status == i%}active{%endif%}" ><a>{{lang(name)}}</a></li>
+							{% endfor %}	
+						</ul>
+					</span>
+					{% if status != '' or time != ''%}
+						<span class="toolbar-item">
+							<a href="/orders/" class="btn button-white">
+								<i class="fa fa-remove"></i> {{lang('remove.filters')}}
+							</a>
+						</span>
+					{% endif %}
+					<span class="toolbar-item toolbar-form">
+						<form id="search-order">
+							<span class="input-group">
+								<input type="text" class="form-control" placeholder="{{lang('search.order.id')}}" />
+								<span class="input-group-btn">
+									<button type="submit" class="dn-btn dn-btn-brand-1 dn-btn-filled" aria-label="{{lang('search.order.id')}}"><i class="fa fa-search"></i></button>
+								</span>
+							</span>
+						</form>
+					</span>
+				</div>	
+				<div class="clearfix"></div>
+				<div id="list_orders">
+					{% for order in orders %}
+						{% set countItems = 0 %}
+						{% for k,item in order.cart.items %}
+								{% set countItems = countItems  + item.count %}
+						{% endfor %}
+						<div class="well well_order">
+							<div class="row">
+								<div class="col-md-8 col-sm-6 col-xs-12">
+									<p>
+										<strong>{{lang('front.order.date')}}:</strong> {{ order.orderDate.sec | date('d/m/Y')}}<br>
+										<strong>{{lang('front.order.status')}}:</strong> {{ lang(orderStatusList[order.status]) }}<br>
+										<strong>{{lang('order.total')}}:</strong> {% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency|raw}}{% endif%} {{ order.total | nfx}}
+									</p>
+								</div>
+								<div class="col-md-4 col-sm-6 col-xs-12 text-end xs-text-start">
+									<br>
+									<a href="/order/{{ order.orderID }}" class="dn-btn dn-btn-brand-1 dn-btn-filled">
+										{{lang('order.show.details')}}&nbsp;&nbsp;&nbsp;<i class="fa fa-angle-right"></i>
+									</a>
+								</div>
+							</div>
+						</div>
+					{% endfor %}
+				</div>
+				<div class="clearfix"></div>
+				{% if ordersCount > limit %}
+					{% set prevPage = page-1%}
+					{% set nextPage = page+1%}
+					<div class="toolbar">
+						<span class="toolbar-item pull-right">
+							<ul class="pagination">
+								{% if prevPage >= 0 %}
+									<li><a href="/orders/{{prevPage}}?time={{time}}&status={{status}}">
+										<i class="fa fa-angle-left"></i></a>
+									</li>
+								{% endif %}
+								<li class="active"><a href="">{{page+1}}/{{pages | round(0, 'ceil')}}</a></li>
+								{% if nextPage < pages  %}
+									<li><a href="/orders/{{nextPage}}?time={{time}}&status={{status}}">
+										<i class="fa fa-angle-right"></i>
+									</a></li>
+								{% endif %}
+							</ul>
+						</span>
+					</div>
+				{% endif %}
+			</div>	
+			</div>
+		</div>
+	
+	{% else %}
+
+		<div class="row">
+			<div class="col-md-12">
+				<p>{{lang('store.not.logged.in')}}</p>				
+				<a href="{{request.script_name}}/login" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('sign.in')}} / {{lang('register')}}</a>
+			</div>
+		</div>
+
+	{% endif %}
+</div>

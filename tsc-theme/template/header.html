@@ -1,0 +1,333 @@
+{% set container_type = theme.settings.header.header_fullscreen == "yes"
+    ? "container-fluid"
+    : "container"
+%}
+
+{% if attribute(theme.settings.header, "top_message_yn_"~locale) == "yes" %}
+	<section id="top_message">
+		<div class="{{container_type}}">
+			<div class="d-flex gap-3 align-items-center">
+				{# Top message linkabile #}
+				<div class="flex-grow-1">
+					{% if attribute(theme.settings.header, 'top_message_link') != "" %}
+						<a href="{{attribute(theme.settings.header, 'top_message_link')}}" 
+						rel="{{theme.settings.header.top_message_link_REL}}"
+						target="{{theme.settings.header.top_message_link_TARGET}}"
+						title="{{attribute(theme.settings.header, 'top_message_link_TITLE')}}">
+					{% endif %}
+						<span id="settings_header_top_message_text_{{locale}}" 
+							data-editor="settings_header_top_message_text_{{locale}}">
+							{% if device_type == "mobile" and attribute(theme.settings.header, 'top_message_text_mob_'~locale) != "" %}
+								{{attribute(theme.settings.header, 'top_message_text_mob_'~locale)}}
+							{% else %}
+								{{attribute(theme.settings.header, 'top_message_text_'~locale)}}
+							{% endif %}
+						</span>
+					{% if attribute(theme.settings.header, 'top_message_link_'~locale) != "" %}
+						</a>
+					{% endif %}
+				</div>
+				
+				{# Contatti #}
+				{% set contacts = [
+					{
+						"id":"tel",
+						"icon":'<i class="fas fa-phone-alt"></i>',
+						"link":"tel:",
+						"label":lang('acc_act.contact.phone')
+					},
+					{
+						"id":"wa",
+						"icon":'<i class="fab fa-whatsapp"></i>',
+						"link":"https://wa.me/",
+						"label":lang('acc_act.contact.wa')
+					},
+					{
+						"id":"email",
+						"icon":'<i class="fas fa-envelope-open-text"></i>',
+						"link":"mailto:",
+						"label":lang('acc_act.contact.email')
+					}
+				] %}
+				{% for contact in contacts %}
+					{% set num = attribute(theme.settings.header, 'top_message_'~contact.id~'_'~locale) %}
+					{% if num != "" %}
+						<div class="d-none d-md-block">
+							<a  href="{{contact.link}}{{num|replace({" ":""})}}"
+								target="_blank"
+								data-editor="settings_header_top_message_{{contact.id}}_{{locale}}"
+								aria-label="{{contact.label}} {{num|striptags|e}} {{lang('link.open_new_tab')}}">{{contact.icon}} {{num}}</a>
+						</div>
+					{% endif %}
+				{% endfor %}
+				
+				{# Icone social #}
+				<div class="border-start border-end px-2 d-none d-md-block">
+					{% include 'social.html' %}
+				</div>
+				
+				{# Selettore lingua #}
+				<div class="d-none d-md-block">
+					{% set countLang = group.props.languages | length %}
+					{% if countLang > 1 %}
+						{% set flags = {'flag_it':'<svg width="33" height="24" viewBox="0 0 33 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_251_1373)"><path fill-rule="evenodd" clip-rule="evenodd" d="M0.5 0H32.5V24H0.5V0Z" fill="white"/><path fill-rule="evenodd" clip-rule="evenodd" d="M0.5 0H11.165V24H0.5V0Z" fill="#009246"/><path fill-rule="evenodd" clip-rule="evenodd" d="M21.835 0H32.5V24H21.835V0Z" fill="#CE2B37"/></g><defs><clipPath id="clip0_251_1373"><rect width="32" height="24" fill="white" transform="translate(0.5)"/></clipPath></defs></svg>',
+										'flag_en':'<svg width="32" height="24" viewBox="0 0 32 24" fill="none" xmlns="http://www.w3.org/2000/svg"><g clip-path="url(#clip0_261_2208)"><path d="M0 0H32V24H0V0Z" fill="#012169"/><path d="M3.75 0L15.95 9.05L28.1 0H32V3.1L20 12.05L32 20.95V24H28L16 15.05L4.05 24H0V21L11.95 12.1L0 3.2V0H3.75Z" fill="white"/><path d="M21.2 14.05L32 22V24L18.45 14.05H21.2ZM12 15.05L12.3 16.8L2.7 24H0L12 15.05ZM32 0V0.15L19.55 9.55L19.65 7.35L29.5 0H32ZM0 0L11.95 8.8H8.95L0 2.1V0Z" fill="#C8102E"/><path d="M12.05 0V24H20.05V0H12.05ZM0 8V16H32V8H0Z" fill="white"/><path d="M0 9.65V14.45H32V9.65H0ZM13.65 0V24H18.45V0H13.65Z" fill="#C8102E"/></g><defs><clipPath id="clip0_261_2208"><rect width="32" height="24" fill="white"/></clipPath></defs></svg>'} %}
+						<div class="dropdown">
+							<button class="dropdown-toggle dn-btn-clear" type="button" id="dropdown-lang" data-bs-toggle="dropdown" aria-expanded="false">
+								{{locale[:2]}}
+							</button>
+							<ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdown-lang" style="min-width:unset;">
+								{% for lang in group.props.languages %}
+									{% set locationurl = request.script_name %}
+									{% if document.alternates[lang] > '' %}
+										{%  set locationurl = document.alternates[lang] %}
+									{% endif %}
+									<li><a href="{{locationurl}}?lang={{lang}}" class="language-link dropdown-item" title=" {{ languages[lang] | slice(0, 2) }}" >
+										{{attribute(flags, 'flag_'~lang[:2])}} - {{lang[:2]|upper}}
+									</a></li>
+								{% endfor %}
+							</ul>
+						</div>
+					{% endif %}
+				</div>
+			</div>
+		</div>
+	</section>
+{% endif %}
+
+{% if is_agent %}
+    <section id="agent-row">
+        <div class="{{container_type}} text-center">
+    		{% if customer_selected  %}
+    		    {# Caso cliente selezionato dalla lista #}
+    		    <span class="small">{{lang('front.agent.shop_for')}}</span>
+				<b class="mx-3">{{customer_data.billing.fullname[:40]}}{% if customer_data.billing.fullname|length > 40 %}&hellip;{% endif %}</b>
+    		    <a href="/profile/choose-customer" class="me-2 button-outline-light">{{lang('front.agent.change')|upper}} <i class="ms-1 fas fa-exchange-alt"></i></a>
+    		{% elseif new_customer %}
+    		    {# Caso nuovo cliente #}
+    		    <span class="small">{{lang('front.agent.shop_for')}} <span class="badge text-bg-light">{{lang('front.agent.new_customer')}}</span></span>
+    		    <b class="mx-3">{{customer_data.companyName}}</b>
+    		    <a href="/profile/choose-customer" class="me-2 button-outline-light">{{lang('front.agent.change')|upper}} <i class="ms-1 fas fa-exchange-alt"></i></a>
+    		{% else %}
+    		    {# Caso navigazione autonoma #}
+    		    <span class="small">{{lang('profile.agent.no_customer_selected')}}</span>
+    		    <a href="/profile/choose-customer" class="me-2 button-outline-light">{{lang('profile.agent.choose_customer')|upper}} <i class="ms-1 fas fa-exchange-alt"></i></a>
+    		{% endif %}
+    	</div>
+    </section>
+{% endif %}
+
+<header id="section_header" class="main_section">
+	<div class="{{container_type}}">
+		<div class="row d-flex align-items-center">
+			<div class="col-12 col-sm-6 col-md-3">
+				{% if theme.settings.header.show_logo == 'yes' %}
+					{% set logo_url = theme.settings.header.logo %}
+					{% if logo_url == '' %}
+						{% set logo_url = "https://tcdn.storeden.com/store/"~groupUID %}
+					{% endif %}
+    				<a href="/" title="{{group.title}}" class="logo_wrap">
+    					<img src="{{logo_url}}"
+    						 data-editor="settings_header_logo"
+    						 data-placeholder="https://tcdn.storeden.com/store/{{groupUID}}"
+    						 alt="{{theme.settings.header.logo_ALT}}"
+    						 class="logo">
+    				</a>
+				{% else %}
+    				<div class="heading logo_wrap">
+    					<a href="/" title="{{group.title}}">{{group.title|upper}}</a>
+    				</div>
+				{% endif %}
+			</div>
+			<div class="col-12 col-sm-6 col-md-5 d-none d-md-block">
+			    {% include 'main_menu.html' %}
+			</div>
+			<div class="col-12 col-sm-6 col-md-4" id="{% if disable_shop%}disabled_sell{%endif%}">
+				<div id="top_menu" class="text-center text-sm-end d-flex align-items-center flex-wrap justify-content-md-end justify-content-between row-gap-2">
+					{% if not disable_shop %}
+					    <span class="item">
+    						<form class="searchForm">
+            					<div class="input-group">
+            						{% set search_term = '' %}
+            						{% if request.path.2 == 'search' %}
+            							{% set search_term = request.path.3 %}
+            						{% endif %}
+            						<input type="text" placeholder="{{lang('search')}}" name="search" value="{{search_term}}" class="form-control search_field" />
+            						<span class="input-group-btn">
+            							<button type="submit" class="dn-btn-clear" class="do_search" aria-label="{{lang('search')}}"><i class="fa fa-search fa-lg"></i></button>
+            						</span>
+            					</div>
+            				</form>
+    					</span>
+					
+    					<span class="item d-none d-md-block">
+    						<div class="dropdown">
+                                <button class="dropdown-toggle dn-btn-clear" type="button" id="dropdown-user" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{lang('user.profile')}}">
+                                    <i class="fas fa-user"></i>
+                                </button>
+                				<ul class="dropdown-menu dropdown-menu-end text-center dropdown-menu-user" aria-labelledby="dropdown-user">
+            						{% if user.fullname != "" %}
+            						    <p><strong>{{user.fullname}}</strong></p>
+        						    {% endif %}
+                    				{% if is_agent %}
+                    				    <a href="/profile">{{lang('agent.profile')}}</a>
+                    					{% if customer_selected %}
+                    					    <hr>
+                    					    <p class="fw-bold">{{customer_data.billing.fullname[:15]}}{% if customer_data.billing.fullname|length > 15 %}&hellip;{% endif %}</p>
+                    					    <a href="/profile/customer-review">{{lang('profile.agent.customer_review')}}</a>
+                    					    <a href="/profile/proposals">{{lang('profile.agent.customer_proposals')}}</a>
+                    					    <a href="/profile/choose-customer">{{lang('front.agent.change_long')}}</a>
+                    				    {% elseif new_customer %}
+                    				        <hr>
+                    				        <p class="fw-bold">{{customer_data.companyName[:15]}}{% if customer_data.companyName|length > 15 %}&hellip;{% endif %}</p>
+                    				        <a href="/profile/customer-review">{{lang('profile.agent.customer_review')}}</a>
+                    				        <a href="/profile/choose-customer">{{lang('front.agent.change_long')}}</a>
+                    				    {% else %}
+                    				        <a href="/profile/choose-customer">{{lang('profile.agent.choose_customer')}}</a>
+                    				    {% endif %}
+                    					<hr>
+                    				{% elseif user.uid > 0 %}
+                    				    <a href="/order_status">{{lang('page.order.status')}}</a>
+                    					<a href="/orders">{{lang('user.orders')}}</a>
+                    					<a href="/profile">{{lang('user.profile')}}</a>
+                    					<a href="/wishlist">{{lang('front.wishlist')}}</a>
+                    					<a href="/messages">{{lang('store.messages')}}</a>
+                    				{% else %}
+                    					<a href="/login">{{lang('sign.in')}}</a>
+                    					{% if shop_rules.enable_registration_link %}
+											{% if shop_rules.registration_type == 'b2b' %}
+												<a href="/login/registration">{{ lang('register') }}</a>
+											{% elseif shop_rules.registration_type == 'standard' %}
+												<a href="/login">{{ lang('register') }}</a>
+											{% endif %}
+										{% endif %}
+                    					<a href="/order_status">{{lang('page.order.status')}}</a>
+                    				{% endif %}
+                    				
+                    				{% if user.uid > 0 %}
+                    					<a href="/logout?callback=/?logged-out=1">{{lang('admin.logout')}}</a>
+                    				{% endif %}
+                				</ul>
+                            </div>
+    					</span>
+    					
+    					<span class="item cart_item {% if cartCount() > 0%}with_values{% endif %}">
+    						<div class="dropdown">
+                                <button class="dropdown-toggle dn-btn-clear" type="button" id="dropdown-cart" data-bs-toggle="dropdown" aria-expanded="false" aria-label="{{lang('cart.review')}}">
+                                    <i class="fas fa-shopping-cart"></i>
+                                    <span class="badge cart_items_count">{{cartCount()}}</span>
+                                </button>
+                				<div class="dropdown-menu dropdown-menu-end text-center" aria-labelledby="dropdown-cart">
+            						<div id="cart_preview" class="text-center {% if cartCount() > 0 %}cart_with_values{% endif %}">
+                        				<p><strong>{{lang('cart.review')}}</strong></p>
+                        				<p class="cart_is_empty">
+                        					{{lang('yout.cart.is.empty')|raw}}
+                        				</p>
+                        				<div class="cart_has_items">
+                        					<p>
+                        						{{lang('items.in.cart')}}: <span class="cart_items_count">{{cartCount()}}</span><br>
+                        						{{lang('items.total')}}: {{currency|raw}} <span class="cart_items_total">{{cartTotal()|nfx}}</span>
+                        					</p>
+                        					<a href="/cart" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('back.to.cart')}}</a>
+                        				</div>
+                        			</div>
+                				</div>
+                            </div>
+    					</span>
+					{% endif %}
+					{#<label class="main-menu-btn" for="main-menu-state" id="toggleMobileMenu">
+						<span class="main-menu-btn-icon"></span>
+					</label>#}
+					{% include 'mobile_menu.html' %}
+				</div>
+			</div>
+			
+		</div> <!-- header .container .row -->
+
+	</div> <!-- header .container -->
+</header>
+
+<div id="section_header_placeholder"></div>
+
+<script>
+    $(function () {
+
+        const $section = $('#section_header');
+        const $placeholder = $('#section_header_placeholder');
+    
+        // Funzione per rilevare desktop secondo bootstrap (>= md)
+        function isDesktop() {
+            return window.innerWidth >= 768;
+        }
+    
+        function getOffsetSum() {
+            let total = 0;
+    
+            ['#top_message', '#agent-row', '#section_header'].forEach(function(selector) {
+                const $el = $(selector);
+                if ($el.length) total += $el.outerHeight(true);
+            });
+    
+            return total;
+        }
+    
+        let triggerOffset = getOffsetSum();
+    
+        $(window).on('resize', function () {
+            triggerOffset = getOffsetSum();
+    
+            // Se rientri in mobile, disattiva subito la slim-mode
+            if (!isDesktop()) {
+                $section.removeClass('slim-mode');
+                $placeholder.height(0);
+            }
+        });
+    
+        $(window).on('scroll', function () {
+            // Se non è desktop, non fare nulla
+            if (!isDesktop()) return;
+    
+            const scrollTop = $(this).scrollTop();
+    
+            if (scrollTop > triggerOffset) {
+                if (!$section.hasClass('slim-mode')) {
+                    $placeholder.height($section.outerHeight(true)); // occupa spazio
+                    $section.addClass('slim-mode');
+                }
+            } else {
+                if ($section.hasClass('slim-mode')) {
+                    $section.removeClass('slim-mode');
+                    $placeholder.height(0); // rilascia lo spazio
+                }
+            }
+        });
+    
+    });
+
+</script>
+
+{% set custom_menu_id = attribute(theme.settings.header, 'category_row_choose_menu_'~locale) %}
+
+<div id="category-row" class="d-none {% if theme.settings.header.category_row_show_cats == "yes" or (custom_menu_id != "" and theme.settings.header.category_row_show_custom_menu == "yes") %}d-md-block{% endif %}">
+    <div class="{{container_type}}">
+        <nav class="category-nav" role="navigation">
+        	{# Utile solo se serve da mobile
+        	<input id="category-menu-state" class="menu-state" type="checkbox" />#}
+        	<ul id="category-menu" class="sm sm-clean menu">
+        		{% if theme.settings.header.category_row_show_cats == "yes" %}
+        		    {% set vars = { 'categoryList': categorytree() , 'request': request, 'noSubcategories':true} %}
+        		    {% include "menu_categories.html" with vars %}
+    		    {% endif %}
+    		    {% if theme.settings.header.category_row_show_custom_menu == "yes" and custom_menu_id != "" %}
+                	{% if custom_menu_id != '' %}
+                		{% set custom_menu = getNavigation(custom_menu_id) %}
+                		{% if custom_menu.sections | length > 0 %}
+                			{% set vars = { 'menulist': custom_menu , 'currentURL': currentURL} %}
+                			{% include 'custom_menu.html' with vars %}
+                		{% endif %}
+                	{% endif %}	
+    		    {% endif %}
+        	</ul>
+        </nav>
+    </div>
+</div>

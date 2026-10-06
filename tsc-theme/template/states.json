@@ -1,0 +1,266 @@
+[
+    {
+        "_id": "4f16e62efee48e593f000089",
+        "uid": 2,
+        "tld": "AL",
+        "name": "Albania"
+    },
+    {
+        "_id": "4f16e62efee48e593f00008c",
+        "uid": 5,
+        "tld": "AD",
+        "name": "Andorra"
+    },
+    {
+        "_id": "4f16e62efee48e593f000096",
+        "uid": 15,
+        "tld": "AT",
+        "name": "Austria"
+    },
+   {
+        "_id": "4f16e62efee48e593f00009e",
+        "uid": 24,
+        "tld": "BE",
+        "name": "Belgium"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000a4",
+        "uid": 30,
+        "tld": "BA",
+        "name": "Bosnia and Herzegovina"
+    },
+     {
+        "_id": "4f16e62efee48e593f0000ab",
+        "uid": 37,
+        "tld": "BG",
+        "name": "Bulgaria"
+    },
+    {
+        "_id": "58ca4f4f8d4b7993fcf4f70e",
+        "uid": 276,
+        "tld": "IC",
+        "name": "Canarias"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000c3",
+        "uid": 61,
+        "tld": "HR",
+        "name": "Croatia"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000c6",
+        "uid": 64,
+        "tld": "CZ",
+        "name": "Czech Republic"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000c7",
+        "uid": 65,
+        "tld": "DK",
+        "name": "Denmark"
+    },
+    {
+        "_id": "4f16e62efee48e593f000168",
+        "uid": 226,
+        "tld": "ES",
+        "name": "España"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000d7",
+        "uid": 81,
+        "tld": "FI",
+        "name": "Finland"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000d8",
+        "uid": 82,
+        "tld": "FR",
+        "name": "France"
+    },
+     {
+        "_id": "4f16e62efee48e593f0000df",
+        "uid": 90,
+        "tld": "GE",
+        "name": "Georgia"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000a9",
+        "uid": 35,
+        "tld": "DE",
+        "name": "Germany"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000e2",
+        "uid": 93,
+        "tld": "GI",
+        "name": "Gibraltar"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000e4",
+        "uid": 95,
+        "tld": "GR",
+        "name": "Greece"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000f4",
+        "uid": 111,
+        "tld": "HU",
+        "name": "Hungary"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000f5",
+        "uid": 112,
+        "tld": "IS",
+        "name": "Iceland"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000fa",
+        "uid": 117,
+        "tld": "IE",
+        "name": "Ireland"
+    },
+   {
+        "_id": "4f16e62efee48e593f0000fc",
+        "uid": 119,
+        "tld": "IT",
+        "name": "Italia"
+    },
+    {
+        "_id": "4f16e62efee48e593f00010e",
+        "uid": 137,
+        "tld": "LV",
+        "name": "Latvia"
+    },
+    {
+        "_id": "4f16e62efee48e593f000113",
+        "uid": 142,
+        "tld": "LI",
+        "name": "Liechtenstein"
+    },
+    {
+        "_id": "4f16e62efee48e593f000114",
+        "uid": 143,
+        "tld": "LT",
+        "name": "Lithuania"
+    },
+    {
+        "_id": "4f16e62efee48e593f000115",
+        "uid": 144,
+        "tld": "LU",
+        "name": "Luxembourg"
+    },
+    {
+        "_id": "4f16e62efee48e593f000117",
+        "uid": 146,
+        "tld": "MK",
+        "name": "Macedonia"
+    },
+    {
+        "_id": "4f16e62efee48e593f00011d",
+        "uid": 152,
+        "tld": "MT",
+        "name": "Malta"
+    },
+    {
+        "_id": "4f16e62efee48e593f000128",
+        "uid": 163,
+        "tld": "MD",
+        "name": "Moldova"
+    },
+    {
+        "_id": "4f16e62efee48e593f000129",
+        "uid": 164,
+        "tld": "MC",
+        "name": "Monaco"
+    },
+    {
+        "_id": "4f16e62efee48e593f00015e",
+        "uid": 216,
+        "tld": "ME",
+        "name": "Montenegro"
+    },
+    {
+        "_id": "4f16e62efee48e593f000134",
+        "uid": 175,
+        "tld": "NL",
+        "name": "Netherlands"
+    },
+    {
+        "_id": "4f16e62efee48e593f00013e",
+        "uid": 185,
+        "tld": "NO",
+        "name": "Norway"
+    },
+    {
+        "_id": "4f16e62efee48e593f00014b",
+        "uid": 197,
+        "tld": "PL",
+        "name": "Poland"
+    },
+    {
+        "_id": "4f16e62efee48e593f00014c",
+        "uid": 198,
+        "tld": "PT",
+        "name": "Portugal"
+    },
+    {
+        "_id": "4f16e62efee48e593f000150",
+        "uid": 202,
+        "tld": "RO",
+        "name": "Romania"
+    },
+    {
+        "_id": "4f16e62efee48e593f000159",
+        "uid": 211,
+        "tld": "SM",
+        "name": "San Marino"
+    },
+    {
+        "_id": "4f16e62efee48e593f000162",
+        "uid": 220,
+        "tld": "SK",
+        "name": "Slovakia"
+    },
+    {
+        "_id": "4f16e62efee48e593f000163",
+        "uid": 221,
+        "tld": "SI",
+        "name": "Slovenia"
+    },
+    {
+        "_id": "4f16e62efee48e593f00016f",
+        "uid": 233,
+        "tld": "SE",
+        "name": "Sweden"
+    },
+    {
+        "_id": "4f16e62efee48e593f000170",
+        "uid": 234,
+        "tld": "CH",
+        "name": "Switzerland"
+    },
+    {
+        "_id": "4f16e62efee48e593f00017e",
+        "uid": 246,
+        "tld": "TR",
+        "name": "Turkey"
+    },
+    {
+        "_id": "4f16e62efee48e593f000183",
+        "uid": 251,
+        "tld": "UA",
+        "name": "Ukraine"
+    },
+    {
+        "_id": "4f16e62efee48e593f000185",
+        "uid": 253,
+        "tld": "GB",
+        "name": "United Kingdom"
+    },
+    {
+        "_id": "4f16e62efee48e593f0000f0",
+        "uid": 107,
+        "tld": "VA",
+        "name": "Vatican City (Holy See)"
+    }
+]

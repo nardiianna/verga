@@ -1,0 +1,136 @@
+<div class="container">
+	{% if user.uid > 0 %}
+	    {% if is_agent %}
+	        <style>
+	            .user_custom_fields{
+	                display:none;
+	            }
+	        </style>
+	    {% endif %}
+		{% if request.path[2] == '' %}
+			<div class="row">
+				<div class='col-md-3 col-sm-4 third-column-product'>	
+					{% include 'menu_profile.html' %}
+				</div>
+				<div class="col-md-9 col-sm-8  col-xs-12 profileLeft">
+					<h1 class="heading">{{lang('user.account.settings')}}</h1>
+					<div class="well">
+						<form class="formLogin" enctype="multipart/form-data" action="/profile/edit" method="POST" id="formProfile">
+							<div class="form-group row">
+								<div class="col-md-4 col-sm-4"><label>{{lang('signup.email')}}</label></div>
+								<div class="col-md-8 col-sm-8">
+									<input type="text" name="email" id="emailCheck" class="email form-control" value="{{user.email}}" aria-label="{{lang('signup.email')}}"/>
+									<input type="hidden" name="email_check" id="originalMail"  value="{{user.email}}"/>
+									<p id="error_registration_email" class="text-danger" style="display:none;margin-top: 4px;">
+										{{lang('address.duplicated')}}
+									</p>
+									<p id="error_valid_email" class="text-danger" style="display:none;margin-top: 4px;">
+										{{lang('front.newsletter.error')}}
+									</p>
+								</div>
+								<script>
+									$(document).on('change paste keyup', '#emailCheck', function(){
+										var email = $(this).val();
+										var is_valid = validateEmail(email);
+										if (is_valid){
+											$('#error_valid_email').fadeOut();
+											$('#formProfileSubmit').fadeIn();
+											Storeden.isEmailNotRegistered($(this).val(), function(res){
+												var is_the_same = $('#emailCheck').val() == $('#originalMail').val();
+												if (is_the_same == false && res == true) {
+													$('#error_registration_email').fadeIn();
+													$('#emailCheck').parent().addClass('has-error');
+													$('#formProfileSubmit').fadeOut();
+												} else {
+													$('#error_registration_email').fadeOut();
+													$('#emailCheck').parent().removeClass('has-error');
+													$('#formProfileSubmit').fadeIn();
+												}
+											})
+										} else {
+											$(this).parent().addClass('has-error');
+											$('#error_valid_email').fadeIn();
+											$('#formProfileSubmit').fadeOut();
+										}
+									})	
+								</script>
+							</div>
+							<div class="form-group row">
+								<div class="col-md-4 col-sm-4"><label>{{lang('signup.fullname')}}</label></div>
+								<div class="col-md-8 col-sm-8"><input type="fullname" name="fullname" class="fullname form-control" value="{{user.fullname}}" required aria-label="{{lang('signup.fullname')}}"/></div>
+							</div>
+							<div class="form-group row d-none">
+								<div class="col-md-4 col-sm-4"><label>{{lang('signup.language')}}</label></div>
+								<div class="col-md-8 col-sm-8">
+									<select name="language" class="language form-control" required>
+									{% for tld,lang in languages %}
+									<option value="{{tld}}" {% if user.prefs.language == tld %} selected="selected" {% endif %}>{{lang}}</option>
+									{% endfor %}
+									</select>
+								</div>
+							</div>
+							<div class="form-group row d-none">
+								<div class="col-md-4 col-sm-4">
+									<label>{{lang('edit.profile.image')}}</label>
+								</div>
+								<div class="col-md-3 col-sm-3">
+									<div class="change-img">
+										<div class="wrap_input_image">
+											<input type="file" multiple="" id="photoprofile_field" name="file">
+										</div>
+									</div>
+									<div class="img-content">
+										<div class="input-image">
+											<output class="output-image">
+												{% if user.prefs.picture != '' %}
+													<span>
+														<img src="https://egress.storeden.net/gwebp/{{user.prefs.picture}}/user" class="thumb img-responsive"/>
+													</span>
+												{% endif %}
+											</output>
+										</div>
+										<div class="clearfix"></div>
+									</div>
+								</div>
+							</div>
+							<div class="clearfix"></div>
+							<div class="form-group form-submit text-end">	
+								<button type="submit" id="formProfileSubmit" class="btn button">{{lang('admin.save')}}</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		{% else %}
+			{% if request.path[2] == 'edit' %}
+				{% include 'edit_profile.html' %}
+
+			{% elseif request.path[2] == 'addresses' %}
+				{% include 'addresses.html' %}
+
+			{% elseif request.path[2] == 'choose-customer' %}
+				{% include 'choose_customer.html' %}
+
+			{% elseif request.path[2] == 'customer-review' %}
+				{% include 'customer_review.html' %}
+
+			{% elseif request.path[2] == 'proposals' %}
+				{% include 'customer_proposals.html' %}
+				
+			{% elseif request.path[2] == 'orders' %}
+				{% include 'customer_orders.html' %}
+
+			{% elseif request.path[2] == 'new-customer' %}
+				{% include 'new_customer.html' %}
+
+			{% endif %}
+		{% endif %}
+	{% else %}
+		<div class="row">
+			<div class="col-md-12">
+				<p>{{lang('store.not.logged.in')}}</p>				
+				<a href="{{request.script_name}}/login" class="btn button">{{lang('sign.in')}} / {{lang('register')}}</a>
+			</div>
+		</div>
+	{% endif %}
+</div>

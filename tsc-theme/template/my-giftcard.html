@@ -1,0 +1,38 @@
+<div class="container" id="my_giftcard_page">
+
+	<div class="row">
+
+	    <div class='col-md-3 col-sm-4 third-column-product'>{% include 'menu_profile.html' %}</div>
+	
+	    <div class="col-md-9 col-sm-8  col-xs-12 profileLeft">
+
+	        <div class="boxed_section">
+
+    			<h1 class="heading">{{lang('my.giftcard')}}</h1>
+    
+    			<p>
+    				{{lang('my.giftcard.balance')}} <strong>{{currency}} {{getGiftCardBalance()|nfx}}</strong>
+    				<br>{{lang('my.giftcard.count') | replace({"{count}": '<strong>'~my_giftcard.count~'</strong>'}) }}
+    			</p>
+    			<br>
+    
+    			{% for single_giftcard in my_giftcard.list %}
+    				<div data-id="{{single_giftcard._id}}" data-order="{{single_giftcard.orderID}}" class="well well-address well_giftcard" >
+						<p class="well-single-address well_giftcard_single">
+							{{lang('mygiftcard.code')}}: <strong>{{ single_giftcard.code }}</strong><br>
+							{{lang('mygiftcard.value')}}: <strong>{{currency}} {{ single_giftcard.value|nfx }}</strong><br>
+							{% if single_giftcard.claimed %}
+								{{lang('mygiftcard.claim_date')}}: <strong>{{ single_giftcard.claim_date.sec | date('d/m/Y H:i:s') }}</strong><br>
+							{% endif %}
+						</p>
+					</div>
+    			{% endfor %}
+    
+			</div>
+    
+		</div>
+    
+	</div>
+
+</div>
+

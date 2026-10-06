@@ -1,0 +1,1899 @@
+{% set items = cartItems() %}
+{% set countItems = cartCount() %}
+{% set cartTotal = cartTotal() %}
+
+{% set difference = 0 %}
+{% set minAmount = group.props.checkoutlimit %}
+{% if minAmount > 0 %}
+	{% set difference = minAmount - cartTotal%}
+{% endif %}
+
+{% set cart_user = user.uid%}
+{% if cart_user == ''%}
+	{% set cart_user = 0 %}
+{% endif %}
+
+<div class="container">
+	
+<div id="box_empty_cart" {% if countItems > 0 %} style="display:none" {% endif %}>
+	<p>{{lang('yout.cart.is.empty') | raw }}</p>	
+	<a href="/shop" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('back.to.shop')}}</a>
+</div>
+
+{% if countItems > 0 %}
+
+	<form method="POST" action="/cart" id="formCartQuantity">
+		<table class="cart_table table table-condensed">
+			<thead>
+				<tr>
+					<th style="width:50%">{{lang('cart.item')}}</th>
+					<th style="width:12%">{{lang('item.price')}}</th>
+					<th style="width:19%">{{lang('item.quantity') | raw }}</th>
+					<th style="width:12%" class="text-center">{{lang('cart.subtotal')}}</th>
+					<th style="width:1%"></th>
+				</tr>
+			</thead>
+			<tbody>
+			{% for k,item in items %}
+						
+				{% set dataOptions = '' %}
+				
+				{% set totalItem = item.price*item.count  %}
+				{% set exp = explode('#|#', k) %}
+				{% set itemUID = exp.0 %}
+				
+				{% set options = explode('_', exp.1) %}
+				
+				{% if exp.1 != '' %}
+					{% set dataOptions = exp.1 %}
+				{% else%}
+					{% set options = '' %}
+				{% endif %}
+
+				{% set product = getCompleteItem(itemUID, false, true, false) %}
+
+				{% set available = product.stockCount %}
+				{% if product.data.unlimited %}
+					{% set available = 'unlimited' %}
+				{% elseif product.usevariants == 1 %}
+					{% for var in product.variants %}
+						{% if var.superkey | replace({"." : "-DOT-"}) == exp.1 %}
+							{% set available = var.available %}
+						{% endif %}
+					{% endfor %}
+				{% endif %}
+				
+				{% if product.title == ''%}
+				{% set productTitle = item.title %}
+				{% else %}
+				{% set productTitle = product.title %}
+				{% endif %}
+
+				{% set minQuantity = product.data.minQuantity %}
+				{% if minQuantity < 1 %}
+					{% set minQuantity = 1 %}
+				{% endif %}
+
+				{% set step = product.data.step %}
+				{% if step < 1 %}
+					{% set step = 1 %}
+				{% endif %}
+			
+				{% set optionClear = exp.1 |replace({'*': "asterix"}) %}
+				{% set rowID = 'row_'~itemUID~'_'~optionClear %}
+
+				<tr id="{{rowID}}" class="row_{{k}} cart_single_row" data-class="row_{{k}}" data-id="{{rowID}}">
+					<td data-th="{{lang('cart.item')}}">
+						<div class="row cart_table_row">
+							<div class="col-sm-3 col-md-3 col-3 cart_table_image noPaddingLeft">
+								<img src="https://cdn.storeden.net/secache/{{product.image_id|default(shop_rules.placeholder)}}" class="img-responsive" alt="{{productTitle}} - {{lang('acc_act.main_img')}}">
+							</div>
+							<div class="col-sm-9 col-md-9 col-9 cart_table_content">
+								<a class="strong" href="{{request.script_name}}/product/{{itemUID}}/{{product.slug}}">{{productTitle}}</a>
+								{% set l = options | length %}
+								{% if l > 0 %}
+									<br><span class="options">
+										{% set variants_found = [] %}
+										{% for option in options %}
+										    {% set option_found = false %}
+											{% for k, vars in product.vars %}
+												{% for j,value in vars.options if not option_found %}
+													{% if value.option | lower | replace({'.':'-dot-'}) == option|lower and vars.title not in variants_found %}
+														{% set variants_found = variants_found | merge([vars.title]) %}
+														{{vars.title}}:
+														{{ value.title}}<br>
+														{% set option_found = true %}
+													{% endif %}
+												{% endfor %}
+											{% endfor %}
+										{% endfor %}
+									</span>
+								{% endif %}
+								{% if minQuantity > 1 or step > 1%}		
+									<br>{{lang('item.min.quantity')}}  {{minQuantity}} {{lang('storefront.piece')}}, 
+									{{lang('item.steps')}} {{step}} {{lang('storefront.piece')}}
+								{% endif %}
+							</div>
+						</div>
+					</td>
+					<td data-th="{{lang('item.price')}}">{{currency | raw }} <span class="item_single_price">{{item.price | nfx}}</span>
+						<span class="tax-row d-none">
+							<br><small>{{lang('tax')}} {{currency | raw }} <span></span> </small>
+						</span>
+					</td>
+					<td data-th="{{lang('item.quantity') | raw }}">
+						<div class="quantity_select quantity_select_{{k}}" data-uid="{{product.uid}}">
+							<div class="btn-group product_quantity" 
+								 data-min="{{minQuantity}}" 
+								 data-step="{{step}}" 
+								 data-unlimited="{{product.data.unlimited}}"
+								 data-key="{{k}}"
+								 data-max="{{available}}"
+								 >
+								<button type="button" class="btn button-white qt-down fromCart">-</button>
+								<button type="button" class="btn button-white quantity">{{item.count}}</button>
+								<button type="button" class="btn button-white qt-up fromCart">+</button>
+								<input type="hidden" name="quantity[{{k}}]" class="quantity_input" value="{{item.count}}">
+							</div>
+							<p class="text-danger overquantity">{{lang('max.quantity.reached')}}</p>
+						</div>
+					</td>
+					<td data-th="{{lang('cart.subtotal')}}" class="text-start text-md-center">
+						{{currency | raw }} <span class="item_total_price">{{totalItem | nfx}}</span>
+					</td>
+					<td class="actions" data-th="">
+						<span class="remove_item remove_item_{{k}}" data-key="{{k}}">
+							<span class="remove_from_cart"></span> <span class="xs-show">{{lang('admin.item.remove')}}</span>	
+						</span>
+					</td>
+				</tr>	
+			
+			{% endfor %}
+			
+			{% if gift_option.active == 1%}
+				<tr id="gift_option">
+					<td colspan="3">
+						<div class="row">
+							<div class="col-md-5 col-sm-5 col-12">
+								<div class="cart_switch">
+									<span class="switch" id="gift-switch">
+										<input type="checkbox" value="1" id="isGift" name="isGift" aria-label="{{lang('front.gift.option')}}">
+									</span>
+									<span class="switch-label">{{lang('front.gift.option')}}</span> 
+								</div>
+							</div>
+							<div class="col-md-7 col-sm-7 col-12">
+								<div class="d-none" id="giftMessage">
+									<div class="clearfix"></div>
+									<p>{{lang('front.gift.option.message')}}</p>
+									<textarea class="form-control" name="giftOptionMessage" id="giftOptionMessage" rows="4"></textarea>	
+								</div>
+							</div>
+						</div>
+					</td>
+					<td class="text-start text-md-center xs-d-none" id="giftPriceCell">
+						<div class="d-none" id="giftPrice">
+							<span id="gift_price_wrap" class="{%if gift_option.price == 0%}d-none{%endif%}">
+								{{currency | raw }} 
+								<span id="gift_price" data-price="{{gift_option.price}}">
+									{{ gift_option.price | nfx }} 
+								</span>
+							</span>
+							<span id="gift_free" class="{%if gift_option.price > 0%}d-none{%endif%}">{{lang('free')}}</span>
+						</div>
+					</td>
+					<td  class="xs-d-none"></td>
+				</tr>
+			{% endif %}
+				
+			</tbody>
+		</table>
+	</form>	
+	
+	
+	{% if difference > 0 and minAmount > 0 %}
+
+		<div class="text-center" >
+			<div class="alert alert-warning">
+				<br>
+				{% set b = lang('front.minimum.amount.not.reached') %}
+				{% set b = b | replace({ "{minAmount}": group.props.checkoutlimit, "{currency}": lang('symbol.' ~ group.currency) })%}
+				{{ b | raw }}
+				<br>
+				{% set b = lang('front.minimum.amount.not.reached.difference') %}
+				{% set b = b | replace({ "{difference}": difference, "{currency}": lang('symbol.' ~ group.currency) })%}
+				{{ b | raw }}
+				<br><br>
+			</div>
+			<a class="btn button" href="/shop">{{lang('back.to.shop')}}</a>
+		</div>
+
+	{% else  %}
+	
+	<div id="checkoutContainer">
+		
+		<div class="h1 heading text-center" id="completeOrderSection">{{lang('complete.order')}}</div>
+		
+		<form id="checkoutForm">
+			
+			<input type="hidden" value="" name="shipping_address" id="shipping_address_id">
+			<input type="hidden" value="" name="billing_address" id="billing_address_id">
+			
+			<div id="cart_steps">
+				<ul class="cart-steps {% if user.uid == 0 %}cart-steps_guest{% endif %}">
+					{% if user.uid == 0 %}
+					<li id="step_0">
+						<span class="line"></span>
+						<span class="label">{{lang('cart.step.login')}}</span>
+						<span class="number current"><i class="fa fa-check"></i></span>
+					</li>
+					{% endif %}
+					<li id="step_1">
+						<span class="line"></span>
+						<span class="label">{{lang('cart.step.addresses')}}</span>
+						<span class="number {% if user.uid > 0 %}current{%endif%}"><i class="fa fa-check"></i></span>
+					</li>
+					<li id="step_2">
+						<span class="line"></span>
+						<span class="label">{{lang('cart.step.shipping')}}</span>
+						<span class="number"><i class="fa fa-check"></i></span>
+					</li>
+					<li id="step_3">
+						<span class="line"></span>
+						<span class="label">{{lang('cart.step.payment')}}</span>
+						<span class="number"><i class="fa fa-check"></i></span>
+					</li>
+					<li id="step_4">
+						<span class="line"></span>
+						<span class="label">{{lang('cart.step.confirm')}}</span>
+						<span class="number"><i class="fa fa-check"></i></span>
+					</li>
+				</ul>
+			</div>
+			
+			<div id="cart_height" class="row">
+				<div class="col-lg-8 col-md-12 col-sm-12 col-12">
+					<div id="steps_content">
+
+						{% if user.uid  == 0 %}
+							<div id="step_0_content" class="step_content active" data-count="0">
+								<div class="heading">{{lang('guest.login.title')}}</div>
+								<p>{{lang('guest.login.text')}}</p>
+								<p>{{lang('please.choose.one')}}:</p>
+								<div class="row" id="guest_options">
+									<div class="col-md-4 col-sm-4">
+										<label class="guest_label button-white btn btn-block w-100" for="guest_checkout">
+											<input type="radio" value="skip" name="guest_cart_action" id="guest_checkout" 
+												   data-target="skip"> 
+											{{lang('front.proceed.as.guest')}}
+										</label>
+									</div>
+									<div class="col-md-4 col-sm-4">
+										<label class="guest_label btn button-white btn-block w-100" for="login_checkout">
+											<input type="radio" value="signin" name="guest_cart_action" id="login_checkout" 
+												   data-target="guest_signin"> {{lang('sign.in')}}
+										</label>
+									</div>
+									<div class="col-md-4 col-sm-4">
+										<label class="guest_label btn button-white btn-block w-100" for="register_checkout">
+											<input type="radio" value="register" name="guest_cart_action" id="register_checkout" 
+												   data-target="guest_register" > {{lang('register')}}
+										</label>
+									</div>
+								</div>
+
+								<div class="guest_panel" id="guest_register">
+									<div class="formRegistration">
+										<div class="heading">{{lang('register')}}</div>
+										<div class="row">
+											<div class="col-md-6 col-sm-6 col-12">
+												<a href="{{document.fb_login}}" class="btn btn-facebook btn-block social_button"><i class="fa fa-facebook"></i> Facebook Connect</a>
+											</div>
+											<div class="col-md-6 col-sm-6 col-12">
+												<a href="{{document.google_login}}" class="btn btn-google-plus btn-block social_button"><i class="fa fa-google-plus"></i> Google Connect</a>
+											</div>
+											<div class="clearfix"></div>
+										</div>
+										<p>{{lang('new.account.text') | raw}}</p>
+										<input type="hidden" name="language" class="language" value="{{locale}}">
+										<div class="row">
+											<div class="col-md-6 col-sm-6">
+												<div class="form-group">
+													<label>{{lang('name.and.surname')}} <span class="text-danger">*</span></label>
+													<input type="fullname" name="fullname" class="fullname form-control"/>
+												</div>
+											</div>
+											<div class="col-md-6 col-sm-6">
+												<div class="form-group">
+													<label>{{lang('signup.email')}} <span class="text-danger">*</span></label>
+													<input type="email" name="email" class="email form-control registration_email"/>
+												</div>
+											</div>
+											<div class="col-md-6 col-sm-6">
+												<div class="form-group">
+													<label>{{lang('signup.password')}} <span class="text-danger">*</span></label>
+													<input type="password" name="password" class="password form-control"/>
+												</div>
+											</div>
+											<div class="col-md-6 col-sm-6">
+												<div class="form-group">
+													<label>{{lang('signup.password.rewrite')}} <span class="text-danger">*</span></label>
+													<input type="password" name="repassword" class="repassword form-control"/>
+												</div>
+											</div>
+										</div>
+										<div id="error_different_pw" class="alert alert-danger" style="display:none;">
+											{{lang('different.pw')}}
+										</div>
+										<div id="error_chars_pw" class="alert alert-danger" style="display:none;">
+											{{lang('6.chars')}}
+										</div>
+										<div id="error_registration_email" class="alert alert-danger" style="display:none;">
+											{{lang('address.duplicated')}}
+										</div>
+										<div id="error_registration" class="alert alert-danger" style="display:none;">
+											{{lang('registration.error')}}
+										</div>
+										<div class="form-group">
+											<p class="legalLinks">
+												{{lang('registration.conditions') | raw }} {{group.description | title}}.
+											</p>
+										</div>
+										<div class="form-group form-submit text-center">
+											<div class="btn button login_register_button register-from-cart">{{lang('register')|upper}}</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="guest_panel" id="guest_signin">
+										<div class="formLogin">
+											<div class="heading">{{lang('sign.in')}}</div>
+											<p>{{lang('login.fb.or.gplus')}}</p>
+											<div class="row">
+												<div class="col-md-6 col-sm-6 col-12">
+													<a href="{{document.fb_login}}" class="btn btn-facebook btn-block social_button"><i class="fa fa-facebook"></i> Facebook Connect</a>
+												</div>
+												<div class="col-md-6 col-sm-6 col-12">
+													<a href="{{document.google_login}}" class="btn btn-google-plus btn-block social_button"><i class="fa fa-google-plus"></i> Google Connect</a>
+												</div>
+												<div class="clearfix"></div>
+											</div>
+											<p>{{lang('login.with.credentials')}}</p>
+											<div class="row">
+												<div class="col-md-6 col-sm-6 col-12">
+													<div class="form-group">
+														<label>{{lang('signup.email')}}</label>
+														<input type="email" name="email" class="email form-control"/>
+													</div>
+												</div>
+												<div class="col-md-6 col-sm-6 col-12">
+													<div class="form-group">
+														<label>{{lang('signup.password')}}</label>
+														<input type="password" name="password" class="password form-control"/>
+													</div>
+												</div>
+											</div>
+											<div id="error_login" class="alert alert-danger" style="display:none;">
+												{{lang('signin.error')}} {{lang('signin.error.check')}}.
+											</div>
+											<p>{{lang('pw.dont.remember')}}, <a href="/restore-password" target="_blank">{{lang('pw.dont.remember.click')}}.</a></p>
+											<div class="form-group form-submit text-center">	
+												<div class="btn button login_register_button login-from-cart">{{lang('sign.in')|upper}}</div>
+											</div>
+										</div> <!-- formLogin -->
+								</div>
+
+							</div>
+						{% endif %}
+
+						<div id="step_1_content" class="step_content {% if user.uid > 0 %}active{% endif %}" data-count="1">
+
+							<div class="heading">{{lang('shipping.address')}}</div>
+							<div class="row">
+								<div class="col-md-6 col-sm-6 col-12">
+									<select name="shipping_address_select" class="form-control selectpicker {% if user.uid == '' %}d-none{%endif%}" id="shipping_address_select" aria-label="{{lang('acc_act.choose_addr')}}">
+										{% if user.uid > 0 %}
+											{% for address in user.addresses %}
+												<option value="{{address._id}}" 
+													{% if address.principal == 1%}selected="selected"{%endif%}>	
+													{{address.fullname}} - {{address.addr1}} {{address.city}} - 
+													{{getState(address.state)}} - {{getCountry(address.nation)}}
+												</option>
+											{% endfor %}
+										{% endif %}
+										<option value="add_new" {% if user.addresses | length == 0%}selected="selected"{% endif %}>
+											+ {{lang('admin.add')}}
+										</option>
+									</select>
+								</div>
+							</div>
+
+							<div class="clearfix address_form_container" id="shipping_address_form" data-type="shipping">
+								<div id="shipping_well">
+									{% include 'form_address.html' %}
+								</div>
+								<div class="alert alert-danger cart_alert" id="error_shipping_address_save">{{lang('front.shipping.save.error')}}</div>
+							</div>
+							<hr>
+							<div id="addresses_option">
+								{% if invoice_option == true %}
+									<div class="cart_switch" id="invoice_option">
+										<span class="switch">
+											<input type="checkbox" value="1" id="invoiceOption" aria-label="{{lang('front.need.invoice')}}">
+										</span>
+										<span class="switch-label">{{lang('front.need.invoice')}}</span>
+									</div>
+								{% endif %}	
+								<div class="cart_switch">
+									<span class="switch active">
+										<input type="checkbox" value="1" checked="checked" id="sameAddress" aria-label="{{lang('front.shop.same.billing')}}">
+									</span>
+									<span class="switch-label">{{lang('front.shop.same.billing')}}</span>
+								</div>
+							</div>
+
+							<div class="d-none" id="billing_address_wrap">
+
+								<div class="heading">{{lang('billing.address')}}</div>
+
+								<div class="row">
+									<div class="col-md-6 col-sm-6 col-12">
+										<select name="billing_address_select" class="form-control selectpicker {% if user.uid == '' %}d-none{%endif%}" id="billing_address_select" aria-label="{{lang('acc_act.choose_addr')}}">
+											{% if user.uid > 0 %}
+												{% for address in user.addresses %}
+													<option value="{{address._id}}" 
+														{% if address.principal == 1%}selected="selected"{%endif%}>	
+														{{address.fullname}} - {{address.addr1}} {{address.city}} - 
+														{{getState(address.state)}} {{getCountry(address.nation)}}
+													</option>
+												{% endfor %}
+											{% endif %}
+											<option value="add_new" {% if user.addresses | length == 0%}selected="selected"{% endif %}>
+												+ {{lang('admin.add')}}
+											</option>
+										</select>
+									</div>
+								</div>
+
+								<div class="clearfix address_form_container" id="billing_address_form" data-type="billing">
+									<div id="billing_well">
+										{% include 'form_address.html' %}	
+									</div>
+									<div class="alert alert-danger cart_alert" id="error_billing_address_save">{{lang('front.billing.save.error')}}</div>
+								</div>
+							</div>
+
+						</div>
+
+						<div id="step_2_content" class="step_content" data-count="2">
+							<div class="heading">
+								{{lang('invoice.shipping.method')}}
+								<span class="btn-tooltip" data-placement="bottom" title="{{lang('shipping.method.guide')}}" data-container="body">
+									<i class="fa fa-info-circle"></i></span>
+							</div>	
+							<div class="alert alert-warning" id="shipping_unavailable" style="display:none">
+								{{lang('no.shipping.available.for.address')}}
+							</div>							
+							<div id="shipping_results"></div>
+						</div>
+
+						<div id="step_3_content" class="step_content" data-count="3">
+							<div class="heading">
+								{{lang('order.payment')}}
+								<span class="btn-tooltip" data-placement="bottom" title="{{lang('payment.method.guide')}}" 
+									  data-container="body"><i class="fa fa-info-circle"></i></span>
+							</div>	
+							<p>{{lang('select.payment.method')}}</p>
+							<div id="payments_labels"></div>
+						</div>
+
+						<div id="step_4_content" class="step_content" data-count="4">
+
+							<div class="heading noMarginBottom">{{lang('sale.code')}}</div>
+							<p>{{lang('sale.code.text')}}</p>
+							<div class="row">
+								<div class="col-md-4 col-sm-4 col-12">
+									<div class="form-group">
+										<input type="text" name="sale-code" id="sale_code" value="" class="form-control" >
+									</div>
+								</div>
+								<div class="col-md-6 col-sm-6 col-12 coupon_buttons">
+									<div class="btn button" id="applyCoupon">{{lang('apply')}} <i class="fa fa-angle-right fa-lg"></i></div>
+									<div class="btn button-white d-none" id="removeCoupon"><i class="fa fa-remove"></i> {{lang('remove.coupon')}}</div>
+								</div>
+							</div>
+							<div class="alert alert-danger alert-coupon d-none" id="sale-not-found">
+								{{lang('sale.code.wrong')}}
+							</div>
+							<div class="alert alert-danger alert-coupon d-none" id="sale-expired">
+								{{lang('sale.code.expired')}}
+							</div>
+							<div class="alert alert-danger alert-coupon d-none" id="sale-min-total">
+								{{lang('sale.code.min.sum')}}
+							</div>
+							<div class="alert alert-danger alert-coupon d-none" id="sale-already-used">
+								{{lang('sale.code.already.used')}}
+							</div>
+							<br>
+							<div class="heading noMarginBottom">{{lang('write.message.to.seller')}}</div>
+							<p>{{lang('message.to.seller.text')}}</p>
+							<div class="form-group">
+								<textarea name="message" value="" class="form-control" rows="4" id="messageTextarea"></textarea>
+							</div>
+
+							<div id="terms">
+								<div id="conditions" class="form-group">
+									<br><div class="heading">{{lang('admin.conditions')}}</div>
+									<div id="box_conditions" class="well"></div>
+								</div>
+								<div class="form-group">
+									<p class="legalLinks">{{lang('store.conditions.cart')|replace({"data-toggle":"data-bs-toggle"}) | raw}}</p>
+								</div>
+							</div>
+
+						</div>
+
+						<div class="clearfix"></div>
+						<div id="mobile_cart_review" class="d-block d-sm-block d-md-block d-lg-none">
+							{% include 'cart_review_old.html' %}
+						</div>
+						<div id="cart_errors">
+							<div class="alert alert-danger cart_alert" id="error_shipping_address">{{lang('cart.no.shipping.selected')}}</div>
+							<div class="alert alert-danger cart_alert" id="error_billing_address">{{lang('cart.no.billing.selected')}}</div>
+							<div class="alert alert-danger cart_alert" id="error_shipping_method">{{lang('cart.no.carrier.selected')}}</div>
+							<div class="alert alert-danger cart_alert" id="error_payment_method">{{lang('cart.no.payments.selected')}}</div>
+						</div>
+						<div class="clearfix"></div>
+					</div>
+				</div>
+				<div class="col-lg-4 col-md-12 col-sm-5 col-12 d-none d-sm-none d-md-none d-lg-block">
+					<div id="cart_review_container">
+						<div id="cart_review">
+							{% include 'cart_review_old.html' %}
+						</div>
+					</div>
+				</div>
+				<div class="clearfix"></div>
+				<div id="stop_here"></div>
+			</div>
+		</form>
+		
+		<div class="clearfix"></div>
+		
+	</div>
+	
+	<div class="clearfix"></div>
+	
+	{% endif %}
+	
+	<script>
+		/* cart script */
+	 var cart = {};
+	 
+	 cart.init = function(id, addresses, total, userUID, items){ 
+
+		 cart.current_step = 0;
+		 if (userUID>0){
+			 cart.current_step = 1;
+		 }
+
+		 cart.id = id;
+		 cart.is_guest = false;
+		 cart.userUID = userUID;
+		 cart.items = items;
+
+		 if (userUID <= 0){
+			 cart.is_guest = true;
+		 }
+		 cart.same_address = true;
+		 cart.addresses = [];
+
+		 if (addresses != null && addresses.length > 0) {
+
+			 cart.addresses = addresses;
+			 var main_add_id = Storeden.getDefaultAddress()[0];
+			 if (typeof main_add_id !== 'undefined') {
+				 main_add_id = main_add_id._id.$id;
+				 $('#shipping_address_id').val(main_add_id);
+				 $('#billing_address_id').val(main_add_id);
+			 } else {
+			 	main_add_id = 'add_new';
+			 }
+			 
+			 cart.setShippingAddress(main_add_id);
+			 cart.setBillingAddress(main_add_id);
+			 cart.prepareAddressForm('shipping', main_add_id);
+			 cart.prepareAddressForm('billing', main_add_id);
+
+		 } else {
+
+			 cart.setShippingAddress('add_new');
+			 cart.setBillingAddress('add_new');
+			 cart.prepareAddressForm('shipping', 'add_new');
+			 cart.prepareAddressForm('billing', 'add_new');
+
+		 }
+
+		 cart.shipping_method_id = '';
+		 cart.shipping_method = '';
+		 cart.shipping_amount = 0;
+
+		 cart.payment_method_id = '';
+		 cart.payment_method = '';
+		 cart.payment_amount = 0;
+
+		 cart.tax_amount = 0;
+
+		 cart.coupon_amount = 0;
+		 cart.coupon_code = '';
+		 cart.coupon_name = '';
+
+		 cart.is_gift = false;
+		 cart.gift_amount = 0;
+
+		 cart.need_invoice = false;
+		 cart.vat_required = {% if theme.settings.cart.require_vat == 'yes'%}true{%else%}false{%endif%};
+	 	 cart.subtotal = parseFloat(total);
+		 cart.updateTotal();
+	  	 $('.cart_summary_overlay').delay(1500).fadeOut();
+
+	}
+
+	/* cart functions */
+
+	cart.updateTotal = function(){
+
+		var subtotal = cart.subtotal.toFixed(2).toString();
+		$('.cart_totals .toSum').html(subtotal.replace('.', ','));
+
+		if (cart.is_gift) {
+			if (cart.gift_amount > 0){
+				var amount = cart.gift_amount.toFixed(2).toString();
+				$('.cartReview_gift_option_price .toSum').html(amount.replace('.', ','));
+			} else {
+				$('.cartReview_gift_option_price .toSum').html('0,00');
+			}
+			$('.cartReview_gift_option_price').removeClass('d-none');
+		} else {
+			$('.cartReview_gift_option_price .toSum').html(0);
+			$('.cartReview_gift_option_price').addClass('d-none');
+		}
+
+		if (cart.shipping_method_id != '') {
+			$('.cartReview_shipping_cost .toFillText').html('<br><span>'+cart.shipping_method+'</span>');
+			if (cart.shipping_amount > 0){
+				var amount = cart.shipping_amount.toFixed(2).toString();
+				$('.cartReview_shipping_cost .toSum').html(amount.replace('.', ','));
+			} else {
+				$('.cartReview_shipping_cost .toSum').html('0,00');
+			}
+			$('.cartReview_shipping_cost').removeClass('d-none');
+		} else {
+			$('.cartReview_hipping_cost .toFillText').html('');
+			$('.cartReview_shipping_cost .toSum').html(0);
+			$('.cartReview_shipping_cost').addClass('d-none');
+		}
+
+		if (cart.payment_method_id != '') {
+			$('.cartReview_payment_cost .toFillText').html('<br><span>'+cart.payment_method+'</span>');
+			if (cart.payment_amount > 0){
+				var amount = cart.payment_amount.toFixed(2).toString();
+				$('.cartReview_payment_cost .toSum').html(amount.replace('.', ','));
+				$('.cartReview_payment_cost .currency').show();
+			} else {
+				$('.cartReview_payment_cost .toSum').html('');
+				$('.cartReview_payment_cost .currency').hide();
+			}
+			$('.cartReview_payment_cost').removeClass('d-none');
+		} else {
+			$('.cartReview_payment_cost .toSum').html(0);
+			$('.cartReview_payment_cost').addClass('d-none');
+		}
+
+		if (cart.coupon_code != '') {
+			$('.cartReview_sale_discount .toFillText').html('<br><span>'+cart.coupon_code+'</span>');
+			if (cart.coupon_name != '' && cart.coupon_amount > 0){
+				var amount = cart.coupon_amount.toFixed(2).toString();
+				$('.cartReview_sale_discount .toSum').html('-'+amount.replace('.', ','));
+				$('.cartReview_sale_discount .currency').show();
+				$('.cartReview_sale_discount').removeClass('d-none');
+			} else {
+				$('.cartReview_sale_discount .toSum').html(0);
+				$('.cartReview_sale_discount .currency').hide();
+				$('.cartReview_sale_discount').addClass('d-none');
+			}
+		} else {
+			// remove coupon code
+			$('.cartReview_sale_discount .toFillText').html('');
+			$('.cartReview_sale_discount .toSum').html(0);
+			$('.cartReview_sale_discount .currency').hide();
+			$('.cartReview_sale_discount').addClass('d-none');
+		}
+	
+		var b_name = '';
+		if (cart.tax_amount > 0) {
+			var amount = cart.tax_amount.toFixed(2).toString();
+			$('.cartReview_tax_value .toSum').html(amount.replace('.', ','));
+			$('.cartReview_tax_value').removeClass('d-none');
+			$('.cartReview_tax_value_included').addClass('d-none');
+		} else {
+			$('.cartReview_tax_value .toSum').html(0);
+			$('.cartReview_tax_value').addClass('d-none');
+			$('.cartReview_tax_value_included').removeClass('d-none');
+		}
+
+		cart.total = cart.subtotal + cart.tax_amount + cart.shipping_amount + cart.payment_amount - cart.coupon_amount + cart.gift_amount;
+		var t = cart.total.toFixed(2).toString();
+		$('.cartReview_checkout_total .final_sum').html(t.replace('.', ','));
+
+	}
+
+	cart.updateField = function(field,value){
+		cart[field] = value;
+	}
+
+	cart.prepareAddressForm = function(type, address_id) {
+		var container = $('#'+type+'_address_form');
+		if (address_id == 'add_new'){
+			cart.emptyAddressForm(container);
+		} else if (address_id != null && address_id != '') {
+			var address = cart.getAddressObject(address_id)[0];
+			cart.fillAddressForm(container, address);
+		}
+	}
+
+	cart.setShippingAddress = function(address_id){
+
+		var event_obj = { 'address_id' :  address_id };
+		$(document).trigger('storeden.cart.setShippingAddress', [event_obj]);
+
+		var container = $('#shipping_address_form');
+		var address = cart.getAddressObject(address_id)[0];
+		$('.checkout_errors .error_shipping_id').addClass('d-none');
+		if (address_id == null || address_id == '' || address_id == 'add_new'){
+			cart.updateField('shipping_address', null);
+			cart.updateField('shipping_country', STOREDEN_COUNTRY_ID);
+			cart.updateField('shipping_city', 0);
+		} else {
+			cart.updateField('shipping_address', address_id);
+			cart.updateField('shipping_country', address.nation);
+			cart.updateField('shipping_city', address.state);
+		}
+		if (cart.same_address){
+			cart.updateField('billing_address', cart.shipping_address);
+			cart.updateField('billing_country', cart.shipping_country);
+		}
+		cart.getShippingMethods(address);
+		cart.calculateTax();
+	}
+
+	cart.setBillingAddress = function(address_id){
+
+		var event_obj = { 'address_id' :  address_id };
+		$(document).trigger('storeden.cart.setBillingAddress', [event_obj]);
+
+		var container = $('#billing_address_form');
+		var address = cart.getAddressObject(address_id)[0];
+		$('.checkout_errors .error_billing_id').addClass('d-none');
+		if (address_id == null || address_id == '' || address_id == 'add_new'){
+			cart.updateField('billing_address', null);
+			cart.updateField('billing_country', STOREDEN_COUNTRY_ID);
+		} else {
+			cart.fillAddressForm(container, address);
+			cart.updateField('billing_address', address_id);
+			cart.updateField('billing_country', address.nation);
+		}
+		cart.calculateTax();
+	}
+
+
+
+	cart.emptyAddressForm = function(container){
+		container.find('input').val('');
+		container.find('select').val('');
+		var current = STOREDEN_COUNTRY_ID;
+		Storeden.getCountries(function(res){
+			var target = container.find('.country');
+			var options = '<option></option>';
+			for (var i in res) {
+				var country = res[i];
+				if (current != '' && current == country['uid']) {
+					options += '<option value="'+country['uid']+'" selected="selected">'+country['name']+'</option>';
+				} else { 
+					options += '<option value="'+country['uid']+'">'+country['name']+'</option>';
+				}
+			}
+			target.html(options);
+		});
+		container.find('.state').html('');
+		currentState = '';
+		Storeden.getStates(current, function(res){
+			var target = container.find('.state');
+			var options = '<option></option>';
+			for (var i in res) {
+				var state = res[i];
+				if (currentState != '' && currentState == state['uid']) {
+					options += '<option value="'+state['uid']+'" selected="selected">'+state['name']+'</option>';
+				} else { 
+					options += '<option value="'+state['uid']+'">'+state['name']+'</option>';
+				}
+			}
+			target.html(options);
+		});
+	}
+
+	cart.fillAddressForm = function(container, address){
+		container.find('.address_id').val(address._id.$id);
+		container.find('.fullname').val(address.fullname);
+		container.find('.addr1').val(address.addr1);
+		container.find('.email').val(address.email);
+		container.find('.phone').val(address.phone);
+		container.find('.vat').val(address.vat);
+		container.find('.zip').val(address.zip);
+		container.find('.city').val(address.city);
+		var current = address.nation;
+		Storeden.getCountries(function(res){
+			var target = container.find('.country');
+			var options = '<option></option>';
+			for (var i in res) {
+				var country = res[i];
+				if (current != '' && current == country['uid']) {
+					options += '<option value="'+country['uid']+'" selected="selected">'+country['name']+'</option>';
+				} else { 
+					options += '<option value="'+country['uid']+'">'+country['name']+'</option>';
+				}
+			}
+			target.html(options);
+		});
+		var currentState = address.state;
+		Storeden.getStates(current, function(res){
+			var target = container.find('.state');
+			var options = '<option></option>';
+			for (var i in res) {
+				var state = res[i];
+				if (currentState != '' && currentState == state['uid']) {
+					options += '<option value="'+state['uid']+'" selected="selected">'+state['name']+'</option>';
+				} else { 
+					options += '<option value="'+state['uid']+'">'+state['name']+'</option>';
+				}
+			}
+			target.html(options);
+		});
+	}
+
+	cart.getNextStep = function(){
+		var next = parseInt(cart.current_step)+1;
+		if (next>5) {
+			return 5;
+		} else {
+			return next;
+		}
+	}
+
+	cart.getPrevStep = function(){
+		var prev = parseInt(cart.current_step)-1;
+		if ( prev == 0 && cart.userUID>0 ) {
+			return 1;
+		} else if ( prev == -1 && cart.userUID <= 0)  {
+			return 0;
+		} 
+		return prev;
+	}
+
+	cart.addAddressObject = function(address){
+		cart.addresses.push(address);
+	}
+
+	cart.updateAddressObject = function(address_id, address){
+		for (var i = 0; i < cart.addresses.length; ++i){
+			var add = cart.addresses[i];
+			if (address_id == add._id.$id){
+				cart.addresses.splice(i, 1);
+				cart.addresses.push(address);
+			}
+		}
+	}
+
+	cart.getAddressObject = function(address_id){
+		return cart.addresses.filter(function (add) {
+			return add._id.$id == address_id;
+		});
+	}
+
+	cart.removeItem = function(element) {
+		var key = element.attr('data-key');
+		var event_obj = { 'key' : key  };
+		$(document).trigger('storeden.cart.removeItemFromCart', [event_obj]);
+		Storeden.removeItem(key, function(){
+			window.location = '/cart';
+		});
+	}
+
+
+	cart.enableCheckoutButton = function(){
+		$('.btn-next').hide(1);
+		$('.doCheckout').prop('disabled', false).removeClass('disabled').removeClass('d-none');
+	}
+
+	cart.disableCheckoutButton = function(){
+		$('.doCheckout').prop('disabled', true).addClass('disabled').addClass('d-none');
+		$('.btn-next').show(1);
+	}
+	
+	// funzione per trovare e focussare il primo elemento accessibile
+    function focusFirstInside($container) {
+        const selector = `
+            a[href],
+            button:not([disabled]),
+            input:not([disabled]),
+            select:not([disabled]),
+            textarea:not([disabled]),
+            [tabindex]:not([tabindex="-1"])
+        `;
+        const $first = $container.find(selector).first();
+        if ($first.length) {
+            $first.focus();
+        }
+    }
+
+	cart.moveBetweenSteps = function (from,to){
+
+		cart.updateField('current_step', to);
+
+        $('#step_'+from+'_content').fadeOut(1, function() {
+    
+            $('#step_'+to+'_content').fadeIn(function() {
+    
+                // 🟩 FOCUS ACCESSIBILE QUI
+                focusFirstInside($('#step_'+to+'_content'));
+    
+            });
+    
+        });
+
+		var action = 'next';
+		if (from > to){ action = 'prev'; } 
+
+		var event_obj = { 'from' :  from, 'to' : to };
+		$(document).trigger('storeden.cart.move.step', [event_obj]);
+
+		if (action == 'next') {
+
+			$('#step_'+from+' .number').addClass('active').removeClass('current');
+			$('#step_'+to+' .number').addClass('current');
+			$('#step_'+from+'_content').removeClass('active');
+			$('#step_'+to+'_content').addClass('active');
+
+			if (from == 0) {
+				// need to show buttons
+				$('.cart_actions').fadeIn();
+				$('.cart_actions .checkout_btn_move').removeClass('hide_prev');
+			} else if (to == 4) {
+				cart.enableCheckoutButton();
+			}
+			if (!cart.is_guest){
+				$('.cart_actions .checkout_btn_move').removeClass('hide_prev');
+			}
+
+		} else {
+
+			$('#step_'+to+' .number').addClass('current').removeClass('active');
+			$('#step_'+from+' .number').removeClass('current');
+			$('#step_'+from+'_content').addClass('active');
+			$('#step_'+to+'_content').removeClass('active');
+
+			if (to == 0) {
+				// reset guest option selected 
+				$('.guest_label.active').find('input').prop('checked', false);
+				$('.guest_label.active').removeClass('active');
+				// need to hide buttons
+				$('.cart_actions').fadeOut();
+				$('.cart_actions .checkout_btn_move').addClass('hide_prev');
+			} 
+			if (to == 1 && !cart.is_guest) {
+				$('.cart_actions .checkout_btn_move').addClass('hide_prev');
+			}if (to < 4){
+				cart.disableCheckoutButton();
+			}
+		}
+
+		if (to <= 4) {
+			scrollToElement('checkoutContainer');
+		}
+
+	}
+
+	cart.validateStep = function(step){
+
+		// continue as guest
+		if (step == 0) return true;
+
+		if (step == 2) { 
+			//shipping method
+			var c = false;
+			c = ! (cart.shipping_method == '');
+			if (c) {
+				$('#error_shipping_method').fadeOut();
+				return true;
+			} else {
+				$('#error_shipping_method').fadeIn();
+				scrollToElement('step_2_content');
+				return false;
+			}
+		}
+		if (step == 3) { 
+			//payment method
+			var c = false;
+			c = ! (cart.payment_method_id == '');
+			if (c) {
+				$('#error_payment_method').fadeOut();
+				return true;
+			} else {
+				$('#error_payment_method').fadeIn();
+				scrollToElement('step_3_content');
+				return false;
+			}
+		}
+
+		return false;
+	}
+
+	cart.saveAddress = function(type, container){
+
+		var id = container.find('.address_id').val();
+		var fullname = container.find('.fullname').val();
+		var email = container.find('.email').val();
+		var phone = container.find('.phone').val();
+		var vat = container.find('.vat').val();
+		var addr1 = container.find('.addr1').val();
+		var city = container.find('.city').val();
+		var state = container.find('.state').val();
+		var zip = container.find('.zip').val();
+		var country = container.find('.country').val();
+
+		var callback = cart.shippingAddressCallback;
+		if (type == 'billing') {
+			callback = cart.billingAddressCallback;
+		}
+
+		if (id == '') {
+			var action = 'add';
+		} else {
+			if (type == 'billing' && ! cart.same_address ){
+				var action = 'add';
+			} else {
+				var action = 'edit';
+			}
+		}
+
+		if (action == 'add') {
+			addAddress(fullname, addr1, city, zip, state, country, email, phone, vat, callback );
+		} else {
+			editAddress(id,fullname, addr1, city, zip, state, country, email, phone, vat, callback );
+		}
+
+	}
+
+	cart.validateAddress = function(type, container){
+
+		var errors = 0;
+
+		var fullname = container.find('.fullname').val();
+		if (fullname == '') {
+			++errors;
+			container.find('.fullname').parent().addClass('has-error');
+		}
+
+		var email = container.find('.email').val();
+		if (email == '' || !(validateEmail(email)) ) {
+			++errors;
+			container.find('.email').parent().addClass('has-error');
+		}
+
+		var phone = container.find('.phone').val();
+		if (phone == '') {
+			++errors;
+			container.find('.phone').parent().addClass('has-error');
+		}
+
+		var vat = container.find('.vat').val();
+		if (vat == '' && cart.vat_required ) {
+			++errors;
+			container.find('.vat').parent().addClass('has-error');
+		}
+
+		var addr1 = container.find('.addr1').val();
+		if (addr1 == '') {
+			++errors;
+			container.find('.addr1').parent().addClass('has-error');
+		}
+
+		var city = container.find('.city').val();
+		if (city == '') {
+			++errors;
+			container.find('.city').parent().addClass('has-error');
+		}
+
+		var state = container.find('.state').val();
+		if (state == '') {
+			++errors;
+			container.find('.state').parent().addClass('has-error');
+		}
+
+		var zip = container.find('.zip').val();
+		if (zip == '') {
+			++errors;
+			container.find('.zip').parent().addClass('has-error');
+		}
+
+		var country = container.find('.country').val();
+		if (country == '') {
+			++errors;
+			container.find('.country').parent().addClass('has-error');
+		}
+
+		if (errors>0){
+			$("#error_"+type+"_address_save").fadeIn().delay(5000).fadeOut();
+			scrollToElement(type+"_address_form");
+			return false;
+		} else {
+			return true;
+		}
+	}
+
+	cart.getShippingMethods = function(address){
+		$('#shipping_results').html(loading);
+		if (cart.shipping_country>0){
+			Storeden.checkShipping(cart.id, cart.shipping_city, cart.shipping_country, cart.printShippingMethod, address );
+		}
+	}
+
+	cart.printPaymentMethods = function(){
+		
+		Storeden.getPayments( function createPaymentsLabel(payments){
+			var destination = $('#payments_labels');
+			var html = '';
+			for (var i in payments) { 
+				var payment = payments[i];
+				if (payment['available'] == 1) { 
+					html += '<label class="payment_label btn btn-block button-white w-100" id="payment_'+i+'">';
+					html += '<input type="radio" name="payment" value="'+i+'">';
+					html += '<div class="row">';
+					html += '<div class="col-md-8 col-sm-7 col-12 text-start">';
+					html +=  '<p class="payment_name">'+payment['label']+'</p>';
+					html += '</div>';
+					html += '<div class="col-md-4 col-sm-5 col-12 text-start text-md-end ">';
+					if (payment['cost'] > 0) {
+						var price = parsePrice(payment['cost']);
+						html += '<p>{{currency | raw }} <span class="payment_cost" data-cost="'+payment['cost']+'">'+price+'</span></p>';
+					} else {
+						html += '<p><span class="payment_cost d-none" data-cost="0">0</span></p>';
+					}
+					html += '</div>';
+					html += '</div>';
+					html += '</label>';
+				}
+			}
+			destination.html(html);
+			if (payments.length == 1) {
+				$('.payment_label').trigger("click")
+			}
+		}, cart.id, cart.shipping_country, cart.shipping_city, cart.billing_country);
+	}
+
+	cart.printShippingMethod = function(shippings){
+		if (shippings.length == 0 ) {
+			$('#shipping_results').html('');
+			$('#shipping_unavailable').fadeIn();
+			cart.resetShippingMethod();
+		} else {
+			$('#shipping_unavailable').fadeOut();
+			var html = '';
+			var found = false;
+			for (var i in shippings) { 
+				var shipping = shippings[i];
+				if (shipping['shipping_id'] == cart.shipping_method_id ){
+					found = true;	
+				}
+				html += '<label class="shipping_label button-white btn btn-block w-100" for="shipping_'+shipping['shipping_id']+'">';
+				html += '<input type="radio" name="shipping_method" value="'+shipping['shipping_id']+'" id="shipping_'+shipping['shipping_id']+'">';
+				html +=  '<div class="row">';
+				html += '<div class="col-md-8 col-sm-7 col-12 text-start">';
+				html += '<p><strong class="shipping_name">'+shipping['name']+'</strong>';
+				if (shipping['time'] != null && shipping['time'] !=''){
+					html +=  '<br>'+shipping['timeLang'];
+				}
+				html += '</p>';
+				html += '</div>';
+				html += '<div class="col-md-4 col-sm-5 col-12 text-start text-md-end">';
+				var price = parsePrice(shipping['price']);
+				if (Storeden.parsePrice(shipping['price']) > 0) {	
+					html += '<p>{{currency | raw }} <span class="shipping_cost" data-cost="'+shipping['price']+'">'+price+'</span></p>';
+				} else  {
+					html += '<p class="d-none">{{currency | raw }} <span class="shipping_cost" data-cost="0"></span></p>';
+					html += '<p>{{lang('front.item.freeshipping')}}</p>';
+				}
+				html += '</div><div class="clearfix"></div>';
+				html += '</div>';
+				html += '</label>';
+			}
+			$('#shipping_results').html(html); 
+			if (shippings.length == 1) {
+				$('.shipping_label').trigger("click")
+			}
+			if (cart.shipping_method_id != '' ) { 
+				$('input[value="'+cart.shipping_method_id+'"]').parent().trigger("click")
+			} 
+		}  
+	}
+
+	cart.resetShippingMethod = function(){
+		cart.updateField('shipping_method', '');
+		cart.updateField('shipping_method_id', '');
+		cart.updateField('shipping_amount', 0);
+		cart.updateTotal();
+	}
+
+	cart.shippingAddressCallback = function(res){
+
+		var container = $('#shipping_address_form');
+		var select = $('#shipping_address_select');
+		var billing_select = $('#billing_address_select');
+		
+		if ( typeof res === 'undefined') {
+			$('#shipping_address_id').val('');
+			$("#error_shipping_address_save").fadeIn().delay(5000).fadeOut();
+			scrollToElement("error_shipping_address_save");
+			cart.setShippingAddress(null);
+			if (cart.same_address){
+				cart.setBillingAddress(null);
+			}
+		} else { 
+			if (res.result == 'success'){
+				var address = res.response;
+				var address_id = address._id['$id'];
+				container.find('.address_id').val(address_id);
+				var check = select.find("option[value='"+address_id+"']");
+				var label = address.fullname+' - '+address.addr1+' '+address.city+' - '+address.stateName+' - '+address.countryName;
+				if (check.length <= 0){
+				    cart.addAddressObject(address);
+				    select.selectpicker('deselectAll'); 
+					var option = '<option value="'+address_id+'" selected="selected">'+label+'</option>';
+					select.prepend(option);
+					select.selectpicker('val', address_id);
+					select.selectpicker('refresh');
+					if (cart.same_address) { 
+						billing_select.selectpicker('deselectAll'); 
+						billing_select.prepend(option);
+						billing_select.selectpicker('val', address_id);
+						billing_select.selectpicker('refresh');
+					}
+				} else {
+					check.html(label);
+					select.selectpicker('refresh');
+					if (cart.same_address) {
+						var billing_check = select.find("option[value='"+address_id+"']");
+						billing_check.html(label);
+						billing_select.selectpicker('refresh');
+					}
+					cart.updateAddressObject(address_id, address);
+				}
+				$('#shipping_address_id').val(address_id);
+				cart.setShippingAddress(address_id);
+				var test = cart.shipping_address == cart.billng_address;
+				if (cart.same_address) {
+					$('#billing_address_id').val(address_id);
+					cart.prepareAddressForm('billing', address_id);
+					cart.setBillingAddress(address_id);
+					cart.moveBetweenSteps(1,2);
+				} else {
+					// save also billing address before move to step 2
+					cart.saveAddress('billing', $('#billing_address_form') );
+				}
+			} else {
+				var errors = 0;
+				var types = res.types;
+				for (var i in types) {
+					var type = types[i];
+					++errors;
+					container.find('.'+type).parent().addClass('has-error');
+				}
+				if (errors > 0){
+					$('#shipping_address_id').val('');
+					$("#error_shipping_address_save").fadeIn().delay(5000).fadeOut();
+					scrollToElement('step_1_content');
+					cart.setShippingAddress(null);
+					if (cart.same_address){
+						cart.setBillingAddress(null);
+					}
+				}
+			}
+
+		} 
+	}
+
+	cart.billingAddressCallback = function(res){
+		var container = $('#billing_address_form');
+		var select = $('#billing_address_select');
+		var shipping_select = $('#shipping_address_select');
+		if ( typeof res === 'undefined') {
+			$('#billing_address_id').val('');
+			$("#error_billing_address_save").fadeIn().delay(5000).fadeOut();
+			scrollToElement('billing_address_wrap');
+			cart.setBillingAddress(null);
+		} else { 
+			if (res.result == 'success'){
+				var address = res.response;
+				var address_id = address._id['$id'];
+				container.find('.address_id').val(address_id);
+				var check = select.find("option[value='"+address_id+"']");
+				var label = address.fullname+' - '+address.addr1+' '+address.city+' - '+address.stateName+' - '+address.countryName;
+				if (check.length <= 0){
+				    cart.addAddressObject(address);
+					select.selectpicker('deselectAll'); 
+					var option = '<option value="'+address_id+'" selected="selected">'+label+'</option>';
+					select.prepend(option);
+					select.selectpicker('val', address_id);
+					select.selectpicker('refresh');
+				} else {
+					check.html(label);
+					select.selectpicker('refresh');
+					cart.updateAddressObject(address_id, address);
+				}
+
+				$('#billing_address_id').val(address_id);
+				cart.setBillingAddress(address_id);
+				cart.moveBetweenSteps(1,2);
+
+			} else {
+				var errors = 0;
+				var types = res.types;
+				for (var i in types) {
+					var type = types[i];
+					++errors;
+					container.find('.'+type).parent().addClass('has-error');
+				}
+				if (errors > 0){
+					$('#billing_address_id').val('');
+					$("#error_billing_address_save").fadeIn().delay(5000).fadeOut();
+					scrollToElement('billing_address_wrap');
+					cart.setBillingAddress(null);
+				}
+			}
+
+		} 
+
+	}
+
+	cart.calculateTax = function(){
+		Storeden.getTaxAmount(cart.id, cart.billing_country, function(res){
+			var items = res.items;
+			var new_subtotal = 0;
+			var tax_amount = 0;
+			for (var k in items) {
+				var item = items[k];
+				k = k.split('#|#');
+				if (typeof k[1] === 'undefined')
+					var id = 'row_'+k[0]+'_';
+				else {
+					var options = k[1];
+					options = options.replace(/\*/g, 'asterix').replace(/\./g,'-DOT-')
+					var id = 'row_'+k[0]+'_'+options;
+				}
+				var row = $('.cart_single_row[data-id="'+id+'"]');
+				if (item.item_tax > 0) {
+					$('.tax-row').removeClass('d-none');
+					row.find('.tax-row span').html(parsePrice(item.item_tax));
+					tax_amount += item.item_tax;
+				} else {
+					$('.tax-row').addClass('d-none');
+					row.find('.tax-row span').html('');
+				}
+				row.find('.item_single_price').html(parsePrice(item.item_price));
+				row.find('.item_total_price').html(parsePrice(item.total_item_price));
+				new_subtotal += item.total_item_price;
+			}
+			
+			cart.updateField('payment_amount', 0);
+			cart.updateField('payment_method_id', '');
+			cart.updateField('payment_method', '');
+			cart.printPaymentMethods();
+			cart.updateField('subtotal', new_subtotal);
+			cart.updateField('tax_amount', tax_amount);
+			cart.updateTotal();
+			
+		}, cart.shipping_country );
+	}
+
+	cart.applyCouponCallback = function(res){
+
+		if (! (typeof res === 'undefined')){
+
+			var coupon_amount = 0;
+			var coupon_name = '';
+			if (res.error == '') {
+				$('#applyCoupon').addClass('d-none');
+				$('#removeCoupon').removeClass('d-none');
+				$('.alert-coupon').addClass('d-none');
+				coupon_name = res.name;
+				coupon_amount = res.value;
+			} else {
+				$('.alert-coupon').addClass('d-none');
+				$('#'+res.error).removeClass('d-none');
+				$('#removeCoupon').addClass('d-none');
+				$('#applyCoupon').removeClass('d-none');
+			}
+
+			cart.updateField('coupon_amount', coupon_amount);
+			cart.updateField('coupon_name', coupon_name);
+			cart.updateTotal();
+
+			var event_obj = { 'result' :  res };
+			$(document).trigger('storeden.cart.apply.coupon-callback', [event_obj]);
+
+		}
+	}
+
+	cart.couponValue = function(couponName, callback){
+		cart.updateField('coupon_code', couponName);
+		Storeden.couponValue(cart.id, couponName, cart.total, callback);
+	}
+
+	cart.resetCoupon = function(){
+		$('#applyCoupon').removeClass('d-none');
+		$('#removeCoupon').addClass('d-none');
+		$('#sale_code').val('');
+		cart.updateField('coupon_code', '');
+		cart.updateField('coupon_name', '');
+		cart.updateField('coupon_amount', 0);
+		cart.updateTotal();
+	}
+
+	cart.verifyCheckout = function(){
+		var isValid = false;
+
+		//shipping_address
+		var a = false;
+		var valA = $('#shipping_address_id').val();
+		a = ! (typeof $('#shipping_address_id').val() == 'undefined' || $('#shipping_address_id').val() == '');
+		//console.log('Shipping address id: '+a);
+
+		//billing_address
+		var b = false;
+		var valB = $('#billing_address_id').val();
+		b = ! (typeof $('#billing_address_id').val() == 'undefined' || $('#billing_address_id').val() == '');
+		//console.log('Billing address id: '+b);
+
+		//shipping method
+		var c = false;
+		var valC = $('input[name="shipping_method"]:checked').val();
+		c = ! (typeof $('input[name="shipping_method"]:checked').val() == 'undefined' || $('input[name="shipping_method"]:checked').val() == '');
+		//console.log('Shipping method: '+c);
+
+		//payment method
+		var d = false;
+		var valD = $('input[name="payment"]:checked').val();
+		d = ! (typeof $('input[name="payment"]:checked').val() == 'undefined' || $('input[name="payment"]:checked').val() == '');
+		//console.log('Payment method: '+d);
+
+		if (!a){
+			$('.error_shipping_id').removeClass('d-none');
+		} else {
+			$('.error_shipping_id').addClass('d-none');
+		}
+		if (!b){
+			$('.error_billing_id').removeClass('d-none');
+		} else {
+			$('.error_billing_id').addClass();
+		}
+		if (!c){
+			$('.error_shipping_method').removeClass('d-none');
+		} else {
+			$('.error_shipping_method').addClass('d-none');
+		}
+		if (!d){
+			$('.error_payment_method').removeClass('d-none');
+		} else {
+			$('.error_payment_method').addClass('d-none');
+		}
+
+		var isValid =  a & b & c & d;
+
+		if (isValid){
+			cart.doCheckout();
+		} else {
+			$('.checkout_btn_move .btn').prop('disabled', false);
+			$('.checkout_btn_move .btn').removeClass('disabled');
+			$('.checkout_btn_move').removeClass('d-none');
+			$('.checkout-work-in-progress').fadeOut();
+		}
+	}
+
+	cart.doCheckout = function(){
+
+		var shipping = $('#shipping_address_id').val();
+		var billing = $('#billing_address_id').val();
+		var shipping_profile = $('input[name="shipping_method"]:checked').val();
+		var payment_profile = $('input[name="payment"]:checked').val();
+		var coupon = $('#sale_code').val();
+		var message = $('#messageTextarea').val();
+
+		var giftMessage = '';
+		var isGift = false;
+		{% if gift_option.active == 1%}
+		isGift = $('#isGift').is(':checked');
+		 if (isGift) {
+			 giftMessage = $('#giftOptionMessage').val();
+		 }
+		 {% endif %}	
+
+		 {% if invoice_option == true %}
+		 var needInvoice = $('#invoiceOption').is(':checked');
+		  {% else %}
+		  var needInvoice = null;
+		   {% endif %}
+
+		   if (cart.is_guest){
+			   Storeden.guestCheckout('{{cart_id}}', billing, shipping, shipping_profile, payment_profile, coupon, message, false, '', '', cart.checkoutCallback, isGift, giftMessage,needInvoice);
+		   } else {
+			   Storeden.checkout('{{cart_id}}', billing, shipping, shipping_profile, payment_profile, coupon, message, cart.checkoutCallback, isGift, giftMessage, needInvoice);
+		   }		
+	}
+
+		   cart.checkoutCallback = function(res){
+			   if (! (typeof res === 'undefined')) {
+				   if (res.orderID != null && res.response == 'success') {
+					   if (res.response == 'success') {
+						   if (res.redirect != '' && res.redirect != null) {
+							   window.location = res.redirect;
+						   } else {  
+							   cart.checkoutError(res.error);
+						   }
+					   } else {
+						   cart.checkoutError(res.error);
+					   }
+				   } else {
+					   cart.checkoutError(res.error);
+				   }
+			   } else {
+				   cart.checkoutError(0);
+			   }
+		   }
+	 	
+	    /* cart initialize */
+		cart.init('{{cart_id}}', Storeden.USER_ADDRESS, {{cartTotal}}, {{cart_user}}, {{items | json | raw}}  );
+		   
+		/* cart events to handle */
+		
+		$(document).on('click', '#applyCoupon', function(e){
+			e.preventDefault();
+			var couponName = $('#sale_code').val();
+			var event_obj = { 'coupon' :  couponName };
+			$(document).trigger('storeden.cart.apply.coupon', [event_obj]);
+			if (typeof couponName != 'undefined' && couponName != '' && couponName != ' ') {
+				cart.couponValue(couponName, cart.applyCouponCallback);
+			}
+		});
+		
+		$(document).on('click', '#removeCoupon', function(e){
+			cart.resetCoupon();
+		})
+		
+		$(document).on('click', '.checkout_errors .alert', function(e){
+			var from = cart.current_step;
+			var to = $(this).attr('data-move');
+			var scrolltoBilling = false;
+			if (to == '1.1'){
+				to = 1;
+				scrolltoBilling = true;
+			}
+			cart.moveBetweenSteps(from,to);
+			if (scrolltoBilling){
+				scrollToElement('billing_address_wrap');
+			}
+		})
+		
+		$(document).on('click', '.move-to-step', function(e){
+			
+			e.preventDefault;
+			var from = cart.current_step;
+			var action = 'next';
+			var to = cart.getNextStep();
+			if ($(this).hasClass('btn-prev')){
+				var to = cart.getPrevStep();
+				action = 'prev';
+			}
+			
+			// reset pending erros
+			$('#cart_errors .alert').hide();
+			$('.checkout_errors .alert').addClass('d-none');
+			
+			var validate = true;
+			
+			if (action == 'next') {
+				// move forward
+				if (from == 0){
+					// user is guest, then move to next step 
+					cart.moveBetweenSteps(from,to);
+				} else if (to <= 4) {
+					// check if current step is valid then move on
+					if (from != 1 && cart.validateStep(from)){
+						cart.moveBetweenSteps(from,to);
+					} 
+					if (from == 1 ){
+						// validate shipping address before moving
+						var valid_input = cart.validateAddress('shipping', $('#shipping_address_form'));
+						if (!cart.same_address){
+							// validate also billing if needed before moving
+							valid_input = valid_input && cart.validateAddress('billing', $('#billing_address_form'));
+						}
+						if (valid_input){
+							// save address, moving is done in save address callback 
+							cart.saveAddress('shipping', $('#shipping_address_form') );
+						}
+					}
+				} else {
+					// not valid step number
+				}
+			} else {
+				// move backward
+				if (to >= 0) {
+					cart.moveBetweenSteps(from,to);
+				}
+			}
+			
+		});
+		
+	 $(document).on('click', '.remove_item', function(){
+		 cart.removeItem($(this));
+	 })
+
+	 $(document).on('changed.bs.select', '#shipping_address_select', function(){
+		 cart.setShippingAddress($(this).val());
+		 cart.prepareAddressForm('shipping', $(this).val());
+		 if ( cart.same_address ) {
+			 if ( $(this).val() != 'add_new' ) {
+				 $('#billing_address_select').selectpicker('deselectAll'); 
+				 $('#billing_address_select').selectpicker('val', $(this).val());
+				 cart.prepareAddressForm('billing', $(this).val());
+				 cart.setBillingAddress($(this).val());
+			 }
+		 } 
+	 })
+		
+	 $(document).on('click', '.doCheckout', function(e){
+		 e.preventDefault();
+		 $('.checkout_btn_move .btn').prop('disabled', true);
+		 $('.checkout_btn_move .btn').addClass('disabled');
+		 $('.checkout_btn_move').addClass('d-none');
+		 $('.checkout-work-in-progress').fadeIn();
+		 cart.verifyCheckout();
+	 })
+		
+	 $(document).on('changed.bs.select', '#billing_address_select', function(){
+		 cart.prepareAddressForm('billing', $(this).val());
+		 cart.setBillingAddress($(this).val());
+	 })
+		
+	 $(document).on('change', '.switch #sameAddress', function(e){
+		 var checked = $(this).is(':checked');
+		 if (checked){
+			 cart.updateField('same_address', true);
+			 $('#billing_address_wrap').addClass('d-none');
+			 scrollToElement('step_1_content');
+		 } else {
+			 cart.updateField('same_address', false);
+			 $('#billing_address_wrap').removeClass('d-none');
+			 scrollToElement('billing_address_wrap');
+		 }
+	 })
+
+	 $(document).on('change paste keyup', '.address_form_container .form-control', function(e){
+
+		 var parent = $(this).parent();
+		 var is_required = ($(this).attr('required') == "required");
+		 var val =  $(this).val();
+		 var type = $(this).attr('type');
+
+		 if (is_required) {
+			 if (type == 'email') {
+				 if (val == '' || !(validateEmail(val)) ) {
+					 parent.addClass('has-error');
+				 } else {
+					 parent.removeClass('has-error');
+				 }
+			 } else {
+				 if (val != '') {
+					 parent.removeClass('has-error');
+					 if ($(this).hasClass('country')){
+						 parent.closest('.list-country-state').find('.state').parent().removeClass('has-error');
+					 }
+				 } else {
+					 parent.addClass('has-error');
+					 if ($(this).hasClass('country')){
+						 parent.closest('.list-country-state').find('.state').parent().addClass('has-error');
+					 }
+				 }
+			 }
+		 }
+	 })
+		
+	 $(document).on('change', '.guest_label input', function(){
+		 var checked = $(this).is(':checked');
+		 if (checked){
+			 $('.guest_label.active').removeClass('active');
+			 $(this).parent().addClass('active');
+		 } else {
+			 $(this).parent().removeClass('active');
+		 }
+		 var target = $(this).attr('data-target');
+		 var guest_action = $(this).val();
+		 guestOption(target, guest_action);
+	 })
+		
+	 function guestOption(target, action){
+		 if (target == 'skip') {
+			 cart.moveBetweenSteps(0,1);
+			 $('#guest_signin').fadeOut();
+			 $('#guest_register').fadeOut();
+		 } else if (target == 'guest_register') {
+			 $('#guest_signin').hide();
+			 $('#guest_register').fadeIn();
+			 scrollToElement('guest_register');
+		 } else if (target == 'guest_signin') {
+			 $('#guest_register').hide();
+			 $('#guest_signin').fadeIn();
+			 scrollToElement('guest_signin');
+		 }
+	 }
+
+	 $(document).on('change', '#invoiceOption', function(){
+		 var checked = $(this).is(':checked');
+		 var event_obj = { 'checked' :  checked };
+		 $(document).trigger('storeden.cart.invoice.option', [event_obj]);
+	 })
+			 
+	 $(document).on('change', '.shipping_label input', function(){
+
+		 var id = $(this).val();
+		 var event_obj = { 'shipping_method' :  id };
+		 $(document).trigger('storeden.cart.setShippingMethod', [event_obj]);
+
+		 $('#error_shipping_method').fadeOut();
+		 $('.checkout_errors .error_shipping_method').addClass('d-none');
+		 var checked = $(this).is(':checked');
+		 if (checked){
+			 $('.shipping_label.active').removeClass('active');
+			 $(this).parent().addClass('active');
+		 } else {
+			 $(this).parent().removeClass('active');
+		 }
+
+		 var cost = $(this).parent().find('.shipping_cost').attr('data-cost');
+		 var name = $(this).parent().find('.shipping_name').html();
+		 if (typeof cost === 'undefined'){
+			 cost = 0;
+		 }
+		 cart.updateField('shipping_amount', parseFloat(cost.replace(',', '.')));
+		 cart.updateField('shipping_method_id', id);
+		 cart.updateField('shipping_method', name);
+		 cart.updateTotal();
+	 })
+		
+	 $(document).on('change', '.payment_label input', function(){
+		
+		 var id = $(this).val();
+		 var event_obj = { 'payment_method' :  id };
+		 $(document).trigger('storeden.cart.setPaymentMethod', [event_obj]);
+
+		 $('#error_payment_method').fadeOut();
+		 $('.checkout_errors .error_payment_method').addClass('d-none');
+		 var checked = $(this).is(':checked');
+		 if (checked){
+			 $('.payment_label.active').removeClass('active');
+			 $(this).parent().addClass('active');
+		 } else {
+			 $(this).parent().removeClass('active');
+		 }
+		 var cost = $(this).parent().find('.payment_cost').attr('data-cost');
+		 var name = $(this).parent().find('.payment_name').html();
+		 if (typeof cost === 'undefined'){
+			 cost = 0;
+		 }
+		 cart.updateField('payment_amount', parseFloat(cost.replace(',', '.')));
+		 cart.updateField('payment_method_id', id);
+		 cart.updateField('payment_method', name);
+		 cart.updateTotal();
+	 })
+
+	 $(document).ready(function(){
+		 $('.selectpicker').selectpicker({
+			 style: 'button-white',
+		 });
+	 })
+		
+	 $(document).on('change', '#shipping_address_form .listCountry', function(){
+		 $('#shipping_unavailable').hide();
+		 cart.resetShippingMethod();
+	 })
+
+	 function moveCartReview(){
+		 var el = $('#cart_review');
+		 var elpos_original = el.offset().top;
+		 $(window).scroll(function(){
+			 var elpos = el.offset().top; 
+			 var windowpos = $(window).scrollTop();
+			 var finaldestination = windowpos;
+			 var stophere = ( $('#stop_here').offset().top ) ;
+			 if(windowpos<elpos_original || windowpos>=stophere) {
+				 finaldestination = elpos_original;
+				 el.stop().animate({'top':0});
+			 } else {
+				 var totalFromTop = parseInt($('#cart_review').css('top').replace('px',''));
+				 var totalHeight = totalFromTop+el.height();
+				 var moveHere = finaldestination-elpos_original+10;
+				 var container_height = parseInt($('#cart_height').height());
+				 var maxTop = container_height - el.height();
+				 if ( moveHere > maxTop  ){} 
+				 else {		
+					 el.stop().animate({'top':moveHere},300);
+				 }
+			 }
+		 }); 
+	 }
+		
+	 $(window).resize(function(){
+		 var w = $(window).width();
+		 if (w > 767){
+			 moveCartReview();
+		 } else {
+			 $('#cart_review').stop().animate({'top':0});
+		 }
+	 })
+						 
+	 $(document).ready(function(){
+		 Storeden.getConditions(function(res){
+			 $('#conditions #box_conditions').html(res.text);
+		 });
+		 var w = $(window).width();
+		 if (w > 767){
+			 moveCartReview();
+		 } else {
+			 $('#cart_review').stop().animate({'top':0});
+		 }
+	 })
+
+	 $(document).on('change', '#isGift', function(e){
+		 var checked = $(this).is(':checked');
+		 var gift_amount = $('#gift_price').attr('data-price');
+		 var w = $(window).width();
+		 cart.updateField('is_gift', checked);
+		 cart.updateField('gift_amount', parseFloat(gift_amount.replace(',', '.')));
+		 if (checked) {
+			 $('#giftMessage').removeClass('d-none');
+			 $('#giftPrice').removeClass('d-none');
+		 } else {
+			 $('#giftMessage').addClass('d-none');
+			 $('#giftPrice').addClass('d-none');
+		 }
+		 cart.updateTotal();
+	 }) 
+		   
+	 $('#checkoutForm input').on('keypress keydown keyup', function(e){
+		if(e.keyCode == 13) { e.preventDefault(); }
+	 });   
+		   
+	</script>
+	
+	
+{% endif %}
+
+</div>	
+
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'cart')%}
+	{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>

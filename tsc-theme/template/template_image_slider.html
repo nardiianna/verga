@@ -1,0 +1,80 @@
+<section class="section template_image_slider" id="section_{{vars.section.id}}_image_slider">
+	<div class="{{vars.section.settings.layout}} image_fullscreen">	
+		<div class="swiper-container swiper-{{vars.section.id}} swiper">
+			<div class="swiper-wrapper">
+			    {% for i in 1..8 %}
+			    	{% if attribute(vars.section.settings, 'enabled_'~i) == 'yes' %}
+						<div class="swiper-slide">
+						    {% if attribute(vars.section.settings, 'link_'~i~'_'~locale)  != '' and attribute(vars.section.settings, 'button_'~i~'_yn') == "no" %}
+    							<a href="{{attribute(vars.section.settings, 'link_'~i~'_'~locale)}}"
+    							   rel="{{attribute(vars.section.settings, 'link_'~i~'_REL') }}"
+    							   target="{{attribute(vars.section.settings, 'link_'~i~'_TARGET') }}"
+    							   title="{{attribute(vars.section.settings, 'link_'~i~'_TITLE_'~locale)}}" >
+							{% endif %}
+							{% set src_val = attribute(vars.section.settings, 'image_'~i~'_'~locale) %}
+							{% if attribute(vars.section.settings, 'image_'~i~'_mob_'~locale) != '' and getDeviceInfo().type != 'desktop' %}
+								{% set src_val = attribute(vars.section.settings, 'image_'~i~'_mob_'~locale) %}
+							{% endif %}
+							{% if src_val == ''%}
+								{% set src_val = placeholders.slide %}
+							{% endif %}
+							
+							<img src="{{placeholders.lazy}}" data-src="{{src_val}}" 
+								 data-editor="{{vars.section.data_editor}}_image_{{i}}_{{locale}}" 
+								 alt="{{attribute(vars.section.settings, '_image_'~i~'_ALT_'~locale)|default(attribute(vars.section.settings, 'title_'~i~'_'~locale))}}"
+								 data-placeholder="{{placeholders.slide}}"
+								 class="lazy w-100"
+								 loading="lazy">
+							<div class="slider-text-container position-absolute d-flex {{attribute(vars.section.settings, 'text_'~i~'_position_x')}} {{attribute(vars.section.settings, 'text_'~i~'_position_y')}} top-0 bottom-0 start-0 end-0">
+							    <div class="slider-text {{attribute(vars.section.settings, 'text_'~i~'_style')}} {{attribute(vars.section.settings, 'text_'~i~'_alignment')}}">
+    							    <div class="slider-text-title" role="heading" aria-level="2">
+    							        {{attribute(vars.section.settings, 'title_'~i~'_'~locale)}}
+    						        </div>
+    						        <div class="slider-text-subtitle">
+    						            {{attribute(vars.section.settings, 'subtitle_'~i~'_'~locale)}}
+    						        </div>
+    						        {% if attribute(vars.section.settings, 'button_'~i~'_yn') == "yes" and attribute(vars.section.settings, 'link_'~i~'_'~locale)  != '' %}
+        						        <a href="{{attribute(vars.section.settings, 'link_'~i~'_'~locale)}}"
+            							   rel="{{attribute(vars.section.settings, 'link_'~i~'_REL') }}"
+            							   target="{{attribute(vars.section.settings, 'link_'~i~'_TARGET') }}"
+            							   title="{{attribute(vars.section.settings, 'link_'~i~'_TITLE_'~locale)}}" >
+        						            <div class="slider-text-button dn-btn dn-btn-brand-1 dn-btn-filled">
+            						            {{attribute(vars.section.settings, 'button_'~i~'_'~locale)}}
+            						        </div>
+        						        </a>
+    						        {% endif %}
+						        </div>
+						    </div>
+							{% if attribute(vars.section.settings, 'link_'~i~'_'~locale) != '' and attribute(vars.section.settings, 'button_'~i~'_yn') == "no" %}
+								</a>		
+							{% endif %}
+						</div>
+					{% endif %}
+				{% endfor %}
+			</div>
+			<!-- Add Arrows -->
+			<div class="swiper-button-next swiper-button-white"></div>
+			<div class="swiper-button-prev swiper-button-white"></div>
+			
+			
+			<!-- If we need pagination 
+            <div class="swiper-pagination"></div>-->
+		</div>
+		
+		<script>
+            const swiper{{vars.section.id}} = new Swiper('.swiper-{{vars.section.id}}', {
+                lazy: true,
+                {% if vars.section.settings.loop == "yes" %}loop: true,{% endif %}
+                {% if vars.section.settings.autoplay == "yes" %}
+                    autoplay: {
+                        delay: {{vars.section.settings.autoplay_time * 1000}},
+                    },
+                {% endif %}
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                }
+            });
+        </script>
+	</div>
+</section>

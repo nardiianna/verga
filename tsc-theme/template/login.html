@@ -1,0 +1,60 @@
+{% if shop_rules.registration_type == "standard" %}
+    {% include 'login_standard.html' %}
+{% elseif shop_rules.registration_type == "b2b" %}
+
+	{% if request.path.2 == "registration" %}
+		{% include 'registration.html' %}
+		
+	{% elseif user.uid > 0 and request.payload.submit == "" %}
+		<script>window.location = '/'; </script>
+
+	{% else %}
+		<div class="container">
+			<div class="row" id="registration_row">
+				<div class="col-md-12 col-sm-12 col-12 text-center" id="formLogin">
+					<div style="max-width:600px;margin:0 auto;">
+						<div class="h1 heading">{{lang('sign.in')|upper}}</div>
+						<form class="formLogin">
+							{#<p>{{lang('login.fb.or.gplus')}}</p>
+							<div class="row">
+								<div class="col-md-6 col-sm-6 col-12">
+									<a href="{{document.fb_login}}" class="btn btn-facebook btn-block social_button"><i class="fa fa-facebook"></i> Facebook Connect</a>
+								</div>
+								<div class="col-md-6 col-sm-6 col-12">
+									<a href="{{document.google_login}}" class="btn btn-google-plus btn-block social_button"><i class="fa fa-google-plus"></i> Google Connect</a>
+								</div>
+								<div class="clearfix"></div>
+							</div>#}
+							<p>{{lang('login.with.credentials')}}</p>
+							<div class="row row-gap-3">
+								<div class="col-md-12 col-sm-12 col-12">
+									<div class="form-group text-left">
+										<label>{{lang('register.email')}}</label>
+										<input type="email" name="email" class="email form-control"/>
+									</div>
+								</div>
+								<div class="col-md-12 col-sm-12 col-12">
+									<div class="form-group text-left">
+										<label>{{lang('signup.password')}}</label>
+										<input type="password" name="password" class="password form-control"/>
+									</div>
+								</div>
+							</div>
+							<div id="error_login" class="alert alert-danger" style="display:none;">
+								{{lang('signin.error')}} {{lang('signin.error.check')}}.
+							</div>
+							<p class="mt-2">{{lang('pw.dont.remember')}}, <a href="{{request.script_name}}/restore-password">{{lang('pw.dont.remember.click')}}.</a></p>
+							<div class="form-group form-submit text-center">	
+								<button type="submit" class="btn button login_register_button">{{lang('sign.in')|upper}}</button>
+							</div>
+						</form>
+						{% if shop_rules.enable_registration_link %}
+							<p class="font-weight-bold">{{lang('not.registered.yet')}}</p>
+							<a href="/login/registration" class="btn button">{{lang('go.to.registration')}}</a>
+						{% endif %}
+					</div>
+				</div>
+			</div>
+		</div>
+	{% endif %}
+{% endif %}

@@ -1,0 +1,36 @@
+{% set perpageValues = [30,60,90] %}
+{% if defaultItemsPerPage in perpageValues %}{%else%}
+	{% set perpageValues = perpageValues | merge([defaultItemsPerPage])%}
+{% endif %}
+
+<div class="toolbar">
+	
+	{% if request.path.2 != 'tags' %}
+	    <div class="toolbar-item d-inline-block">
+            <button type="button" class="btn button-white dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                {{lang('shop.show.order')}}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" id="sort">
+                <li class="{% if orderField =='new' and ordertype==1%}active{%endif %}"><a href="#" class="dropdown-item" id="new_1">{{lang('shop.show.order.new.1')}}</a></li>
+				<li class="{% if orderField =='new' and ordertype==-1%}active{%endif %}"><a href="#" class="dropdown-item" id="new_-1">{{lang('shop.show.order.new.2')}}</a></li>
+				<li class="{% if orderField =='price' and ordertype==1%}active{%endif %}"><a href="#" class="dropdown-item" id="price_1">{{lang('shop.show.order.price.1')}}</a></li>
+				<li class="{% if orderField =='price' and ordertype==-1%}active{%endif %}"><a href="#" class="dropdown-item" id="price_-1">{{lang('shop.show.order.price.2')}}</a></li>
+				<li class="{% if orderField =='title' and ordertype==1%}active{%endif %}"><a href="#" class="dropdown-item" id="title_1">{{lang('shop.show.order.title.1')}}</a></li>
+				<li class="{% if orderField =='title' and ordertype==-1%}active{%endif %}"><a href="#" class="dropdown-item" id="title_-1">{{lang('shop.show.order.title.2')}}</a></li>
+            </ul>
+        </div>
+        
+		<div class="toolbar-item d-inline-block">
+            <button type="button" class="btn button-white dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                {{lang('shop.show.element.per.page')}}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end" id="perpage">
+                {% for i in perpageValues|sort %}
+					<li class="{% if itemsPerPage == i %}active{%endif%}"><a href="#" class="dropdown-item" id="{{i}}">{{i}}</a></li>
+				{% endfor %}
+            </ul>
+        </div>
+	
+	{% endif %}
+</div>
+{% include 'shop_pagination.html' %}

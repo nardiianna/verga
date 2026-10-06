@@ -1,0 +1,767 @@
+{% if request.path.3 == "authorized" %}
+    {% if request.path.4 == "sendemail" %}
+    	{% set email = sendEmail(group.admin_email, request.payload.subject, request.payload.message, group.title, request.payload.email) %}
+    	<div class="background-gears px-3">
+            <div class="text-center" >
+                <div class="heading pt-5">{{lang('profile.message.sent')}}</div>
+            </div>
+        </div>
+    {% else %}
+        <div class="container">
+	        <h3>Premi "Invia" per inviare una mail conferma di avvenuta registrazione al cliente</h3>    
+	        {% set message = "\nComplimenti, la tua richiesta è stata approvata! \n\nOra potrai accedere al nostro sito per effettuare i tuoi acquisti" %}
+	        {% set subject = "La tua richiesta di accesso al sito "~group.title~" è stata approvata" %}
+    	
+    	    <form class="formReg" id="regForm"  method="POST" action="/login/registration/authorized/sendemail">
+        	    <div class="form-group">
+        			<label>{{lang('signup.email')}} <span class="text-danger">*</span></label>
+        			<input type="email" name="email" class="email form-control registration_email" value="{{request.path|last}}"  required/>
+        		</div>
+        		<div class="form-group">
+        			<label><span>{{lang('subject')}}</label>
+        			<input type="text" name="subject" class="form-control" value="{{subject}}" required/>
+        		</div>
+        	    <div class="form-group">
+        			<label><span>{{lang('message')}}</span></label>
+        			<textarea rows="4" name="message" class="form-control" value="{{message}}" required style="height:unset;">{{message}}</textarea>
+        		</div>
+        	    <input id="submitMe" type="submit" name="submit" value="{{lang('admin.send')|upper}}" class="dn-btn dn-btn-brand-1 dn-btn-filled"/>
+        	</form>
+    	</div>
+	{% endif %}
+
+{% elseif request.payload.submit != "" %}
+    
+    
+	{# A questo punto il form di registrazione storeden è stato compilato e non ci sono stati errori,
+	la callback ha fatto il submit sul seondo form e ora mando l'email con i dati aggiuntivi #}
+
+    {% if user.uid > 0 %}
+	
+        {% set message = "<h3>Nuova richiesta di registrazione sul sito "~group.title~" </h3>" %}
+        {% set email = "" %}
+        {% for key, field in request.payload if key not in ["submit", "password", "repassword"] %}
+            {% set chiave = key %}
+            {% set valore = field %}
+            {% if chiave == "state" %}
+            {% set valore = getState(field) %}
+            {% endif %}
+            {% if chiave == "country" %}
+                {% set valore = getCountry(field) %}
+            {% endif %}
+            {% if chiave == "email" %}
+            {%set email = field %}
+            {% endif %}
+            {% set message = message ~ "<b>" ~chiave|upper ~ ":</b> " ~ valore ~ "<br>" %}
+        {% endfor %}
+        {% set message = message ~ '<br><a href="https://'~http_host~'/ns/authorize-users?destination=https://'~http_host~currentURL~'/authorized/'~email~'&customer_id='~customer.id~'">Approva Utente</a>' %}
+        {% set email = sendEmail(group.admin_email, 'Nuova richiesta registrazione cliente '~ request.payload.name ~ ' ' ~ request.payload.surname, message, group.title, 'marco.brognara@duckynetwork.it') %}
+    {% endif %}
+	<div class="background-gears px-3">
+        <div class="text-center" >
+            <div class="heading pt-5">{{lang('register.thank.you.heading')}}</div>
+        </div>
+    </div>
+    
+{% elseif user.uid == 0 %}
+    <div class="container">
+        <div class="row" id="registration_row">
+            <div class="col-md-12 col-sm-12 col-xs-12" id="formRegistration_aaa">
+            	<div class="h1 heading text-center">{{lang('register')|upper}}</div>
+            	<form class="formReg" id="regForm"  method="POST" action="#">
+            		<div class="row">
+            		    <div class="form-group form-box" id="registrationTypeWrapper" style="padding:0 15px">
+                			<label>{{lang('registration_pro.type.label')}}</label>
+                			<select name="tipologia" class="form-control customField" id="changeType">
+                                <option value="Privato">{{lang('registration_pro.type.private')}}</option>
+                                <option value="Azienda">{{lang('registration_pro.type.company')}}</option>
+                            </select>
+            		    </div>
+            			<div class="col-md-12 col-sm-12 showOnCompany d-none">
+            			    <div class="form-group" id="companyName">
+            					<label><span>{{lang('registration_pro.company.name.label')}}</span><span class="text-danger requiredMark">*</span></label>
+            					<input type="text" name="companyname" class="companyname form-control" data-required="company"/>
+            				</div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6">
+            				<div class="form-group" id="accountName">
+            					<label><span>{{lang('register.fullname')}}</span><span class="text-danger requiredMark">*</span></label>
+            					<input type="text" name="fullname" class="fullname form-control" data-required="private"/>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('signup.language')}} <span class="text-danger">*</span></label>
+            					<select name="language" class="language form-control">
+            						{% for tld,lang in languages %}
+            						<option value="{{tld}}" {% if tld == locale%}selected="selected"{% endif %} required>{{lang}}</option>
+            						{% endfor %}
+            					</select>
+            				</div>
+            			</div>
+            		</div>
+            		<div class="form-group">
+            			<label>{{lang('signup.email')}} <span class="text-danger">*</span></label>
+            			<input type="email" name="email" class="email form-control registration_email"  required/>
+            		</div>
+            		
+            	  	{# Dati aggiuntivi #}
+                    <div id="additionalRegistrationInfo">
+            		</div>
+            	    <div class="row">
+            			<div class="col-md-4 col-sm-4">
+            			    <div class="form-group">
+            				    <label>{{lang('register.phone')}} <span class="text-danger">*</span></label>
+            			        <input type="text" name="telephone" class="form-control" required/>
+            		        </div>
+            	        </div>
+            	        <div class="col-md-4 col-sm-4">
+            	            <div class="form-group">
+            				    <label>{{lang('register.phone')}} 2</label>
+            			        <input type="text" name="telephone2" class="form-control customField"/>
+            		        </div>
+            	        </div>
+            	        <div class="col-md-4 col-sm-4">
+            	            <div class="form-group">
+            		            <label>{{lang('registration_pro.fax.label')}}</label>
+            			        <input type="text" name="fax" class="form-control customField"/>
+            		        </div>
+                        </div>
+                    </div>
+            	    
+            		{#
+            		    I campi indirizzo sono normalmente sempre visibili e obbligatori.
+            		    Se in una personalizzazione devono essere nascosti per una tipologia cliente,
+            		    applicare le classi di visibilità previste al blocco interessato e impostare
+            		    createAddress a false per la stessa tipologia, evitando Storeden.addAddress()
+            		    quando i dati dell'indirizzo non vengono richiesti.
+            		#}
+            		<div class="row">
+            			<div class="col-md-12 col-sm-12">
+            			    <div class="form-group">
+            				    <label>{{lang('front.register.addr1')}} <span class="text-danger">*</span></label>
+            			        <input type="text" name="addr1" class="form-control" required/>
+            		        </div>
+            		    </div>
+            	    </div>
+            		<div class="row">
+            			<div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            				    <label>{{lang('register.zip')}} <span class="text-danger">*</span></label>
+            			        <input type="text" name="zip" class="form-control" required/>
+            		        </div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6">
+            		        <div class="form-group">
+            			        <label>{{lang('register.city')}} <span class="text-danger">*</span></label>
+            			        <input type="text" name="city" class="form-control" required/>
+            		        </div>
+            		    </div>
+            	    </div>
+            	    <div class="row list-country-state">
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('register.country')}} <span class="text-danger">*</span></label>
+            					<select id="countryCode" name="country" class="form-control listCountry country" data-current="" required>
+            					</select>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('register.state')}} <span class="text-danger">*</span></label>
+            					<select name="state" class="form-control listStates state" required data-current="" data-current-country="">
+            					</select>
+            				</div>
+            			</div>
+            		</div>
+            		<div class="row">
+            		    <div class="col-md-6 col-sm-6 showOnCompany d-none">
+            		        <div class="form-group">
+            			        <label>{{lang('registration_pro.company.vat.label')}} <span class="text-danger requiredMark">*</span></label>
+            			        <input type="text" name="vat" class="form-control customField" data-required="company"/>
+            		        </div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6 showOnItaly d-none">
+            			    <div class="form-group">
+            					<label>{{lang('registration_pro.private.cf.label')}} <span class="text-danger requiredMark">*</span></label>
+            					<input type="text" name="codicefiscale" class="form-control customField"/>
+            				</div>
+            			</div>
+            		</div>
+            		<div class="row showOnCompany showOnItaly d-none" data-required-one="company-italy">
+            			<div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            				    <label>{{lang('registration_pro.company.sdi.label')}} <span class="text-danger oneOfRequiredMark">*</span></label>
+            			        <input type="text" name="sdi" class="form-control customField"/>
+            		        </div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6">
+            		        <div class="form-group">
+            			        <label>{{lang('registration_pro.company.pec.label')}} <span class="text-danger oneOfRequiredMark">*</span></label>
+            			        <input type="text" name="pec" class="form-control customField"/>
+            		        </div>
+            		    </div>
+            	    </div>
+            	    
+            		<div class="form-group">
+            			<label>{{lang('registration_pro.note.label')}}</label>
+            			<textarea name="note" class="form-control customField"></textarea>
+            		</div>
+            		<div class="form-group">
+            			<label>{{lang('registration_pro.referrer.label')}}</label>
+            			<select name="referral" class="form-control customField">
+                            <option value="not-selected">{{lang('registration_pro.referrer.0')}}</option>
+                            <option value="{{lang('registration_pro.referrer.1')}}">{{lang('registration_pro.referrer.1')}}</option>
+                            <option value="{{lang('registration_pro.referrer.2')}}">{{lang('registration_pro.referrer.2')}}</option>
+                            <option value="{{lang('registration_pro.referrer.3')}}">{{lang('registration_pro.referrer.3')}}</option>
+                            <option value="{{lang('registration_pro.referrer.4')}}">{{lang('registration_pro.referrer.4')}}</option>
+                            <option value="{{lang('registration_pro.referrer.5')}}">{{lang('registration_pro.referrer.5')}}</option>
+                            <option value="{{lang('registration_pro.referrer.6')}}">{{lang('registration_pro.referrer.6')}}</option>
+                        </select>
+            		</div>
+            		<div class="row notToSend">
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('signup.password')}} <span class="text-danger">*</span></label>
+            					<input type="password" name="password" class="password form-control" required/>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('signup.password.rewrite')}} <span class="text-danger">*</span></label>
+            					<input type="password" name="repassword" class="repassword form-control" required/>
+            				</div>
+            			</div>
+            		</div>
+            		<div class="cart_switch marketing_switch" style="margin-bottom: 15px">
+            		    <span style="float: left;" class="switch"><input type="checkbox" value="no" name="email_marketing" id="storeden_accept_marketing"></span>
+            		    <span class="switch-label" style="margin-top: 3px;padding-left: 15px;">{{lang('registration_pro.marketing')}}</span>
+            		</div>
+            		
+            		
+            		<div class="form-group">
+            			<p class="legalLinks">
+            				{{lang('registration.conditions')|replace({"data-toggle":"data-bs-toggle", "data-target":"data-bs-target"}) | raw }} {{group.description | title}}.
+            			</p>
+            		</div>
+            		
+            		
+            		
+            		<div id="error_different_pw" class="alert alert-danger" style="display:none;">
+            			{{lang('different.pw')}}
+            		</div>
+            		<div id="error_chars_pw" class="alert alert-danger" style="display:none;">
+            			{{lang('6.chars')}}
+            		</div>
+            		<div id="error_registration_email" class="alert alert-danger" style="display:none;">
+            			{{lang('address.duplicated')}}
+            		</div>
+            		<div id="error_registration" class="alert alert-danger" style="display:none;">
+            			{{lang('registration.error')}}
+            		</div>
+            		
+            		
+            		
+            		<input id="submitMe" type="submit" name="submit" value="{{lang('register')|upper}}" class="dn-btn dn-btn-brand-1 dn-btn-filled d-none"/>
+            		<button class="dn-btn dn-btn-brand-1 dn-btn-filled" type="button" id="fakeButton">{{lang('register')|upper}}</button>
+            		<div id="waithMessage" style="display:none;"><div class="spinner-border text-success"></div>{{lang('please.wait')}}</div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% elseif user.uid > 0 %}
+    <script>
+        $(document).ready(function(){
+            window.location.replace("/");
+        });
+    </script>
+{% endif %}
+<script>
+
+    const registrationConfig = {
+        italyCountryId: '119',
+        defaultType: 'Privato',
+        showTypeSelector: true,
+        createAddress: {
+            Privato: true,
+            Azienda: true
+        }
+    };
+
+    $(document).ready(function(){
+
+        initRegistrationForm();
+
+        Storeden.getCountries(function(){
+            getCountries.apply(this, arguments);
+            setTimeout(updateRegistrationForm, 0);
+        });
+
+    });
+
+    function initRegistrationForm(){
+
+        $('#changeType').val(registrationConfig.defaultType);
+        $('#registrationTypeWrapper').toggleClass('d-none', !registrationConfig.showTypeSelector);
+        updateRegistrationForm();
+
+    }
+
+    function updateRegistrationForm(){
+
+        const type = $('#changeType').val();
+        const country = $('#countryCode').val();
+        const isCompany = type === 'Azienda';
+        const isItaly = country === registrationConfig.italyCountryId;
+
+        $('[class*="showOn"]').each(function(){
+
+            const $element = $(this);
+            let visible = true;
+
+            if ($element.hasClass('showOnCompany') && !isCompany) {
+                visible = false;
+            }
+
+            if ($element.hasClass('showOnPrivate') && isCompany) {
+                visible = false;
+            }
+
+            if ($element.hasClass('showOnItaly') && !isItaly) {
+                visible = false;
+            }
+
+            if ($element.hasClass('showOnForeign') && isItaly) {
+                visible = false;
+            }
+
+            $element.toggleClass('d-none', !visible);
+
+        });
+
+        $('[data-required]').each(function(){
+
+            const $field = $(this);
+            const required = matchesRegistrationRule($field.data('required'), isCompany, isItaly) && !$field.closest('.d-none').length;
+
+            $field.prop('required', required);
+            $field.closest('.form-group').find('.requiredMark').text(required ? '*' : '');
+
+        });
+
+        $('[data-required-one]').each(function(){
+
+            const $group = $(this);
+            const required = matchesRegistrationRule($group.data('required-one'), isCompany, isItaly) && !$group.hasClass('d-none');
+
+            $group.data('required-active', required);
+            $group.find('.oneOfRequiredMark').text(required ? '*' : '');
+
+        });
+
+        if (isCompany) {
+            $('#accountName input').attr('name', 'username');
+            $('#companyName input').attr('name', 'fullname');
+        } else {
+            $('#accountName input').attr('name', 'fullname');
+            $('#companyName input').attr('name', 'companyname');
+        }
+
+    }
+
+    function matchesRegistrationRule(rule, isCompany, isItaly){
+
+        if (rule === 'company') {
+            return isCompany;
+        }
+
+        if (rule === 'private') {
+            return !isCompany;
+        }
+
+        if (rule === 'italy') {
+            return isItaly;
+        }
+
+        if (rule === 'foreign') {
+            return !isItaly;
+        }
+
+        if (rule === 'company-italy') {
+            return isCompany && isItaly;
+        }
+
+        if (rule === 'private-italy') {
+            return !isCompany && isItaly;
+        }
+
+        if (rule === 'company-foreign') {
+            return isCompany && !isItaly;
+        }
+
+        if (rule === 'private-foreign') {
+            return !isCompany && !isItaly;
+        }
+
+        return false;
+
+    }
+
+    $(document).on('change', '#changeType, #countryCode', function(){
+        updateRegistrationForm();
+    });
+
+    $(document).on('change input', '#regForm select, #regForm input, #regForm textarea', function(){
+
+        $(this).closest('.form-group').removeClass('has-error');
+        $(this).closest('[data-required-one]').find('.form-group').removeClass('has-error');
+
+    });
+
+    $(document).on('change', '.registration_email', function(){
+        $('#error_registration_email').fadeOut();
+    });
+
+    $(document).on('change', '.repassword, .password', function(){
+        $('#error_different_pw').fadeOut();
+        $('#error_chars_pw').fadeOut();
+    });
+
+    $(document).on('change', '.switch input', function(){
+
+        const checked = $(this).is(':checked');
+
+        if (checked) {
+            $(this).parent().addClass('active');
+            $(this).val('yes');
+        } else {
+            $(this).parent().removeClass('active');
+            $(this).val('no');
+        }
+
+    });
+
+    $(document).on('click', '#fakeButton', function(e){
+
+        e.preventDefault();
+
+        hideRegistrationErrors();
+        setRegistrationLoading(true);
+
+        let isValid = true;
+        const address = {};
+        const customFields = {};
+
+        $('#regForm input, #regForm select, #regForm textarea').each(function(){
+
+            if (!isValid) {
+                return false;
+            }
+
+            const $field = $(this);
+
+            if ($field.attr('type') === 'submit' || $field.attr('type') === 'button') {
+                return;
+            }
+
+            if (!shouldCollectField($field)) {
+                return;
+            }
+
+            const name = $field.attr('name');
+
+            if (!name) {
+                return;
+            }
+
+            let value = $field.val();
+
+            if (value === '' && $field.prop('required')) {
+
+                isValid = false;
+                $field.closest('.form-group').addClass('has-error');
+                scrollToField($field);
+
+                return false;
+
+            }
+
+            if ($field.hasClass('checkbox_field')) {
+                value = $field.is(':checked') ? 'checked' : '';
+            }
+
+            if ($field.hasClass('customField')) {
+
+                const billingFields = ['vat', 'codicefiscale', 'sdi', 'pec'];
+
+                if (value !== '' && !billingFields.includes(name)) {
+                    customFields[name] = '' + value;
+                }
+
+            } else {
+
+                address[name] = '' + value;
+
+            }
+
+        });
+
+        if (isValid) {
+            isValid = validateRequiredGroups();
+        }
+
+        if (isValid) {
+
+            if (!address.password || address.password.length < 8) {
+
+                isValid = false;
+                $('#error_chars_pw').fadeIn();
+                $('#regForm .password').closest('.form-group').addClass('has-error');
+                scrollToField($('#regForm .password'));
+
+            } else if (address.repassword !== address.password) {
+
+                isValid = false;
+                $('#error_different_pw').fadeIn();
+                $('#regForm .repassword').closest('.form-group').addClass('has-error');
+                scrollToField($('#regForm .repassword'));
+
+            }
+
+        }
+
+        if (!isValid) {
+
+            resetButton();
+            setRegistrationLoading(false);
+            return;
+
+        }
+
+        customFields.billing = buildBillingCustomField();
+
+        registerCustomer(address, customFields);
+
+    });
+
+    function shouldCollectField($field){
+
+        if ($field.is('#changeType')) {
+            return true;
+        }
+
+        return !$field.closest('.d-none').length;
+
+    }
+
+    function validateRequiredGroups(){
+
+        let isValid = true;
+
+        $('[data-required-one]').each(function(){
+
+            const $group = $(this);
+
+            if ($group.data('required-active') !== true) {
+                return;
+            }
+
+            let hasValue = false;
+
+            $group.find('input, select, textarea').each(function(){
+
+                if ($.trim($(this).val()) !== '') {
+                    hasValue = true;
+                    return false;
+                }
+
+            });
+
+            if (!hasValue) {
+
+                isValid = false;
+                $group.find('.form-group').addClass('has-error');
+                scrollToField($group);
+                return false;
+
+            }
+
+        });
+
+        return isValid;
+
+    }
+
+    function buildBillingCustomField(){
+
+        return JSON.stringify({
+            customerid: '',
+            addressid: '',
+            fullname: $('[name="fullname"]').val(),
+            address: $('[name="addr1"]').val(),
+            zipcode: $('[name="zip"]').val(),
+            city: $('[name="city"]').val(),
+            district: $('[name="state"] option:selected').text(),
+            district_code: $('[name="state"] option:selected').attr('data-code') || '',
+            country: $('[name="country"] option:selected').text(),
+            country_code: $('[name="country"] option:selected').attr('data-code') || '',
+            phone: $('[name="telephone"]').val(),
+            vatnumber: $('[name="vat"]').val() || '',
+            fiscalcode: $('[name="codicefiscale"]').val() || '',
+            sdi: $('[name="sdi"]').val() || '',
+            pec: $('[name="pec"]').val() || '',
+            email: $('[name="email"]').val()
+        });
+
+    }
+
+    function registerCustomer(address, customFields){
+
+        const acceptMarketing = $('#storeden_accept_marketing').is(':checked');
+
+        const config = {
+            url: Storeden.PATH_URL + '/register',
+            type: 'POST',
+            cache: false,
+            data: {
+                email: address.email,
+                fullname: address.fullname,
+                password: address.password,
+                repassword: address.repassword,
+                lang: address.language,
+                custom_fields: customFields,
+                accept_marketing: acceptMarketing
+            },
+            success: function(response){
+
+                $(document).trigger('Storeden.register', response);
+                resetButton();
+
+                if (response.error === 'email-already-used') {
+
+                    $('#error_registration_email').fadeIn();
+                    setRegistrationLoading(false);
+                    return;
+
+                }
+
+                if (response.error != null) {
+
+                    $('#error_registration').fadeIn();
+                    setRegistrationLoading(false);
+                    return;
+
+                }
+
+                $('#error_registration').fadeOut();
+                $('#error_registration_email').fadeOut();
+
+                const type = $('#changeType').val();
+
+                if (shouldCreateAddress(type, address)) {
+
+                    Storeden.addAddress(
+                        address.fullname,
+                        address.addr1,
+                        address.city,
+                        address.zip,
+                        address.state,
+                        address.country,
+                        address.email,
+                        address.telephone,
+                        address.vat,
+                        addAddressCallback
+                    );
+
+                } else {
+
+                    completeRegistration();
+
+                }
+
+            },
+            error: function(){
+
+                resetButton();
+                $('#error_registration').fadeIn();
+                setRegistrationLoading(false);
+
+            }
+        };
+
+        $.ajax(config);
+
+    }
+
+    function shouldCreateAddress(type, address){
+
+        if (registrationConfig.createAddress[type] !== true) {
+            return false;
+        }
+
+        return !!(
+            address.addr1 &&
+            address.zip &&
+            address.city &&
+            address.state &&
+            address.country
+        );
+
+    }
+
+    function addAddressCallback(res){
+
+        if (res.result === 'success') {
+
+            completeRegistration();
+
+        } else {
+
+            resetButton();
+            setRegistrationLoading(false);
+            alert('A problem occurred. Please try again or contact us.');
+
+        }
+
+    }
+
+    function completeRegistration(){
+
+        $('.notToSend').remove();
+
+        $('#submitMe')
+            .removeClass('d-none')
+            .trigger('click');
+
+    }
+
+    function setRegistrationLoading(isLoading){
+
+        if (isLoading) {
+            $('#fakeButton').fadeOut();
+            $('#waithMessage').fadeIn();
+        } else {
+            $('#waithMessage').fadeOut();
+            $('#fakeButton').fadeIn();
+        }
+
+    }
+
+    function hideRegistrationErrors(){
+
+        $('#error_registration').hide();
+        $('#error_registration_email').hide();
+        $('#error_different_pw').hide();
+        $('#error_chars_pw').hide();
+
+    }
+
+    function scrollToField($field){
+
+        $('html, body').animate({
+            scrollTop: $field.offset().top - 20
+        }, 500);
+
+    }
+
+</script>

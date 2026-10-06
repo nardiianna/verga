@@ -1,0 +1,374 @@
+<div class="row">
+	<div class='col-md-3 col-sm-4 third-column-product'>	
+		{% include 'menu_profile.html' %}
+	</div>
+	<div class="col-md-9 col-sm-8  col-xs-12 profileLeft pt-md-4 px-md-5">
+		{% if request.payload.companyname != "" %}
+		    {% set message = "<h3>"~user.fullname~" ha richiesto la creazione di un nuovo cliente:</h3>" %}
+        	{% for key, field in request.payload if key != "submit" %}
+        	    {% set message = message ~ "<b>" ~key|upper ~ ":</b> " ~ field ~ "<br>" %}
+        	{% endfor %}
+        	{% set email = sendEmail(group.admin_email, 'Nuova richiesta registrazione cliente '~ request.payload.name ~ ' ' ~ request.payload.surname, message, group.title, 'marco.brognara@duckynetwork.it') %}
+		    
+		    <div class="alert alert-success" role="alert">
+                {{lang('agent.new_customer.success.message')}}
+            </div>
+            <a href="/shop" class="btn button">{{lang('page.shop')}}</a>
+            
+            <script>
+                //Storeden.emptyCart('{{cart_id}}',function (){}); Se serve svuotare il carrello
+                let array = [];
+                let element = {
+                    "companyName":"{{request.payload.companyname}}",
+                    "payment":"",
+                    "new_customer":true,
+                    "billing":{
+                		"customerid":"",
+                		"addressid":"",
+                		"fullname":"{{request.payload.billing_fullname}}",
+                		"address":"{{request.payload.billing_addr1}}",
+                		"zipcode":"{{request.payload.billing_zip}}",
+                		"city":"{{request.payload.billing_city}}",
+                		"district":"{{request.payload.billing_state}}",
+                		"district_code":{{request.payload.billing_state}},
+                		"country":"{{request.payload.billing_country}}",
+                		"country_code":{{request.payload.billing_country}},
+                		"phone":"{{request.payload.billing_telephone}}",
+                		"vatnumber":"{{request.payload.vat}}",
+                		"fiscalcode":"{{request.payload.codicefiscale}}",
+                		"sdi":"{{request.payload.sdi}}",
+                		"pec":"{{request.payload.pec}}",
+                		"email":"{{request.payload.email}}"
+                	},
+                	"shipping":[
+                		{
+                			"customerid":"",
+                			"addressid":"",
+                			"fullname":"{{request.payload.shipping_fullname}}",
+                			"address":"{{request.payload.shipping_addr1}}",
+                			"zipcode":"{{request.payload.shipping_zip}}",
+                			"city":"{{request.payload.shipping_city}}",
+                			"district":"{{request.payload.shipping_state}}",
+                			"district_code":{{request.payload.shipping_state}},
+                			"country":"{{request.payload.shipping_country}}",
+                			"country_code":{{request.payload.shipping_country}},
+                			"phone":"{{request.payload.telephone}}",
+                			"vatnumber":"{{request.payload.vat}}",
+                			"fiscalcode":"{{request.payload.codicefiscale}}",
+                			"sdi":"{{request.payload.sdi}}",
+                			"pec":"{{request.payload.pec}}",
+                			"email":"{{request.payload.email}}"
+                		}
+                	]
+                };
+                array.push(element);
+                setCookieAllsite('customer_info', JSON.stringify(array), 3);
+            </script>
+		{% else %}
+    		<h1 class="heading">{{lang('user.agent.new_customer')}}</h1>
+    		<form id="new-customer-form" method="POST">
+    		    {#<div class="row mb-4">
+    		        <div class="col-6 mb-3">
+                        <label for="vatNumber" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'vatNumber_'~locale)}} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="vatNumber" name="vatNumber" required>
+        		    </div>
+    		        { #<div class="col-6 mb-3">
+                        <label for="fiscalCode" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'fiscalCode_'~locale)}} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="fiscalCode" name="fiscalCode" required>
+        		    </div># }
+        		    <div class="col-6 mb-3">
+        		        <label for="companyName" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'companyName_'~locale)}} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="companyName" name="companyName" required>
+        		    </div>
+        		    <div class="col-6 mb-3">
+        		        <label for="telephone" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'telephone_'~locale)}} <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" id="telephone" name="telephone" required>
+        		    </div>
+        		    <div class="col-6 mb-3">
+        		        <label for="email" class="form-label">E-mail <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+        		    </div>
+    		    </div>
+    		    <div class="row mb-4">
+        		    <div class="col-12 mb-3">
+        		        <label for="address" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'address_'~locale)}}</label>
+                        <input type="text" class="form-control" id="address" name="address">
+        		    </div>
+        		    <div class="col-6 mb-3">
+        		        <label for="zipCode" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'zipCode_'~locale)}}</label>
+                        <input type="text" class="form-control" id="zipCode" name="zipCode">
+        		    </div>
+        		    <div class="col-6 mb-3">
+        		        <label for="city" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'city_'~locale)}}</label>
+                        <input type="text" class="form-control" id="city" name="city">
+        		    </div>
+        		    <div class="col-6 mb-3">
+        		        <label for="district" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'district_'~locale)}}</label>
+                        <input type="text" class="form-control" id="district" name="district">
+        		    </div>
+        		    <div class="col-6 mb-3">
+        		        <label for="country" class="form-label">{{attribute(theme.settings.general.b2b_registration, 'country_'~locale)}}</label>
+                        <select name="country" class="form-control" onchange="checkCountry(this.value)">
+                            <option value="">---</option>
+                        </select>
+        		    </div>
+        		    <div class="col-12 show-if-italy mb-3" style="display:none;">
+                        <b>{{attribute(theme.settings.general.b2b_registration, 'ita_billing_'~locale)}}:</b>
+                    </div>
+                    <div class="col-md-6 col-12 show-if-italy mb-3" style="display:none;">
+        			    <div class="form-group">
+        				    <label>{{attribute(theme.settings.general.b2b_registration, 'sdi_'~locale)}}</label>
+        			        <input type="text" name="sdi" class="form-control"/>
+        		        </div>
+        		    </div>
+        		    <div class="col-md-6 col-12 show-if-italy mb-3" style="display:none;">
+        		        <div class="form-group">
+        			        <label>{{attribute(theme.settings.general.b2b_registration, 'certifiedEmail_'~locale)}}</label>
+        			        <input type="text" name="certifiedEmail" class="form-control"/>
+        		        </div>
+        		    </div>
+    		    </div>#}
+    		    <div class="row">
+            		   {# <div class="form-group form-box d-none" style="padding:0 15px">
+                			<label>Sei una azienda o un privato?</label>
+                			<select name="tipologia" class="form-control customField" value="azienda" id="changeType">
+                                <option value="Privato">Privato</option>
+                                <option value="Azienda" selected>Azienda</option>
+                            </select>
+            		    </div>#}
+            			<div class="col-md-12 col-sm-12 hideOnPrivate requiredOnCompany">
+            			    <div class="form-group" id="companyName">
+            					<label><span>Nome Azienda</span><span class="text-danger">*</span></label>
+            					<input type="text" name="companyname" class="companyname form-control" />
+            				</div>
+            		    </div>
+            		</div>
+            		
+            		<div class="row">
+                	    <div class="col-md-6 col-sm-6 requiredOnPrivate">
+            				<div class="form-group" id="accountName">
+            					<label><span>Nome e cognome</span><span class="text-danger">*</span></label>
+            					<input type="text" name="fullname" class="fullname form-control" required/>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-6">
+                			<div class="form-group">
+                    			<label>{{lang('signup.email')}} <span class="text-danger">*</span></label>
+                    			<input type="email" name="email" class="email form-control registration_email"  required/>
+                    		</div>
+                		</div>
+        			</div>
+        			<div class="row">
+        			    <div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            				    <label>Telefono <span class="text-danger">*</span></label>
+            			        <input type="text" id="telephone" name="telephone" class="form-control customField" required/>
+            		        </div>
+            	        </div>
+        			    <div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            				    <label>Cellulare <span class="text-danger">*</span></label>
+            			        <input type="text" id="mobile_phone" name="mobile_phone" class="form-control customField" required/>
+            		        </div>
+            	        </div>
+        			</div>
+        		    <div class="row">
+        		        <div class="col-md-6 col-sm-6">
+                			<div class="form-group">
+                    			<label>Ruolo</label>
+                    			<select name="role" class="form-control customField">
+                    			    <option value="not-selected">{{lang('registration_pro.referrer.0')}}</option>
+                                    {% for x in 1..5 %}<option value="{{lang('registration_pro.role.'~x)}}">{{lang('registration_pro.role.'~x)}}</option>{% endfor %}
+                                </select>
+            		        </div>
+                		</div>
+        			</div>
+        			<div class="mt-4 border-top pt-3">
+            		    <span class="h4">{{lang('billing.address')}}</span>
+        		    </div>
+        	        <div class="row">
+                	    <div class="col-md-6 col-sm-6 requiredOnPrivate">
+            				<div class="form-group" id="billing_accountName">
+            					<label><span>Nome e cognome</span><span class="text-danger">*</span></label>
+            					<input type="text" id="billing_fullname" name="billing_fullname" class="fullname customField form-control" required/>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            				    <label>Indirizzo <span class="text-danger">*</span></label>
+            			        <input type="text" id="billing_addr1" name="billing_addr1" class="form-control customField" required/>
+            		        </div>
+            		    </div>
+        			</div>
+            		
+            		<div class="row">
+            			<div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            				    <label>CAP <span class="text-danger">*</span></label>
+            			        <input type="text" id="billing_zip" name="billing_zip" class="form-control customField" required/>
+            		        </div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6">
+            		        <div class="form-group">
+            			        <label>Città <span class="text-danger">*</span></label>
+            			        <input type="text" id="billing_city" name="billing_city" class="form-control customField" required/>
+            		        </div>
+            		    </div>
+            	    </div>
+            	    <div class="row list-country-state">
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('register.country')}} <span class="text-danger">*</span></label>
+            					<select id="billing_countryCode" name="billing_country" class="form-control listCountry country{# #} customField" data-current="" onchange="italianRequired(this.value)" required>
+            					</select>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('register.state')}} <span class="text-danger">*</span></label>
+            					<select id="billing_state" name="billing_state" class="form-control listStates state customField" required data-current="" data-current-country="">
+            					</select>
+            				</div>
+            			</div>
+            		</div>
+            		<div class="row">
+            		    <div class="col-md-6 col-sm-6 hideOnPrivate requiredOnCompany">
+            		        <div class="form-group">
+            			        <label>Numero di partita IVA <span class="text-danger">*</span></label>
+            			        <input type="text" name="vat" class="form-control customField" />
+            		        </div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            					<label>Codice fiscale</label>
+            					<input type="text" name="codicefiscale" class="form-control customField fiscalCode" id="codiceFiscale"/>
+            				</div>
+            			</div>
+            		</div>
+            		<div class="row oneOfThese italianRequired">
+            			<div class="col-md-6 col-sm-6 hideOnPrivate">
+            			    <div class="form-group">
+            				    <label>Codice SDI <span class="text-danger">*</span></label>
+            			        <input type="text" name="sdi" class="form-control customField"/>
+            		        </div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6 hideOnPrivate requiredOnCompany">
+            		        <div class="form-group">
+            			        <label>Pec <span class="text-danger">*</span></label>
+            			        <input type="text" name="pec" class="form-control customField"/>
+            		        </div>
+            		    </div>
+            	    </div>
+            		
+            		
+            		<div class="mt-4 border-top pt-3">
+            		    <span class="h4">{{lang('shipping.address')}}</span>
+            		    <button id="same_address" class="btn btn-outline-dark ms-2 py-0">{{lang('address.copy_data')}}</button>
+        		    </div>
+        	        <div class="row mt-3">
+                	    <div class="col-md-6 col-sm-6 requiredOnPrivate">
+            				<div class="form-group" id="shipping_accountName">
+            					<label><span>Nome e cognome</span><span class="text-danger">*</span></label>
+            					<input type="text" id="shipping_fullname" name="shipping_fullname" class="fullname customField form-control" required/>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-12">
+            			    <div class="form-group">
+            				    <label>Indirizzo <span class="text-danger">*</span></label>
+            			        <input type="text" id="shipping_addr1" name="shipping_addr1" class="form-control customField" required/>
+            		        </div>
+            		    </div>
+        			</div>
+        			
+            		<div class="row">
+            			<div class="col-md-6 col-sm-6">
+            			    <div class="form-group">
+            				    <label>CAP <span class="text-danger">*</span></label>
+            			        <input type="text" id="shipping_zip" name="shipping_zip" class="form-control customField" required/>
+            		        </div>
+            		    </div>
+            		    <div class="col-md-6 col-sm-6">
+            		        <div class="form-group">
+            			        <label>Città <span class="text-danger">*</span></label>
+            			        <input type="text" id="shipping_city" name="shipping_city" class="form-control customField" required/>
+            		        </div>
+            		    </div>
+            	    </div>
+            	    <div class="row list-country-state">
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('register.country')}} <span class="text-danger">*</span></label>
+            					<select id="shipping_countryCode" name="shipping_country" class="form-control listCountry country{# #} customField" data-current="" onchange="italianRequired(this.value)" required>
+            					</select>
+            				</div>
+            			</div>
+            			<div class="col-md-6 col-sm-6">
+            				<div class="form-group">
+            					<label>{{lang('register.state')}} <span class="text-danger">*</span></label>
+            					<select id="shipping_state" name="shipping_state" class="form-control listStates state customField" required data-current="" data-current-country="">
+            					</select>
+            				</div>
+            			</div>
+            		</div>
+                <div class="col-12 text-center"><button type="submit" class="btn button">{{lang('admin.send')|upper}}</button></div>
+            </form>
+        {% endif %}
+	</div>
+</div>
+
+<script>
+    $(document).ready(function(){
+        $('select[name="country"]').empty().append(new Option("---", ""));
+        Storeden.getCountries(function(countries){
+            countries.forEach(function(country) {
+                $('select[name="country"]').append(new Option(country.name, country.tld));
+            });
+        });
+    })
+    
+    function checkCountry(country){
+        console.log("change country: " + country);
+        if(country == "IT"){
+            $('.show-if-italy').fadeIn();
+        }else{
+            $('.show-if-italy').fadeOut();
+        }
+    }
+    
+    $('#same_address').on('click', function(e){
+        e.preventDefault();
+        var fullname = $('#billing_fullname').val();
+		$('#shipping_fullname').val(fullname);
+		var email = $('#billing_email').val();
+		$('#shipping_email').val(email);
+		var phone = $('#billing_telephone').val();
+		$('#shipping_telephone').val(phone);
+		var vat = $('#billing_vat').val();
+		$('#shipping_vat').val(vat);
+		var addr1 = $('#billing_addr1').val();
+		$('#shipping_addr1').val(addr1);
+		var city = $('#billing_city').val();
+		$('#shipping_city').val(city);
+		var stateOptions = $('#billing_state').html();
+		$('#shipping_state').html(stateOptions);
+		var state = $('#billing_state').val();
+		$('#shipping_state').val(state);
+		var zip = $('#billing_zip').val();
+		$('#shipping_zip').val(zip);
+		var country = $('#billing_countryCode').val();
+		$('#shipping_countryCode').val(country);
+    });
+    
+    function italianRequired(country){
+        console.log('nazione: ',country);
+        if(country==119){
+            $('.italianRequired').each(
+                function(){$(this).removeClass("d-none");}
+            )
+        }else{
+            $('.italianRequired').each(
+                function(){$(this).addClass("d-none");}
+            )
+        }
+    }
+</script>

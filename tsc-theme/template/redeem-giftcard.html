@@ -1,0 +1,73 @@
+<div class="container pt-4" id="reedem_giftcard_page">
+    
+    {% if user.uid < 1 %}
+    	
+    	<div class="giftcard-container" id="redeem_giftcard">
+    		<h1>{{lang('redeem.code.need.login')}}</h1>
+    		<p>{{lang('redeem.code.need.login.p')|raw}}</p>
+    	</div>
+    	{% include 'login.html' %}
+    	
+    {% else %}
+	
+	<div class="giftcard-container" id="redeem_giftcard">
+	    
+		<h1 class="heading">{{lang('front.gift.card')}}</h1>
+		
+		<div class="padd">
+		
+			{% if raisederror.has %}
+				<div class="alert alert-danger">
+					{{lang('redeem.error.title')}}<br>
+					{{lang('redeem.error.code.'~raisederror.code) | raw}}
+				</div>
+			{% elseif request.method == 'POST' or request.query.status == 'success' %}
+				<div class="alert alert-success">
+					{{lang('redeem.succes') | raw}}
+				</div>
+			{% endif %}
+
+			<form method="post" action="/redeem-giftcard">
+				<div class="row">
+					<div class="col-12 col-sm-12 col-md-7">
+						<p class="mb-5">{{lang('giftcard.redeem.message')}}<br>{{lang('redeem.code')}}</p>
+						<div class="form-group mb-5">
+							<input type="text" name="giftcard_code" class="form-control" maxlength="18" value="{{request.query.giftcode}}" style="text-transform: uppercase"/>
+							<small style="margin-top: 5px;line-height:normal">* {{lang('redeem.code.small') | raw }}</small>
+						</div>
+						<input type="submit" class="dn-btn dn-btn-filled dn-btn-brand-1 mb-5" value="{{lang('redeem.submit')}}" />
+					</div>
+					<div class="col-12 col-sm-12 col-md-5 text-end">
+						<div class="padd">
+							<div id="giftcard-preview">
+								<div id="gitcard-top" class="text-center position-relative">
+									<span id="giftcard-name"></span>
+								</div>
+								<div id="giftcard-bottom">
+									<p class="p-3">{{user.fullname}}<br>{{user.email}}</p>
+									<div class="row">
+										<div class="col-md-6 col-sm-7 col-xs-12">
+											<div id="giftcard-text">
+    											<h1 class="text-start">{{lang('current.balance')}}</h1>
+    											<div class="clearfix"></div>
+											</div>
+										</div>
+										<div class="col-md-6 col-sm-5 col-xs-12 text-end">
+											<h1 id="current-giftcard-balance">
+												{{ getGiftCardBalance() | nfx }} {{ lang('symbol.'~group.currency) | raw}}
+											</h1>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+
+					</div>
+
+				</div>
+			</form>
+		</div>
+	</div>
+{% endif %}
+</div>

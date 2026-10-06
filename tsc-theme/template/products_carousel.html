@@ -1,0 +1,63 @@
+{% set autoplay = 'false' %}
+{% if vars.section.settings.autoplay == 'yes'%}
+	{% set autoplay = '5000' %}
+{% endif %}
+
+{% if vars.section.id != "" %}
+    {% set unique_identifier = vars.section.id %}
+{% else %}
+    {% set unique_identifier = request.path.1 %}
+{% endif %}
+
+<div style="position:relative">
+<div id="swiper_{{unique_identifier}}" class="swiper" style="overflow:hidden;">
+	<div class="swiper-wrapper">
+		{% set per_row = 4 %}
+		{% set count_slide = 0 %}
+		{% set count_item = 0 %}
+		{% set items = item_vars.items | slice(0, item_vars.count) %}
+		{% for item in items if ((not(item.unlimited))or(item.stockCount > 0)) %}
+			<div class="swiper-slide">
+			    {% include 'product_preview.html' %}
+			</div>
+		{% endfor %}
+		
+		{% if count_item <= per_row and count_item > 0%}
+				{% set count_slide = count_slide +1 %}
+				</div> <!-- row -->
+			</div> <!-- item -->
+		{% endif %}
+	
+  	</div>
+  	
+  	<div class="swiper-pagination"></div>
+  	{#<div class="swiper-scrollbar"></div>#}
+  	
+</div>
+
+<div class="swiper-button-prev swiper-button-prev_{{unique_identifier}} swiper-prod"></div>
+<div class="swiper-button-next swiper-button-next_{{unique_identifier}} swiper-prod"></div>
+</div>
+
+<script>
+    const swiper = new Swiper('#swiper_{{vars.section.id}}', {
+        spaceBetween: 15,
+        slidesPerView: 2,
+        breakpoints: {
+            // when window width is >= 480px
+            480: {
+                slidesPerView: 3,
+                spaceBetween: 20
+            },
+            // when window width is >= 640px
+            640: {
+                slidesPerView: 4,
+                spaceBetween: 20
+            }
+        },
+        navigation: {
+            nextEl: '.swiper-button-next_{{vars.section.id}}',
+            prevEl: '.swiper-button-prev_{{vars.section.id}}',
+        },
+    });
+</script>

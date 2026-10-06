@@ -1,0 +1,308 @@
+{% if theme.settings.shop.show_price_filter == 'yes' %}
+		
+	{% if request.query.price_low > 0 %}
+		{% set currentMin = request.query.price_low %}
+	{% else %}
+		{% set currentMin = 0 %}
+	{% endif %}
+
+	{% if request.query.price_high > 0%}
+		{% set currentMax = request.query.price_high %}
+	{% else %}
+		{% set currentMax = theme.settings.shop.price_filter_max %}
+		{% if currentMax == '' or max == 0 %}
+			{% set max = 5000 %}
+		{% endif %}
+	{% endif %}
+
+	{% set max = theme.settings.shop.price_filter_max %}
+	{% if max == '' or max == 0 %}
+		{% set max = 5000 %}
+	{% endif %}
+
+	{% set step = theme.settings.shop.price_filter_step %}
+	{% if step == '' or step == 0 %}
+		{% set step = 50 %}
+	{% endif %}
+
+	<div class="navigation-block price-navigation">
+		<input id="price_menu_state" data-target="price_slider_block" class="menu-state" type="checkbox" aria-hidden="true" tabindex="-1"/>
+		<label class="main-menu-btn" for="price_menu_state">
+			<span class="main-menu-btn-icon"></span>
+		</label>
+		{#<span class="nav-filters nav-title"><a href="#"><strong>{{lang('front.filter.price')}}</strong></a></span>#}
+		<label for="price_menu_state" class="nav-filters nav-title main-menu-label" tabindex="0" role="button" aria-controls="price_menu_state">
+            <strong>{{lang('front.filter.price')}}</strong>
+        </label>
+		<div class="sm sm-vertical sm-clean menu vertical-menu" id="price_slider_block">
+			<div id="price_slider">
+				<div id="slider-step"></div>
+			</div>
+			<p>
+				<small>{{currency|raw}} 
+					<span id="slider-step-value-min">{{currentMin}}</span> - 
+					<span id="slider-step-value-max">{{currentMax}}</span>
+					{% if (request.query.price_high != '' and max > request.query.price_high) or request.query.price_low > 0 %}
+						<span class="pointer remove_price_filter">
+							<span>{{lang('front.remove.filter')}}</span>
+						</span>
+					{% endif %}
+				</small>
+			</p>
+		</div>
+	</div>
+	
+	<script>
+		
+		$(document).ready(function(){
+    
+            var stepSlider = document.getElementById('slider-step');
+            noUiSlider.create(stepSlider, {
+                start: [ {{currentMin}}, {{currentMax}} ],
+                step: {{step}},
+                connect: true,
+                range: {
+                    'min': 0,	  	
+                    'max': {{max}}
+                },
+                format: wNumb({
+                    decimals: 0,
+                    mark : ",",
+                    thousand : "."
+                })
+            });
+        
+            // 👍 Aggiungiamo i nomi accessibili alle maniglie
+            var handles = stepSlider.querySelectorAll('.noUi-handle');
+        
+            handles[0].setAttribute('aria-label', '{{ lang("front.filter.price.min")|default("Prezzo minimo") }}');
+            handles[1].setAttribute('aria-label', '{{ lang("front.filter.price.max")|default("Prezzo massimo") }}');
+        
+            // Aggiorna valori mostrati
+            stepSlider.noUiSlider.on('update', function( values, handle ) {
+                $('#slider-step-value-min').text(values[0]);
+                $('#slider-step-value-max').text(values[1]);
+            });
+        
+            stepSlider.noUiSlider.on('set', function ( values, handle, unencoded, isTap, positions ) {
+                var p = values[0];
+                p = p.replace('.', '');
+                price_low = parseInt(p);
+                p = values[1];
+                p = p.replace('.', '');
+                price_high = parseInt(p);
+                createFilteredUrl();
+            });
+            
+            $(document).on('click', '.remove_price_filter', function(){
+                price_low = 0;
+                price_high = {{max}};
+                createFilteredUrl();	   
+            });
+        
+        });
+
+	  
+	</script>
+	
+	{% flush %}
+{% endif %}
+
+{% if theme.settings.shop.show_other_filters == 'yes' %}
+
+	{% set toHide = theme.settings.shop.filters_to_hide | replace({' ':''}) | split(',') %}
+	{% set params = getParameters() %}
+
+	{% for value in params %}
+
+		{% set key = value.key %}
+		{% set show_this_filter = true %}
+		{% if key in toHide %}
+			{% set show_this_filter = false %}
+		{% endif %}
+
+		{% if show_this_filter %}	
+
+			{% set is_set_another = false %}
+			{% for k,v in current_parametrs %}
+				{% if k != key %}
+					{% set is_set_another = true %}
+				{% endif %}
+			{% endfor %}
+
+			{% set is_set = false %}	
+			{% set current_val = '' %}	
+			{% if attribute(current_parametrs, key) | length > 0 %}
+				{% set is_set = true %}	
+				{% set current_val = attribute(current_parametrs, key) %}
+			{% endif %}
+
+			{% set options_count = 0 %}
+			{% set values = value.values %}
+
+			<div class="navigation-block d-none filter-navigation" id="navigation_block_{{key}}">
+				<input id="list_{{key}}_menu_state" data-target="#list_{{key}}" class="menu-state" type="checkbox" aria-hidden="true" tabindex="-1"/>
+				<label class="main-menu-btn" for="list_{{key}}_menu_state">
+					<span class="main-menu-btn-icon"></span>
+				</label>
+				{#<span class="nav-filters nav-title"><a href="#"><strong>{{translate_resource(value._id, 'key', key) }}</strong></a></span>#}
+				<label for="list_{{key}}_menu_state" class="nav-filters nav-title main-menu-label" tabindex="0" role="button" aria-controls="list_{{key}}_menu_state">
+                    <strong>{{translate_resource(value._id, 'key', key) }}</strong>
+                </label>
+				<ul id="#list_{{key}}" class="sm sm-vertical sm-clean menu vertical-menu">
+						
+					{% for i,v in values %}
+						{% set filter_current ="parameters."~key %}
+						
+						{% set filterArray = [] %}
+						{% set filterArray = filterArray | merge(document.active_filter)  %}
+						{% set filterArray = filterArray | merge({ (filter_current) : ''~(i) })  %}
+						
+						{% set is_set_option = false %}
+						{% if i in current_val %}
+							{% set is_set_option = true %}
+						{% endif %}
+					
+						{% set filterCount = countProductsByParams(vars.categoryUID, vars.brandUID, filterArray) %}
+						{% if filterCount > 0 or (is_set and is_set_option) %}
+							{% set options_count = options_count + 1%}
+							{% set new_params = '' %}
+							{% set new_params_reset = '' %}
+							{% for current_key, current_value in filterArray %}
+								{% set split_key = current_key | split('.') %}
+								{% set new_params = new_params ~ '/' ~ split_key.1 ~ '/' ~ current_value %}
+								{% if split_key.1 != key %}
+									{% set new_params_reset = new_params ~ '/' ~ split_key.1 ~ '/' ~ current_value %}
+								{% endif %}
+							{% endfor %}
+							<li data-key="{{key}}" data-value="{{i}}" id="param_{{key}}_{{i}}" class="filter">
+								<a href="#" class="pointer {% if is_set and i in current_val %}active{% endif %}">
+									{{	translate_resource(value._id, 'string-'~i, v)  }} <span class="text-muted">({{filterCount}})</span>
+								</a>
+							</li>
+						{% endif %}
+					{% endfor %}
+				</ul>
+			</div>
+
+			{% if options_count > 0 or is_set %}
+				<script>
+					$('#navigation_block_{{key}}').removeClass('d-none');		
+				</script>
+			{% endif %}
+
+			{% flush %}
+
+		{% endif %}
+	{% endfor %}
+{% endif %}
+
+<script>
+		
+	//pathname
+	var loc = window.location.pathname;
+	var pathname = loc.split('/');
+
+	//basic values
+	var brandUID = '-';
+	var categoryUID = '-';
+
+	//parameters 
+	var params = new Array();
+	if (pathname[2] == 'complex') {
+		for (var i = 7; i<pathname.length; i+=2){
+			var kp = pathname[i];
+			var kv = pathname[i+1];
+			if (kp != '') {
+				params[kp] = kv.split('~');
+			}
+		}
+	}
+
+	//query values
+	var categoryUID = '{{vars.categoryUID}}';
+	var brandUID =  '{{vars.brandUID}}';
+	var sort_order_type = "{{attribute(request.query, 'sort-order-type')}}";
+	var sort_order_field = "{{attribute(request.query, 'sort-order-field')}}";
+	var product_page = "{{itemsPerPage}}";
+	var page = {{currentPage}};
+	var price_low = 0;
+	var price_high = '{{request.query.price_high}}';
+	var search_title = '{{request.query.title}}';
+
+	$(document).ready(function(){
+		$('#perpage #'+product_page).addClass('active');
+		$('#sort #'+sort_order_field+'_'+sort_order_type).addClass('active');
+	})
+	
+	$(document).on('click', '#perpage a', function(e){
+		e.preventDefault();
+		var val = $(this).attr('id');
+		product_page = val;
+		page = 1;
+		createFilteredUrl();
+	})
+
+	$(document).on('click', '#sort a', function(e){
+		e.preventDefault();
+		var val = $(this).attr('id');
+		var exp = val.split('_');
+		sort_order_field = exp[0];
+		sort_order_type = exp[1];
+		page = 1;
+		createFilteredUrl();
+	})
+	
+	$(document).on('click', '.filter', function(){
+		
+		var filter_key = $(this).attr('data-key');
+		var filter_value = $(this).attr('data-value');
+		var current = params[filter_key];
+		if (typeof(current) == 'undefined') {
+			params[filter_key] = [filter_value];
+		} else {
+			var is_in = current.indexOf(filter_value);
+			if (is_in < 0) {
+				current.push(filter_value);
+				params[filter_key] = current;
+			} else {
+				current.splice(is_in, 1);
+				params[filter_key] = current;
+			}
+		}
+		createFilteredUrl();
+		
+	});
+
+	function createFilteredUrl(){
+		
+		var url = '/shop/complex/category/'+categoryUID+'/brand/'+brandUID+'/';
+		
+		var opt = opt;
+		var has_param = false;
+		for (var k in params){
+			opt = (params[k]).join('~');
+			if (opt != '') {
+				has_param = true;
+				url += k+'/'+opt+'/';
+			}
+		}
+		if (has_param){
+			url = url.slice(0,-1)
+		}	
+		var query = '?';
+
+		if (price_low >= 0 && price_high > price_low ){
+			query += 'price_low='+price_low+'&price_high='+price_high;
+		}
+		query += '&sort-order-field='+sort_order_field+'&sort-order-type='+sort_order_type+'&product-page='+product_page+'&page='+page;
+		if (search_title){
+			query += '&title='+search_title;
+		}
+		if (query != '?')
+			url += query;
+		
+		window.location = url;
+	}
+		
+</script>

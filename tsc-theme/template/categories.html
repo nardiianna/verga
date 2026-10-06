@@ -1,0 +1,24 @@
+{% set current_level_new = current_level+1 %}
+{% if current_level > 0 %}	
+	<ul>
+{% endif %}
+		{% for category in catree %}
+			{% if new_vars.categoryUID == category.catUID %}
+				{% set activeClass = 'active'%}
+			{% else %}
+				{% set activeClass = '' %}
+			{% endif %}
+			{% set subLenght = category.subcategory | length %}
+			<li>
+				<a href="/shop/complex/category/{{category.catUID}}/brand/{{new_vars.brandUID}}{{new_vars.param}}{{new_vars.query}}" class="{{activeClass}}">
+					<div class="overflow-hidden">{{ category.name }}</div>
+				</a>
+				{% if subLenght > 0 %}
+					{% set vars = { 'catree':  category.subcategory, 'current_level': current_level_new, 'new_vars' : new_vars } %}
+					{% include "categories.html" with vars %}
+				{% endif %}
+			</li>
+		{% endfor %}
+{% if current_level > 0 %}			
+	</ul>
+{% endif %}

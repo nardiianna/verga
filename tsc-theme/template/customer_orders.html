@@ -1,0 +1,191 @@
+<div class="row">
+	<div class='col-12 col-sm-4 col-md-3 third-column-product'>	
+		{% include 'menu_profile.html' %}
+	</div>
+	<div class="col-12 col-sm-8 col-md-9  col-xs-12 profileLeft">
+	    {% set orderStatusList = getOrdersStatus() %}
+	    
+		{% if customer_selected or agent_selected or (user.uid > 0 and not is_agent) %}
+    		{% if request.query.n != "" %}
+    		    {% set n = request.query.n %}
+    		    
+                {% set order_details = fetchAndCache(shop_rules.fetchAndCache.order_details ~ n)|jsondecode.detail %}
+				
+				{% for i in 1..3 if order_details is empty %}
+                    {% set order_details = fetchAndCache(shop_rules.fetchAndCache.order_details ~ n~"&retry="~i)|jsondecode.detail %}
+                    <script>
+            		    console.log("Ripetizione F&C order details n° {{i}}");
+            		</script>
+                {% endfor %}
+        		
+        		<script>
+        		    console.log("order_details:", {{order_details|json}});
+        		</script>
+        		
+        		{% set pda_n = "" %}
+        		{% for tag in order_details.tags if "pre_order_id__" in tag %}
+        		    {% set pda_n = tag|split("__")|last %}
+        		{% endfor %}
+        		
+    		    <a href="/profile/orders" class="mb-2 d-block"><i class="fas fa-angle-left"></i> {{lang('front.back')}}</a>
+    		    <h1 class="heading">{{lang('order.id')}} n°{{n}}</h1>
+    		    <div class="row row-gap-4 mb-5">
+    		        <div class="col-12 col-md-6"><h4>{{lang('profile.agent.quotes.heading.2')}}</h4> {{order_details.iso.orderDate|date("d/m/Y - h:i")}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('profile.agent.quotes.heading.4')}}</h4> {{ lang(orderStatusList[order_details.status]) }}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('order.payment')}}</h4> {{order_details.payment}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('invoice.shipping.method')}}</h4> {{order_details.method}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('shipping.address')}}</h4> {{order_details.delivery.fullname}}<br>{{order_details.delivery.addr1}},<br>{{order_details.delivery.zip}} {{order_details.delivery.city}} ({{order_details.delivery.stateName}}) {{order_details.delivery.nationName}}</div>
+    		        <div class="col-12 col-md-6"><h4>{{lang('billing.address')}}</h4> {{order_details.billing.fullname}}<br>{{order_details.billing.addr1}},<br>{{order_details.billing.zip}} {{order_details.billing.city}} ({{order_details.billing.stateName}}) {{order_details.billing.nationName}}</div>
+    		        {% if pda_n != "" %}
+    		            <div class="col-12 col-md-6">
+    		                <h4>{{lang('order.generated_by_pda')}}</h4>
+    		                N° {{pda_n}} <a href="/profile/proposals?n={{pda_n}}" class="ms-2 dn-text-underline">{{lang('pda.open')}}</a>
+		                </div>
+	                {% endif %}
+    		        <div class="col-12 col-md-6"><h4>{{lang('message.to.store')}}</h4> {{order_details.message}}</div>
+    		    </div>
+    		    
+    		    <div class="row row-gap-3 mb-4">
+    		        <div class="col-6 h4 border-bottom border-secondary pb-2">{{lang('cart.item')}}</div>
+    		        <div class="col-2 h4 border-bottom border-secondary pb-2">{{lang('item.price')}}</div>
+    		        <div class="col-2 h4 border-bottom border-secondary pb-2">{{lang('item.quantity')}}</div>
+    		        <div class="col-2 h4 border-bottom border-secondary pb-2">{{lang('cart.subtotal')}}</div>
+                    
+                    {% set cart_items = order_details.cart.items|json_encode|jsondecode(true) %}
+    		        {% for x in cart_items %}
+                        {#% set x = attribute(order_details.cart.items, product_id) %#}
+        		        <div class="col-6 border-bottom pb-2">
+        		            <h5>{{x.title}}</h5>
+        		            <small>{{lang('item.sku')}}: {{x.sku}}</small>
+        		            {% if x.options != "" %}<br><small>{{lang('item.variants')}}: {{x.options}}</small>{% endif %}
+    		            </div>
+        		        <div class="col-2 border-bottom pb-2">
+    		                {{x.price| number_format(2, ',', '.')}} {{currency|raw}}
+    		            </div>
+        		        <div class="col-2 border-bottom pb-2">{{x.count}}</div>
+        		        <div class="col-2 border-bottom pb-2">{{(x.price * x.count)| number_format(2, ',', '.')}} {{currency|raw}}</div>
+    		        {% endfor %}
+    		    </div>
+    		    
+    		    <div class="text-end">
+            	    <h5>{{lang('total')}}</h5>{{order_details.total| number_format(2, ',', '.')}} {{currency | raw }} 
+            	</div>
+    		{% else %}
+        		{% set order_listing = fetchAndCache(shop_rules.fetchAndCache.order_list)|jsondecode %}
+				
+				{% for i in 1..3 if order_listing is empty %}
+                    {% set order_listing = fetchAndCache(shop_rules.fetchAndCache.order_list~"&retry="~i)|jsondecode %}
+                    <script>
+            		    console.log("Ripetizione F&C order listing n° {{i}}");
+            		</script>
+                {% endfor %}
+        		
+        		<script>
+        		    console.log("order_listing:", {{order_listing|json}});
+        		</script>
+        		
+        		<h1 class="heading">{{lang('user.orders')}}</h1>
+        		<table id="quotes-table" class="table list-orders mb-5 list-table">
+        		    <thead>
+        			    <tr>
+        				    <th class="first-row p-2 p-md-3 text-start" style="width:20%">{{lang('profile.agent.quotes.heading.1')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.2')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.3')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.4')}}</th>
+        				    <th class="first-row p-2 p-md-3" style="width:20%">{{lang('profile.agent.quotes.heading.5')}}</th>
+        				    <th class="first-row p-2 p-md-3 text-center" style="width:20%">{{lang('profile.agent.details')}}</th>
+        			    </tr>
+        		    </thead>
+        		    <tbody>
+        		        {% for x in order_listing.list %}
+            		        <tr>
+                                <td class="p-2 p-md-3 cell text-start">{{x.orderID}}</td> 
+                                <td class="p-2 p-md-3 cell">{{x.date|split(" ")|first|date("d/m/Y")}}</td>
+                                <td class="p-2 p-md-3 cell">{{x.total| number_format(2, ',', '.')}} {{currency|raw}}</td>
+                                <td class="p-2 p-md-3 cell">{{ lang(orderStatusList[x.status]) }}</td>
+                                <td class="p-2 p-md-3 cell">{{ x.billing.fullname }}</td>
+                                <td class="p-2 p-md-3 text-center cell">
+                			        <a href="/profile/orders?n={{x.orderID}}" class="button-underline">{{lang('profile.agent.details')}}</a>
+                		        </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+            	</table>
+        	{% endif %}
+    	{% else %}
+    	    <div class="alert alert-warning" role="alert">
+                {{lang('profile.agent.no_customer_selected')}}
+            </div>
+    	{% endif %}
+	</div>
+</div>
+{% if customer_data.customer_id != "" %}
+    <script>
+        $(document).ready(function() {
+			//Se ci sono date in formato gg/mm/aaaa
+            $.extend(DataTable.ext.type.order, {
+                "date-eu-pre": function (date) {
+                    if (!date) return 0;
+                    const parts = date.split('/');
+                    if (parts.length !== 3) return 0;
+                    // parts[2] = anno, parts[1] = mese, parts[0] = giorno
+                    return new Date(parts[2], parts[1] - 1, parts[0]).getTime();
+                }
+            });
+
+            const quotesTable = new DataTable('#quotes-table', {
+                responsive: {
+                    details: {
+                        type: 'inline'   // dettagli sotto la riga (migliore su mobile)
+                    }
+                },
+                order: [[1, 'desc']],
+                displayLength: 25,
+				{% if locale == "it_IT" %}
+                language: {
+                    processing:     "Caricamento in corso...",
+                    search:         "Cerca",
+                    lengthMenu:     "_MENU_ elementi per pagina",
+                    info:           "Elementi: _TOTAL_",
+                    infoEmpty:      "",
+                    infoFiltered:   "",
+                    infoPostFix:    "",
+                    loadingRecords: "Caricamento...",
+                    zeroRecords:    "",
+                    emptyTable:     "",
+                    paginate: {
+                        first:      "Prima",
+                        previous:   "Precedente",
+                        next:       "Prossima",
+                        last:       "Ultima"
+                    },
+                },
+				{% endif %}
+                columnDefs: [
+                    {
+                        searchable: false,
+                        orderable:false,
+                        target: 5
+                    },
+                    {% if customer.custom_fields.role != "area_manager" %}{
+                        visible: false,
+                        target: 4
+                    },
+                    {% endif %}
+                    {
+                        targets: 1,
+                        type: 'date-eu',
+                    }
+                ],
+                layout: {
+                    top: null,
+                    topStart: 'info',
+                    topEnd: 'search',
+                    bottom: 'paging',
+                    bottomStart: null,
+                    bottomEnd: null
+                }
+            });
+        });
+    </script>
+{% endif %}

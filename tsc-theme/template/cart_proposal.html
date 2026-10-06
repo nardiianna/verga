@@ -1,0 +1,1609 @@
+{# DISANNOTARE SE SERVONO DEGLI INDIRIZZI FAKE #}
+{#% set fake_addr = [
+    	{
+    		"customerid": "10",
+    		"addressid": "0",
+    		"fullname": "Sede di Padova",
+    		"address": "Via Venezia, 1",
+    		"zipcode": "35020",
+    		"city": "Padova",
+    		"district": "",
+    		"district_code": null,
+    		"country": "",
+    		"country_code": null,
+    		"phone": "0123456",
+    		"vatnumber": "888",
+    		"fiscalcode": "",
+    		"sdi": "999",
+    		"pec": "pec#pec.it",
+    		"email": "brognara.marco+test4@gmail.com"
+    	},
+    	{
+    		"customerid": "10",
+    		"addressid": "1",
+    		"fullname": "Sede di Treviso",
+    		"address": "Via G. Amendola, 30",
+    		"zipcode": "31020",
+    		"city": "",
+    		"district": "TV",
+    		"district_code": 13637,
+    		"country": "IT",
+    		"country_code": 119,
+    		"phone": "0123456",
+    		"vatnumber": "888",
+    		"fiscalcode": "",
+    		"sdi": "999",
+    		"pec": "pec#pec.it",
+    		"email": "brognara.marco+test4@gmail.com"
+    	},
+    	{
+    		"customerid": "10",
+    		"addressid": "2",
+    		"fullname": "Sede di Este",
+    		"address": "Viale fiume, 65",
+    		"zipcode": "35042",
+    		"city": "Este",
+    		"district": "PD",
+    		"district_code": 6482,
+    		"country": "IT",
+    		"country_code": 119,
+    		"phone": "0123456",
+    		"vatnumber": "888",
+    		"fiscalcode": "",
+    		"sdi": "999",
+    		"pec": "pec#pec.it",
+    		"email": "brognara.marco+test4@gmail.com"
+    	},
+    	{
+    		"customerid": "10",
+    		"addressid": "3",
+    		"fullname": "Sede Legale",
+    		"address": "Via G. Berchet, 16",
+    		"zipcode": "35131",
+    		"city": "Padova",
+    		"district": "PD",
+    		"district_code": 6482,
+    		"country": "IT",
+    		"country_code": 119,
+    		"phone": "0123456",
+    		"vatnumber": "888",
+    		"fiscalcode": "",
+    		"sdi": "999",
+    		"pec": "pec#pec.it",
+    		"email": "brognara.marco+test4@gmail.com"
+    	}
+    ] %}
+{% set customer_data = {
+    "customer_id": customer_data.customer_id,
+    "billing": customer_data.billing,
+    "shipping": fake_addr,
+    "payment": customer_data.payment
+} %#}
+
+{% set items = cartItems() %}
+{% set countItems = cartCount() %}
+{% set cartTotal = cartTotal() %}
+<script>
+    var prop_items = new Array();
+</script>
+<div class="container">
+    {% if request.path.2 not in ['proposal','proposal-error'] %}
+        {% if (is_agent and (customer_selected or new_customer)) or not is_agent %}
+            {% if countItems > 0 %}
+            	<form method="POST" action="/cart" id="formCartQuantity" class="mb-5">
+            		<table class="cart_table table table-condensed">
+            			<thead>
+            				<tr>
+            					<th style="width:50%">{{lang('cart.item')}}</th>
+            					<th style="width:12%">{{lang('item.price')}}</th>
+            					<th style="width:19%">{{lang('item.quantity') | raw }}</th>
+            					<th style="width:12%" class="text-center">{{lang('cart.subtotal')}}</th>
+            					<th style="width:1%"></th>
+            				</tr>
+            			</thead>
+            			<tbody>
+            			{% for k,item in items %}
+            						
+            				{% set dataOptions = '' %}
+            				
+            				{% set totalItem = item.price*item.count  %}
+            				{% set exp = explode('#|#', k) %}
+            				{% set itemUID = exp.0 %}
+            				
+            				{% set options = explode('_', exp.1) %}
+            				
+            				{% if exp.1 != '' %}
+            					{% set dataOptions = exp.1 %}
+            				{% else%}
+            					{% set options = '' %}
+            				{% endif %}
+                            {% if show_logs %}<script>console.log("itemuid: {{itemUID}}");</script>{% endif %}
+            				{% set product = getCompleteItem(itemUID, false, true, false) %}
+            
+            				{% set available = product.stockCount %}
+            				{% if product.data.unlimited %}
+            					{% set available = 'unlimited' %}
+            				{% elseif product.usevariants == 1 %}
+            					{% for var in product.variants %}
+            						{% if var.superkey | replace({"." : "-DOT-"}) == exp.1 %}
+            							{% set available = var.available %}
+            						{% endif %}
+            					{% endfor %}
+            				{% endif %}
+            				
+            				{% if product.title == ''%}
+            				    {% set productTitle = item.title %}
+            				{% else %}
+            				    {% set productTitle = product.title %}
+            				{% endif %}
+            
+            				{% set minQuantity = product.data.minQuantity %}
+            				{% if minQuantity < 1 %}
+            					{% set minQuantity = 1 %}
+            				{% endif %}
+            
+            				{% set step = product.data.step %}
+            				{% if step < 1 %}
+            					{% set step = 1 %}
+            				{% endif %}
+            			
+            				{% set optionClear = exp.1 |replace({'*': "asterix"}) %}
+            				{% set rowID = 'row_'~itemUID~'_'~optionClear %}
+            				
+            				{% set tax = getTaxProfile(product.taxprofile) %}
+                            {% set tax_value = tax.value %}
+                            {% if tax_value == 0 %}
+                                {% set tax_value = 22 %}
+                            {% endif %}
+                            {% set tax_value = 1 + (tax_value / 100) %}
+
+                            {% set sign_sku = (item.sku) ? item.sku|url_encode : product.code|url_encode %}
+                        	{# url_encode serve perchè se passi al fetchAndCache valori di parametri con spazi non funziona Storello in particolare ha sku con gli spazi #}
+							{% set sign_options = item.options %}
+                        	{% set sign_count = item.count %}
+                          	{% set sign_count_del = item.count %}
+                        	{% set sign_price = item.price %}
+                        	{% set sign_lis_price = item.listing_price %}
+                        	{% set sign_disc_per = '' %}
+                        	{% set sign_disc_val = '' %}
+                        	{% set sign_tax_value = tax.value %}
+                            {% set cust_string = '' %}
+                            {% set signature_source = [sign_sku, sign_options, sign_count, sign_count_del, sign_price,  sign_lis_price,  sign_disc_per,  sign_disc_val,  sign_tax_value, cust_string] %}
+ 
+                        	{% set signature = fetchAndCache(shop_rules.fetchAndCache.hash_string~signature_source|join("|")) %}
+
+                            {% for i in 1..3 if signature is empty %}
+                                {% set signature = fetchAndCache(shop_rules.fetchAndCache.hash_string~signature_source|join("|")~'&retry='~i) %}
+                                <script>
+                                    console.log("Ripetizione F&C signature n° {{i}}");
+                                </script>
+                            {% endfor %}
+                    
+            				<tr id="{{rowID}}" class="row_{{k}} cart_single_row" data-class="row_{{k}}" data-id="{{rowID}}">
+            					<td data-th="{{lang('cart.item')}}">
+            						<div class="row cart_table_row">
+            							<div class="col-sm-3 col-md-3 col-3 cart_table_image noPaddingLeft">
+            								<img src="https://cdn.storeden.net/secache/{{product.image_id|default(shop_rules.placeholder)}}" class="img-responsive" alt="{{productTitle}} - {{lang('acc_act.main_img')}}">
+            							</div>
+            							<div class="col-sm-9 col-md-9 col-9 cart_table_content">
+            								<a class="strong" href="{{request.script_name}}/product/{{itemUID}}/{{product.slug}}">{{productTitle}}</a>
+            								<p>SKU: {{product.code}}</p>
+                                            {% set l = options | length %}
+            								{% if l > 0 %}
+            									<br><span class="options">
+            										{% set variants_found = [] %}
+            										{% for option in options %}
+            										    {% set option_found = false %}
+            											{% for k, vars in product.vars %}
+            												{% for j,value in vars.options if not option_found %}
+            													{% if value.option | lower | replace({'.':'-dot-'}) == option|lower and vars.title not in variants_found %}
+            														{% set variants_found = variants_found | merge([vars.title]) %}
+            														{{vars.title}}:
+            														{{ value.title}}<br>
+            														{% set option_found = true %}
+            													{% endif %}
+            												{% endfor %}
+            											{% endfor %}
+            										{% endfor %}
+            									</span>
+            								{% endif %}
+            								{% if item.customization != "" %}
+            								    <div class="customization">
+            								        {% if 'cartrule' in item.customization %}
+														{{lang('cartrule.' ~ item.customization|jsondecode.cartrule)}}
+													{% else %}
+														{{item.customization|jsondecode|first}}
+													{% endif %}
+            								    </div>
+            								{% endif %}
+            								{% if minQuantity > 1 or step > 1%}		
+            									<br>{{lang('item.min.quantity')}}  {{minQuantity}} {{lang('storefront.piece')}}, 
+            									{{lang('item.steps')}} {{step}} {{lang('storefront.piece')}}
+            								{% endif %}
+
+                                            {% if signature == "" or signature is null %}
+            								    <div class="alert alert-danger" role="alert">
+                                                    {{lang('pda.signature_error')}}
+                                                </div>
+            								{% endif %}
+            							</div>
+            						</div>
+            					</td>
+            					<td data-th="{{lang('item.price')}}"><span class="item_single_price">{{item.price | nfx}}</span> {{currency | raw }}
+            						<span class="tax-row d-none">
+            							<br><small>{{lang('tax')}} {{currency | raw }} <span></span> </small>
+            						</span>
+            					</td>
+            					<td data-th="{{lang('item.quantity') | raw }}">
+            						<div class="quantity_select quantity_select_{{k}}" data-uid="{{product.uid}}">
+            							<div class="btn-group product_quantity" 
+            								 data-min="{{minQuantity}}" 
+            								 data-step="{{step}}" 
+            								 data-unlimited="{{product.data.unlimited}}"
+            								 data-key="{{k}}"
+            								 data-max="{{available}}"
+            								 >
+            								<button type="button" class="btn button-white qt-down fromCart aria-label="{{lang('acc_act.decrease_qty')}}"">-</button>
+            								<button type="button" class="btn button-white quantity">{{item.count}}</button>
+            								<button type="button" class="btn button-white qt-up fromCart" aria-label="{{lang('acc_act.increase_qty')}}">+</button>
+            								<input type="hidden" name="quantity[{{k}}]" class="quantity_input" value="{{item.count}}">
+            							</div>
+            							<p class="text-danger overquantity">{{lang('max.quantity.reached')}}</p>
+            						</div>
+            					</td>
+            					<td data-th="{{lang('cart.subtotal')}}" class="text-start text-md-center">
+            						<span class="item_total_price">{{totalItem | nfx}}</span> {{currency | raw }}
+            					</td>
+            					<td class="actions" data-th="">
+            						<button type="button" class="dn-btn-clear remove_item remove_item_{{k}}" data-key="{{k}}" aria-label="{{lang('admin.item.remove')}}">
+            							<span class="remove_from_cart"></span> <span class="xs-show">{{lang('admin.item.remove')}}</span>	
+            						</button>
+            					</td>
+            				</tr>
+
+            				<script>
+                			    var prop_items_cust = {};
+                                prop_items.push({
+                                    "uid": `{{ itemUID }}`,
+                                    "count": {{ item.count }},
+                                    "count_del": {{ item.count }},
+                                    "price": `{{item.price}}`,
+                                    "options": `{{ item.options }}`,
+                                    "title": `{{ item.title|e('js') }}`.replace(/"/g, "''"),
+                                    "sku": `{% if item.sku %}{{ item.sku }}{% else %}{{product.code}}{% endif %}`,
+                                    "disc_per": ``,
+                                    "disc_val": ``,
+                                    "lis_price": `{{item.listing_price}}`,
+                                    "tax_value": `{{tax.value}}`,
+                                    "signature": `{{ signature }}`,
+                                    "cust": prop_items_cust // Free associative array
+                                });
+                            </script>
+            			{% endfor %}
+            			
+            			{% if gift_option.active == 1%}
+            				<tr id="gift_option">
+            					<td colspan="3">
+            						<div class="row">
+            							<div class="col-md-5 col-sm-5 col-12">
+            								<div class="cart_switch">
+            									<span class="switch" id="gift-switch">
+            										<input type="checkbox" value="1" id="isGift" name="isGift">
+            									</span>
+            									<span class="switch-label">{{lang('front.gift.option')}}</span> 
+            								</div>
+            							</div>
+            							<div class="col-md-7 col-sm-7 col-12">
+            								<div class="d-none" id="giftMessage">
+            									<div class="clearfix"></div>
+            									<p>{{lang('front.gift.option.message')}}</p>
+            									<textarea class="form-control" name="giftOptionMessage" id="giftOptionMessage" rows="4"></textarea>	
+            								</div>
+            							</div>
+            						</div>
+            					</td>
+            					<td class="text-start text-md-center xs-d-none" id="giftPriceCell">
+            						<div class="d-none" id="giftPrice">
+            							<span id="gift_price_wrap" class="{%if gift_option.price == 0%}d-none{%endif%}">
+            								<span id="gift_price" data-price="{{gift_option.price}}">
+            									{{ gift_option.price | number_format(2, ',', '.') }} 
+            								</span>
+            								{{currency | raw }}
+            							</span>
+            							<span id="gift_free" class="{%if gift_option.price > 0%}d-none{%endif%}">{{lang('free')}}</span>
+            						</div>
+            					</td>
+            					<td  class="xs-d-none"></td>
+            				</tr>
+            			{% endif %}
+            				
+            			</tbody>
+            		</table>
+            	</form>
+            	
+            	<div class="row mb-5 align-items-center">
+            	   <div class="col-12 col-md-5">
+            	        {% if shop_rules.proposal_coupon %}
+                            <h4>{{lang('sale.code')}}</h4>
+                            <p>{{lang('sale.code.text')}}</p>
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="coupon" id="input-coupon" aria-describedby="apply-coupon">
+                                <button type="button" id="apply-coupon" class="dn-btn dn-btn-filled dn-btn-brand-1">{{lang('apply')}} <i class="fa fa-angle-right fa-lg"></i></button>
+                            </div>
+                            <div id="coupon-errors" class="mt-3">
+                                <div class="alert alert-danger alert-coupon d-none" id="sale-not-found">
+            						{{lang('sale.code.wrong')}}
+            					</div>
+            					<div class="alert alert-danger alert-coupon d-none" id="sale-expired">
+            						{{lang('sale.code.expired')}}
+            					</div>
+            					<div class="alert alert-danger alert-coupon d-none" id="sale-min-total">
+            						{{lang('sale.code.min.sum')}}
+            					</div>
+            					<div class="alert alert-danger alert-coupon d-none" id="sale-already-used">
+            						{{lang('sale.code.already.used')}}
+            					</div>
+                            </div>
+                        {% endif %}
+        	       </div>
+            	   <div class="col-12 col-md-4"></div>
+            	   <div class="col-12 col-md-3">
+                	   <div class="row text-md-end">
+                	       <div class="col-6"><b>{{lang('cart.subtotal')}}</b></div>
+                	       <div class="col-6">{{cartTotal| number_format(2, ',', '.')}} {{currency | raw }}</div>
+                	       {% if shop_rules.proposal_coupon %}
+                    	       <div class="col-6">Coupon</div>
+                    	       <div class="col-6"><span id="target-coupon-value">0</span></div>
+                    	       
+                    	       <div class="col-6"><b>=</b></div>
+                    	       <div class="col-6"><span id="target-total" data-value="{{cartTotal}}">{{cartTotal| number_format(2, ',', '.')}}</span> {{currency | raw }}</div>
+                	       {% endif %}
+            	       </div>
+        	       </div>
+            	</div>
+            	
+            	<div class="billing-data mb-5">
+            	    <h3>{{lang('proposal.billing_title')}}</h3>
+            	    {% set disable_billing = "" %}
+            	    {% if not shop_rules.edit_billing_address %}
+            	        {% set disable_billing = "disabled" %}
+            	    {% endif %}
+            	    
+            	    <div class="row">
+            	        <div class="col-12">
+            	            <div class="form-group mb-3">
+                				<label class="form-label">{{lang('digital.invoice.company.business.name')}} <span class="text-danger">*</span></label>
+                				<input type="text" name="fullname" class="form-control fullname" required value="{{customer_data.billing.fullname}}" {{disable_billing}} aria-label="{{lang('digital.invoice.company.business.name')}}">
+                			</div>
+            	        </div>
+            	        <div class="col-md-6 col-sm-6 col-12">
+                			<div class="form-group mb-3">
+                				<label class="form-label">{{lang('register.email')}} <span class="text-danger">*</span></label>
+                				<input type="email" name="email" class="form-control email" required value="{{customer_data.billing.email}}" {{disable_billing}} aria-label="{{lang('register.email')}}">
+                			</div>
+                		</div>
+                		<div class="col-md-6 col-sm-6 col-12">
+                			<div class="form-group mb-3">
+                				<label class="form-label">{{lang('register.phone')}} <span class="text-danger">*</span></label>
+                				<input type="text" name="phone" class="form-control phone" required value="{{customer_data.billing.phone}}" {{disable_billing}} aria-label="{{lang('register.phone')}}">
+                			</div>
+                		</div>
+                		<div class="col-md-8 col-sm-9 col-12">
+                			<div class="form-group mb-3">
+                				<label class="form-label">{{lang('front.register.addr1')}} <span class="text-danger">*</span></label>
+                				<input type="text" name="addr1" class="form-control addr1" required value="{{customer_data.billing.address}}" {{disable_billing}} aria-label="{{lang('front.register.addr1')}}">
+                			</div>
+                		</div>
+                		<div class="col-md-4 col-sm-3 col-12">
+                			<div class="form-group mb-3">
+                				<label class="form-label">{{lang('register.zip')}} <span class="text-danger">*</span></label>
+                				<input type="text" name="zip" class="form-control zip" required value="{{customer_data.billing.zipcode}}" {{disable_billing}} aria-label="{{lang('register.zip')}}">
+                			</div>
+                		</div>
+                		<div class="col-12">
+                    		<div class="row list-country-state">
+                        		<div class="col-md-4 col-sm-4 col-12">
+                        			<div class="form-group">
+                        				<label class="form-label">{{lang('register.city')}} <span class="text-danger">*</span></label>
+                        				<input type="text" name="city" class="form-control city" required value="{{customer_data.billing.city}}" {{disable_billing}} aria-label="{{lang('register.city')}}">
+                        			</div>
+                        		</div>
+                        		<div class="col-md-4 col-sm-4 col-12">
+                        			<div class="form-group">
+                        				<label class="form-label">{{lang('register.country')}} <span class="text-danger">*</span></label>
+                        				<select name="country" class="form-select listCountry country" data-current="{{customer_data.billing.country_code}}" required {{disable_billing}} aria-label="{{lang('register.country')}}">
+                        				</select>
+                        			</div>
+                        		</div>
+                        		<div class="col-md-4 col-sm-4 col-12">
+                        			<div class="form-group">
+                        				<label class="form-label">{{lang('register.state')}} <span class="text-danger">*</span></label>
+                        				<select name="state" class="form-select listStates state" required data-current="{{customer_data.billing.district_code}}" data-current-country="{{customer_data.billing.country_code}}" {{disable_billing}} aria-label="{{lang('register.state')}}">
+                        				</select>
+                        			</div>
+                        		</div>
+                    		</div>
+                		</div>
+            	    </div>
+            	    
+            	    {% if customer_data.billing.fiscalcode != "" %}<p><b>{{lang('digital.invoice.person.tax_number')}}:</b> {{customer_data.billing.fiscalcode}}</p>{% endif %}
+            	    {% if customer_data.billing.vatnumber != "" %}<p><b>{{lang('digital.invoice.company.vat_number')}}:</b> {{customer_data.billing.vatnumber}}</p>{% endif %}
+            	    {% if customer_data.billing.sdi != "" %}<p><b>{{lang('digital.invoice.company.unique_code')}}:</b> {{customer_data.billing.sdi}}</p>{% endif %}
+            	    {% if customer_data.billing.pec != "" %}<p><b>{{lang('digital.invoice.company.pec_address')}}:</b> {{customer_data.billing.pec}}</p>{% endif %}
+            	    
+            	    {% if shop_rules.edit_billing_address %}
+            	        <button type="button" class="dn-btn dn-btn-brand-1 dn-btn-filled btn-save" onclick="updateBillingCCF()">
+            	            {{lang('save')}}
+            	            <div class="spinner-border spinner-border-sm" role="status" style="display:none;">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <i class="fas fa-times" style="display:none;"></i>
+                            <i class="fas fa-check" style="display:none;"></i>
+        	            </button>
+            	    {% endif %}
+            	</div>
+            	
+            	<div class="row mb-5 row-gap-5 shipping-data">
+                	<div class="col-12 col-md-6">
+                	    <h3>{{lang('shipping.address')}}</h3>
+                	    <div class="scrollable-radio-list" id="addresses-list" style="max-width:550px;">
+                	        {% set default_ship_addr_id = shop_rules.order_data.shipping_addr_id|default(-1) %}
+
+                	        {# 15-12-2025 GESTIONE INDIRIZZI TSC/CCF (no agenti) #}
+                	        {% if not is_agent %}
+                	            {# Ciclo e mostro gli indirizzi TSC #}
+                	            {% set tsc_addr_meta_id_list = [] %}
+                	            {% set reload_page = 0 %}
+                	            {% for x in user.addresses %}
+                	                {% if show_logs %}<script>console.log("Inizio ciclo indirizzi TSC");</script>{% endif %}
+                	                {% set x_addr_id = attribute(x._id, "$id") %}
+                	                {% if show_logs %}<script>console.log("Turno di {{x_addr_id}}");</script>{% endif %}
+                	                <div class="item {% if x.metadata.hidden == "true" %}d-none{% endif %}">
+                                        <div class="d-flex align-items-center">
+                                            <input class="form-check-input" type="radio" name="ship-addr-radio" id="{{x_addr_id}}" meta-id-gest="{{x.metadata.id_gest}}" value="{{x_addr_id}}" data-addr-type="tsc">
+                                            <label class="form-check-label flex-grow-1" for="{{x_addr_id}}">{{x.fullname}}<br>
+                                                <span>{{x.addr1}} - {{x.zip}} {{x.city}} ({{x.stateName}}) {{x.countryName}}
+                                                    {#<br>Metadata id_gest: {{x.metadata.id_gest|default("/")}}<br>Metadata hidden: {{x.metadata.hidden|default("/")}}#}
+                                                </span>
+                                            </label>
+                                            <div>
+                                                <button aria-label="{{lang('admin.remove')}}" class="dn-btn-clear delete-address" data-id-gest="{{x.metadata.id_gest|default("")}}" data-address-id="{{x_addr_id}}"><i class="far fa-trash-alt"></i></button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    {# Per ogni indirizzo TSC ciclo anche gli indirizzi GEST (senza mostrarli), e confronto i 3 campi. #}
+                                    {% set tsc_cmp_string =  x.fullname|lower ~ " " ~ x.addr1|lower ~ " " ~ x.email|lower %}
+                                    {% if show_logs %}<script>console.log("Stringa TSC: {{tsc_cmp_string}}");</script>{% endif %}
+                                    {% set continue_loop = true %}
+                                    {% if x.metadata.id_gest != "" %}
+                                        {% set tsc_addr_meta_id_list = tsc_addr_meta_id_list | merge([x.metadata.id_gest]) %}
+                                    {% endif %}
+                                    
+                                    {% for y in customer_data.shipping if continue_loop %}
+                                        {% if show_logs %}<script>console.log("Analizzo rispetto l'indirizzo gest: {{y.addressid}}");</script>{% endif %}
+                                        {% set gest_cmp_string =  y.fullname|lower ~ " " ~ y.address|lower ~ " " ~ y.email|lower %}
+                                        {% if show_logs %}<script>console.log("Stringa GEST: {{gest_cmp_string}}");</script>{% endif %}
+                                        {% if tsc_cmp_string == gest_cmp_string %}
+                                            {% if show_logs %}<script>console.log("Trovato corrispondenza dei 3 campi!");</script>{% endif %}
+                                            {% if x.metadata.id_gest == "" %}
+                                                {# Se trovo corrispondenza ma manca il meta-id, glielo metto e fermo il ciclo #}
+                                                <script>
+                                                    {% if show_logs %}console.log("L'indirizzo TSC ha come meta id_gest: {{x.metadata.id_gest}}");
+                                                    console.log("Chiamo funzione Andrea per aggiunta meta id");{% endif %}
+                                                    $(document).ready(function(){
+                                                        const metaObject = {"id_gest":"{{y.addressid}}", "hidden":"{{x.metadata.hidden|default("")}}"};
+                                                        addressMetadata(
+                                                            '{{ group.uid }}',
+                                                            '{{x_addr_id}}',
+                                                            "null",
+                                                            "null",
+                                                            function(res){
+                                                                {% if show_logs %}console.log("Aggiungo l'id gest dall'indirizzo {{x_addr_id}} perché manca. res:", res);{% endif %}
+                                                                if(res.result == "success"){
+                                                                    operationDone();
+                                                                }else{
+                                                                    alert("Error", res);
+                                                                }
+                                                            },
+                                                            metaObject
+                                                        );
+                                                    })
+                                                </script>
+                                                {% set reload_page = reload_page + 1 %}
+                                                {% set continue_loop = false %}
+                                            {% elseif x.metadata.id_gest != "" and x.metadata.id_gest == y.addressid %}
+                                                {# se trovo corrispondenza e c’è il meta-id ed è giusto non faccio niente e fermo il ciclo #}
+                                                {% if show_logs %}<script>console.log("L'id è giusto, non faccio altro");</script>{% endif %}
+                                                {% set continue_loop = false %}
+                                            {% elseif x.metadata.id_gest != "" and x.metadata.id_gest != y.addressid %}
+                                                {# Se trovo corrispondenza e c’è il meta-id ma non è giusto lo sostituisco e fermo il ciclo #}
+                                                <script>
+                                                    {% if show_logs %}console.log("Chiamo funzione Andrea per cambio meta id");{% endif %}
+                                                    $(document).ready(function(){
+                                                        const metaObject = {"id_gest":"{{y.addressid}}", "hidden":"{{x.metadata.hidden|default("")}}"};
+                                                        addressMetadata(
+                                                            '{{ group.uid }}',
+                                                            '{{x_addr_id}}',
+                                                            "null",
+                                                            "null",
+                                                            function(res){
+                                                                {% if show_logs %}console.log("Cambio l'id gest dall'indirizzo {{x_addr_id}} perché ho trovato una corrispondenza ma non con questo id. res:", res);{% endif %}
+                                                                if(res.result == "success"){
+                                                                    operationDone();
+                                                                }else{
+                                                                    alert("Error", res);
+                                                                }
+                                                            },
+                                                            metaObject
+                                                        );
+                                                    })
+                                                </script>
+                                                {% set reload_page = reload_page + 1 %}
+                                                {% set continue_loop = false %}
+                                            {% endif %}
+                                        {% endif %}
+                                    {% endfor %}
+                                    
+                                    {% set gest_addr_id_list = [] %}
+                                    {% for y in customer_data.shipping %}
+                                        {% set gest_addr_id_list = gest_addr_id_list | merge([y.addressid]) %}
+                                    {% endfor %}
+                                    
+                                    {% if continue_loop and x.metadata.id_gest != "" %}
+                                        {% if x.metadata.id_gest in gest_addr_id_list %}
+                                            {# se non trovo corrispondenza ma c’è un meta-id esistente, aggiorno l’indirizzo TSC con i dati del dell’indirizzo indicato dal meta-id del gestionale #}
+                                            {% set gest_addr_new_data = null %}
+                                            {% for y in customer_data.shipping if y.addressid == x.metadata.id_gest %}
+                                                {% set gest_addr_new_data = y %}
+                                            {% endfor %}
+                                            <script>
+                                                {% if show_logs %}console.log("Non ho trovato corrispondenza ma ha un meta id esistente, chiamo funzione tsc edit address e aggiorno i dati tsc sulla base di quelli del gestionale");{% endif %}
+                                                $(document).ready(function(){
+                                                    editAddress(
+                                                        '{{x_addr_id}}',
+                                                        '{{gest_addr_new_data.fullname|default(x.fullname)}}',
+                                                        '{{gest_addr_new_data.address|default(x.addr1)}}',
+                                                        '{{gest_addr_new_data.city|default(x.city)}}',
+                                                        '{{gest_addr_new_data.zipcode|default(x.zip)}}',
+                                                        {{gest_addr_new_data.district_code|default(x.state)}},
+                                                        {{gest_addr_new_data.country_code|default(x.nation)}},
+                                                        '{{gest_addr_new_data.email|default(x.email)}}',
+                                                        '{{gest_addr_new_data.phone|default(x.phone)}}',
+                                                        '{{gest_addr_new_data.vatnumber|default(x.vat)}}',
+                                                        function(res){
+                                                            {% if show_logs %}console.log("editAddress {{x_addr_id}}", res);{% endif %}
+                                                            operationDone();
+                                                        }
+                                                    );
+                                                })
+                                            </script>
+                                            {% set reload_page = reload_page + 1 %}
+                                        {% else %}
+                                            {# Se non trovo corrispondenza ma c’è un meta-id non esistente, svuoto il meta-id #}
+                                             <script>
+                                                {% if show_logs %}console.log("Non ho trovato corrispondenza ma ha un meta id NON esistente, chiamo funzione Andrea per rimuoverlo");{% endif %}
+                                                $(document).ready(function(){
+                                                    const metaObject = {"id_gest":"", "hidden":"{{x.metadata.hidden|default("")}}"};
+                                                    addressMetadata(
+                                                        '{{ group.uid }}',
+                                                        '{{x_addr_id}}',
+                                                        "null",
+                                                        "null",
+                                                        function(res){
+                                                            {% if show_logs %}console.log("Rimuovo l'id gest dall'indirizzo {{x_addr_id}} perché inesistente res:", res);{% endif %}
+                                                            if(res.result == "success"){
+                                                                operationDone();
+                                                            }else{
+                                                                alert("Error", res);
+                                                            }
+                                                        },
+                                                        metaObject
+                                                    );
+                                                })
+                                            </script>
+                                            {% set reload_page = reload_page + 1 %}
+                                        {% endif %}
+                                    {% endif %}
+                                    {# Se non trovo corrispondenza e non ha l’id non faccio niente #}
+                                    
+                	            {% endfor %}
+                	            
+                	            {# >>>>>> RICARICARE PAGINA <<<<<< #}
+                                {% if reload_page %}
+                                    <div class="position-fixed top-0 bottom-0 end-0 start-0 d-flex align-items-center justify-content-center" style="background-color:#ffffffba; z-index:99999;">
+                                        <div class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+                                    </div>
+                                {% endif %}
+                                
+                                <script>
+                                    {% if show_logs %}console.log("Numero operazioni: {{reload_page}}");{% endif %}
+                                    var operationNumber = {{reload_page}};
+                                    function operationDone(){
+                                        {% if show_logs %}console.log("Operation done from " + operationNumber);{% endif %}
+                                        operationNumber--;
+                                        {% if show_logs %}console.log("...to " + operationNumber);{% endif %}
+                                        if(operationNumber <= 0){
+                                            window.location.reload();
+                                        }
+                                    }
+                                </script>
+                	            
+                	            {# Ciclo e mostro gli indirizzi del gestionale (dal CCF) quelli che hanno un id non presente negli indirizzi TSC #}
+                	            {% for x in customer_data.shipping if x.addressid not in tsc_addr_meta_id_list %}
+                    		        <div class="item">
+                                        <div class="d-flex align-items-center">
+                                            <input class="form-check-input" type="radio" name="ship-addr-radio" id="{{x.addressid}}" value="{{x.addressid}}" data-addr-type="ccf" {% if loop.index0 == default_ship_addr_id %}checked{% endif %}>
+                                            <label class="form-check-label flex-grow-1" for="{{x.addressid}}">{{x.fullname}}<br>
+                                                <span>{{x.address}} - {{x.zipcode}} {{x.city}} ({{x.district}}) {{x.country}}</span>
+                                            </label>
+                                        </div>
+                                        <div class="missing-fields-address mt-3" style="display:none">
+                                            <div class="alert alert-danger" role="alert">{{lang('pda.complete_address_to_proceed')}}</div>
+                                            {% include 'form_address.html' %}
+                                            <button class="dn-btn dn-btn-brand-1 dn-btn-filled btn-save" onclick="addNewTSCAddressFromCCF($(this))">
+                                                {{lang('proposal.shipping.save_new_addr')}}
+                                                <div class="spinner-border spinner-border-sm" role="status" style="display:none;">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                                <i class="fas fa-times" style="display:none;"></i>
+                                                <i class="fas fa-check" style="display:none;"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                    		    {% endfor %}
+            	            {% else %}
+            	            
+            	                {# Stampa normale indirizzi gestionale in caso Agente #}
+            	                {% for x in customer_data.shipping if x.fullname != "" %}
+                    		        <div class="item">
+                                        <div class="d-flex align-items-center">
+                                            <input class="form-check-input" type="radio" name="ship-addr-radio" id="{{x.addressid}}" value="{{x.addressid}}" {% if loop.index0 == default_ship_addr_id %}checked{% endif %}>
+                                            <label class="form-check-label flex-grow-1" for="{{x.addressid}}">{{x.fullname}}<br>
+                                                <span>{{x.address}} - {{x.zipcode}} {{x.city}} ({{x.district}}) {{x.country}}</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                    		    {% endfor %}
+                	        {% endif %}
+                	    </div>
+                	</div>
+                	{% if shop_rules.new_shipping_address and not is_agent %}
+                    	<div class="col-12 col-md-6">
+                    	    <h3 lcass="d-none d-md-block">&nbsp;</h3>
+                    	    <div class="scrollable-radio-list">
+                    	        <div class="item">
+                                    <div class="d-flex align-items-center">
+                                        <input class="form-check-input" type="radio" name="ship-addr-radio" id="new-shipping-addr" value="new" meta-id-gest="new">
+                                        <div class="flex-grow-1">
+                                            <label class="form-check-label d-block h5 mb-0" for="new-shipping-addr">{{lang('shipping.address.new')}}</label>
+                                            <div class="d-none mt-3" id="new-shipping-addr-form">
+                                                {% include 'form_address.html' %}
+                                                <button class="dn-btn dn-btn-brand-1 dn-btn-filled btn-save" onclick="addNewTSCAddress()">
+                                                    {{lang('proposal.shipping.save_new_addr')}}
+                                                    <div class="spinner-border spinner-border-sm" role="status" style="display:none;">
+                                                        <span class="visually-hidden">Loading...</span>
+                                                    </div>
+                                                    <i class="fas fa-times" style="display:none;"></i>
+                                                    <i class="fas fa-check" style="display:none;"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                    	    </div>
+                	    </div>
+            	    {% endif %}
+            	</div>
+            	
+            	<div class="payment-method mb-5">
+            	    <h3>{{lang('order.payment')}}</h3>
+            	    {{customer_data.payment}}
+            	</div>
+            	
+            	<div class="shipping-method mb-5">
+            	    <h3>{{lang('order.shipping')}}</h3>
+            	    Da quantificare
+            	</div>
+            	
+            	<div class="note mb-5">
+            	    <h3>{{lang('message.to.store')}}</h3>
+            	    <textarea id="messageTextarea" class="form-control" aria-label="{{lang('message.to.store')}}" maxlength="200"></textarea>
+            	</div>
+            	
+            	<div class="send-proposal">
+            	    <button type="button" class="dn-btn dn-btn-brand-2 dn-btn-filled" onclick="generateProposalData($(this))">
+            	        {{lang('proposal.confirm')}}
+            	        <div class="spinner-border spinner-border-sm" role="status" style="display:none;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+        	        </button>
+            	</div>
+            	
+            	{# Ducky Network - Proposal send variable setting #}
+        
+                {{fetchAndCache(shop_rules.fetchAndCache.proposal_config)}}
+            
+                <script>
+                    const ccf_addresses = {{customer_data.shipping|json}};
+                    const tsc_addresses = {{user.addresses|json}};
+                    
+                    var CART_TOTAL = {{ cartTotal }};
+                    var COUPON_CODE = '';
+                    var COUPON_VALUE = 0;
+                    
+                    function getShippingAddressSelected() {
+
+                        const $radio = $('input[name="ship-addr-radio"]:checked');
+                        const addrId = $radio.val();
+                        const addrType = $radio.data('addr-type');
+                    
+                        /* ===============================
+                           NUOVO INDIRIZZO
+                        ================================ */
+                    
+                        if (addrId === 'new') {
+                            return {
+                                del_id: 'new',
+                                del_fullname: $('#new-shipping-addr-form .fullname').val(),
+                                del_email: $('#new-shipping-addr-form .email').val(),
+                                del_address: $('#new-shipping-addr-form .addr1').val(),
+                                del_phone: $('#new-shipping-addr-form .phone').val(),
+                                del_vat: $('#new-shipping-addr-form .vat').val(),
+                                del_city: $('#new-shipping-addr-form .city').val(),
+                                del_zip: $('#new-shipping-addr-form .zip').val(),
+                                del_state: $('#new-shipping-addr-form .state :selected').data('code'),
+                                del_country: $('#new-shipping-addr-form .country :selected').data('code'),
+                                del_cust: {}
+                            };
+                        }
+                    
+                        /* ===============================
+                           INDIRIZZO NATIVO (TSC)
+                        ================================ */
+                    
+                        if (addrType === 'tsc') {
+                            const base = tsc_addresses.find(a => a._id.$id == addrId);
+                            if (!base) throw new Error('Indirizzo non valido');
+                    
+                            return {
+                                del_id: addrId,
+                                del_fullname: base.fullname,
+                                del_email: base.email,
+                                del_address: base.addr1,
+                                del_phone: base.phone,
+                                del_vat: base.vat,
+                                del_city: base.city,
+                                del_zip: base.zip,
+                                del_state: base.state,
+                                del_country: base.nation,
+                                del_cust: {}
+                            };
+                        }
+                    
+                        /* ===============================
+                           INDIRIZZO CCF
+                        ================================ */
+                    
+                        const base = ccf_addresses.find(a => a.addressid == addrId);
+                        if (!base) throw new Error('Indirizzo non valido');
+                    
+                        const $wrapper = $radio
+                            .closest('.item')
+                            .find('.missing-fields-address');
+                    
+                        // 🚫 BLOCCANTE se il form è ancora visibile
+                        {% if not is_agent %}
+                            if ($wrapper.is(':visible')) {
+                                throw new Error('Completa e salva l’indirizzo prima di proseguire');
+                            }
+                        {% endif %}
+                    
+                        // base JSON
+                        const addr = {
+                            del_id: addrId,
+                            del_fullname: base.fullname,
+                            del_email: base.email,
+                            del_address: base.address,
+                            del_phone: base.phone,
+                            del_vat: base.vatnumber,
+                            del_city: base.city,
+                            del_zip: base.zipcode,
+                            del_state: base.district,
+                            del_country: base.country,
+                            del_cust: {}
+                        };
+                    
+                        /* ===============================
+                           MERGE CON FORM (senza controlli)
+                        ================================ */
+                    
+                        const $form = $wrapper.find('.address_form');
+                    
+                        if ($form.length) {
+                            const map = {
+                                del_fullname: '.fullname',
+                                del_email: '.email',
+                                del_address: '.addr1',
+                                del_phone: '.phone',
+                                del_vat: '.vat',
+                                del_city: '.city',
+                                del_zip: '.zip'
+                            };
+                    
+                            for (const k in map) {
+                                const val = $form.find(map[k]).val();
+                                if (val !== undefined && val !== '') {
+                                    addr[k] = val;
+                                }
+                            }
+                    
+                            const country = $form.find('.country :selected').data('code');
+                            const state   = $form.find('.state :selected').data('code');
+                    
+                            if (country) addr.del_country = country;
+                            if (state)   addr.del_state   = state;
+                        }
+                    
+                        return addr;
+                    }
+
+
+
+                    
+                    function getBillingAddress(){
+                        var billingAddr = {
+                            "bil_id": "{{customer_data.billing.addressid}}",
+                            "bil_fullname": $('.billing-data .fullname').val(),
+                            "bil_email": $('.billing-data .email').val(),
+                            "bil_address": $('.billing-data .addr1').val(),
+                            "bil_phone": $('.billing-data .phone').val(),
+                            "bil_vat": "{{customer_data.billing.vatnumber}}",
+                            "bil_city": $('.billing-data .city').val(),
+                            "bil_zip": $('.billing-data .zip').val(),
+                            "bil_state": $('.billing-data .state :selected').attr('data-code'),
+                            "bil_country": $('.billing-data .country :selected').attr('data-code'),
+                            "bil_cust": {} // Free associative array
+                        };
+                        return billingAddr;
+                    }
+
+					function proposalCallback(response){
+                        if (response && response['proposal_id']) {
+                            // Successo: reindirizza alla pagina della proposta
+                            window.location = '/cart/proposal/' + response['proposal_id'];
+                        } else {
+                            // Errore: reindirizza alla pagina di errore
+                            window.location = '/cart/proposal-error';
+                        }
+                    }
+                    
+                    function generateProposalData(e){
+                        //e.preventDefault();
+                        e.find('.spinner-border').fadeIn();
+            
+                        var prop_shop_id = '{{ group.uid }}';
+                        var prop_cart_id = '{{ cart_id }}';
+                    
+                        var prop_customer_fullname = '{{ customer_data.billing.fullname }}';
+                        var prop_customer_group = '';
+                        var prop_customer_email = '{{ customer_data.billing.email }}';
+                    
+                        var prop_agent_id = '{% if is_agent %}{{customer.id}}{% endif %}';
+                        var prop_agent_fullname = '{% if is_agent %}{{customer.fullname}}{% endif %}';
+                        var prop_agent_group = '';
+                        var prop_agent_email = '{{customer.userEmail}}';
+                        
+                        var prop_billing_address = getBillingAddress();
+                        
+                        const $radio = $('input[name="ship-addr-radio"]:checked');
+
+                        // solo CCF
+                        {% if not is_agent %}
+                            if ($radio.data('addr-type') !== 'tsc' && $radio.val() !== 'new') {
+                            
+                                const $wrapper = $radio.closest('.item').find('.missing-fields-address');
+                            
+                                if ($radio.data('addr-type') !== 'tsc' && $radio.val() !== 'new' && $radio.data('saved') != 1) {
+                            
+                                    const base = ccf_addresses.find(a => a.addressid == $radio.val());
+                                    if (!base) {
+                                        e.find('.spinner-border').hide();
+                                        alert('Shipping address not valid');
+                                        return false;
+                                    }
+                                    
+                                    Storeden.addAddress(
+                                        base.fullname,
+                                        base.address,
+                                        base.city,
+                                        base.zipcode,
+                                        base.district_code,
+                                        base.country_code,
+                                        base.email,
+                                        base.phone,
+                                        base.vatnumber,
+                                        function (res) {
+                                            if (res.result === 'success') {
+                                                // marca come salvato e riparti
+                                                $radio.data('saved', 1);
+                                                generateProposalData(e);
+                                            } else {
+                                                e.find('.spinner-border').hide();
+                                                console.log("result", res);
+                                                alert('Operation failed');
+                                            }
+                                        }
+                                    );
+                            
+                                    return false; // ⛔ ferma il flusso qui
+                                }
+                            }
+                        {% endif %}
+                    
+                        let prop_delivery_address;
+
+                        try {
+                            prop_delivery_address = getShippingAddressSelected();
+                            // procedi con invio ordine
+                        } catch (err) {
+                            scrollToElement("addresses-list");
+                            e.find('.spinner-border').hide();
+                            alert(err.message);
+                            return false;
+                        }
+
+                        var prop_require_invoice = 1;
+                        {#% if invoice_option == true %}
+                            if ($('#invoiceOption').is(':checked')) {
+                                prop_require_invoice = 1;
+                            }
+                        {% endif %#}
+                    
+                        var prop_digital_invoice = {
+                            "subject_type": "company",
+                            "com_business_name": '{{customer_data.billing.fullname}}',
+                            "com_vat_number": '{{customer_data.billing.vatnumber}}',
+                            "com_tax_number": '{{customer_data.billing.fiscalcode}}',
+                            "com_unique_code": '{{customer_data.billing.sdi}}',
+                            "com_pec_address": '{{customer_data.billing.pec}}',
+                            "per_tax_number": '{{customer_data.billing.fiscalcode}}',
+                            "per_pec_address": '{{customer_data.billing.pec}}'
+                        }
+                        
+                        const prop_total = CART_TOTAL;
+                        const prop_shipping_method = '';
+                        const prop_shipping_amount = 0;
+                        const prop_payment_method = '{{customer_data.payment}}';
+                        const prop_payment_amount = 0;
+                        const prop_discount_desc = COUPON_CODE;
+                        const prop_discount_value = COUPON_VALUE;
+                        const prop_locale = '{{ locale }}';
+                        const prop_message = $('#messageTextarea').val();
+                        const prop_tags = '';
+                        const $selected = $('input[name="ship-addr-radio"]:checked');
+                        const prop_additional = {
+                            customer_id_gest: '{{ customer_data.customer_id }}',
+                            address_id_gest: $selected.attr('meta-id-gest') || $selected.val(),
+                            agent_id_gest: '{% if is_agent %}{{customer.custom_fields.customer_id}}{% else %}{{ customer_data.agent_id }}{% endif %}'
+                        };
+                        const prop_origin = 'front_end';
+                
+                		sendProposal(
+							prop_shop_id,
+							prop_cart_id,
+							prop_customer_fullname,
+							prop_customer_group,
+							prop_customer_email,
+							prop_agent_id,
+							prop_agent_fullname,
+							prop_agent_group,
+							prop_agent_email,
+							prop_billing_address,
+							prop_delivery_address,
+							prop_require_invoice,
+							prop_digital_invoice,
+							prop_items,
+							prop_total,
+							prop_shipping_method,
+							prop_shipping_amount,
+							prop_payment_method,
+							prop_payment_amount,
+							prop_discount_desc,
+							prop_discount_value,
+							prop_locale,
+							prop_message,
+							prop_tags,
+							prop_additional,
+							prop_origin,
+							proposalCallback
+						);
+                    }
+                    
+                    function removeItem(element) {
+                		var key = element.attr('data-key');
+                		var event_obj = { 'key' : key  };
+                		$(document).trigger('storeden.cart.removeItemFromCart', [event_obj]);
+                		Storeden.removeItem(key, function(){
+                			window.location = '/cart';
+                		});
+                	}
+                	
+                	//Salvataggio CCF
+                	function saveCCF(fieldsData, button){
+                        var config = {
+                            url: "https://aip.storeden.com/labs/apps/custom_fields/rest/save_from_cart.php?instance=[istanza]",
+                            type: "POST",
+                            data: { fields: fieldsData, customer: StoredenCustomerData },
+                            success: function(response) {
+                                //console.log(response);
+                                button.find('.spinner-border').hide();
+                                const checkIcon = button.find('.fa-check');
+                                checkIcon.fadeIn();
+                                setTimeout(() => {
+                                    checkIcon.fadeOut();
+                                }, 3000);
+                            },
+                            error: function(xhr, status, error) {
+                                button.find('.spinner-border').hide();
+                                const timesIcon = button.find('.fa-times');
+                                timesIcon.fadeIn();
+                                setTimeout(() => {
+                                    timesIcon.fadeOut();
+                                }, 3000);
+                            }
+                        };
+                        
+                        $.ajax(config);
+                	}
+                	
+                	function updateBillingCCF(){
+                        const $box = $('.billing-data');
+                        const $btn = $box.find('.btn-save');
+                        const $required = $box.find('input[required], select[required], textarea[required]');
+                    
+                        $btn.find('.spinner-border').fadeIn();
+                    
+                        $required.each(function () {
+                            $(this).parent().toggleClass('has-error', !$.trim($(this).val() || ''));
+                        });
+                    
+                        if ($required.filter(function () {
+                            return !$.trim($(this).val() || '');
+                        }).length) {
+                            $btn.find('.spinner-border').hide();
+                            $btn.find('.fa-times').stop(true, true).show().delay(3000).hide(0);
+                            return false;
+                        }
+                    
+                        var billingData = {
+                            "customerid":"{{customer_data.billing.customerid}}",
+                            "addressid":"{{customer_data.billing.addressid}}",
+                            "fullname":$box.find('.fullname').val(),
+                            "address":$box.find('.addr1').val(),
+                            "zipcode":$box.find('.zip').val(),
+                            "city":$box.find('.city').val(),
+                            "district":$box.find('.state :selected').text(),
+                            "district_code":$box.find('.state :selected').attr('data-code'),
+                            "country":$box.find('.country :selected').text(),
+                            "country_code":$box.find('.country :selected').attr('data-code'),
+                            "phone":$box.find('.phone').val(),
+                            "vatnumber":$box.find('.vatnumber').val() || "{{customer_data.billing.vatnumber}}",
+                            "fiscalcode":"{{customer_data.billing.fiscalcode}}",
+                            "sdi":"{{customer_data.billing.sdi}}",
+                            "pec":"{{customer_data.billing.pec}}",
+                            "email":$box.find('.email').val()
+                        };
+                    
+                        var fieldsData = {
+                            "billing": JSON.stringify(billingData)
+                        };
+                    
+                        {% if is_agent %}
+                            alert("Funzione disponibile solo per i clienti b2b, serve una procedura esterna per gli agenti");
+                            $btn.find('.spinner-border').hide();
+                        {% else %}
+                            saveCCF(fieldsData, $btn);
+                        {% endif %}
+                    }
+                    
+                    $(document).on('input change', '.billing-data [required]', function () {
+                        $(this).parent().toggleClass('has-error', !$.trim($(this).val() || ''));
+                    });
+                	
+                	function addNewTSCAddress(){
+                    	$('#new-shipping-addr-form .btn-save .spinner-border').fadeIn();
+                        
+                        var itsok = true;
+                        var address = {};
+                        
+                        $('#new-shipping-addr-form input, #new-shipping-addr-form select').each(function(){
+                            if(itsok){
+                                var name = $(this).attr('name');
+                            	var value = $(this).val();
+                            	if(($(this).val() == "")&&($(this).prop('required'))){
+                                        itsok = false;
+                                        $(this).parent().addClass('has-error');
+                                        $("html, body").animate({
+                                    		scrollTop: $(this).offset().top - 20
+                                    	}, 500);
+                                }
+                                if (!$(this).parent().parent().hasClass('d-none')){
+                            		if ($(this).hasClass('checkbox_field')){
+                            			if ($(this).is(':checked')){
+                            				value = 'checked';
+                            			} else {
+                            				value = '';
+                            			}
+                            		}
+                                }
+                                address[name] = ""+value;
+                            }
+                        });
+                        {% if is_agent %}
+                            alert("Funzione disponibile solo per i clienti b2b, serve una procedura esterna per gli agenti");
+                            $('#new-shipping-addr-form .btn-save .spinner-border').fadeOut();
+                        {% else %}
+                            Storeden.addAddress(address.fullname,address.addr1,address.city,address.zip,address.state,address.country,address.email,address.phone,address.vat,addAddressCallback);
+                            function addAddressCallback(res){
+                                $('#new-shipping-addr-form .btn-save').find('.spinner-border').hide();
+                                if(res.result == 'success'){
+                                    $('#new-shipping-addr-form .btn-save').addClass('pe-none').prop('disabled', true);
+                                    const $checkIcon = $('#new-shipping-addr-form .btn-save').find('.fa-check');
+                                    $checkIcon.stop(true, true).fadeIn().delay(3000).fadeOut();
+                                }else{
+                                    alert('An error occurred. Please check your information and try again, or contact us.');
+                                    console.log("error res", res);
+                                    const $errorIcon = $('#new-shipping-addr-form .btn-save').find('.fa-times');
+                                    $errorIcon.stop(true, true).fadeIn().delay(3000).fadeOut();
+                                }
+                            }
+                        {% endif %}
+                	}
+                	
+                	function addNewTSCAddressFromCCF(button) {
+
+                        const $button  = $(button);
+                        const $wrapper = $button.closest('.missing-fields-address');
+                        const $radio   = $wrapper.closest('.item').find('input[name="ship-addr-radio"]');
+                    
+                        $button.find('.spinner-border').fadeIn();
+                    
+                        let itsok = true;
+                        let address = {};
+                    
+                        $button.parent().find('input, select').each(function () {
+                    
+                            if (!itsok) return;
+                    
+                            const name  = $(this).attr('name');
+                            let value   = $(this).val();
+                    
+                            if ($(this).prop('required') && value === "") {
+                                itsok = false;
+                                $(this).parent().addClass('has-error');
+                                $("html, body").animate({
+                                    scrollTop: $(this).offset().top - 20
+                                }, 500);
+                                return;
+                            }
+                    
+                            if (!$(this).parent().parent().hasClass('d-none')) {
+                                if ($(this).hasClass('checkbox_field')) {
+                                    value = $(this).is(':checked') ? 'checked' : '';
+                                }
+                            }
+                    
+                            address[name] = "" + value;
+                        });
+                    
+                        if (!itsok) {
+                            $button.find('.spinner-border').hide();
+                            return;
+                        }
+                    
+                        Storeden.addAddress(
+                            address.fullname,
+                            address.addr1,
+                            address.city,
+                            address.zip,
+                            address.state,
+                            address.country,
+                            address.email,
+                            address.phone,
+                            address.vat,
+                            addAddressCallback
+                        );
+                    
+                        function addAddressCallback(res) {
+                    
+                            $button.find('.spinner-border').hide();
+                    
+                            if (res.result === 'success') {
+                    
+                                // ✅ marca l’indirizzo CCF come salvato
+                                $radio.data('saved', 1);
+                    
+                                $button.find('.btn-save')
+                                    .addClass('pe-none')
+                                    .prop('disabled', true);
+                    
+                                $button.find('.fa-check').fadeIn();
+                    
+                                setTimeout(() => {
+                                    $wrapper.fadeOut();
+                                }, 2000);
+                    
+                            } else {
+                                alert('An error occurred. Please check your information and try again, or contact us.');
+                                console.log("error res", res);
+                                $button.find('.fa-times').stop(true, true).fadeIn().delay(3000).fadeOut();
+                            }
+                        }
+                    }
+
+                	
+                    $(document).on('click', '.remove_item', function(){
+                        removeItem($(this));
+                    })
+                    
+                    $(document).ready(function() {
+                        $('input[name="ship-addr-radio"]').change(function() {
+                            var selectedValue = $(this).val();
+                            if(selectedValue == "new"){
+                                $('#new-shipping-addr-form').removeClass('d-none');
+                            }else{
+                                $('#new-shipping-addr-form').addClass('d-none');
+                            }
+                        });
+                        
+                        Storeden.getCountries(getCountries);
+                    });
+                    
+                    $(document).on('click', '.delete-address', async function (e) {
+                        e.preventDefault();
+                    
+                        const $btn = $(this);
+                        const addrId = $btn.attr('data-address-id');
+                        const gest_id = $btn.attr('data-id-gest');
+                    
+                        const result = await confirmModal({
+                            title: 'Conferma eliminazione',
+                            body: 'Sei sicuro di voler eliminare questo indirizzo?',
+                        });
+                    
+                        if (result === 'confirm') {
+                            {% if show_logs %}console.log("Effettiva eliminazione");{% endif %}
+                            const metaObject = {"id_gest":gest_id, "hidden":"true"};
+                            addressMetadata(
+                                '{{ group.uid }}',
+                                addrId,
+                                "null",
+                                "null",
+                                function (res) {
+                                    if (res && res.result === "success") {
+                                        window.location.reload();
+                                    } else {
+                                        console.log("Errore, res:", res);
+                                        alert('Operation failed');
+                                    }
+                                },
+                                metaObject
+                            );
+                        }
+                    });
+
+                    /* ===============================
+                       CONFIG
+                    ================================ */
+                    
+                    const REQUIRED_FIELDS = [
+                        'address',
+                        'city',
+                        'country_code',
+                        'district_code',
+                        'email',
+                        'fullname',
+                        'phone',
+                        'zipcode'
+                    ];
+                    
+                    // mappa JSON → classi form
+                    const FIELD_MAP = {
+                        fullname: 'fullname',
+                        email: 'email',
+                        phone: 'phone',
+                        address: 'addr1',
+                        zipcode: 'zip',
+                        city: 'city'
+                    };
+                    
+                    /* ===============================
+                       HELPERS
+                    ================================ */
+                    
+                    function resetMissingForms() {
+                        $('.missing-fields-address').each(function () {
+                            $(this).hide();
+                            $(this)
+                                .find('input, select')
+                                .prop('disabled', false)
+                                .prop('required', false)
+                                .val('');
+                        });
+                    }
+                    
+                    /* ===============================
+                       MAIN
+                    ================================ */
+                    {% if not is_agent %}
+                        $(document).on('change', '#addresses-list input[type=radio][name=ship-addr-radio]', function () {
+                        
+                            // 🔴 chiudi tutto prima
+                            resetMissingForms();
+                    
+                            const addressId = $(this).val();
+                            const address = ccf_addresses?.find(a => a.addressid == addressId) ?? null;
+                            if (!address) return;
+                    
+                            const $item    = $(this).closest('.item');
+                            const $wrapper = $item.find('.missing-fields-address');
+                            const $form    = $wrapper.find('.address_form');
+                            
+                            // ✅ BLOCCO se già salvato
+                            if ($(this).data('saved') == 1) {
+                                return;
+                            }
+                    
+                            /* ---------------------------
+                            check campi mancanti
+                            ---------------------------- */
+                    
+                            const missingFields = REQUIRED_FIELDS.filter(key => {
+                                return !address[key] || String(address[key]).trim() === '';
+                            });
+                    
+                            if (missingFields.length === 0) {
+                                return;
+                            }
+                            {% if show_logs %}console.log("missing fields: ", missingFields);{% endif %}
+                    
+                            /* ---------------------------
+                            mostra form
+                            ---------------------------- */
+                    
+                            $wrapper.show();
+
+                            /* precompilo telefono e email, richiesta cliente */
+                            const BILLING_FALLBACK = {
+                                email: "{{ customer_data.billing.email|e('js') }}",
+                                phone: "{{ customer_data.billing.phone|e('js') }}"
+                            };
+                    
+                            /* ---------------------------
+                            precompila input testuali
+                            ---------------------------- */
+                    
+                            Object.keys(FIELD_MAP).forEach(key => {
+                                let value = address[key] || '';
+                            
+                                // fallback SOLO se il campo è vuoto
+                                if (!value) {
+                                    if (key === 'email' && BILLING_FALLBACK.email) {
+                                        value = BILLING_FALLBACK.email;
+                                    }
+                                    if (key === 'phone' && BILLING_FALLBACK.phone) {
+                                        value = BILLING_FALLBACK.phone;
+                                    }
+                                }
+                            
+                                $form.find('.' + FIELD_MAP[key]).val(value);
+                            });
+                    
+                            /* ---------------------------
+                            country → province (safe)
+                            ---------------------------- */
+                    
+                            const $country = $form.find('.country');
+                            const $state   = $form.find('.state');
+                            
+                            const districtCode = address.district_code ? String(address.district_code) : '';
+                            const countryCode  = address.country_code;
+                            
+                            // imposta country
+                            if (countryCode) {
+                                $country.val(countryCode);
+                            }
+                            
+                            // imposta il valore che getStates userà
+                            $state.removeAttr('data-current');
+                            
+                            if (districtCode && !missingFields.includes('district_code')) {
+                                $state.attr('data-current', districtCode);
+                            }
+                            
+                            // trigger → farà tutto Storeden
+                            $country.trigger('change');
+                    
+                            /* ---------------------------
+                            disable tutto
+                            ---------------------------- */
+                    
+                            $form.find('input, select')
+                                .prop('disabled', true)
+                                .prop('required', false);
+                    
+                            /* ---------------------------
+                            riabilita solo mancanti
+                            ---------------------------- */
+                    
+                            missingFields.forEach(field => {
+                                switch (field) {
+                                    case 'address':
+                                        $form.find('.addr1').prop({ disabled: false, required: true });
+                                        break;
+                                    case 'zipcode':
+                                        $form.find('.zip').prop({ disabled: false, required: true });
+                                        break;
+                                    case 'city':
+                                        $form.find('.city').prop({ disabled: false, required: true });
+                                        break;
+                                    case 'country_code':
+                                        $form.find('.country').prop({ disabled: false, required: true });
+                                        break;
+                                    case 'district_code':
+                                        $form.find('.state').prop({ disabled: false, required: true });
+                                        break;
+                                    default:
+                                        $form.find('.' + field)
+                                            .prop({ disabled: false, required: true });
+                                }
+                            });
+                    
+                        });
+                    {% endif %}
+                    
+                    $(document).ready(function () {
+
+                        const $radios = $('#addresses-list input[type=radio][name=ship-addr-radio]');
+                        const $checked = $radios.filter(':checked');
+
+                        setTimeout(() => {
+                            if ($checked.length) {
+                                // Se c'è già un selezionato, forza il change
+                                $checked.trigger('change');
+                            } else if ($radios.length) {
+                                // Se nessuno è selezionato, seleziona il primo
+                                $radios.first()
+                                    .prop('checked', true)
+                                    .trigger('change');
+                            }
+                        }, 1000);
+
+                    });
+                    
+                    Storeden.couponValueNew = function(options, callback) {
+                        console.log("options ricevute", options);
+                        const requestData = {
+                            cart: options.cart,
+                            coupon: options.couponCode,
+                            itemTotals: options.itemTotals,
+                    
+                            billing: options.billingAddressId,
+                            shipping_address: options.shippingAddressId,
+                    
+                            country: options.country,
+                            shipping: options.shippingMethod,
+                    
+                            shipping_nation: options.shippingNation,
+                            shipping_city: options.shippingCity,
+                    
+                            user_email: options.userEmail
+                        };
+                    
+                        $.ajax({
+                            url: Storeden.PATH_URL + "/coupon.value.js",
+                            type: "POST",
+                            cache: false,
+                            data: requestData,
+                            success: function(response){
+                    
+                                if (typeof callback === "function") {
+                                    callback(response);
+                                }
+                    
+                                try {
+                                    $(document).trigger("Storeden.coupon.applied", response);
+                                } catch (err) {}
+                            }
+                        });
+                    
+                    };
+
+                    $(document).on('click', '#apply-coupon', function(e){
+                        const coupon = $('#input-coupon').val();
+                        console.log("click applicazione coupon " + coupon + " total: " + CART_TOTAL);
+                        
+                        $('.alert-coupon').addClass('d-none');
+                	    
+                	    Storeden.couponValueNew({
+                            cart: '{{cart_id}}',
+                            couponCode: coupon,
+                            itemTotals: CART_TOTAL,
+                        
+                            billingAddressId: '',
+                            shippingAddressId: '',
+                        
+                            country: 119,
+                            shippingMethod: '',
+                        
+                            shippingNation: 119,
+                            shippingCity: '',
+                        
+                            userEmail: '{{customer_data.billing.email|default(user.email)}}'
+                        }, function(res){
+                            
+                            console.log("res", res);
+                            
+                            if (! (typeof res === 'undefined')){
+                                
+                    			if (res.error == '') {
+                    			    
+                    				CART_TOTAL = parseFloat($('#target-total').attr('data-value'));
+                    				
+                    				const newTotal = CART_TOTAL - res.value;
+                    				
+                    				CART_TOTAL = newTotal;
+                    				COUPON_CODE = res.metadata.sales.code;
+                    				COUPON_VALUE = res.value;
+                    				
+                    				$('#target-coupon-value').text("-" + parsePrice(res.value));
+                    				$('#target-total').text(parsePrice(newTotal));
+                    				
+                    			} else {
+                    			    $('#'+res.error).removeClass('d-none');
+                    			}
+                    
+                    			var event_obj = { 'result' :  res };
+                    			$(document).trigger('storeden.cart.apply.coupon-callback', [event_obj]);
+                    		}
+                        });
+                    });
+                </script>
+            	
+            	
+            {% else %}
+                <div id="box_empty_cart">
+                	<p>{{lang('yout.cart.is.empty') | raw }}</p>	
+                	<a href="/shop" class="dn-btn dn-btn-brand-1 dn-btn-filled" style="">{{lang('back.to.shop')}}</a>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-warning" role="alert">
+                {{lang('profile.agent.no_customer_selected')}}
+            </div>
+            <a href="/profile/choose-customer" class="dn-btn dn-btn-filled dn-btn-brand-1">{{lang('profile.agent.choose_customer')|upper}} <i class="ms-1 fas fa-cart-arrow-down"></i></a>
+        {% endif %}
+    {% elseif request.path.2 != 'proposal-error' %}
+        {% set proposal_n = request.path.3 %}
+        <div class="text-center">
+            <h1 class="text-success">{{lang('proposal.thank_you.title')|replace({"[n]":proposal_n})}}</h1>
+            <p class="mb-4">{{lang('proposal.thank_you.text')}}</p>
+            <a href="/profile/proposals" class="dn-btn dn-btn-filled dn-btn-brand-1">{{lang('profile.orders')}}</a>
+        </div>
+        <script>
+            $(document).ready(function(){
+                Storeden.emptyCart('{{cart_id}}', function (){
+                    $('.cart_item').removeClass('with_values');
+        		    $('#cart_preview').removeClass('cart_with_values');
+        		});
+            });
+		</script>
+    {% elseif request.path.2 == 'proposal-error' %}
+        <div class="text-center">
+            <h1 class="text-danger">{{lang('proposal.error.title')}}</h1>
+            <p class="mb-4">{{lang('proposal.error')}}</p>
+            <a href="/cart" class="dn-btn dn-btn-filled dn-btn-brand-1">{{lang('back.to.cart')}}</a>
+        </div>
+    {% endif %}
+</div>

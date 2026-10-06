@@ -1,0 +1,81 @@
+<div class="cart_review_items">
+	<div class="heading">{{lang('cart.summary')}}</div>
+	<br>
+	<div class="row cart_totals">
+		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('cart.subtotal')}}</div>
+		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end">
+			{{currency|raw}} <span class="toSum">{{cartTotal|nfx}}</span>
+		</div>
+	</div>
+
+	<div class="row cart_totals d-none cartReview_tax_value">
+		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('tax')}} <span class="toFillText"></span></div>
+		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end">{{currency | raw }} <span class="toSum">0</span></div>
+	</div>
+
+	<div class="row cart_totals d-none cartReview_tax_value_included">
+		<div class="col-md-12 col-sm-12 col-12 strong"><span class="toFillText">{{lang("item.tax.included")}}</span></div>
+	</div>
+
+	<div class="row cart_totals d-none cartReview_gift_option_price">
+		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('front.gift.total')}}</div>
+		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end">{{currency | raw }} <span class="toSum">0</span></div>
+	</div>
+
+	<div class="row cart_totals d-none cartReview_shipping_cost">
+		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('cart.step.shipping')}} <span class="toFillText"></span></div>
+		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end"><br>{{currency | raw }} <span class="toSum">0</span></div>
+	</div>
+
+	<div class="row cart_totals d-none cartReview_payment_cost">
+		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('payment')}} <span class="toFillText"></span></div>
+		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end"><br><span class="currency">{{currency | raw }}</span> <span class="toSum">0</span></div>
+	</div>
+
+	<div class="row cart_totals d-none cartReview_sale_discount">
+		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('cart.coupon.amount')}} <small class="toFillText"></small></div>
+		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end text-success">
+			<br>{{currency | raw }} <span class="toSum">0</span></div>
+	</div>
+
+	<div class="review_row  cartReview_checkout_total">
+		<div class="row">
+			<div class="col-md-5 col-sm-12 col-12">{{lang('total')}}</div>
+			<div class="col-md-7 col-sm-12 col-12 text-start text-md-end">
+				{{currency|raw}} <span class="final_sum">{{cartTotal|nfx}}</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="text-center">
+		<div {% if cart_user == 0%}style="display:none"{%endif%} class="cart_actions cart_actions_desktop">
+			<div class="text-center cart_summary_overlay">
+				<i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+			</div>
+			<div class="text-center checkout-work-in-progress">
+				<i class="fa fa-2x fa-circle-o-notch fa-spin"></i>
+				<h2><small>{{lang('checkout.waiting')}}</small></h2>
+			</div>
+			<div class="alert alert-danger checkout-main-error" style="display:none">{{lang('checkout.impossibile.incomplete.data')}}</div>
+			<div class="checkout_errors">
+				<div data-move="1" class="alert alert-danger alert-checkout d-none error_shipping_id">{{lang('cart.no.shipping.selected')}}</div>
+				<div data-move="1.1" class="alert alert-danger alert-checkout d-none error_billing_id">{{lang('cart.no.billing.selected')}}</div>
+				<div data-move="2" class="alert alert-danger alert-checkout d-none error_shipping_method">{{lang('cart.no.carrier.selected')}}</div>
+				<div data-move="3" class="alert alert-danger alert-checkout d-none error_payment_method">{{lang('cart.no.payments.selected')}}</div>
+			</div>
+			<div class="checkout_btn_move checkout_btn_move_desktop d-none_prev">
+				<button type="button" class="btn button-white move-to-step btn-prev btn_move_step_large" aria-label="{{lang('front.back')}}">
+					<i class="fa fa-angle-left fa-lg"></i>
+				</button>
+				<button type="button" class="dn-btn dn-btn-brand-1 dn-btn-filled move-to-step btn-next btn_move_step_large">
+					{{lang('next')}} <i class="fa fa-angle-right  fa-lg"></i>
+				</button>
+				<button class="btn button-checkout btn-block d-none disabled doCheckout">
+					{{lang('confirm.order')|upper}} &nbsp;&nbsp;&nbsp;<i class="fa fa-angle-right fa-lg"></i>
+				</button>
+			</div>
+		</div>
+	</div>
+
+	<div class="clearfix"></div>
+</div>

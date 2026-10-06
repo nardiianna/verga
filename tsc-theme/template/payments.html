@@ -1,0 +1,78 @@
+{% set response = request.path.2 %}
+
+{% if response == 'success' %}
+
+	<div class="container order_response_container">
+		<div class="heading text-success"><i class="fa fa-check fa-lg"></i> {{lang('your.order.is.complete')}}</div>
+		<p>
+		{{lang('order.id')}}  <strong>{{request.path.3}}</strong>
+		</p>
+	</div>
+
+	<!-- google ecommerce analytics -->
+	{% if group.analytics != ''%}
+			{% set affiliation_title = group.title|replace({' ':'-'}) %}
+			{% set order = getOrderById(request.path.3) %}
+			<script type="text/javascript" data-pagespeed-no-defer>
+				var analyticsSended = {{ order.analytics_sended | json_encode }};
+                if (analyticsSended !== true) {
+    				ga('require', 'ecommerce');
+    				ga('ecommerce:clear');
+    				{% for k,item in order.cart.items %}
+    					{% set product_handler = ( k | split('#|#') ) %}
+    					{% set product_object = getItem(product_handler.0) %}
+    					{% set category_id = product_object.categoryUID[0] %}
+    					{% set category_path = '' %}
+    					{% if category_id > 0 %}
+    						{% set list = getCategoryList(category_id) %}
+    						{% for i,cat in list %}
+    							{% if i == 0 %}
+    								{% set category_path = '' ~ cat.name %}
+    							{% else %}
+    								{% set category_path = category_path ~ '/' ~ cat.name %}
+    							{% endif %}
+    						{% endfor %}
+    					{% endif %}
+    					ga('ecommerce:addItem', {
+    						'id': '{{order.orderID}}',
+    						'name': {{ item.title | json_encode | raw }},
+    						'sku': {{ item.sku | json_encode | raw}},
+    						'category': {{ category_path | json_encode | raw }},
+    						'price': '{{ item.price | replace({',':'.'}) }}',
+    						'quantity': '{{ item.count }}',
+    						'currency': '{{group.currency}}'
+    					});
+    				{% endfor %}
+    				ga('ecommerce:addTransaction', {
+    				  'id': '{{order.orderID}}',                    
+    				  'affiliation': '{{affiliation_title}}',   
+    				  'revenue': '{{order.total| replace({',':'.'})}}',
+    				  'currency': '{{group.currency}}'
+    				});
+    				ga('ecommerce:send');
+                }
+			</script>
+		{% endif %}
+{% endif %}
+
+{% if response == 'error' %}
+		<div class="container order_response_container">
+			<div class="heading text-danger"><i class="fa fa-remove fa-lg"></i> {{lang('order.error')}}</div>
+			<p>
+			{{lang('order.id')}}  <strong>{{request.path.3}}</strong>
+			</p>
+		</div>
+{% endif %}
+
+{% if response == 'cancel' %}
+	<div class="container order_response_container">
+		<div class="heading text-danger"><i class="fa fa-warning fa-lg"></i> {{lang('order.cancel')}}</div>
+		<p>
+			{{lang('order.id')}}  <strong>{{request.path.3}}</strong>
+		</p>
+	</div>
+{% endif %}
+
+<div class="container">
+	{% include 'order.html' %}
+</div>

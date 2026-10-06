@@ -1,0 +1,11 @@
+<style>
+    #section_{{vars.section.id}}_color_background{
+        padding:60px 0;
+        background: {{vars.section.settings.color1}};
+        {% if vars.section.settings.gradient_yn == "yes" %}
+            background: {% if vars.section.settings.radial_yn == "no" %}linear-gradient({{vars.section.settings.degrees}}deg{% else %}radial-gradient(circle{% endif %}, {{vars.section.settings.color2}} 0%, {{vars.section.settings.color1}} 100%);
+        {% endif %}
+    }
+</style>
+
+<section class="section template_color_background" id="section_{{vars.section.id}}_color_background">

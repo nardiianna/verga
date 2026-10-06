@@ -1,0 +1,57 @@
+<section class="section template_paragraph" id="section_{{vars.section.id}}_paragraph" {% if vars.section.settings.margin_top == "no" %}style="margin-top:0;"{% endif %}>
+	<div class="{{vars.layout}}">
+		<div class="row d-flex align-items-center {{vars.section.settings.image_alignment}}">
+				
+			{% set text_class = 'col-md-12 col-sm-12 col-xs-12'  %}
+			
+			{% set src_val = vars.section.settings.image %}
+			{% if src_val == ''%}
+				{% set src_val = placeholders.image %}
+			{% endif %}
+			
+			{% if src_val != '' and vars.section.settings.image_view == 'yes' %}
+			
+				{% set image_size = vars.section.settings.size %}
+				{% set text_size = 12 - image_size %}
+				{% set text_class = 'col-md-'~text_size~' col-sm-'~text_size~' col-xs-12' %}
+				
+				<div class="col-md-{{image_size}} col-sm-{{image_size}} col-xs-12 text-center" {% if vars.section.settings.space_between == "no" %}style="padding:0;"{% endif %}>
+					<img src="{{src_val}}" 
+						 data-editor="{{vars.section.data_editor}}_image" 
+						 data-placeholder="{{placeholders.image}}" 
+						 alt="{{attribute(vars.section.settings, 'image_ALT')|default(attribute(vars.section.settings, 'title_'~locale))}}" 
+						 loading="lazy"
+						 {% if vars.section.settings.space_between == "no" %}style="width:100%;"{% endif %}>
+				</div>
+			
+			{% endif %}
+			
+			<div class="{{text_class}}" {% if vars.section.settings.text_padding == "yes" %}style="padding:30px;"{% endif %}>	
+				{% if attribute(vars.section.settings, 'title_'~locale) != "" %}
+    				<div class="heading text-{{vars.section.settings.title_align}}" data-editor="{{vars.section.data_editor}}_title_{{locale}}" role="heading" aria-level="2">
+    					{{attribute(vars.section.settings, 'title_'~locale)}}
+    				</div>
+				{% endif %}
+				{% if attribute(vars.section.settings, 'content_'~locale) != "" %}
+    				<div class="text mb-3" data-editor="{{vars.section.data_editor}}_content_{{locale}}">
+    					{{attribute(vars.section.settings, 'content_'~locale)|raw}}
+    				</div>
+				{% endif %}
+				{% if attribute(vars.section.settings, 'link_'~locale) != '' %}
+					<div class="text-{{vars.section.settings.title_align}}">
+					    <a href="{{attribute(vars.section.settings, 'link_'~locale)}}"
+                            rel="{{vars.section.settings.link_REL}}"
+                            target="{{vars.section.settings.link_TARGET}}"
+                            title="{{attribute(vars.section.settings, 'link_TITLE_'~locale)}}"
+                            class="dn-btn dn-btn-brand-1 dn-btn-filled">
+                            <span data-editor="{{vars.section.data_editor}}_button_label_{{locale}}">
+                            	{{attribute(vars.section.settings, 'button_label_'~locale)}}
+                            </span>
+					    </a>
+				    </div>
+				{% endif %}
+			</div>
+				
+		</div>
+	</div>
+</section>

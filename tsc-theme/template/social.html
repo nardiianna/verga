@@ -1,0 +1,48 @@
+{# Nuova versione MB #}
+{# Se l'icona non viene specidficata viene costruito il link a fontawesome #}
+{% set socials = 
+[
+    {
+        'id':'storeden',
+        'icon':'<i class="fab icon-storeden fa-lg"></i>'
+    },
+    {
+        'id':'facebook',
+        'icon':''
+    },
+    {
+        'id':'youtube',
+        'icon':''
+    },
+    {
+        'id':'x',
+        'icon':'<svg xmlns="http://www.w3.org/2000/svg" height="15" style="vertical-align: bottom;" viewBox="0 0 300 301"><path d="M178.57 127.15L290.27 0H263.81L166.78 110.38L89.34 0H0L117.13 166.93L0 300.25H26.46L128.86 183.66L210.66 300.25H300M36.01 19.54H76.66L263.79 281.67H223.13"/></svg>'
+    },
+    {
+        'id':'instagram',
+        'icon':''
+    },
+    {
+        'id':'pinterest',
+        'icon':''
+    },
+    {
+        'id':'linkedin',
+        'icon':''
+    },
+    {
+        'id':'tiktok',
+        'icon':'<svg xmlns="http://www.w3.org/2000/svg" height="18" viewBox="0 0 448 512"><path d="M448,209.91a210.06,210.06,0,0,1-122.77-39.25V349.38A162.55,162.55,0,1,1,185,188.31V278.2a74.62,74.62,0,1,0,52.23,71.18V0l88,0a121.18,121.18,0,0,0,1.86,22.17h0A122.18,122.18,0,0,0,381,102.39a121.43,121.43,0,0,0,67,20.14Z"/></svg>'
+    }
+] %}
+<div class="social-links">
+    {% for social in socials if attribute(theme.settings.general.social, 'social_'~social.id) != "" %}
+        <a href="{{attribute(theme.settings.general.social, 'social_'~social.id)}}" target="_blank" aria-label="Social network {{social.id}} {{lang('link.open_new_tab')}}">
+            {% if social.icon != "" %}
+                {{social.icon}}
+            {% else %}
+                <i class="fab fa-{{social.id}} fa-lg"></i>
+            {% endif %}
+        </a>
+    {% endfor %}
+</div>

@@ -1,0 +1,108 @@
+{% set blog_categories = getBlogCategories(locale) %}
+
+{% set layout_box = "col-md-12 col-sm-12-col-xs-12" %}
+{% set blog_preview_class = 'blog_preview_1' %}
+
+{% set content_width = 'col-md-9 col-sm-9 col-xs-12' %}
+{% set left_col_width = 'col-md-3 col-sm-3 col-xs-12' %}
+
+{% if theme.settings.blog.show_categories != 'yes' or blog_categories | length == 0  %}
+	{% set content_width = 'col-md-12 col-sm-12 col-xs-12' %}
+	{% set left_col_width = 'd-none' %}
+{% endif %}
+
+{% set show_image = '' %}
+{% if theme.settings.blog.show_post_image != 'yes' %}
+	{% set show_image = 'post_no_image' %}
+{% endif %}
+
+<div class="container">
+	
+	<div class="blog_heading">
+		{% if request.path.2 == 'category' and request.path.3 != ''%}
+		{% set current_blog_category = getBlogCategory(request.path.3) %}
+			<h1 class="heading">{{current_blog_category.name}} <small>{{ posts_count }} {{lang('count.post')}}</small></h1>
+			{% if current_blog_category.description != '' %}
+				<div class="category_blog_description" >{{current_blog_category.description|raw}}</div>
+			{% endif %}
+		{% else %}
+			<h1 class="heading">{{lang('blog')}} <small>{{ posts_count }} {{lang('count.post')}}</small></h1>
+		{% endif %}
+	</div>
+	
+	<div class="row">
+		<div class="{{left_col_width}}">
+			{% if blog_categories | length > 0 %}
+				<div class="navigation-block">
+					<nav class="blog-nav" role="navigation">
+						<input id="blog-menu-state" data-target="#blog-menu" class="menu-state" type="checkbox" />
+						<label class="main-menu-btn" for="blog-menu-state">
+							<span class="main-menu-btn-icon"></span>
+						</label>
+						<span class="nav-brand nav-title xs-show"><a href="#"><strong>{{lang('blog.categories')}}</strong></a></span>
+						<ul id="blog-menu" class="sm sm-vertical sm-clean menu vertical-menu">
+							<li class="{% if request.path.3 == '' %}active{%endif%}">
+								<a href="{{ request.script_name }}/blog">{{lang('front.all.categories')}}</a>
+							</li>
+							{% for blog_cat in blog_categories %}
+								<li class="{% if request.path.3 == blog_cat._id%}active{%endif%}" >
+									<a href="/blog/category/{{blog_cat._id}}/{{blog_cat.slug}}"  
+									   class="{%if blog_cat._id == request.path.3%}active{%endif%}">{{blog_cat.name}}</a>
+								</li>
+							{% endfor %}
+						</ul>
+					</nav>
+				</div>
+			{% endif %}
+		</div>
+		<div class="template_blog_preview">
+			<div class="{{content_width}}">
+				<div class="row">
+					<div class="{{blog_preview_class}}">
+						{% for post in posts %}
+							<div class="{{layout_box}}">
+								<div class="blog_placeholder blog_post {{show_image}}">
+									<a href="{{ postUrl(post) }}" title="{{post.title}}">
+										<div class="blog_img">
+											{% if post.ext_img%}
+												<img src="{{post. ext_img}}" loading="lazy"/>
+											{% endif %}
+										</div>
+										<div class="blog_content">
+											<p> 
+												 {{ post.ts.sec | date("d/m/Y") }}<br>
+												<strong>{{post.title}}</strong> <br>
+												{{ post.extract }}
+											</p>
+											<div class="btn button">{{lang('link.read.more')}} <i class="fa fa-angle-right"></i></div>
+										</div>
+									</a>
+								</div>
+							</div>
+						{% endfor %}
+					</div>
+				</div>
+				
+				<div class="clearfix"></div>
+				<div id="blog_pagination">
+					{% if previous_page | length > 1 %}
+					<a href="{{ previous_page }}" class="btn button-white pull-left"><i class="fa fa-angle-left"></i> {{lang('blog.prev.page')}} </a>
+					{% endif %}
+					{% if next_page | length > 1 %}
+					<a href="{{ next_page }}" class="btn button-white pull-right"> {{lang('blog.next.page')}}  <i class="fa fa-angle-right"></i></a>
+					{% endif %}
+					<div class="clearfix"></div>
+				</div>
+				
+			</div>
+		</div>
+	</div>
+</div>
+
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'blog')%}
+		{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>

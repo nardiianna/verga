@@ -1,0 +1,14 @@
+<div class="store-reviews">
+	<div class="loading"></div>
+	<div class="reviews-content hide">
+		<p class="block-stars"></p>
+		<a href="https://www.storeden.com/{{storeden_locale_path}}/reviews/{{groupUID}}?plugin=review-show" target="_blank">
+			{{lang('front.view.store.reviews')}} (<span class="reviews-count"></span>)
+		</a>
+	</div>
+</div>
+<script>
+	{% if theme.settings.general.reviews.reviews_footer == 'yes' or theme.settings.general.reviews.reviews_shop == 'yes' %}
+		getReviews();
+	{% endif %}
+</script>

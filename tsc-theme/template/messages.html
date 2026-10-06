@@ -1,0 +1,152 @@
+{% if user.uid >  0 %}
+	{% set messages = getConversationMessages() %}
+	<script>
+		var session_lang = '{{locale}}';
+	</script>
+	<script src="//static-cdn.storeden.com/community/js/time-ago.js"></script>
+	<div class="container">
+		<div class="row">
+			<div class='col-md-3 col-sm-4'>	
+				{% include 'menu_profile.html' %}
+			</div>
+			<div class="col-md-7 col-sm-8 col-xs-12  profileLeft">
+				<h1 class="heading">{{lang('store.messages')}}</h1>
+				<div class="well" id="chat_well">
+					<div id="chat_container">
+						<div id="chat_bull_content">
+							{% for mess in messages | reverse %}
+								{% if mess.message != '' %}	
+									{% if mess.from == user.uid %}
+										<p class="text-end noMarginBottom chat_heading"><span class="timeago" title="{{  mess.ts.sec | date('Y-m-d H:i:s') }}">&nbsp;</span> - {{ lang('you') }}</p>
+										<div class="text-end">
+											<span class="chat_bull">
+												{{mess.message}}
+											</span>
+										</div>
+									{% else %}
+										<p class="text-start noMarginBottom chat_heading">{{ group.title }} - <span class="timeago" title="{{  mess.ts.sec | date('Y-m-d H:i:s') }}">&nbsp;</span></p>
+										<div class="text-start">
+											<span class="chat_bull">
+												{{mess.message}}
+											</span>
+										</div>
+									{% endif %}
+								{% endif %}
+							{% endfor %}
+						</div>
+					</div>
+				</div>
+				<form id="formChat">
+					<div class="row">
+						<div class="col-md-9 col-sm-8 col-xs-12">
+							<textarea name="message" 
+									  class="form-control" 
+									  id="chatMessage" 
+									  placeholder="{{lang('front.write.message')}}" 
+									  rows="4"></textarea>
+						</div>
+						<div class="col-md-3 col-sm-4 col-xs-12 text-end">
+							<button type="submit" class="btn button" id="submitChatMessage">
+								{{lang('admin.send')}}&nbsp;&nbsp;&nbsp;<i class="fa fa-angle-right"></i> 
+							</button>
+						</div>
+					</div>
+				</form>
+				<script>
+					
+					var lastTimeStamp = '';
+					var ts = '';
+					var toid = {{groupUID}};
+					var currentPoll = null;
+					
+					$('#chatMessage').keydown(function(){if(event.keyCode==13){$('#formChat').submit();return false;}});
+					
+					$(document).on('submit', '#formChat', function(e){
+						e.preventDefault();
+						loadingButton($('#formChat .button'), $('#formChat .button').html(), 'html' );
+						var message  = $('#chatMessage').val();
+						if (message != ''){
+							Storeden.sendMessageChat(message, chatCallback);
+							$('#chatMessage').val('');
+						}
+					})
+				
+					function chatCallback(response){
+						var html = createMessHtml(response);
+						$("#chat_bull_content").append(html);
+						$(".timeago").timeago();
+						$("#chat_bull_content").animate({"scrollTop": $('#chat_bull_content')[0].scrollHeight}, 300);
+						resetButton();
+					} 
+					
+					function createMessHtml(response){
+						
+						var from_mess = response.name;
+						if (response.name == '{{user.fullname}}'){
+							from_mess = "{{lang('you')}}";
+						}
+						
+						var html = ''; 
+						if (response.name == '{{user.fullname}}'){
+							html +='<p class="text-end noMarginBottom chat_heading">';
+							html += '<span class="timeago" title="{{ response.date | date('Y-m-d H:i:s') }}">&nbsp;</span> - '+from_mess+'</p>';
+							html += '<div class="text-end">';
+						} else {
+							html +='<p class="text-start noMarginBottom chat_heading">'+from_mess+' - ';
+							html += '<span class="timeago" title="{{ response.date | date('Y-m-d H:i:s') }}">&nbsp;</span></p>';
+							html += '<div class="text-start">';
+						}
+						html += '<span class="chat_bull">';
+						html += response.message;
+						html += '</span>';
+						html += '</div>';
+						return html;
+					}
+					
+					//polling function
+					function poll(lastTimeStamp){
+						currentPoll = $.ajax({
+							url: '/restserver/poll_message.js',
+							type: 'POST',
+							data: {'ts' : lastTimeStamp },
+							success: function(response){
+								var c = 0;
+								$.each(response, function(i, k){ 
+									var create = createMessHtml(response[i]);
+									console.log(create);
+									$("#chat_bull_content").append(create);
+									lastTimeStamp = response[i].ts;
+									c++;
+								});
+								
+								ts = lastTimeStamp;
+								if ( c > 0) {
+									$(".timeago").timeago();
+									$("#chat_bull_content").animate({"scrollTop": $('#chat_bull_content')[0].scrollHeight}, 300);
+								}
+							},
+							complete: function(){
+								setTimeout(function(){ poll( lastTimeStamp) }, 20000);
+							},
+							timeout: 2000
+						});
+					}
+					
+					$(document).ready(function(){
+						$(".timeago").timeago();
+						$("#chat_bull_content").animate({"scrollTop": $('#chat_bull_content')[0].scrollHeight}, 300);
+						scrollToElement('formChat');
+						poll(lastTimeStamp);
+					});
+					
+				</script>
+			</div>
+		</div>
+	</div>
+
+{% else %}
+	<div class="container">
+		<p>{{lang('store.not.logged.in')}}</p>				
+		<a href="/login" class="btn button">{{lang('sign.in')}} / {{lang('register')}}</a>
+	</div>
+{% endif %}

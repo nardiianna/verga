@@ -1,0 +1,28 @@
+{% set currentpage = getPageById(pageid) %}
+{% set subpage = getPageByParentId(pageid) %}
+{% if currentURL == '/page/'~currentpage.friendlyURL%}
+	{% set active = "active"%}
+{% else %}
+	{% set active = ""%}
+{%endif%}
+{% if (subpage | length) > 0 %}
+	<li class="{{active}}">
+		<a href="/page/{{currentpage.friendlyURL}}">{% if currentpage.title != '' %}{{ currentpage.title | trim  }}{% else %}&nbsp;{% endif %}</a>
+		<ul>
+		{% for pagetree in subpage %}
+			{% if getPageByParentId(pagetree.id) | length > 0 %}
+				{% include 'custom_menu_pages.html' with {'pageid': ''~pagetree.id} only %}
+			{% else %}
+				{% if currentURL == '/page/'~pagetree.friendlyURL%}
+					{% set active = "active"%}
+				{% else %}
+					{% set active = ""%}
+				{%endif%}
+				<li><a class="{{active}}" href="/page/{{pagetree.friendlyURL}}">{{ pagetree.title }}</a></li>
+			{% endif %}
+		{% endfor %}
+		</ul>
+	</li>
+{% else %}
+	<li><a class="{{active}}" href="/page/{{currentpage.friendlyURL}}">{{ currentpage.title | trim  }}</a></li>
+{% endif %}

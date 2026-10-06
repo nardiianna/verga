@@ -1,0 +1,33 @@
+{% set sections = menulist.sections %}
+{% for section in sections %}
+	{% set element = section.url | trim %}	
+	{% if section.type == 'product' %}
+		{% set p = getItem(element)%}
+		{% set url = request.script_name~'/product/'~element~'/'~p.slug %}
+	{% elseif section.type == 'category' %}
+		{% set url = request.script_name~getCategoryURL(element) %}
+	{% elseif section.type == 'post' %}
+		{% set post = getPost(element)%}
+		{% set url = postUrl(post)  %}
+	{% elseif section.type == 'brand' %}
+		{% set url = request.script_name~getBrandURL(element)  %}
+	{% elseif section.type == 'page' %}
+		{% set page_menu = getPageById(element) %}
+		{% set url = request.script_name~'/page/'~page_menu.friendlyURL %}
+	{% else %}
+		{% set url = element %}
+	{% endif %}	
+	{% if currentURL == url %}
+		{% set active = "active"%}
+	{% else %}
+		{% set active = ""%}
+	{%endif%}
+	<li class="{{active}}">
+		<a href="{{url}}" 
+		   target="{{section.target}}" 
+		   rel="{{section.rel}}" 
+		   title="{{section.title}}">
+			{{section.title}}
+		</a>	
+	</li>
+{% endfor %}

@@ -1,0 +1,94 @@
+
+<div id="review_cart" class="cart_review_items d-none">
+	<div class="heading">{{lang('cart.summary')}}</div>
+	<div class="row cart_addresses">
+	    {% if request.path.2 == "invoice" %}
+	        <div class="col-md-12 col-sm-12 col-12">
+	            <div id="review_billing_details" class="mb-2"><p><b>{{lang('billing.details')}}:</b></p></div>
+	        </div>
+	        <div class="col-md-6 col-sm-6 col-12"> 
+	            <p><b>{{lang('billing.address')}}:</b></p>
+                <div id="review_address_billing"></div>
+                {#<span class="pointer" onclick="cart.moveBetweenSteps(4,1)"><u>{{lang('change')}}</u></span>#}
+    	    </div>
+	    {% endif %}
+	    <div  class="col-md-6 col-sm-6 col-12">
+	        <p><b>{{lang('shipping.address')}}:</b></p>
+	        <div id="review_address_shipping"></div>
+	        <span class="pointer" onclick="cart.moveBetweenSteps(4,1)"><u>{{lang('change')}}</u></span>
+	    </div>
+	</div>
+	<hr style="border-color: #5d5d5d;">
+	
+	<div class="row cart_items">
+	    {{cart_review}}
+	</div>
+	
+	<hr style="border-color: #5d5d5d;">
+	
+	<div id="cart-waiting">
+        <div class="spinner-border text-secondary mt-2 float-end" role="status">
+          <span class="sr-only">Please wait...</span>
+        </div>
+    </div>
+    
+	<div id="cart-totals-review" class="d-none">
+    	<div class="row cart_totals">
+    		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('cart.subtotal')}}</div>
+    		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end">
+    		    <span class="toSum">{{cartTotal|nfx}}</span> {{currency|raw}}
+    		</div>
+    	</div>
+    
+    	<div class="row cart_totals d-none cartReview_tax_value">
+    		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('tax')}} <span class="toFillText"></span></div>
+    		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end"><span class="toSum">0</span> {{currency | raw }}</div>
+    	</div>
+    
+    	<div class="row cart_totals d-none cartReview_tax_value_included">
+    		<div class="col-md-12 col-sm-12 col-12 strong"><span class="toFillText">{{lang("item.tax.included")}}</span></div>
+    	</div>
+    	
+    	<div class="row cart_totals cartReview_tax_calculating">
+    		<div class="col-md-12 col-sm-12 col-12 strong"><span class="toFillText">{{lang("item.tax.calculating")}}</span></div>
+    	</div>
+    	
+    	<div class="row cart_totals d-none cartReview_tax_value_temp">
+    		<div class="col-md-12 col-sm-12 col-12 strong"><span class="toFillText">{{lang("tax.label")}}</span></div>
+    	</div>
+    
+    	<div class="row cart_totals d-none cartReview_gift_option_price">
+    		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('front.gift.total')}}</div>
+    		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end"><span class="toSum">0</span> {{currency | raw }}</div>
+    	</div>
+    
+    	<div class="row cart_totals d-none cartReview_shipping_cost">
+    		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('cart.step.shipping')}} <span class="toFillText"></span>
+    		<br><span class="pointer" onclick="cart.moveBetweenSteps(4,2)" style="font-weight:400"><u>{{lang('change')}}</u></span></div>
+    		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end"><br><span class="toSum">0</span> {{currency | raw }}</div>
+    	</div>
+    
+    	<div class="row cart_totals d-none cartReview_payment_cost">
+    		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('payment')}} <span class="toFillText"></span>
+    		<br><span class="pointer" onclick="cart.moveBetweenSteps(4,3)" style="font-weight:400"><u>{{lang('change')}}</u></span></div>
+    		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end"><br><span class="toSum">0</span> <span class="currency">{{currency | raw }}</span></div>
+    	</div>
+    
+    	<div class="row cart_totals d-none cartReview_sale_discount">
+    		<div class="col-md-6 col-sm-12 col-12 strong">{{lang('cart.coupon.amount')}} <small class="toFillText"></small></div>
+    		<div class="col-md-6 col-sm-12 col-12 text-start text-md-end text-success">
+    			<br><span class="toSum">0</span> {{currency | raw }}
+			</div>
+    	</div>
+    
+    	<div class="review_row  cartReview_checkout_total">
+    		<div class="row">
+    			<div class="col-md-5 col-sm-12 col-12">{{lang('total')}}</div>
+    			<div class="col-md-7 col-sm-12 col-12 text-start text-md-end">
+    			    <span class="final_sum">{{cartTotal|nfx}}</span> {{currency|raw}}
+    			</div>
+    		</div>
+    	</div>
+	</div>
+	<div class="clearfix"></div>
+</div>

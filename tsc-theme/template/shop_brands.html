@@ -1,0 +1,36 @@
+{% set brands = getBrands() %}
+{% set count_brands = 0 %}
+{% if brands | length  > 0 %}
+	
+	<nav class="brands-nav" role="navigation">
+		<input id="brands-menu-state" data-target="#brands-menu" class="menu-state" type="checkbox" aria-hidden="true" tabindex="-1"/>
+		<label class="main-menu-btn" for="brands-menu-state">
+			<span class="main-menu-btn-icon"></span>
+		</label>
+		{#<span class="nav-brand nav-title"><a href="#"><strong>{{lang('brands')}}</strong></a></span>#}
+		<label for="brands-menu-state" class="nav-brand nav-title main-menu-label" tabindex="0" role="button" aria-controls="brands-menu">
+            <strong>{{lang('brands')}}</strong>
+        </label>
+		<ul id="brands-menu" class="sm sm-vertical sm-clean menu vertical-menu">
+			{% for brand in brands %}
+				{% if vars.brandUID == brand.uid %}
+					{% set activeClass = "active"%}
+				{% else %}
+					{% set activeClass = "" %}
+				{% endif %}
+				{% set filterArray = [] %}
+				{% set filterArray = filterArray | merge(document.active_filter)  %}
+				{% set countBrand = countProductsByParams(categoryUID, brand.uid, filterArray)%}
+				{% if countBrand > 0 %}
+					{% set count_brands = count_brands + 1 %}
+					<li><a href="/shop/complex/category/{{vars.categoryUID}}/brand/{{brand.uid}}{{vars.param}}{{vars.query}}" class="{{activeClass}}">{{brand.name}} <span class="counter">({{countBrand}})</span></a></li>
+				{% endif %}
+			{% endfor %}
+		</ul>
+	</nav>
+	{% if count_brands == 0 %}
+		<script>
+			$('.brands-nav').closest('.navigation-block').hide();	
+		</script>
+	{% endif %}
+{% endif %}

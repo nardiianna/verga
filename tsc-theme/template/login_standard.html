@@ -1,0 +1,107 @@
+{% if user.uid > 0 %}
+	<script>window.location = '/'; </script>
+{% else %}
+	<div class="container">
+		<div class="row" id="registration_row">
+			<div class="col-md-6 col-sm-12 col-12" id="formLogin">
+				<div class="h1 heading">{{lang('sign.in')}}</div>
+				<form class="formLogin">
+					<p>{{lang('login.fb.or.gplus')}}</p>
+					<div class="row">
+						<div class="col-md-6 col-sm-6 col-12">
+							<a href="{{document.fb_login}}" class="btn btn-facebook d-block social_button"><i class="fab fa-facebook"></i> Facebook Connect</a>
+						</div>
+						<div class="col-md-6 col-sm-6 col-12">
+							<a href="{{document.google_login}}" class="btn btn-google-plus d-block social_button"><i class="fab fa-google"></i> Google Connect</a>
+						</div>
+						<div class="clearfix"></div>
+					</div>
+					<p>{{lang('login.with.credentials')}}</p>
+					<div class="row">
+						<div class="col-md-6 col-sm-6 col-12">
+							<div class="form-group">
+								<label>{{lang('register.email')}}</label>
+								<input type="email" name="email" class="email form-control"/>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-6 col-12">
+							<div class="form-group">
+								<label>{{lang('signup.password')}}</label>
+								<input type="password" name="password" class="password form-control"/>
+							</div>
+						</div>
+					</div>
+					<div id="error_login" class="alert alert-danger" style="display:none;">
+						{{lang('signin.error')}} {{lang('signin.error.check')}}.
+					</div>
+					<p>{{lang('pw.dont.remember')}}, <a href="{{request.script_name}}/restore-password">{{lang('pw.dont.remember.click')}}.</a></p>
+					<div class="form-group form-submit text-center">	
+						<button type="submit" class="btn button login_register_button">{{lang('sign.in')|upper}}</button>
+					</div>
+				</form>
+			</div>
+			<div class="col-md-6 col-sm-12 col-12" id="formRegistration">
+				<div class="h1 heading">{{lang('register')}}</div>
+				<form class="formRegistration">
+					<p>{{lang('create.newaccount')}}</p>
+					<div class="row">
+						<div class="col-md-6 col-sm-6">
+							<div class="form-group">
+								<label>{{lang('register.fullname')}} <span class="text-danger">*</span></label>
+								<input type="fullname" name="fullname" class="fullname form-control"/>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-6">
+							<div class="form-group">
+								<label>{{lang('signup.language')}} <span class="text-danger">*</span></label>
+								<select name="language" class="language form-control">
+									{% for tld,lang in languages %}
+									<option value="{{tld}}" {% if tld == locale%}selected="selected"{% endif %}>{{lang}}</option>
+									{% endfor %}
+								</select>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<label>{{lang('signup.email')}} <span class="text-danger">*</span></label>
+						<input type="email" name="email" class="email form-control registration_email"/>
+					</div>
+					<div class="row">
+						<div class="col-md-6 col-sm-6">
+							<div class="form-group">
+								<label>{{lang('signup.password')}} <span class="text-danger">*</span></label>
+								<input type="password" name="password" class="password form-control"/>
+							</div>
+						</div>
+						<div class="col-md-6 col-sm-6">
+							<div class="form-group">
+								<label>{{lang('signup.password.rewrite')}} <span class="text-danger">*</span></label>
+								<input type="password" name="repassword" class="repassword form-control"/>
+							</div>
+						</div>
+					</div>
+					<div id="error_different_pw" class="alert alert-danger" style="display:none;">
+						{{lang('different.pw')}}
+					</div>
+					<div id="error_chars_pw" class="alert alert-danger" style="display:none;">
+						{{lang('6.chars')}}
+					</div>
+					<div id="error_registration_email" class="alert alert-danger" style="display:none;">
+						{{lang('address.duplicated')}}
+					</div>
+					<div id="error_registration" class="alert alert-danger" style="display:none;">
+						{{lang('registration.error')}}
+					</div>
+					<div class="form-group">
+						<p class="legalLinks">
+							{{lang('registration.conditions') | raw }} {{group.description | title}}.
+						</p>
+					</div>
+					<div class="form-group form-submit text-center">	
+						<button type="submit" class="btn button login_register_button">{{lang('register')|upper}}</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+{% endif %}

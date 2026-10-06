@@ -1,0 +1,19 @@
+<div class="container">
+	<h1 class="heading">
+		{% if request.path.2 == 'cookies-law'  or request.path.2 == 'page-privacy' or request.path.2 == 'page-conditions' %}
+			{{document.seo.title}}
+		{% else%}	
+			{{ translate_resource(content._id, 'title', content.title) }}
+		{% endif  %}
+	</h1>
+	<div class="page-content">
+		{{ translate_resource(content._id, 'content', content.content) | raw }}
+	</div>
+</div>
+<div id="section-container">
+	{% set page_sections = attribute(theme_sections, 'page')%}
+	{% for section in page_sections  %}
+		{% set vars = { 'section': section, 'layout' : 'container' } %}
+		{% include section.template with vars %}
+	{% endfor %}
+</div>

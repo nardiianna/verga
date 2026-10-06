@@ -1,0 +1,169 @@
+{% set items = [] %}
+{% if vars.section.settings.mode in ["filter", "same-cat"] %}
+	{% set filterArray = [] %}
+	
+	{% if vars.section.settings.highview == 'yes' %}
+		{% set filterArray = filterArray | merge({ 'highview' : 1 }) %}
+	{% endif %}
+	
+	{% if vars.section.settings.filter != '' and  vars.section.settings.filter_INDEX != '' %}
+		{% set filterName = 'parameters.' ~ vars.section.settings.filter%}
+		{% set filterValue = vars.section.settings.filter_INDEX %}
+		{% set filterArray = filterArray | merge({ (filterName) : (filterValue) }) %}
+	{% endif %}
+	
+	{% set list_cat = null %}
+	{% if vars.section.settings.mode == "same-cat" %}
+    	{% set categoryUID = product.categoryUID|first %}
+	    {% if categoryUID != "" %}
+	        {% set in_cat_array = [] |  merge({ '$in' : [categoryUID] }) %}
+		    {% set filterArray = filterArray | merge({ 'categoryUID' : in_cat_array }) %}
+		{% endif %}
+	{% elseif vars.section.settings.category > 0 %}
+		{% set categoryUID = 0 + vars.section.settings.category %}
+		{% set list_cat = getAllChildrenCategories(categoryUID, categorytree(categoryUID)) %}
+		{% if list_cat | length > 0 %}
+    		{% set list_cat = list_cat | merge([(categoryUID)]) %}
+    		{% set in_cat_array = [] |  merge({ '$in' : list_cat }) %}
+    	{% else %}
+    	    {% set in_cat_array = [] |  merge({ '$in' : [categoryUID] }) %}
+    	{% endif %}
+		{% set filterArray = filterArray | merge({ 'categoryUID' : in_cat_array }) %}
+	{% endif %}
+	
+	{% set brandUID = null %}
+	{% if vars.section.settings.brand > 0 %}
+		{% set brandUID = vars.section.settings.brand %}
+	{% endif %}
+	
+	{% set tag =  vars.section.settings.tag %}
+	{% if tag != '' %}
+		{% set filterArray = filterArray | merge({ 'tags' : tag }) %}	
+	{% endif %}
+	
+	{% set sortArray = [] %}
+	
+	{% if vars.section.settings.sort != '' %}
+		
+		{% set expl = vars.section.settings.sort | split('-') %}
+		{% set sort_direction = 1 %}
+		{% if expl.1 == 'desc' %}
+			{% set sort_direction = -1 %}
+		{% endif %}
+	
+		{% set sort_param = 'title' %}
+		{% if expl.0 == 'price' %}
+			{% set sort_param = 'final_price' %}
+		{% elseif expl.0 == 'sale' %}
+			{% set sort_param = 'sale' %}
+		{% elseif expl.0 == 'new' %}
+			{% set sort_param = 'uid' %}
+			{% set sort_direction = sort_direction * -1 %}
+		{% endif %}
+			
+		{% set sortArray = sortArray | merge({ (sort_param) : (sort_direction) }) %}
+	
+	{% endif %}
+	{% if vars.section.settings.mode == "same-cat" or vars.section.settings.sort == "random" %}
+	    {% set items = getItemsByFilterRandom(null, brandUID, filterArray, [], 0, vars.section.settings.count) %}
+    {% else %}
+        {% set items = getItemsByFilter(null, brandUID, filterArray, sortArray, 0, vars.section.settings.count) %}
+    {% endif %}
+{% else %}
+    {% if product.uid > 0%}
+    	{% set relatedItems = getRelatedItems(product.uid) %}		
+    	{% if relatedItems | length > 0 %}
+    		{% set items = [] %}
+    		{% for uid in relatedItems %}
+    			{% set item = getCompleteItem(uid) %}
+    			{% set items = items | merge([item]) %}
+    		{% endfor %}
+    	{% endif %}
+    {% endif %}
+{% endif %}
+
+{% if items | length > 0 %}
+    <section class="section template_filtered_products product_container" {% if vars.section.settings.widget_back_yn == 'yes' %}style="background-color:{{vars.section.settings.widget_back}}"{% endif %} id="section_{{vars.section.id}}_filtered_products">
+	    <div class="{{vars.layout}}">
+    		<div class="section_product_title_container position-relative d-flex align-items-center mb-3">
+    			<div class="section_product_title">
+    				<div class="d-md-flex flex-wrap align-items-center">
+    				    <div>
+    				        <div class="heading me-3 mb-2 mb-md-0" data-editor="{{vars.section.data_editor}}_title_{{locale}}" role="heading" aria-level="2">
+            					{{attribute(vars.section.settings, 'title_'~locale)}}
+            				</div>
+            				<div class="subtitle dn-text-secondary mb-3 mb-md-0" data-editor="{{vars.section.data_editor}}_subtitle_{{locale}}">
+            					{{attribute(vars.section.settings, 'subtitle_'~locale)}}
+            				</div>
+        				</div>
+        				{% if attribute(vars.section.settings, 'button_text_'~locale) != "" %}
+            				<div>
+            				    <a  href="{{attribute(vars.section.settings, 'button_link')}}"
+            				        class="dn-btn dn-btn-brand-1 dn-btn-outline"
+            				        rel="{{vars.section.settings.button_link_REL}}"
+            					    target="{{vars.section.settings.button_link_TARGET}}"
+            					    title="{{attribute(vars.section.settings, 'button_link_TITLE_'~locale)}}">{{attribute(vars.section.settings, 'button_text_'~locale)}}</a>
+            				</div>
+        				{% endif %}
+    				</div>
+    			</div>
+    			<div class="arrows flex-grow-1 d-none d-md-flex justify-content-end">
+                    <div class="prev-button pointer me-3" onclick="swiper{{vars.section.id}}.slidePrev()"><i class="fas fa-chevron-left"></i></div>
+                    <div class="next-button pointer" onclick="swiper{{vars.section.id}}.slideNext()"><i class="fas fa-chevron-right"></i></div>
+                </div>
+    		</div>
+			<div class="swiper swiper-container" id="swiper-{{vars.section.id}}" {% if vars.section.settings.swiper_back_yn == "yes" %}style="background-color:{{vars.section.settings.swiper_back}};"{% endif %}>
+                <!-- Additional required wrapper -->
+                <div class="swiper-wrapper">
+                <!-- Slides -->
+                    {% for item in items %}
+                        <div class="swiper-slide h-auto" {% if vars.section.settings.slide_back_yn == "yes" %}style="background-color:{{vars.section.settings.slide_back}};"{% endif %}>
+                            {% include 'product_preview.html' %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <!-- If we need pagination 
+                <div class="swiper-pagination"></div>-->
+                
+                <!-- If we need navigation buttons 
+                <div class="swiper-button-prev"></div>
+                <div class="swiper-button-next"></div>-->
+                
+                <!-- If we need scrollbar 
+                <div class="swiper-scrollbar"></div>-->
+            </div>
+            
+            <script>
+                const swiper{{vars.section.id}} = new Swiper('#swiper-{{vars.section.id}}', {
+                    slidesPerView: {{vars.section.settings.per_row_mobile}},
+                    spaceBetween: 10,
+                    // Responsive breakpoints
+                    breakpoints: {
+                        // when window width is >= 480px
+                        480: {
+                          slidesPerView: {{vars.section.settings.per_row_tablet}},
+                          spaceBetween: 20
+                        },
+                        // when window width is >= 640px
+                        767: {
+                          slidesPerView: {{vars.section.settings.per_row}},
+                          spaceBetween: 30
+                        }
+                    },
+                    
+                    /* Navigation arrows
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },*/
+                    
+                    {% if vars.section.settings.autoplay == "yes" %}
+                    autoplay: {
+                        delay: {{vars.section.settings.autoplay_time}},
+                    },
+                    {% endif %}
+                });
+            </script>
+    	</div>
+    </section>
+{% endif %}

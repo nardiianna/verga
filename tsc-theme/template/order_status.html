@@ -1,0 +1,52 @@
+<div class="container">
+	<div class="row">
+		{% if user.uid > 0 %}
+			<div class='col-md-3 col-sm-4 third-column-product'>	
+				{% include 'menu_profile.html' %}
+			</div>
+			<div class="col-md-9 col-sm-8 col-xs-12 profileLeft">
+		{% else %}
+			<div class="col-md-12">
+		{% endif %}
+		{% set idOrder = order.orderID %}
+		{% set orderStatusList = getOrdersStatus() %}
+		{% if request.payload.orderID != '' %}
+			{% if order != null%}
+				{% include 'order.html' %}
+			{% endif %}
+		{% endif %}
+		{% if order == null %}
+				
+			<div class="heading">{{lang('page.order.status')}}</div>
+			<p class="search-order">{{lang('search.order')}}</p>
+				
+			<div class="well">
+				<form method="POST" action="/order_status">
+					<div class="row my-4">
+						<div class="col-12 col-md-6">
+							<div class="form-group">
+								<label for="orderID">{{lang('order.id')}}</label>
+								<input type="text" name="orderID" id="orderID" class="email form-control" required/>
+							</div>
+						</div>
+						<div class="col-12 col-md-6">
+							<div class="form-group">
+								<label for="email">{{lang('register.email')}}</label>
+								<input type="email" id="email" name="email" class="email form-control" required/>
+							</div>
+						</div>
+					</div>
+					{% if order == null and search_order == 1 %}
+						<div class="alert alert-danger text-start">
+							{{lang('guest.order.not.found')}}
+						</div>
+					{% endif %}
+					<div class="form-group">
+						<button type="submit" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('search')}}</button>
+					</div>
+				</form>
+			</div>
+		{% endif %}
+		</div>
+	</div>
+</div>

@@ -1,0 +1,265 @@
+{% set is_rma_active = true %}
+
+<div class="container" id="order_return_page">
+
+{% if is_rma_active %}
+
+	{% set id_order = request.path.2 %}
+	{% if id_order == '' and request.payload.orderID != '' %}
+		{% set id_order = request.payload.orderID %}
+	{% endif %}
+	{% set email = request.path.3 %}
+	{% if email == '' and request.payload.email != '' %}
+		{% set email = request.payload.email %}
+	{% endif %}
+
+
+		<h1>{{lang('front.rma.pagetitle')}}</h1>
+
+		{% if order == null %}
+
+			{% if search_order == 1 %}
+				<div class="alert alert-warning">
+					{{lang('rma.order.not.found')}}
+				</div>
+			{% endif %}
+
+			{% if user.uid <= 0 %}
+				<p>{{lang('front.rma.instruction.guest')}}</p>
+			{% else %}
+				<p>{{lang('front.rma.instruction')}}</p>
+			{% endif %}
+			<form method="POST" action="/order-return">
+				<input type="hidden" name="action" value="search_order">
+				<div class="row">
+					<div class="col-12 col-sm-12 col-md-4">
+						<div class="form-group">
+							<label>{{lang('order.id')}}</label>
+							<input type="text" class="form-control" name="orderID" value="{{id_order}}"  />
+						</div>
+					</div>
+					{% if user.uid <= 0 %}
+					<div class="col-12 col-sm-12 col-md-4">
+						<div class="form-group">
+							<label>{{lang('register.email')}}</label>
+							<input type="email" class="form-control" name="email" value="{{email}}" />
+						</div>
+					</div>
+					{% endif %}
+				</div>
+				<button type="submit" id="searchOrderRMA" style="border:none" class="btn button">{{lang('search')}}</button>
+			</form>
+			<br><br>
+		{% else %}
+			<a href="/order-return" style="margin-bottom: 20px;" class="btn button">{{lang('rma.new.search')}}</a>
+			<br><br>
+		{% endif %}
+
+		{% if order != null %}
+
+			{% set reasons = getRMATypes() %}
+
+			{% if rma_list | length > 0 and rma_create == NULL %}
+				<p>
+					{{lang('rma.already.created')}}
+				</p>
+				<ul class="unstyled">
+				{% for k,v in rma_list %}
+					<li><a href="/return/{{v.orderID}}/{{v._id}}">#{{v.rma}} </a> ({{lang('admin.return.'~v.status)}})</li>
+				{% endfor %}
+				</ul>
+			{% endif %}
+			<p>
+				{% if rma_create == null %}{{lang('front.rma.instruction.text')|raw}}<br>{% endif %}
+				{{lang('order.id')}}
+				<a href="/order/{{order.orderID}}">
+					<strong>{% if (order.short_id > 0) %} {{order.short_id}} {% else %} {{order.orderID}} {% endif %}</strong>
+				</a>
+			</p>
+
+			{% if rma_create != null %}
+
+				{% if rma_create == 'success' %}
+					<div class="alert alert-success">
+						{{lang('rma.create.success')|raw}}
+						<br><a href="/return/{{order.orderID}}/{{rma_id}}">{{lang('rma.view.return.details')}} <strong>{{rma_code}}</strong></a>
+					</div>
+				{% else %}
+					<div class="alert alert-danger">{{lang('rma.create.error')|raw}}</div>
+				{% endif %}
+
+			{% endif %}
+
+			{% if rma_create != 'success' %}
+				<form id="form_request" method="POST" action="/order-return/{{id_order}}/{{email}}" enctype="multipart/form-data" >
+					<input type="hidden" name="action" value="send_request">
+					{% set totalItems = 0 %}
+					{% for k,item in order.cart.items %}
+						{% set exp = explode('#|#', k) %}
+						{% set itemUID = exp.0 %}
+						{% set product = getCompleteItem(itemUID, false, true, false) %}
+						{% if product.title == ''%}
+							{% set productTitle = item.title %}
+						{% else %}
+							{% set productTitle = product.title %}
+						{% endif %}
+						{% set totalItem = item.price*item.count  %}
+						{% set options = explode('_', exp.1) %}
+						{% set totalItems = totalItems + totalItem %}
+						<div class="form-group item_to_return">
+							<div class="row">
+								<div class="col-sm-2 col-md-2">
+									<label class="pointer" for="product_{{k}}">
+										<img src="https://cdn.storeden.net/secache/{{product.image_id|default(shop_rules.placeholder)}}" class="img-responsive">
+									</label>
+								</div>
+								<div class="col-sm-1 col-md-1 col-xs-2 text-start">
+									<input type="checkbox" value="1" name="rma[items][]" class="check_product" data-k="{{k}}" id="product_{{k}}">
+								</div>
+								<div class="col-sm-4 col-md-4 col-xs-10" style="margin-bottom:3px;">
+									<label class="pointer" for="product_{{k}}"><strong>{{productTitle}}</strong>
+										{% set l = options | length %}
+										{% if l > 0 %}
+											<br>
+											<span class="options">
+												{% for option in options%}
+													{% for k, vars in product.vars %}
+													{% for j,value in vars.options%}
+													{% if value.option == option%}
+													<strong>{{vars.title}}</strong>: {{ value.title}}
+													{% endif %}
+													{%endfor%}
+													{% endfor %}
+												{% endfor %}
+											</span>
+										{% endif %}
+										<br>{{lang('item.price')}}: {{currency|raw}} {{item.price | nfx}}
+										<br>{{lang('item.quantity') | raw }}: {{item.count}}
+										<br>{{lang('cart.subtotal')}}: {{currency|raw}} {{totalItem | nfx}}
+									</label>
+								</div>
+								<div class="col-sm-5 col-md-5 col-xs-12">
+									<div class="product_reason" style="display:none">
+										<div class="row">
+											<div class="col-md-12">
+												<div class="form-group">
+													{{lang('rma.order.billing.fullname')}}: {{order.billing.fullname}}
+												</div>
+											</div>
+											<div class="col-md-12">
+												<div class="form-group">
+													{{lang('rma.order.billing.email')}}: {{order.billing.email}}
+												</div>
+											</div>
+											<div class="col-md-8 col-sm-7 col-xs-7">
+												<div class="form-group">
+													<label>{{lang('rma.reason')}}</label>
+													<select name="cart[{{k}}][reason]" class="form-control">
+														{% for k,reason in reasons %}
+															<option value="{{k}}">{{lang(reason)}}</option>
+														{% endfor %}
+													</select>
+												</div>
+											</div>
+											<div class="col-md-4 col-sm-5 col-xs-7">
+												<div class="form-group">
+													<label>{{lang('rma.quantity')}}</label>
+													<select name="cart[{{k}}][quantity]" class="form-control">
+														{% for i in range(1, item.count) %}
+															<option value="{{i}}">{{i}}</option>
+														{% endfor %}
+													</select>
+												</div>
+											</div>
+										</div>
+										<div class="form-group">
+											<label>{{lang('rma.note')}}</label>
+											<textarea name="cart[{{k}}][note]" class="form-control" rows="3"></textarea>
+											<input type="hidden" value="{{exp.1}}" name="cart[{{k}}][options]">
+											<input type="hidden" value="{{item.price}}" name="cart[{{k}}][price]">
+											<input type="hidden" value="{{item.sku}}" name="cart[{{k}}][sku]">
+											<input type="hidden" value="{{productTitle}}" name="cart[{{k}}][title]">
+											<input type="hidden" value="" name="cart[{{k}}][return]" data-k="{{k}}" class="check_item">
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						{% endfor %}
+
+						<div id="rma_last">
+							<div class="row">
+								<div class="col-md-4 col-sm-4 col-xs-12">
+									<div class="form-group">
+										<label>{{lang('rma.general.notes')}}</label>
+									</div>
+								</div>
+								<div class="col-md-8 col-sm-8 col-xs-12">
+									<div class="form-group">
+										<textarea name="message" rows="3" class="form-control"></textarea>
+									</div>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-md-8 col-sm-6 col-xs-12">
+									<p>
+										{{lang('send.rma.request.text')|raw}}
+									</p>
+								</div>
+								<div class="col-md-4 col-sm-6 col-xs-12">
+									<div class="form-group text-end">
+										<p class="text-danger" id="noProduct">
+											{{lang('rma.select.at.least.one.product')}}
+										</p>
+										<input type="hidden" value="{{order.orderID}}" name="orderID">
+										<button type="submit" style="display:none;border:none;" id="submitRMA" class="btn btn-primary button">
+											{{lang('send.rma.request')}}
+										</button>
+									</div>
+								</div>
+							</div>
+						</div>
+
+					</form>
+			{% endif %}
+			<script>
+
+				$(document).on('click', '#submitRMA', function(e){
+					e.preventDefault();
+					$(this).addClass('disabled').prop('disabled', true).html('<i class="fa fa-circle-o-notch fa-spin"></i>');
+					$('#form_request').submit();
+				})
+
+				var products = 0;
+				$(document).on('change', '.check_product', function(){
+					var target = $(this).parent().parent().find('.product_reason');
+					var k = $(this).attr('data-k');
+					if ($(this).is(':checked')){
+						++products;
+						target.show();
+						$('.check_item[data-k="'+k+'"]').val('1');
+					} else {
+						--products;
+						target.hide();
+						$('.check_item[data-k="'+k+'"]').val('');
+					}
+					if (products > 0){
+						$('#noProduct').fadeOut(300, function(){
+							$('#submitRMA').fadeIn();
+						});
+					} else {
+						$('#submitRMA').fadeOut(300, function(){
+							$('#noProduct').fadeIn();
+						});
+					}
+				})
+			</script>
+		{% endif %}
+	</div>
+
+{% else %}
+
+{% endif %}
+
+	<div class="clearfix"></div>
+</div>

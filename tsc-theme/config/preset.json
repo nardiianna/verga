@@ -1,0 +1,5120 @@
+{
+	"placeholders":{
+		"image":"https://cdn.storeden.net/themes/config_v2/svg/image_placeholder.svg",
+		"slide":"https://cdn.storeden.net/themes/config_v2/svg/slide_placeholder.svg",
+		"banner_image":"https://cdn.storeden.net/themes/config_v2/svg/banner_placeholder.svg",
+		"video":"https://cdn.storeden.net/themes/config_v2/svg/video_placeholder.svg",
+		"product_1":"https://cdn.storeden.net/themes/config_v2/svg/product_1.svg",
+		"product_2":"https://cdn.storeden.net/themes/config_v2/svg/product_2.svg",
+		"product_3":"https://cdn.storeden.net/themes/config_v2/svg/product_3.svg",
+		"product_4":"https://cdn.storeden.net/themes/config_v2/svg/product_4.svg",
+		"blog":"https://cdn.storeden.net/themes/config_v2/svg/blog_placeholder.svg",
+		"newsletter":"https://cdn.storeden.net/themes/config_v2/svg/newsletter_placeholder.svg",
+		"lazy":"https://cdn.storeden.net/2020/backoffice/img/loading.svg"
+	},
+	"presets":{
+		"youtube_video":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Youtube video PRO",
+			"icon":"fa-youtube",
+			"settings":[
+				{
+					"label":"Video Url",
+					"fields":[
+						{
+							"type":"text",
+							"id":"video_id",
+							"label":"Youtube Video ID",
+							"default":"",
+							"info":"Example: https://www.youtube.com/watch?v=XYZ, XYX is the video ID"
+						}
+					]
+				},
+				{
+					"label":"Other settings",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"autoplay",
+							"label":"Autoplay"
+						},
+						{
+							"type":"yes_no",
+							"id":"loop",
+							"label":"Loop"
+						},
+						{
+							"type":"yes_no",
+							"id":"controls",
+							"label":"Show controls",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"rel",
+							"label":"Show related video",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"container",
+							"label":"Video boxed",
+							"default":"yes"
+						}
+					]
+				}
+			]
+		},
+		"divider":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Divider",
+			"icon":"fa-minus",
+			"available":[
+				
+			],
+			"settings":[
+				{
+					"label":"Settings",
+					"fields":[
+						{
+							"type":"color",
+							"id":"color",
+							"label":"Color",
+							"default":"#000000"
+						},
+						{
+							"type":"text",
+							"id":"height",
+							"label":"Height",
+							"default":"1px"
+						},
+						{
+							"type":"select",
+							"id":"layout",
+							"label":"Layout",
+							"options":[
+								{
+									"option":"container",
+									"label":"Container width"
+								},
+								{
+									"option":"fullscreen",
+									"label":"Fullscreen"
+								}
+							]
+						},
+						{
+							"type":"text",
+							"id":"margin_top",
+							"label":"Margin top",
+							"default":"10px"
+						},
+						{
+							"type":"text",
+							"id":"margin_bottom",
+							"label":"Margin bottom",
+							"default":"10px"
+						}
+					]
+				}
+			]
+		},
+		"multibox_2_to_12":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"2 to 12 banners",
+			"icon":"fa-columns",
+			"settings":[
+				{
+					"label":"Desktop settings",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle",
+							"label":"Subtitle",
+							"multilang":"yes"
+						},
+						{
+							"type":"select",
+							"id":"title_position",
+							"label":"Title position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							]
+						},
+						{
+							"type":"number",
+							"id":"desk_col",
+							"label":"Elements in a row (desktop)",
+							"default":"2"
+						},
+						{
+							"type":"pixel",
+							"id":"desk_gap",
+							"label":"Gap between banners (desktop)",
+							"default":"30"
+						},
+						{
+							"type":"number",
+							"id":"mob_col",
+							"label":"Elements in a row (mobile)",
+							"default":"2"
+						},
+						{
+							"type":"pixel",
+							"id":"mob_gap",
+							"label":"Gap between banners (mobile)",
+							"default":"30"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_yn",
+							"label":"Show a button",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"button_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_link",
+							"label":"Button link",
+							"multilang":"no"
+						}
+					]
+				},
+				{
+					"label":"1° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_1",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_1",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_1",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_1",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_1",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_1",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_1",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_1",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_1_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_1_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_1_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_1_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"test-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"2° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_2",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_2",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_2",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_2",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_2",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_2",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_2",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_2",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_2_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_2_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_2_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_2_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"3° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_3",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_3",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_3",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_3",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_3",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_3",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_3",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_3",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_3_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_3_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_3_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_3_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"4° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_4",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_4",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_4",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_4",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_4",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_4",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_4",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_4",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_4_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_4_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_4_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_4_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"5° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_5",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_5",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_5",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_5",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_5",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_5",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_5",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_5",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_5_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_5_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_5_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_5_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"6° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_6",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_6",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_6",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_6",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_6",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_6",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_6",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_6",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_6_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_6_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_6_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_6_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"7° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_7",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_7",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_7",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_7",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_7",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_7",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_7",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_7",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_7_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_7_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_7_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_7_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"8° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_8",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_8",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_8",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_8",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_8",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_8",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_8",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_8",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_8_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_8_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_8_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_8_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"9° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_9",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_9",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_9",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_9",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_9",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_9",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_9",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_9",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_9_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_9_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_9_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_9_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"10° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_10",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_10",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_10",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_10",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_10",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_10",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_10",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_10",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_10_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_10_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_10_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_10_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"11° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_11",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_11",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_11",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_11",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_11",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_11",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_11",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_11",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_11_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_11_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_11_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_11_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"12° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_12",
+							"label":"Show this banner",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_12",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_12",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_12",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"textarea",
+							"id":"svg_12",
+							"label":"SVG (replace img)"
+						},
+						{
+							"type":"link",
+							"id":"link_12",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_12",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_12",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_12_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_12_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_12_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_12_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"multibox_2_to_6":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"2 to 6 banners",
+			"icon":"fa-columns",
+			"settings":[
+				{
+					"label":"General settings",
+					"fields":[
+						{
+							"type":"number",
+							"id":"mobile_col",
+							"label":"Elements in a row (mobile)",
+							"default":"2"
+						},
+						{
+							"type":"pixel",
+							"id":"gap",
+							"label":"Gap between banners (desktop)",
+							"default":"30"
+						},
+						{
+							"type":"pixel",
+							"id":"gap_mobile",
+							"label":"Gap between banners (mobile)",
+							"default":"20"
+						},
+						{
+							"type":"select",
+							"id":"type",
+							"label":"View type",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"grid",
+									"label":"Simple 1 row grid"
+								},
+								{
+									"option":"slider",
+									"label":"Slider"
+								},
+								{
+									"option":"mobile-slider",
+									"label":"Grid for desktop and slider for mobile"
+								}
+							]
+						},
+						{
+							"type":"number",
+							"id":"desktop_col",
+							"label":"Elements in a row desktop",
+							"default":"2",
+							"info":"Only for slider in desktop view (if slider is enabled)"
+						},
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle",
+							"label":"Subtitle",
+							"multilang":"yes"
+						},
+						{
+							"type":"select",
+							"id":"title_position",
+							"label":"Title position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							]
+						},
+						{
+							"type":"yes_no",
+							"id":"button_yn",
+							"label":"Show a button",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"button_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_link",
+							"label":"Button link",
+							"multilang":"no"
+						}
+					]
+				},
+				{
+					"label":"1° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_1",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_1",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_1",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_1",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"link",
+							"id":"link_1",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_1",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_1",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_1_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_1_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_1_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_1_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"2° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_2",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_2",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_2",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_2",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"link",
+							"id":"link_2",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_2",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_2",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_2_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_2_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_2_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_2_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"3° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_3",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_3",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_3",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_3",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"link",
+							"id":"link_3",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_3",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_3",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_3_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_3_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_3_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_3_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"4° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_4",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_4",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_4",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_4",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"link",
+							"id":"link_4",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_4",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_4",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_4_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_4_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_4_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_4_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"5° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_5",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_5",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_5",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_5",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"link",
+							"id":"link_5",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_5",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_5",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_5_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_5_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_5_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_5_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"6° banner",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show_banner_6",
+							"label":"Show this banner",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"blank_banner_6",
+							"label":"Blank placeholder",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_6",
+							"label":"Image"
+						},
+						{
+							"type":"image",
+							"id":"image_alt_6",
+							"label":"Image on hovering"
+						},
+						{
+							"type":"link",
+							"id":"link_6",
+							"label":"Link",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"text_6",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"text_b_6",
+							"label":"Description",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_6_yn",
+							"label":"Show a button",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_6_text",
+							"label":"Button text",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_6_link",
+							"label":"Button link",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"button_6_position",
+							"label":"Position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								},
+								{
+									"option":"full",
+									"label":"Full width"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"collapse_row":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Collapse row (FAQ)",
+			"icon":"fa-chevron-down",
+			"settings":[
+				{
+					"label":"Content",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"content",
+							"label":"Content",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"anchor",
+							"label":"Anchor (no blank spaces)",
+							"multilang":"no",
+							"info":"Set an anchor to reach this element from anywhere by putting at the end of the url the '#' followed by the anchor you choosed. Example: /page#anchor. This element will be opened by default when the link with the anchor is clicked"
+						},
+						{
+							"type":"yes_no",
+							"id":"margin_top",
+							"label":"Margin top",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"chevron",
+							"label":"Animated arrow",
+							"multilang":"no",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"opened",
+							"label":"Opened by default",
+							"multilang":"no",
+							"default":"no"
+						}
+					]
+				}
+			]
+		},
+		"contact_us_advanced":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Contact us advanced",
+			"icon":"fas fa-envelope-open-text",
+			"settings":[
+				{
+					"label":"General settings",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"show",
+							"label":"Show in this language",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"yes",
+								"en_US":"yes",
+								"es_ES":"yes",
+								"de_DE":"yes",
+								"fr_FR":"yes"
+							}
+						},
+						{
+							"type":"yes_no",
+							"id":"modal_yn",
+							"label":"Put in a modal",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"modal_id",
+							"label":"Modal id",
+							"info":"Only for modal mode"
+						},
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"recipient",
+							"label":"Recipient",
+							"multilang":"yes",
+							"info":"Leave blank to use the default site email address."
+						},
+						{
+							"type":"text",
+							"id":"subject",
+							"label":"Subject",
+							"multilang":"yes",
+							"info":"Leave blank for a default subject."
+						}
+					]
+				},
+				{
+					"label":"Store details",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"store_details_yn",
+							"label":"Show store details",
+							"default":"yes"
+						},
+						{
+							"type":"textarea",
+							"id":"text",
+							"label":"Text",
+							"multilang":"yes"
+						},
+						{
+							"type":"textarea",
+							"id":"address",
+							"label":"Address",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"address_smart_yn",
+							"label":"Address smart link",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"wa",
+							"label":"WhatsApp",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"wa_smart_yn",
+							"label":"WhatsApp smart link",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"tel1",
+							"label":"Telephone1",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"tel1_smart_yn",
+							"label":"Tel1 smart link",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"tel2",
+							"label":"Telephone2",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"tel2_smart_yn",
+							"label":"Tel2 smart link",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"email",
+							"label":"Email",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"email_smart_yn",
+							"label":"Email smart link",
+							"multilang":"yes"
+						}
+					]
+				},
+				{
+					"label":"Name",
+					"fields":[
+						{
+							"type":"text",
+							"id":"name_field_name",
+							"label":"Name field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"name_field_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_name_yn",
+							"label":"Name full width"
+						}
+					]
+				},
+				{
+					"label":"Email",
+					"fields":[
+						{
+							"type":"text",
+							"id":"email_field_name",
+							"label":"Email field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"email_field_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_email_yn",
+							"label":"Email full width"
+						}
+					]
+				},
+				{
+					"label":"Telephone field",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"tel_yn",
+							"label":"Add a telephone field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"tel_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"tel_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"tel_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_tel_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 1",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_1_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_1_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_1_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_1_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_1_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 2",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_2_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_2_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_2_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_2_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_2_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 3",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_3_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_3_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_3_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_3_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_3_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 4",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_4_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_4_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_4_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_4_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_4_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 5",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_5_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_5_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_5_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_5_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_5_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 6",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_6_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_6_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_6_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_6_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_6_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 7",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_7_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_7_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_7_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_7_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_7_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 8",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_8_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_8_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_8_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_8_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_8_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 9",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_9_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_9_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_9_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_9_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_9_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Custom text field 10",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"add_field_10_yn",
+							"label":"Add a TEXT field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"add_field_10_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"add_field_10_placeholder",
+							"label":"Placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"add_field_10_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_field_10_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"File field",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"file_field_yn",
+							"label":"Add a FILE field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"file_field_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"file_field_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_file_field_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Dropdown field",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"dd_field_yn",
+							"label":"Add a DROPDOWN field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"dd_field_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"textarea",
+							"id":"dd_field_options",
+							"label":"Possibile options",
+							"multilang":"yes",
+							"info":"One option per line.",
+							"default":{
+								"it_IT":"option 1\noption 2\noption 3",
+								"en_US":"option 1\noption 2\noption 3",
+								"es_ES":"option 1\noption 2\noption 3",
+								"de_DE":"option 1\noption 2\noption 3",
+								"fr_FR":"option 1\noption 2\noption 3"
+							}
+						},
+						{
+							"type":"yes_no",
+							"id":"dd_field_empty_yn",
+							"label":"Blank first option",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"dd_field_mandatory_yn",
+							"label":"Required field",
+							"info":"Blank first option must be active to set the dropdown field as required",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_dd_field_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Radio / check field",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"rc_field_yn",
+							"label":"Add radio/check fields",
+							"multilang":"no"
+						},
+						{
+							"type":"select",
+							"id":"rc_type",
+							"label":"Type",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"radio",
+									"label":"Radio (max 1 selection)"
+								},
+								{
+									"option":"checkbox",
+									"label":"Checkbox (multiple selections)"
+								}
+							]
+						},
+						{
+							"type":"text",
+							"id":"rc_field_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"textarea",
+							"id":"rc_field_options",
+							"label":"Possibile options",
+							"multilang":"yes",
+							"info":"One option per line.",
+							"default":{
+								"it_IT":"option 1\noption 2\noption 3",
+								"en_US":"option 1\noption 2\noption 3",
+								"es_ES":"option 1\noption 2\noption 3",
+								"de_DE":"option 1\noption 2\noption 3",
+								"fr_FR":"option 1\noption 2\noption 3"
+							}
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_rc_field_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Accept field",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"check_field_yn",
+							"label":"Add a checkbox field",
+							"multilang":"no"
+						},
+						{
+							"type":"text",
+							"id":"check_field_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"check_field_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_check_field_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Textarea field",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"ta_field_yn",
+							"label":"Add a textarea field",
+							"multilang":"no",
+							"default":"yes"
+						},
+						{
+							"type":"text",
+							"id":"ta_field_name",
+							"label":"Field name",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"ta_field_placeholder",
+							"label":"Field placeholder",
+							"multilang":"yes",
+							"info":"For future purpose"
+						},
+						{
+							"type":"yes_no",
+							"id":"ta_field_mandatory_yn",
+							"label":"Required field",
+							"multilang":"no"
+						},
+						{
+							"type":"yes_no",
+							"id":"full_width_ta_field_yn",
+							"label":"Full width"
+						}
+					]
+				},
+				{
+					"label":"Submit button",
+					"fields":[
+						{
+							"type":"text",
+							"id":"submit_text",
+							"label":"Text",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"Invia",
+								"en_US":"Submit",
+								"es_ES":"Entregar",
+								"de_DE":"Einreichen",
+								"fr_FR":"Soumettre"
+							}
+						}
+					]
+				}
+			]
+		},
+		"mailchimp_newsletter":{
+			"group":"Users",
+			"label":"Mailchimp newsletter",
+			"icon":"fa-envelope-o",
+			"info":"You need to have a valid Mailchimp account and to get form embedded code",
+			"available":[
+				
+			],
+			"settings":[
+				{
+					"label":"Embed form",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Section title",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"Newsletter",
+								"en_US":"Newsletter",
+								"es_ES":"Newsletter",
+								"de_DE":"Newsletter",
+								"fr_FR":"Newsletter"
+							}
+						},
+						{
+							"type":"editor",
+							"id":"text",
+							"label":"Section text",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>",
+								"en_US":"Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>",
+								"es_ES":"Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>",
+								"de_DE":"Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>",
+								"fr_FR":"Lorem ipsum dolor sit amet, <strong>consectetur adipiscing elit</strong>"
+							}
+						},
+						{
+							"type":"textarea",
+							"id":"embed_form",
+							"label":"Embed form",
+							"default":"",
+							"light":"no",
+							"multilang":"yes",
+							"info":"Get the embedded form from Mailchimp and paste it here"
+						}
+					]
+				},
+				{
+					"label":"Other settings",
+					"fields":[
+						{
+							"type":"image",
+							"id":"image",
+							"label":"Image",
+							"info":"Suggested width at least 700 pixel, it will adapt to the screen",
+							"default":""
+						},
+						{
+							"type":"link",
+							"id":"link",
+							"label":"Image link",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"/shop",
+								"en_US":"/shop",
+								"es_ES":"/shop",
+								"de_DE":"/shop",
+								"fr_FR":"/shop"
+							}
+						}
+					]
+				}
+			]
+		},
+		"banner_image":{
+			"group":"Media",
+			"label":"Banner image",
+			"icon":"fa-image",
+			"available":[
+				
+			],
+			"settings":[
+				{
+					"label":"Image",
+					"fields":[
+						{
+							"type":"image",
+							"id":"image",
+							"label":"Image",
+							"multilang":"yes",
+							"info":"Suggested width 1200 pixel at least",
+							"default":{
+								
+							}
+						},
+						{
+							"type":"link",
+							"id":"link",
+							"label":"Link",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"/shop",
+								"en_US":"/shop",
+								"es_ES":"/shop",
+								"de_DE":"/shop",
+								"fr_FR":"/shop"
+							}
+						}
+					]
+				}
+			]
+		},
+		"test":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Test palette",
+			"icon":"fa-palette",
+			"settings":[
+				{
+					"label":"Useless section",
+					"fields":[
+						{
+							"type":"text",
+							"id":"link",
+							"label":"Useless field",
+							"default":""
+						}
+					]
+				}
+			]
+		},
+		"filtered_products":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Filtered products",
+			"icon":"fa fa-filter",
+			"info":"The 'related products' and 'Same category random' modes works only in product page.",
+			"settings":[
+				{
+					"label":"Mode",
+					"fields":[
+						{
+							"type":"select",
+							"id":"mode",
+							"label":"Mode",
+							"options":[
+								{
+									"option":"filter",
+									"label":"Filter products"
+								},
+								{
+									"option":"related",
+									"label":"Related products"
+								},
+								{
+									"option":"same-cat",
+									"label":"Same category random"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Heading",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Section title",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle",
+							"label":"Section subtitle",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_text",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_link",
+							"label":"Button link"
+						}
+					]
+				},
+				{
+					"label":"Filter mode settings",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"highview",
+							"label":"Highview items",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"category",
+							"id":"category",
+							"label":"Category",
+							"multilang":"no",
+							"default":""
+						},
+						{
+							"type":"brand",
+							"id":"brand",
+							"label":"Brands",
+							"multilang":"no",
+							"default":""
+						},
+						{
+							"type":"filter",
+							"id":"filter",
+							"label":"Filter to use",
+							"multilang":"no",
+							"default":""
+						},
+						{
+							"type":"text",
+							"id":"tag",
+							"light":"no",
+							"label":"Tag",
+							"multilang":"no",
+							"default":""
+						},
+						{
+							"type":"select",
+							"id":"sort",
+							"label":"Sort by",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"price-asc",
+									"label":"From lower price"
+								},
+								{
+									"option":"price-desc",
+									"label":"From highest price"
+								},
+								{
+									"option":"sale-asc",
+									"label":"From lower sale value"
+								},
+								{
+									"option":"sale-desc",
+									"label":"From highest sale value"
+								},
+								{
+									"option":"title-asc",
+									"label":"Title, A-Z"
+								},
+								{
+									"option":"title-desc",
+									"label":"Title, Z-A"
+								},
+								{
+									"option":"new-asc",
+									"label":"Newer items"
+								},
+								{
+									"option":"new-desc",
+									"label":"Older items"
+								},
+								{
+									"option":"random",
+									"label":"Random"
+								}
+							],
+							"default":"new-asc"
+						}
+					]
+				},
+				{
+					"label":"Aspect",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"autoplay",
+							"label":"Carousel autoplay",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"number",
+							"id":"autoplay_time",
+							"label":"Interval (milliseconds)",
+							"multilang":"no",
+							"default":5000
+						},
+						{
+							"type":"number",
+							"id":"count",
+							"label":"Max number of products",
+							"multilang":"no",
+							"default":8
+						},
+						{
+							"type":"number",
+							"id":"per_row",
+							"label":"Products per row desktop",
+							"multilang":"no",
+							"default":4
+						},
+						{
+							"type":"number",
+							"id":"per_row_tablet",
+							"label":"Products per row tablet",
+							"multilang":"no",
+							"default":3
+						},
+						{
+							"type":"number",
+							"id":"per_row_mobile",
+							"label":"Products per row mobile",
+							"multilang":"no",
+							"default":2
+						},
+						{
+							"type":"yes_no",
+							"id":"slide_back_yn",
+							"label":"Set a slide backround"
+						},
+						{
+							"type":"color",
+							"id":"slide_back",
+							"label":"Slide background",
+							"default":"#FFFFFF"
+						},
+						{
+							"type":"yes_no",
+							"id":"swiper_back_yn",
+							"label":"Set a swiper backround"
+						},
+						{
+							"type":"color",
+							"id":"swiper_back",
+							"label":"Swiper background",
+							"default":"#FFFFFF"
+						},
+						{
+							"type":"yes_no",
+							"id":"widget_back_yn",
+							"label":"Set a widget backround"
+						},
+						{
+							"type":"color",
+							"id":"widget_back",
+							"label":"Widget background",
+							"default":"#FFFFFF"
+						}
+					]
+				}
+			]
+		},
+		"image_slider":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Image slider PRO",
+			"icon":"fa-th-large",
+			"settings":[
+				{
+					"label":"Settings",
+					"fields":[
+						{
+							"type":"select",
+							"id":"layout",
+							"label":"Layout <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"fullscreen",
+									"label":"Fullscreen"
+								},
+								{
+									"option":"container",
+									"label":"Centered"
+								}
+							]
+						},
+						{
+							"type":"yes_no",
+							"id":"autoplay",
+							"label":"Autoplay <i class=\"fas fa-angle-double-right\"></i>"
+						},
+						{
+							"type":"text",
+							"id":"autoplay_time",
+							"default":"5",
+							"label":"Interval (seconds) <i class=\"fas fa-stopwatch\"></i>"
+						},
+						{
+							"type":"yes_no",
+							"id":"loop",
+							"label":"Loop <i class=\"fas fa-retweet\"></i>"
+						}
+					]
+				},
+				{
+					"label":"Image slide 1",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_1",
+							"label":"Enable this slide",
+							"default":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_1",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_1_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_1",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_1",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_1",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_1",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_1_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_1_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_1_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_1_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_1_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Image slide 2",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_2",
+							"label":"Enable this slide",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_2",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_2_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_2",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_2",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_2",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_2",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_2_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_2_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_2_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_2_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_2_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Image slide 3",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_3",
+							"label":"Enable this slide",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_3",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_3_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_3",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_3",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_3",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_3",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_3_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_3_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_3_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_3_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_3_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Image slide 4",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_4",
+							"label":"Enable this slide",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_4",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_4_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_4",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_4",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_4",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_4",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_4_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_4_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_4_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_4_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_4_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Image slide 5",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_5",
+							"label":"Enable this slide",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_5",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_5_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_5",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_5",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_5",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_5",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_5_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_5_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_5_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_5_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_5_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Image slide 6",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_6",
+							"label":"Enable this slide",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_6",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_6_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_6",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_6",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_6",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_6",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_6_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_6_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_6_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_6_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_6_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Image slide 7",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_7",
+							"label":"Enable this slide",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_7",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_7_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_7",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_7",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_7",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_7",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_7_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_7_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_7_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_7_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_7_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Image slide 8",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"enabled_8",
+							"label":"Enable this slide",
+							"default":"no"
+						},
+						{
+							"type":"image",
+							"id":"image_8",
+							"label":"Image <i class=\"fas fa-desktop\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image_8_mob",
+							"label":"Image <i class=\"fas fa-mobile-alt\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link_8",
+							"label":"Link <i class=\"fas fa-link\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"title_8",
+							"label":"Title <i class=\"fas fa-heading\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"subtitle_8",
+							"label":"Subtitle <i class=\"fas fa-paragraph\"></i>",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_8",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"button_8_yn",
+							"label":"Show the button",
+							"info":"If 'yes' will be used the link with a button instead of linking the entire image"
+						},
+						{
+							"type":"select",
+							"id":"text_8_alignment",
+							"label":"Text Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							],
+							"default":"center"
+						},
+						{
+							"type":"select",
+							"id":"text_8_position_x",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-h\"></i>",
+							"options":[
+								{
+									"option":"justify-content-start",
+									"label":"Left"
+								},
+								{
+									"option":"justify-content-center",
+									"label":"Center"
+								},
+								{
+									"option":"justify-content-end",
+									"label":"Right"
+								}
+							],
+							"default":"justify-content-center"
+						},
+						{
+							"type":"select",
+							"id":"text_8_position_y",
+							"label":"Alignment <i class=\"fas fa-arrows-alt-v\"></i>",
+							"options":[
+								{
+									"option":"align-items-start",
+									"label":"Top"
+								},
+								{
+									"option":"align-items-center",
+									"label":"Center"
+								},
+								{
+									"option":"align-items-end",
+									"label":"Bottom"
+								}
+							],
+							"default":"align-items-center"
+						},
+						{
+							"type":"select",
+							"id":"text_8_style",
+							"label":"Caption style <i class=\"fas fa-palette\"></i>",
+							"options":[
+								{
+									"option":"",
+									"label":"Standard"
+								},
+								{
+									"option":"light",
+									"label":"Standard light"
+								},
+								{
+									"option":"light-box",
+									"label":"Standard with light box"
+								},
+								{
+									"option":"dark-box",
+									"label":"Standard with dark box"
+								},
+								{
+									"option":"big",
+									"label":"Big"
+								},
+								{
+									"option":"big light",
+									"label":"Big light"
+								},
+								{
+									"option":"big light-box",
+									"label":"Big with light box"
+								},
+								{
+									"option":"big dark-box",
+									"label":"Big with dark box"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"three_columns_box":{
+			"group":"Content",
+			"label":"Three banners",
+			"icon":"fa-image",
+			"available":[
+				
+			],
+			"settings":[
+				{
+					"label":"Left box",
+					"fields":[
+						{
+							"type":"image",
+							"id":"left_image",
+							"label":"Image",
+							"multilang":"yes",
+							"default":{
+								
+							},
+							"info":"Suggested width at least 400px"
+						},
+						{
+							"type":"link",
+							"id":"left_link",
+							"label":"Link",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"/shop",
+								"en_US":"/shop",
+								"es_ES":"/shop",
+								"de_DE":"/shop",
+								"fr_FR":"/shop"
+							}
+						}
+					]
+				},
+				{
+					"label":"Center box",
+					"fields":[
+						{
+							"type":"image",
+							"id":"center_image",
+							"label":"Image",
+							"multilang":"yes",
+							"default":{
+								
+							},
+							"info":"Suggested width at least 400px"
+						},
+						{
+							"type":"link",
+							"id":"center_link",
+							"label":"Link",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"/shop",
+								"en_US":"/shop",
+								"es_ES":"/shop",
+								"de_DE":"/shop",
+								"fr_FR":"/shop"
+							}
+						}
+					]
+				},
+				{
+					"label":"Right box",
+					"fields":[
+						{
+							"type":"image",
+							"id":"right_image",
+							"label":"Image",
+							"multilang":"yes",
+							"default":{
+								
+							},
+							"info":"Suggested width at least 400px"
+						},
+						{
+							"type":"link",
+							"id":"right_link",
+							"label":"Link",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"/shop",
+								"en_US":"/shop",
+								"es_ES":"/shop",
+								"de_DE":"/shop",
+								"fr_FR":"/shop"
+							}
+						}
+					]
+				}
+			]
+		},
+		"gallery_slider":{
+			"group":"Media",
+			"label":"Gallery slider",
+			"icon":"fas fa-images",
+			"settings":[
+				{
+					"label":"General options",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Title (used also as ALT tag)",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"title_yn",
+							"label":"Show title"
+						},
+						{
+							"type":"select",
+							"id":"title_position",
+							"label":"Title position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							]
+						},
+						{
+							"type":"gallery",
+							"id":"gallery_id",
+							"label":"Gallery"
+						},
+						{
+							"type":"yes_no",
+							"id":"images_max_height_yn",
+							"label":"Set a max-height"
+						},
+						{
+							"type":"pixel",
+							"id":"images_max_height",
+							"label":"Max-height"
+						},
+						{
+							"type":"yes_no",
+							"id":"lightbox",
+							"label":"Lightbox"
+						},
+						{
+							"type":"yes_no",
+							"id":"secache",
+							"label":"Use small images"
+						}
+					]
+				},
+				{
+					"label":"Slider options",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"autoplay",
+							"label":"Carousel autoplay",
+							"multilang":"no",
+							"default":"no"
+						},
+						{
+							"type":"number",
+							"id":"autoplay_time",
+							"label":"Interval (milliseconds)",
+							"multilang":"no",
+							"default":5000
+						},
+						{
+							"type":"number",
+							"id":"per_row",
+							"label":"Elements per row desktop",
+							"multilang":"no",
+							"default":8
+						},
+						{
+							"type":"number",
+							"id":"per_group_row",
+							"label":"Elements scrolled desktop",
+							"multilang":"no",
+							"default":1
+						},
+						{
+							"type":"number",
+							"id":"per_row_tablet",
+							"label":"Elements per row tablet",
+							"multilang":"no",
+							"default":3
+						},
+						{
+							"type":"number",
+							"id":"per_group_row_tablet",
+							"label":"Elements scrolled tablet",
+							"multilang":"no",
+							"default":1
+						},
+						{
+							"type":"number",
+							"id":"per_row_mobile",
+							"label":"Elements per row mobile",
+							"multilang":"no",
+							"default":2
+						}
+					]
+				}
+			]
+		},
+		"gallery_grid":{
+			"group":"Media",
+			"label":"Gallery grid",
+			"icon":"fas fa-images",
+			"settings":[
+				{
+					"label":"General options",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Title (used also as ALT tag)",
+							"multilang":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"title_yn",
+							"label":"Show title"
+						},
+						{
+							"type":"select",
+							"id":"title_position",
+							"label":"Title position",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"text-start",
+									"label":"Left"
+								},
+								{
+									"option":"text-center",
+									"label":"Center"
+								},
+								{
+									"option":"text-end",
+									"label":"Right"
+								}
+							]
+						},
+						{
+							"type":"gallery",
+							"id":"gallery_id",
+							"label":"Gallery"
+						},
+						{
+							"type":"yes_no",
+							"id":"images_max_height_yn",
+							"label":"Set a max-height"
+						},
+						{
+							"type":"pixel",
+							"id":"images_max_height",
+							"label":"Max-height"
+						},
+						{
+							"type":"yes_no",
+							"id":"lightbox",
+							"label":"Lightbox"
+						},
+						{
+							"type":"yes_no",
+							"id":"secache",
+							"label":"Use small images"
+						}
+					]
+				},
+				{
+					"label":"Grid options",
+					"fields":[
+						{
+							"type":"number",
+							"id":"per_row",
+							"label":"Elements per row desktop",
+							"multilang":"no",
+							"default":8
+						},
+						{
+							"type":"number",
+							"id":"per_row_tablet",
+							"label":"Elements per row tablet",
+							"multilang":"no",
+							"default":3
+						},
+						{
+							"type":"number",
+							"id":"per_row_mobile",
+							"label":"Elements per row mobile",
+							"multilang":"no",
+							"default":2
+						}
+					]
+				}
+			]
+		},
+		"color_background_start":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"🔻 Back color START 🔻",
+			"icon":"fa-palette",
+			"settings":[
+				{
+					"label":"Settings",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"gradient_yn",
+							"label":"Use gradient",
+							"default":"no"
+						},
+						{
+							"type":"color",
+							"id":"color1",
+							"label":"Color 1",
+							"multilang":"no"
+						},
+						{
+							"type":"color",
+							"id":"color2",
+							"label":"Color 2",
+							"multilang":"no"
+						},
+						{
+							"type":"number",
+							"id":"degrees",
+							"label":"Rotate by degrees",
+							"multilang":"no",
+							"default":"180"
+						},
+						{
+							"type":"yes_no",
+							"id":"radial_yn",
+							"label":"Radial",
+							"multilang":"no"
+						}
+					]
+				}
+			]
+		},
+		"color_background_end":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"🔺 Back color END 🔺",
+			"icon":"fa-palette",
+			"settings":[
+				{
+					"label":"Settings",
+					"fields":[
+						{
+							"type":"text",
+							"id":"useless",
+							"label":"Field not used"
+						}
+					]
+				}
+			]
+		},
+		"free_html":{
+			"group":"<i class=\"far fa-star\"></i> PRO widgets",
+			"label":"Free html",
+			"icon":"fas fa-code",
+			"settings":[
+				{
+					"label":"Content",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"container_yn",
+							"label":"Boxed"
+						},
+						{
+							"type":"textarea",
+							"id":"html",
+							"label":"Paste here html code",
+							"multilang":"yes"
+						}
+					]
+				}
+			]
+		},
+		"blog_preview":{
+			"group":"Blog",
+			"label":"Blog post preview",
+			"icon":"fa-newspaper-o",
+			"settings":[
+				{
+					"label":"Content",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Section title",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_text",
+							"label":"Button",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"button_link",
+							"label":"Button link"
+						},
+						{
+							"type":"yes_no",
+							"id":"show_image",
+							"label":"Show post image",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"show_date",
+							"label":"Show post date",
+							"default":"yes"
+						},
+						{
+							"type":"select",
+							"id":"count",
+							"label":"Number of post to display",
+							"multilang":"no",
+							"default":"3",
+							"options":[
+								{
+									"option":"6",
+									"label":"6 articles"
+								},
+								{
+									"option":"3",
+									"label":"3 articles"
+								},
+								{
+									"option":"2",
+									"label":"2 articles"
+								},
+								{
+									"option":"1",
+									"label":"1 article"
+								}
+							]
+						},
+						{
+							"type":"yes_no",
+							"id":"use_tag",
+							"label":"Filter posts by tag",
+							"multilang":"no",
+							"default":"no",
+							"info":"If you don't use tag filter, latest post will be displayed"
+						},
+						{
+							"type":"text",
+							"id":"tag",
+							"light":"no",
+							"label":"Tag to use",
+							"multilang":"no",
+							"default":""
+						}
+					]
+				}
+			]
+		},
+		"about_us":{
+			"group":"Content",
+			"label":"H1 seo content",
+			"icon":"fa-comment-o",
+			"info":"Use this content to add H1 and seo contents to your homepage, about us or contact us page. This preset may be used only once.",
+			"settings":[
+				{
+					"label":"Content",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"H1 Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"editor",
+							"id":"content",
+							"label":"Content",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link",
+							"label":"Link",
+							"multilang":"yes"
+						}
+					]
+				}
+			]
+		},
+		"paragraph":{
+			"group":"Content",
+			"label":"Paragraph and image",
+			"icon":"fa-align-left",
+			"settings":[
+				{
+					"label":"General settings",
+					"fields":[
+						{
+							"type":"select",
+							"id":"size",
+							"label":"Proportions (image : text)",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"2",
+									"label":"1 : 5"
+								},
+								{
+									"option":"3",
+									"label":"1 : 3"
+								},
+								{
+									"option":"4",
+									"label":"1 : 2"
+								},
+								{
+									"option":"6",
+									"label":"1 : 1"
+								},
+								{
+									"option":"8",
+									"label":"2 : 1"
+								},
+								{
+									"option":"9",
+									"label":"3 : 1"
+								},
+								{
+									"option":"10",
+									"label":"5 : 1"
+								}
+							],
+							"default":"6"
+						},
+						{
+							"type":"yes_no",
+							"id":"margin_top",
+							"label":"Margin-top",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"space_between",
+							"label":"Space between",
+							"default":"yes"
+						},
+						{
+							"type":"yes_no",
+							"id":"text_padding",
+							"label":"Padding text"
+						},
+						{
+							"type":"select",
+							"id":"image_alignment",
+							"label":"Image position",
+							"multilang":"no",
+							"default":"left",
+							"options":[
+								{
+									"option":"",
+									"label":"Left"
+								},
+								{
+									"option":"flex-row-reverse",
+									"label":"Right"
+								}
+							]
+						}
+					]
+				},
+				{
+					"label":"Content",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Title",
+							"multilang":"yes"
+						},
+						{
+							"type":"select",
+							"id":"title_align",
+							"label":"Title alignment",
+							"multilang":"no",
+							"options":[
+								{
+									"option":"start",
+									"label":"Left"
+								},
+								{
+									"option":"center",
+									"label":"Center"
+								},
+								{
+									"option":"end",
+									"label":"Right"
+								}
+							]
+						},
+						{
+							"type":"editor",
+							"id":"content",
+							"label":"Content",
+							"multilang":"yes"
+						},
+						{
+							"type":"link",
+							"id":"link",
+							"label":"Link",
+							"multilang":"yes"
+						},
+						{
+							"type":"text",
+							"id":"button_label",
+							"label":"Button link label",
+							"multilang":"yes"
+						}
+					]
+				},
+				{
+					"label":"Image",
+					"fields":[
+						{
+							"type":"yes_no",
+							"id":"image_view",
+							"label":"Show image",
+							"multilang":"no",
+							"default":"yes"
+						},
+						{
+							"type":"image",
+							"id":"image",
+							"label":"Image",
+							"multilang":"no",
+							"info":"This image has free sizes"
+						}
+					]
+				}
+			]
+		},
+		"google_map":{
+			"group":"Content",
+			"label":"Google map",
+			"icon":"fa-map-marker",
+			"available":[
+				"homepage",
+				"about-us",
+				"contact-us"
+			],
+			"settings":[
+				{
+					"label":"Where we are",
+					"fields":[
+						{
+							"type":"text",
+							"id":"title",
+							"label":"Section title",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"Dove siamo",
+								"en_US":"Our location",
+								"es_ES":"Nuestra ubicación",
+								"de_DE":"Unser Standort",
+								"fr_FR":"Notre emplacement"
+							}
+						},
+						{
+							"type":"editor",
+							"id":"text",
+							"label":"Information about location",
+							"multilang":"yes",
+							"default":{
+								"it_IT":"<strong>Lorem ipsum dolor sit amet</strong><br>consectetur adipiscing elit<br>sed do eiusmod tempor incididunt<br>ut labore et dolore magna aliqua",
+								"en_US":"<strong>Lorem ipsum dolor sit amet</strong><br>consectetur adipiscing elit<br>sed do eiusmod tempor incididunt<br>ut labore et dolore magna aliqua",
+								"es_ES":"<strong>Lorem ipsum dolor sit amet</strong><br>consectetur adipiscing elit<br>sed do eiusmod tempor incididunt<br>ut labore et dolore magna aliqua",
+								"de_DE":"<strong>Lorem ipsum dolor sit amet</strong><br>consectetur adipiscing elit<br>sed do eiusmod tempor incididunt<br>ut labore et dolore magna aliqua",
+								"fr_FR":"<strong>Lorem ipsum dolor sit amet</strong><br>consectetur adipiscing elit<br>sed do eiusmod tempor incididunt<br>ut labore et dolore magna aliqua"
+							}
+						},
+						{
+							"type":"textarea",
+							"id":"map_iframe",
+							"label":"Map URL (Embed Iframe)",
+							"multilang":"no",
+							"default":""
+						}
+					]
+				}
+			]
+		}
+	}
+}

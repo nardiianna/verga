@@ -1,0 +1,123 @@
+<section class="section template_gallery_slider py-3 py-md-5" id="section_{{vars.section.id}}_gallery_slider">
+	<div class="{{vars.layout}}">
+        {% if vars.section.settings.title_yn == "yes" %}
+            <div class="heading {{vars.section.settings.title_position}}" data-editor="{{vars.section.data_editor}}_title_{{locale}}" role="heading" aria-level="2">
+                {{attribute(vars.section.settings, 'title_'~locale)}}
+            </div>
+        {% endif %}
+        
+        {% set alt_tag = "" %}
+        {% if attribute(vars.section.settings, 'title_'~locale) != "" %}
+            {% set alt_tag = attribute(vars.section.settings, 'title_'~locale) %}
+        {% else %}
+            {% set alt_tag = getGalleries()[vars.section.settings.gallery_id].title %}
+        {% endif %}
+        
+        {% set img_cdn = "https://egress.storeden.net/gallery/" %}
+        {% if vars.section.settings.secache == "yes" %}
+        	{% set img_cdn = "https://cdn.storeden.net/secache/" %}
+        {% endif %}
+        
+        {% set gallery = getGalleryContents(vars.section.settings.gallery_id) %}
+	    <div class="swiper swiper-container" id="swiper-{{vars.section.id}}">
+	        <div class="swiper-wrapper align-items-center">
+        	    {% for img in gallery %}
+        	        <div class="swiper-slide text-center">
+        			   <img
+        			        src="{{img_cdn}}{{img}}"
+        			        loading="lazy"
+        			        {% if vars.section.settings.images_max_height_yn == "yes" %}style="max-height:{{vars.section.settings.images_max_height}}px;"{% endif %}
+        			        {% if vars.section.settings.lightbox == "yes" %}
+        			            class="img-lightbox pointer"
+        			            data-lightbox-url="https://egress.storeden.net/gallery/{{img}}"
+        			            alt="{{alt_tag}} image {{loop.index}}"
+    			            {% else %}
+    			                alt="{{alt_tag}} image {{loop.index}} - Click to enlarge"
+    			            {% endif %}>
+        			</div>
+		        {% endfor %}
+		    </div>
+		    <div class="swiper-button-prev" id="swiper-button-prev_{{vars.section.id}}"></div>
+            <div class="swiper-button-next" id="swiper-button-next_{{vars.section.id}}"></div>
+		</div>
+	</div>
+	<script>
+        const swiper{{vars.section.id}} = new Swiper('#swiper-{{vars.section.id}}', {
+            slidesPerView: {{vars.section.settings.per_row_mobile}},
+            slidesPerGroup: 1,
+            spaceBetween: 5,
+            breakpoints: {
+                480: {
+                    slidesPerView: {{vars.section.settings.per_row_tablet}},
+                    slidesPerGroup: {{vars.section.settings.per_group_row_tablet}},
+                    spaceBetween: 20
+                },
+                767: {
+                    slidesPerView: {{vars.section.settings.per_row}},
+                    slidesPerGroup: {{vars.section.settings.per_group_row}},
+                    spaceBetween: 20
+                }
+            },
+        
+            navigation: {
+                nextEl: '#swiper-button-next_{{vars.section.id}}',
+                prevEl: '#swiper-button-prev_{{vars.section.id}}',
+            },
+        
+            {% if vars.section.settings.autoplay == "yes" %}
+            autoplay: {
+                delay: {{vars.section.settings.autoplay_time}},
+            },
+            {% endif %}
+        });
+        {% if vars.section.settings.lightbox == "yes" %}
+            (function($){
+                if (window.lightboxInitialized) return; // Evita doppia inizializzazione
+                window.lightboxInitialized = true;
+            
+                $(document).ready(function(){
+                    // Creazione lightbox se non esiste
+                    if ($('#custom-lightbox').length === 0) {
+                        $('body').append(`
+                            <div id="custom-lightbox" role="dialog" aria-modal="true" aria-label="Immagine ingrandita" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);justify-content:center;align-items:center;z-index:99999;">
+                                <button id="lightbox-close" aria-label="Chiudi" style="position:absolute;top:20px;right:20px;font-size:24px;color:#fff;background:none;border:none;cursor:pointer;">&times;</button>
+                                <img id="lightbox-img" src="" alt="Immagine ingrandita" style="max-width:90%;max-height:90%;border:4px solid #fff;border-radius:8px;">
+                            </div>
+                        `);
+                    }
+            
+                    const $lightbox = $('#custom-lightbox');
+                    const $lightboxImg = $('#lightbox-img');
+            
+                    // Apertura lightbox
+                    $(document).on('click', '.img-lightbox', function(e){
+                        e.preventDefault();
+                        const imgUrl = $(this).attr('data-lightbox-url');
+                        if (!imgUrl) return;
+                        $lightboxImg.attr('src', imgUrl);
+                        $lightbox.fadeIn().css('display','flex').attr('tabindex','-1').focus();
+                    });
+            
+                    // Chiusura lightbox
+                    $('#lightbox-close').on('click', function(){
+                        $lightbox.fadeOut();
+                    });
+            
+                    // Chiudi con ESC
+                    $(document).on('keydown', function(e){
+                        if (e.key === "Escape") {
+                            $lightbox.fadeOut();
+                        }
+                    });
+            
+                    // Chiudi cliccando fuori dall'immagine
+                    $lightbox.on('click', function(e){
+                        if (e.target.id === 'custom-lightbox') {
+                            $lightbox.fadeOut();
+                        }
+                    });
+                });
+            })(jQuery);
+        {% endif %}
+    </script>
+</section>

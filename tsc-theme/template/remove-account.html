@@ -1,0 +1,65 @@
+<div class="container">
+
+    <div class="row">
+
+	    <div class='col-md-3 col-sm-4 third-column-product'>{% include 'menu_profile.html' %}</div>
+	
+	    <div class="col-md-9 col-sm-8  col-xs-12 profileLeft">
+
+        	<h1 class="heading">{{lang('community.remove.account')}}</h1>
+        	<p>{{lang('front.remove.account.intro')|raw}}</p>
+        
+        	{% if request.query.error != '' %}
+        		<div class="alert alert-danger">
+        			{{ lang(request.query.error) }}
+        		</div>
+        	{% endif %}
+        
+        	<form action="/profile/remove-account" class="form" method="POST" id="remAccountForm">
+        		<input type="hidden" name="remove_account" value="1">
+        		<input type="hidden" name="type" value="standard">
+        		<div class="form-group mb-3">
+        			<label>{{lang('signup.password')}}</label>
+        			<input name="password" style="max-width: 300px;" type="password" value="" class="form-control" required="">
+        		</div>
+        		<div class="form-group">
+        			<button class="btn btn-danger" name="" type="submit">{{lang('community.delete.me')}}</button>
+        		</div>
+        	</form>
+        
+        	<script>
+        		$(document).on('click','#remAccountForm .btn-danger',function(e){
+        			e.preventDefault();
+        			$('#confirmModalAccount').modal('show');
+					$('#confirmDeleteAccount').off().on('click', function(e){
+        				$('#remAccountForm').submit();
+        			})
+        		})
+        	</script>
+        
+        	<div class="modal fade" id="confirmModalAccount">
+        		<div class="modal-dialog">
+        			<div class="modal-content">
+        				<div class="modal-header">
+        					<h5 class="modal-title" id="myModalLabel">{{lang('community.remove.account')}}</h5>
+        					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        				</div>
+        				<div class="modal-body">
+        					<p>{{lang('front.remove.account.confirmation')|raw}}</p>
+        				</div>
+        				<div class="modal-footer">
+        					<button type="button" class="btn btn-default" data-dismiss="modal">{{lang('admin.cancel')}}</button>
+        					<button type="submit" class="btn btn-danger" id="confirmDeleteAccount">{{lang('platform.delete.confirm.title')}}</button>
+        				</div>
+        			</div>
+        		</div>
+        	</div>
+        	
+        </div>
+
+	</div>
+</div>
+
+<style>
+	.container .container{width: 100% !important;max-width: 100% !important;}
+</style>

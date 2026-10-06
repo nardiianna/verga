@@ -1,0 +1,431 @@
+{% set modal = false %}
+{% if vars.section.settings.modal_yn == "yes" %}
+    {% set modal = true %}
+{% endif %}
+
+{% if modal %}
+<div class="modal fade template_form_contactus template_contact_us_advanced" id="{{vars.section.settings.modal_id}}" tabindex="-1" aria-hidden="true">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+		    <div class="modal-header">
+                <h5 class="modal-title">{{attribute(vars.section.settings, 'title_'~locale)}}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+			<div class="modal-body">
+{% else %}
+<section class="section template_form_contactus template_contact_us_advanced {% if attribute(vars.section.settings, 'show_'~locale) == "no" %}d-none{% endif %}" id="section_{{vars.section.id}}_contact_us_advanced">
+	<div class="{{vars.layout}}">
+{% endif %}
+		<div class="row">
+			{% if vars.section.settings.store_details_yn == "yes" %}
+    			<div class="col-12 {% if modal %}col-md-12 col-sm-12{% else %}col-md-4 col-sm-4{% endif %} intro">
+    				<div class="heading" data-editor="{{vars.section.data_editor}}_title_{{locale}}" role="heading" aria-level="2">
+    					{{attribute(vars.section.settings, 'title_'~locale)}}
+    				</div>
+    				<div class="additional-info" data-editor="{{vars.section.data_editor}}_text_{{locale}}">
+    					{{attribute(vars.section.settings, 'text_'~locale)|raw}}
+    				</div>
+    				{% if attribute(vars.section.settings, 'address_'~locale) != "" %}
+    				    <div class="additional-info">
+    				        <i class="fas fa-map-marker-alt"></i>
+    				        {% if attribute(vars.section.settings, 'address_smart_yn_'~locale) == "yes" %}<a href="https://www.google.com/maps/search/?api=1&query={{attribute(vars.section.settings, 'address_'~locale)|url_encode}}" target="_blank" rel="noopener noreferrer">{% endif %}
+    				            {{attribute(vars.section.settings, 'address_'~locale)}}
+    				        {% if attribute(vars.section.settings, 'address_smart_yn_'~locale) == "yes" %}</a>{% endif %}
+    				    </div>
+    			    {% endif %}
+    			    {% if attribute(vars.section.settings, 'wa_'~locale) != "" %}
+    				    <div class="additional-info">
+    				        <img src="https://aip.storeden.com/labs/apps/whatsapp_contact/wa.logo.png" alt="logo Whatsapp" class="fas" style="max-width: 20px;">
+    				        {% if attribute(vars.section.settings, 'wa_smart_yn_'~locale) == "yes" %}<a href="https://api.whatsapp.com/send?phone={{attribute(vars.section.settings, 'wa_'~locale)|replace({" ":""})}}" target="_blank" rel="noopener noreferrer">{% endif %}
+    				            {{attribute(vars.section.settings, 'wa_'~locale)}}
+    				        {% if attribute(vars.section.settings, 'wa_smart_yn_'~locale) == "yes" %}</a>{% endif %}
+    				    </div>
+    			    {% endif %}
+    				{% if attribute(vars.section.settings, 'tel1_'~locale) != "" %}
+    				    <div class="additional-info">
+    				        <i class="fas fa-phone-alt"></i>
+    				        {% if attribute(vars.section.settings, 'tel1_smart_yn_'~locale) == "yes" %}<a href="tel:{{attribute(vars.section.settings, 'tel1_'~locale)}}">{% endif %}
+    				            {{attribute(vars.section.settings, 'tel1_'~locale)}}
+    				        {% if attribute(vars.section.settings, 'tel1_smart_yn_'~locale) == "yes" %}</a>{% endif %}
+    				    </div>
+    			    {% endif %}
+    			    {% if attribute(vars.section.settings, 'tel2_'~locale) != "" %}
+    				    <div class="additional-info">
+    				        <i class="fas fa-phone-alt"></i>
+    				        {% if attribute(vars.section.settings, 'tel2_smart_yn_'~locale) == "yes" %}<a href="tel:{{attribute(vars.section.settings, 'tel2_'~locale)}}">{% endif %}
+    				            {{attribute(vars.section.settings, 'tel2_'~locale)}}
+    				        {% if attribute(vars.section.settings, 'tel2_smart_yn_'~locale) == "yes" %}</a>{% endif %}
+    				    </div>
+    			    {% endif %}
+    			    {% if attribute(vars.section.settings, 'email_'~locale) != "" %}
+    				    <div class="additional-info">
+    				        <i class="fas fa-envelope"></i>
+    				        {% if attribute(vars.section.settings, 'email_smart_yn_'~locale) == "yes" %}<a href="mailto:{{attribute(vars.section.settings, 'email_'~locale)}}">{% endif %}
+    				            {{attribute(vars.section.settings, 'email_'~locale)}}
+    				        {% if attribute(vars.section.settings, 'email_smart_yn_'~locale) == "yes" %}</a>{% endif %}
+    				    </div>
+    			    {% endif %}
+    			</div>
+			{% endif %}
+			<div class="col-12 {% if modal or vars.section.settings.store_details_yn == "no" %}col-md-12 col-sm-12{% else %}col-md-8 col-sm-8{% endif %}">
+			    
+				{% if request.method == 'POST' and request.payload.email != '' and request.payload.form_id == vars.section.id %}
+					
+					{% set payload = request.payload %}
+					
+					{% set spam_score = 0 %}
+
+                    {# Honeypot compilato: blocco certo #}
+                    {% if payload.website != "" %}
+                        {% set spam_score = spam_score + 100 %}
+                    {% endif %}
+                    
+                    {# Nome e cognome senza spazio #}
+                    {% if " " not in payload.fullname|trim %}
+                        {% set spam_score = spam_score + 30 %}
+                    {% endif %}
+                    
+                    {# Tempo impiegato dalla prima interazione #}
+                    {% set form_elapsed_ms = payload.form_elapsed_ms|default(0) %}
+                    
+                    {% if form_elapsed_ms <= 0 %}
+                        {% set spam_score = spam_score + 30 %}
+                    {% elseif form_elapsed_ms < 1500 %}
+                        {% set spam_score = spam_score + 50 %}
+                    {% elseif form_elapsed_ms < 3000 %}
+                        {% set spam_score = spam_score + 30 %}
+                    {% elseif form_elapsed_ms < 5000 %}
+                        {% set spam_score = spam_score + 10 %}
+                    {% endif %}
+                    
+                    {% set message_enabled = vars.section.settings.ta_field_yn == "yes" %}
+					{% set message_required = message_enabled and vars.section.settings.ta_field_mandatory_yn == "yes" %}
+					{% set message = payload.message|default('')|trim %}
+
+					{% if message_enabled and (message_required or message != "") %}
+						{# Lunghezza minima del messaggio #}
+						{% if message|length < 20 %}
+							{% set spam_score = spam_score + 30 %}
+						{% endif %}
+						
+						{# Messaggio con poche parole #}
+						{% set normalized_message = message|replace({
+							"\r": " ",
+							"\n": " ",
+							"\t": " "
+						}) %}
+						
+						{% set message_words = 0 %}
+						
+						{% for word in normalized_message|split(" ") %}
+							{% if word|trim != "" %}
+								{% set message_words = message_words + 1 %}
+							{% endif %}
+						{% endfor %}
+						
+						{% if message_words <= 2 %}
+							{% set spam_score = spam_score + 30 %}
+						{% elseif message_words == 3 %}
+							{% set spam_score = spam_score + 10 %}
+						{% endif %}
+						
+						{# Messaggio tutto in maiuscolo #}
+						{% if message|length >= 10 and message == message|upper and message != message|lower %}
+							{% set spam_score = spam_score + 10 %}
+						{% endif %}
+						
+						{# Messaggio con pochissime vocali (sequenze casuali tipo "sdfghjkl") #}
+						{% set letters = message|lower|replace({" ": "","\r": "","\n": "","\t": "",".": "",",": "",";": "",":": "","!": "","?": "","-": "","_": "","(": "",")": "","[": "","]": "","{": "","}": "","/": "","\\": "","'": "","\"": "","0": "","1": "","2": "","3": "","4": "","5": "","6": "","7": "","8": "","9": ""}) %}
+						
+						{% if letters|length >= 10 %}
+							{% set vowels = 0 %}
+						
+							{% for c in letters|split('') %}
+								{% if c in ['a','e','i','o','u'] %}
+									{% set vowels = vowels + 1 %}
+								{% endif %}
+							{% endfor %}
+						
+							{% if vowels / letters|length < 0.20 %}
+								{% set spam_score = spam_score + 20 %}
+							{% endif %}
+						{% endif %}
+
+						{# Sequenza dello stesso carattere ripetuto almeno 8 volte #}
+						{% set repeated_chars = false %}
+						{% set previous_char = "" %}
+						{% set consecutive_chars = 0 %}
+
+						{% for c in message|lower|split('') %}
+							{% if c == previous_char and c != " " %}
+								{% set consecutive_chars = consecutive_chars + 1 %}
+							{% else %}
+								{% set consecutive_chars = 1 %}
+							{% endif %}
+
+							{% if consecutive_chars >= 8 %}
+								{% set repeated_chars = true %}
+							{% endif %}
+
+							{% set previous_char = c %}
+						{% endfor %}
+
+						{% if repeated_chars %}
+							{% set spam_score = spam_score + 30 %}
+						{% endif %}
+
+						{# Messaggio quasi esclusivamente composto da simboli #}
+						{% if message|length >= 10 and letters|length <= 3 %}
+							{% set spam_score = spam_score + 40 %}
+						{% endif %}
+						
+						{# Frasi tipiche dello spam: "need more info", "need information", ecc. #}
+						{% set message_lower = message|lower %}
+						{% if "need" in message_lower and "info" in message_lower %}
+							{% set spam_score = spam_score + 20 %}
+						{% endif %}
+					{% endif %}
+                    
+                    {% set spam = spam_score >= 50 %}
+
+					{% set body = '<html><body>' %}
+						{% set body = body ~ '<p><strong>'~group_lang('front.register.fullname', group.uid, group.locale)~'</strong>: '~payload.fullname~'</p>' %}
+						{% set body = body ~ '<p><strong>'~group_lang('register.email', group.uid, group.locale)~'</strong>: '~payload.email~'</p>' %}
+						{% if payload.phone != '' %}
+							{% set body = body ~ '<p><strong>'~group_lang('register.phone', group.uid, group.locale)~'</strong>: '~payload.phone~'</p>' %}
+						{% endif %}
+						{% for x in 1..10 if attribute(payload, 'add_field_'~x) != '' %}
+							{% set body = body ~ '<p><strong>'~attribute(vars.section.settings, 'add_field_'~x~'_name_'~locale)~'</strong>: '~attribute(payload, 'add_field_'~x) ~'</p>' %}
+						{% endfor %}
+						{% if payload.dd_field != '' %}
+							{% set body = body ~ '<p><strong>'~attribute(vars.section.settings, 'dd_field_name_'~locale)~'</strong>: '~payload.dd_field~'</p>' %}
+						{% endif %}
+						{% if payload.product != '' %}
+							{% set body = body ~ '<p><strong>Prodotto</strong>: '~payload.product~'</p>' %}
+						{% endif %}
+						{% for key, x in payload if "radio_check_field" in key and x != "" %}
+						    {% set body = body ~ '<p><strong>'~attribute(vars.section.settings, 'rc_field_name_'~locale)~'</strong>: '~x~'</p>' %}
+						{% endfor %}
+						{% if vars.section.settings.check_field_yn == "yes" %}
+						    {% set body = body ~ '<p><strong>'~attribute(vars.section.settings, 'check_field_name_'~locale)~'</strong>: ' %}
+						    {% if payload.check_field == "yes" %}
+						        {% set body = body ~ 'Sì</p>' %}
+						    {% else %}
+						        {% set body = body ~ 'No</p>' %}
+						    {% endif %}
+						{% endif %}
+						{% if message_enabled %}
+							{% set body = body ~ '<p><strong>'~group_lang('email.message', group.uid, group.locale)~'</strong>: </p><p>'~message~'</p>' %}
+						{% endif %}
+
+						{% set body = body ~ '<p style="margin-top:20px; font-size:11px; color:#b5b5b5;">Spam score: '~spam_score~' | FT: '~((form_elapsed_ms / 1000)|round(1))~'s</p>' %}
+					{% set body = body ~ '</body></html>' %}
+				    
+				    {% set subject = group_lang('front.email.subject.contactus', group.uid, group.locale)~' '~group.title %}
+				    
+				    {% if attribute(vars.section.settings, 'subject_'~locale) != "" %}
+				        {% set subject = attribute(vars.section.settings, 'subject_'~locale) %}
+				    {% endif %}
+				    
+				    {% if not spam %}
+                        {% set ris = sendEmail(group.admin_email, subject, body, payload.fullname, attribute(vars.section.settings, 'recipient_'~locale), payload.email) %}
+					{% elseif spam_score <= 80 %}
+						{% set ris = sendEmail(payload.email, subject ~ " - SPAM bloccata [" ~ spam_score ~ "]", body, payload.fullname, 'marco.brognara@duckynetwork.it') %}
+                    {% endif %}
+					
+					<div class="alert alert-success">{{lang('profile.message.sent')}}</div>
+
+					{% if modal %}
+					    <script>
+					        $(document).ready(function(){
+                            	$('#{{vars.section.settings.modal_id}}').modal('show');
+                            })
+					    </script>
+					{% endif %}
+				{% endif %}
+				<form method="POST" enctype="multipart/form-data">
+					<input type="hidden" name="form_id" value="{{vars.section.id}}">
+					<input type="hidden" name="form_elapsed_ms" value="0">
+					{{ populateFormAntiSpam() }}
+					{% if product %}<input type="hidden" name="product" value="{{product.code}} - {{product.title}}">{% endif %}
+					<div class="row row-gap-3">
+					    {% set width = "col-md-6 col-sm-12 col-12" %}
+					    {% set full_width = "col-md-12 col-sm-12 col-12" %}
+					    <div class="{% if vars.section.settings.full_width_name_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+							<div class="form-floating">
+								<input type="text" name="fullname" id="{{vars.section.id}}-fullname" class="form-control fullname" required placeholder="{{attribute(vars.section.settings, 'name_field_placeholder_'~locale)}}">
+								<label for="{{vars.section.id}}-fullname">
+								    {% if attribute(vars.section.settings, 'name_field_name_'~locale) != "" %}
+								        {{attribute(vars.section.settings, 'name_field_name_'~locale)}}
+							        {% else %}
+							            {{lang('front.register.fullname')}}
+						            {% endif %}
+						            <span class="required text-danger">*</span>
+							    </label>
+							</div>
+						</div>
+						<div class="{% if vars.section.settings.full_width_email_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+							<div class="form-floating">
+								<input type="email" name="email" id="{{vars.section.id}}-email" class="form-control email" required placeholder="{{attribute(vars.section.settings, 'email_field_placeholder_'~locale)}}">
+								<label for="{{vars.section.id}}-email">
+								    {% if attribute(vars.section.settings, 'email_field_name_'~locale) != "" %}
+								        {{attribute(vars.section.settings, 'email_field_name_'~locale)}}
+							        {% else %}
+							            {{lang('register.email')}}
+						            {% endif %}
+						            <span class="required text-danger">*</span>
+							    </label>
+							</div>
+						</div>
+						{% if vars.section.settings.tel_yn == "yes" %}
+    						<div class="{% if vars.section.settings.full_width_tel_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+    							<div class="form-floating">
+    								<input type="text" name="phone" id="{{vars.section.id}}-phone" class="form-control phone" {% if vars.section.settings.tel_mandatory_yn == "yes"%}required{% endif %} placeholder="{{attribute(vars.section.settings, 'tel_placeholder_'~locale)}}">
+    								<label for="{{vars.section.id}}-phone">
+    								    {% if attribute(vars.section.settings, 'tel_name_'~locale) != "" %}
+    								        {{attribute(vars.section.settings, 'tel_name_'~locale)}}
+    							        {% else %}
+    							            {{lang('register.phone')}}
+    						            {% endif %}
+    								    {% if vars.section.settings.tel_mandatory_yn == "yes"%}<span class="text-danger required">*</span>{% endif %}
+								    </label>
+    							</div>
+    						</div>
+    					{% endif %}
+						{% for x in 1..10 if attribute(vars.section.settings, 'add_field_'~x~'_yn') == "yes" %}
+					        <div class="{% if attribute(vars.section.settings, 'full_width_field_'~x~'_yn') == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+    							<div class="form-floating">
+    								<input type="text" name="add_field_{{x}}" id="{{vars.section.id}}-add_field_{{x}}" class="form-control add-field-{{x}}" {% if attribute(vars.section.settings, 'add_field_'~x~'_mandatory_yn') == "yes"%}required{% endif %} placeholder="{{attribute(vars.section.settings, 'add_field_'~x~'_placeholder_'~locale)}}">
+    								<label for="{{vars.section.id}}-add_field_{{x}}">{{attribute(vars.section.settings, 'add_field_'~x~'_name_'~locale)}} {% if attribute(vars.section.settings, 'add_field_'~x~'_mandatory_yn') == "yes"%}<span class="text-danger required">*</span>{% endif %}</label>
+    							</div>
+    						</div>
+					    {% endfor %}
+					    {% if vars.section.settings.file_field_yn == "yes" %}
+					        <div class="{% if vars.section.settings.full_width_file_field_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+    							<div class="form-group">
+    								<label>{{attribute(vars.section.settings, 'file_field_name_'~locale)}} {% if vars.section.settings.file_field_mandatory_yn == "yes"%}<span class="text-danger required">*</span>{% endif %}</label>
+    								<input type="file" name="file_field" class="form-control file-field" {% if vars.section.settings.file_field_mandatory_yn == "yes"%}required{% endif %} aria-label="{{attribute(vars.section.settings, 'file_field_name_'~locale)}}">
+    							</div>
+    						</div>
+					    {% endif %}
+					    {% if vars.section.settings.dd_field_yn == "yes" %}
+					        <div class="{% if vars.section.settings.full_width_dd_field_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+    							<div class="form-floating">
+    								<select name="dd_field" id="{{vars.section.id}}-dd_field" class="form-control dd-field" {% if vars.section.settings.dd_field_mandatory_yn == "yes"%}required{% endif %}>
+                                        {% set options = attribute(vars.section.settings, 'dd_field_options_'~locale)|split('\n') %}
+                                        {% if vars.section.settings.dd_field_empty_yn == "yes" %}
+                                            <option value="">---</option>
+                                        {% endif %}
+                                        {% for option in options %}
+                                            <option value="{{option}}">{{option}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="{{vars.section.id}}-dd_field">{{attribute(vars.section.settings, 'dd_field_name_'~locale)}} {% if vars.section.settings.dd_field_mandatory_yn == "yes"%}<span class="text-danger required">*</span>{% endif %}</label>
+    							</div>
+    						</div>
+					    {% endif %}
+					    
+					    {% if vars.section.settings.rc_field_yn == "yes" %}
+					        <div class="{% if vars.section.settings.full_width_rc_field_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+    							<div class="form-group">
+    								<label>{{attribute(vars.section.settings, 'rc_field_name_'~locale)}}</label><br>
+                                    
+                                    {% set options = attribute(vars.section.settings, 'rc_field_options_'~locale)|split('\n') %}
+                                    {% set type = vars.section.settings.rc_type %}
+                                    {% for option in options %}
+                                        <input type="{{type}}" name="radio_check_field{% if type == "checkbox" %}_{{loop.index}}{% endif %}" class="{{type}}-field" value="{{option}}" id="rc-option-{{loop.index}}">
+                                        <label for="rc-option-{{loop.index}}" class="option-label"> {{option}}</label>
+                                    {% endfor %}
+    							</div>
+    						</div>
+					    {% endif %}
+					    
+					    
+					    
+					    {% if vars.section.settings.check_field_yn == "yes" %}
+					        <div class="{% if vars.section.settings.full_width_check_field_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+    							<div class="form-group">
+    								<input type="checkbox" name="check_field" id="check_field" value="yes" class="check-field" {% if vars.section.settings.check_field_mandatory_yn == "yes"%}required{% endif %}>
+    								<label for="check_field" class="option-label">{{attribute(vars.section.settings, 'check_field_name_'~locale)}} {% if vars.section.settings.check_field_mandatory_yn == "yes"%}<span class="text-danger required">*</span>{% endif %}</label>
+    							</div>
+    						</div>
+					    {% endif %}
+					    
+					    {# CAMPO TRAPPOLA 'HONEYPOT' campo non visibile che i bot in teoria compilano lo stesso, se è compilato è spam. #}
+                        <div class="col-md-12 col-sm-12 col-12 website-container" style="display:none;">
+                        	<div class="form-group">
+                        		<label>Website</label>
+                        		<input type="text" name="website" class="form-control website">
+                        	</div>
+                        </div>
+					    
+					    {% if vars.section.settings.ta_field_yn == "yes" %}
+    						<div class="{% if vars.section.settings.full_width_ta_field_yn == "yes" %}{{full_width}}{% else %}{{width}}{% endif %}">
+    							<div class="form-floating">
+    								<textarea name="message" id="{{vars.section.id}}-message" class="form-control message" rows="2" {% if vars.section.settings.ta_field_mandatory_yn == "yes"%}required{% endif %} placeholder="{{attribute(vars.section.settings, 'ta_field_placeholder_'~locale)}}"></textarea>
+    								<label for="{{vars.section.id}}-message">
+    								    {% if attribute(vars.section.settings, 'ta_field_name_'~locale) != "" %}
+    								        {{attribute(vars.section.settings, 'ta_field_name_'~locale)}}
+    							        {% else %}
+    							            {{lang('message')}}
+    						            {% endif %}
+    								    {% if vars.section.settings.ta_field_mandatory_yn == "yes"%}<span class="text-danger required">*</span>{% endif %}
+								    </label>
+    							</div>
+    						</div>
+						{% endif %}
+						<div class="col-8">
+							<label class="checkbox">
+								<input type="checkbox" name="privacy" value="1" required >
+								{{lang('newsletter.privacy')}} <a href="/page/page-privacy" target="_blank" style="text-decoration:underline">{{lang('newsletter.privacy.text')}}</a>
+							</label>
+							
+						</div>
+						<div class="col-4 text-md-end">
+							<button type="submit" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{attribute(vars.section.settings, 'submit_text_'~locale)}}</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+{% if modal %}
+			</div>
+			<div class="modal-footer border-top-0">
+				{#<button class="btn button pull-right" data-dismiss="modal" data-bs-dismiss="modal" id="item-details-fast">{{lang('admin.close')}}</button>#}
+			</div>
+		</div>
+	</div>
+</div>
+{% else %}
+	</div>
+</section>
+{% endif %}
+
+<script>
+$(function () {
+	{% if modal %}
+    	const $section = $('#{{vars.section.settings.modal_id}}');
+	{% else %}
+		const $section = $('#section_{{vars.section.id}}_contact_us_advanced');
+	{% endif %}
+
+    const $form = $section.find('form');
+    var interactionStartedAt = null;
+
+    $form.one('focusin input paste pointerdown', function () {
+        interactionStartedAt = Date.now();
+    });
+
+    $form.on('submit', function () {
+
+        var elapsedMs = 0;
+
+        if (interactionStartedAt !== null) {
+            elapsedMs = Date.now() - interactionStartedAt;
+        }
+
+        $form.find('[name="form_elapsed_ms"]').val(elapsedMs);
+    });
+
+});
+</script>

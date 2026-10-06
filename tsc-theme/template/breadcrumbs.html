@@ -1,0 +1,392 @@
+{% if request.path.1 != 'homepage' %}
+	<div id="breadcrumb">
+		<div class="container">
+			
+			{% set breadcrumb_row = 'col-12' %}
+			{% if theme.settings.cart.show_back_to_shop == 'yes' and request.path.1 == 'cart' %}
+				{% set breadcrumb_row = 'col-12 col-sm-12 col-md-8' %}
+			{% endif%}
+
+			<div class="row">
+    
+            <div class="{{breadcrumb_row}}">
+                
+                <nav aria-label="breadcrumb">
+				
+    				<ol class="breadcrumb" itemscope itemtype="http://schema.org/BreadcrumbList">
+    
+    				<li class="breadcrumb-item" itemprop="itemListElement" itemscope  itemtype="http://schema.org/ListItem">
+    					<a itemprop="item" href="/homepage">{{lang('page.home')}}</a>
+    					<meta itemprop="position" content="1" />
+    					<meta itemprop="name" content="{{group.title}}" />
+    				</li>
+    
+    				{% if request.path[1] == 'shop' or  request.path[1] == 'product' %}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    						<a itemprop="item" href="/shop"> {{ lang('page.shop') }} </a>
+    						<meta itemprop="position" content="2" />
+    						<meta itemprop="name" content="{{ lang('page.shop') }}" />
+    					</li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'product' and request.path[2] > ''%}
+    					{% set category_id = product.categoryUID[0] %}
+    					{% set list = getCategoryList(category_id) %}
+    					{% for k,category in list %}
+    						{% if category.name != ''%}
+    							<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    							    <a itemprop="item" href="/shop/category/{{ category.uid }}"> {{ category.name }} </a>
+    							    <meta itemprop="position" content="{{ (k+3) }}" />
+    								<meta itemprop="name" content="{{ category.name }}" />
+    							</li>
+    						{% endif %}
+    					{% endfor %}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    						<a itemprop="item" href="/product/{{request.path[2] }}{% if equest.path[3] != ''%}/{{request.path[3] }}{% endif %}">
+    							{{ product.title }}
+    						</a>
+							<meta itemprop="name" content="{{ product.title }}" />
+							<meta itemprop="position" content="{{ k + 4 }}" />
+    					</li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'shop' and request.path[2] == 'search'%}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+        					<a itemprop="item" href="/shop/search/{{request.path[3] }}">
+        					    {{lang('search')}}
+    					    </a>
+    					    <meta itemprop="name" content="{{lang('search')}}" />
+        					<meta itemprop="position" content="3" />
+    					</li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'shop' and request.path[2] == 'brand'%}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a itemprop="item" href="/shop/{{ request.path[2] }}/{{ request.path[3] }}"> {{ details.name }} </a>
+    						<meta itemprop="position" content="3" />
+    						<meta itemprop="name" content="{{ details.name }}" />
+    					</li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'shop' and request.path[2] == 'category'%}
+    					{% set list = getCategoryList(request.path[3]) %}
+    					{% for k,category in list %}
+    						<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    						    <a itemprop="item" href="/shop/category/{{ category.uid }}"> {{ category.name }} </a>
+    						    <meta itemprop="position" content="{{ k + 3 }}" />
+    						    <meta itemprop="name" content="{{ category.name }}" />
+    						</li>
+    					{% endfor %}
+    				{% endif %}
+    				
+    				{% set complex_index = 2 %}
+    				{% if request.path[1] == 'shop' and request.path[2] == 'complex' %} 
+    				    {% if  request.path[4] != '-' and request.path[4] > 0 %}
+        				    {% set list = getCategoryList(request.path[4]) %}
+        	    			{% for category in list %}
+        					    {% set complex_index = complex_index + 1 %}
+        						<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+        						    <a itemprop="item" href="/shop/category/{{ category.uid }}"> {{ category.name }} </a>
+            						<meta itemprop="position" content="{{complex_index}}" />
+            						<meta itemprop="name" content="{{ category.name }}" />
+        						</li>
+        					{% endfor %}
+        				{% endif %}
+        				{% if  request.path[6] != '-' and request.path[6] > 0 %}
+        				    {% set brand = getBrand(request.path[6]) %}
+        				    <li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+        					    <a itemprop="item" href="/shop/brand/{{brand.uid}}"> {{ brand.name }} </a>
+        						<meta itemprop="position" content="{{complex_index}}" />
+        						<meta itemprop="name" content="{{ brand.name }}" />
+        					</li>
+        				{% endif %}
+    				{% endif %}
+    				
+    
+    				{% if request.path[1] == 'cart' %}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> 
+    					    <span itemprop="item">{{ lang('page.cart') }}</span>
+    					    <meta itemprop="position" content="2" />
+    					    <meta itemprop="name" content="{{ lang('page.cart') }}" />
+					    </li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'page' and request.path[2] > ''%}
+    				    {% if ( request.path[2] != 'cookies-law'  and request.path[2] != 'page-privacy' and request.path[2] != 'page-conditions' ) %}
+    						<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    						    <a href="/page/{{request.path[2]}}" itemprop="item">{{ translate_resource(content._id, 'title', content.title) }} </a>
+        					    <meta itemprop="position" content="2" />
+        					    <meta itemprop="name" content="{{ translate_resource(content._id, 'title', content.title) }}" />
+						    </li>
+    					{% else %}
+    						<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+						        <a href="/page/{{request.path[2]}}" itemprop="item">{{ document.seo.title }}</a>
+        					    <meta itemprop="position" content="2" />
+        					    <meta itemprop="name" content="{{ document.seo.title }}" />
+    					{% endif %}
+    				{% endif %}
+    
+    				{% if request.path[1] == 'login'%}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <span itemprop="item">{{lang('signin.or.signup')}}</span>
+    					    <meta itemprop="position" content="2" />
+    					    <meta itemprop="name" content="{{lang('signin.or.signup')}}" />
+					    </li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'orders' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> 
+    					    <span itemprop="item">{{lang('profile.orders')}}</span>
+    					    <meta itemprop="position" content="2" />
+    					    <meta itemprop="name" content="{{lang('profile.orders')}}" />
+					    </li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'order' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a itemprop="item" href="{{ request.script_name }}/orders"> 
+    					        {{lang('profile.orders')}} 
+    					        <meta itemprop="position" content="2" />
+    					        <meta itemprop="name" content="{{lang('profile.orders')}}" />
+    					    </a>
+					    </li>
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> 
+    					    <span itemprop="item">{{lang('order.details.user')}}</span>
+    					    <meta itemprop="position" content="3" />
+    					    <meta itemprop="name" content="{{lang('order.details.user')}}" />
+					    </li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'profile' and request.path[2] == '' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">{{lang('user.account.settings')}}<meta itemprop="position" content="2" /></li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'profile' and request.path[2] == 'edit' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">{{lang('edit.password')}}<meta itemprop="position" content="2" /></li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'profile' and request.path[2] == 'addresses' and request.path[3] == '' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">{{lang('user.addresses')}}<meta itemprop="position" content="2" /></li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'profile' and request.path[2] == 'addresses' and request.path[3] == 'add' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/profile/addresses">{{lang('user.addresses')}}<meta itemprop="position" content="2" /></a></li>
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">{{lang('admin.add')}}<meta itemprop="position" content="3" /></li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'profile' and request.path[2] == 'addresses' and request.path[3] == 'edit' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"><a href="/profile/addresses">{{lang('user.addresses')}}<meta itemprop="position" content="2" /></a></li>
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">{{lang('admin.edit')}}<meta itemprop="position" content="3" /></li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'restore-password' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> 
+    					    <span iteprop="item">{{ lang('reset.password') }}</span>
+    					    <meta itemprop="position" content="2" />
+    					    <meta itemprop="name" content="{{ lang('reset.password') }}" />
+					    </li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'order_status' %}
+    					{% if user.uid > 0 %}
+    						<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    						    <a href="{{ request.script_name }}/orders">
+    						        <span iteprop="item">{{lang('profile.orders')}} </span>
+            					    <meta itemprop="position" content="2" />
+            					    <meta itemprop="name" content="{{lang('profile.orders')}} " />
+    						    </a>
+						    </li>
+    					{% endif %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="{{ request.script_name }}/order_status"> 
+        					    <span iteprop="item">{{ lang('page.order.status') }} </span>
+        					    <meta itemprop="position" content="{% if user.uid > 0 %}3{%else%}2{%endif%}" />
+        					    <meta itemprop="name" content="{{lang('page.order.status')}} " />
+    					    </a>
+					    </li>
+    				{% endif %}
+    
+    
+    				{% if request.path[1] == 'blog' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					   <a href="/blog" itemprop="item"> 
+    					        {{ lang('blog') }}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('blog')}} " />
+    					    <meta itemprop="position" content="2" />
+					    </li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'blog' and request.path[2] == 'tag' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> 
+    					    <span iteprop="item">{{ lang('front.tag.title') }}  <strong>{{request.path[3]}}</strong> </span>
+    					    <meta itemprop="position" content="3" />
+    					    <meta itemprop="name" content="{{ lang('front.tag.title') }} {{request.path[3]}}" />
+					    </li>
+    				{% endif %}
+    				
+    				{% if request.path[1] == 'blog' and request.path[2] == 'category' %}
+    				    {% set current_blog_category = getBlogCategory(request.path.3) %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> 
+    					    <a href="/blog/category/{{request.path.3}}/{{request.path.4}}" itemprop="item"> 
+    					        {{ current_blog_category.name }}
+					        </a>
+    					    <meta itemprop="position" content="3" />
+    					    <meta itemprop="name" content="{{ current_blog_category.name }}" />
+					    </li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'post'  %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/blog" itemprop="item"> 
+    					        {{ lang('blog') }}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('blog')}} " />
+    					    <meta itemprop="position" content="2" />
+					    </li>
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> 
+    					    <a href="/post/{{request.path.2}}{%if request.path.2 != ''%}/{{request.path.3}}{%endif%}" itemprop="item">{{ post.title}} </a>
+    					    <meta itemprop="position" content="3" />
+    					    <meta itemprop="name" content="{{ post.title}}" />
+    					</li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'shop' and request.path[2] == 'tags'%}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    						<a href="{{ request.script_name }}/shop/tags/{{ request.path[3] }}">{{lang('page.tags')}} {{ request.path[3] }}</a>
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'pay' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> {{ lang('front.pay.title') }}  <meta itemprop="position" content="2" /></li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'payments' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> {{ lang('front.payments.title') }}  <meta itemprop="position" content="2" /></li>
+    				{% endif %}
+    
+    				{% if request.path[1] == 'wishlist' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem"> {{ lang('front.wishlist') }}  <meta itemprop="position" content="2" /></li>
+    				{% endif %}
+    					
+    				{% if request.path[1] == 'about-us' %}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/about-us" itemprop="item"> 
+    					        {{lang('page.aboutus')}}
+					        </a>
+    					    <meta itemprop="position" content="2" />
+    					    <meta itemprop="name" content="{{lang('page.aboutus')}}" />
+					    </li>
+    				{% endif %}
+    					
+    				{% if request.path[1] == 'contact-us' %}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+					        <a href="/contact-us" itemprop="item"> 
+    					        {{lang('page.contactus')}}
+					        </a>
+    					    <meta itemprop="position" content="2" />
+    					    <meta itemprop="name" content="{{lang('page.contactus')}}" />
+					    </li>
+    				{% endif %}
+    					
+    					
+    				{% if request.path[1] == 'password-restore' %}
+    					<li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/password-restore" itemprop="item"> 
+    					        {{lang('login.password.lost')}}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('login.password.lost')}}" />
+    						<meta itemprop="position" content="2" />
+						</li>
+    				{% endif %}
+    					
+    				{% if request.path[1] == 'reset-password' %}
+    					<li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/reset-password" itemprop="item"> 
+    					        {{lang('front.reset.pw')}}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('front.reset.pw')}}" />
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    				
+    				{% if request.path.1 == 'order-return' %}
+    				    <li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/order-return/{{request.path.2}}" itemprop="item"> 
+    					        {{lang('front.rma.pagetitle')}}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('front.rma.pagetitle')}}" />
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    				
+    				{% if request.path.1 == 'my-giftcard' %}
+    				    <li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/my-giftcard" itemprop="item"> 
+    					        {{lang('my.giftcard')}}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('my.giftcard')}}" />
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    				
+    				{% if request.path.1 == 'giftcard' %}
+    				    <li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/giftcard" itemprop="item"> 
+    					        {{lang('front.gift.card')}}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('front.gift.card')}}" />
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    				
+    				{% if request.path.1 == 'redeem-giftcard' %}
+    				    <li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="#" itemprop="item"> 
+    					        {{lang('front.gift.card')}}
+					        </a>
+    					    <meta itemprop="name" content="{{lang('front.gift.card')}}" />
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    				
+    				
+    				{% if document.landingpage.name != '' %}
+    				    <li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/{{request.path.1}}" itemprop="item"> 
+    					        {{ document.landingpage.name }}
+					        </a>
+    					    <meta itemprop="name" content="{{ document.landingpage.name }}" />
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    				
+    				{% if request.path.1 == 'remove-account' %}
+    				    <li class="breadcrumb-item"  itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+    					    <a href="/remove-account" itemprop="item"> 
+    					        {{ lang('community.remove.account') }}
+					        </a>
+    					    <meta itemprop="name" content="{{ lang('community.remove.account') }}" />
+    						<meta itemprop="position" content="2" />
+    					</li>
+    				{% endif %}
+    					
+    				</ol>
+    			</nav>
+			</div>
+
+			{% if theme.settings.cart.show_back_to_shop == 'yes' and request.path.1 == 'cart' %}
+				<div class="col-12 col-sm-12 col-md-4 text-end xs-text-start">
+					<span class="breadcrums_button">
+						<a href="/shop" class="btn button-white pull-right" id="cart_back_to_shop">
+							<i class="fa fa-angle-left"></i> {{lang('back.to.shop')}}
+						</a>
+					</span>
+				</div>
+			{% endif %}	
+	
+			</div>
+		</div>
+	</div>
+{% endif %}

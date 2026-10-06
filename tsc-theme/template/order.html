@@ -1,0 +1,298 @@
+{% if  request.path.1 == 'pay' or request.path.1 == 'payments'  or request.path.1 == 'order_status' %}
+<div id="order_details">
+	<div class="row">
+		<div class="col-12">
+{% else %}		
+<div class="container" id="order_details">
+    <div class="row">
+    	<div class='col-12 col-sm-4 col-md-3 third-column-product'>	
+    		{% include 'menu_profile.html' %}
+    	</div>
+    	<div class="col-12 col-sm-8 col-md-9  col-xs-12 profileLeft">
+{% endif %}
+				
+		{% set idOrder =  request.path.3 %}
+		{% if request.path.1 == 'order' %}
+			{% set idOrder = request.path.2 %}
+			{% set order = getOrderById(idOrder) %}
+		{% endif %}
+		{% if request.path.1 == 'pay' or request.path.1 == 'payments' %}
+			{% set order = getOrderById(idOrder) %}
+		{% endif %}
+		{% if request.path.1 == 'order' or request.path.1 == 'order_status' %}
+		<div class="heading">
+			 {{lang('order.id')}} <small>{{order.orderID}}</small>
+		</div>
+		{% endif %}
+		
+		{% set orderStatusList = getOrdersStatus() %}
+		{% if order == null %}
+			<div>
+				<p>{{lang('invalid.fetching.order')}}</p>				
+				{% if user.uid > 0 %}	
+					<a href="/orders" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('back.to.orders.list')}}</a>
+				{% else %}
+					<a href="/order_status" class="dn-btn dn-btn-brand-1 dn-btn-filled">{{lang('front.back')}}</a>
+				{% endif %}
+			</div>
+		{% else %}
+		    <script>console.log("order", {{order|json}});</script>
+			<div id="order_buttons">
+				{% if order.cart.paymentProfile != 'transfer' and order.cart.paymentProfile != 'mark' and order.status == 0 %}
+					<span class="dn-btn dn-btn-brand-1 dn-btn-filled pay-now-order" data-id="{{order.orderID}}"><i class="fas fa-cash-register"></i> {{lang('order.pay.now')}}</span>
+				{% endif %}
+				{% set tracking_data = getTrackingUrl(order.orderID) %}
+		    	{% set tracking_url = '' %}
+				{% if tracking_data.urls.0.result == 'OK' %}
+    			    {% set tracking_url = tracking_data.urls.0.url %}
+    			    {% if 'http' not in tracking_url %}
+    			        {% set tracking_url = 'https://tracking.qapla.it/'~tracking_url~'#k=rebuilded' %}
+    			    {% endif %}
+    			    <a href="{{tracking_url}}" target="_blank" class="dn-btn dn-btn-brand-1 dn-btn-filled button_tracking">
+    			        {{lang('track.order')|upper}}
+    			    </a>
+    			{% endif %}
+				{% if user.uid  > 0 %}
+					<a class="dn-btn dn-btn-brand-1 dn-btn-filled" href="mailto:{{group.admin_email}}"><i class="fa fa-envelope"></i> {{lang('store.contact.us')}}</a>
+				{% endif %}
+				<span class="btn-contact"></span>
+				{% if( order.rating != 1 and order.status > 3 and order.status!= 7) %}
+					<a class="dn-btn dn-btn-brand-1 dn-btn-filled button-feedback" href="https://feedback.storeden.com/{{idOrder}}/{{order._id}}" target="_blank">
+						<i class="fa fa-star"></i> {{lang('front.order.rating')}}
+					</a>
+				{% endif %}
+				
+			</div>
+			<div class="clearfix"><br></div>
+			<div class="order-detail">
+				<div class="row">
+					<div class="col-md-6">
+						<div class="info-order">
+							<strong>{{lang('order.date')}}</strong><br>
+							{{ order.orderDate.sec | date('d/m/Y H:i')}}
+							{% if order.cart.shippingProfile != '' %}
+    							<br><strong>{{lang('order.shipping')}}</strong><br>
+    							{{order.cart.shippingProfile}}
+							{% endif %}
+							<br><strong>{{lang('order.payment')}}</strong><br>
+							{{getOrderPaymentMethod(order.payment)}}
+    						{% if order.cart.paymentProfile == 'transfer' %}
+								<br><small>
+									{% if paymentconfig.transfer.owner > '' %} 
+										{{lang('order.checkouted.transfer.owner')}}: 
+										<strong>{{paymentconfig.transfer.owner}}</strong><br> {% endif %} 
+									{% if paymentconfig.transfer.swift > '' %} 
+										{{lang('order.checkouted.transfer.swift')}}: 
+										<strong>{{paymentconfig.transfer.swift}}</strong><br> 
+									{% endif %} 
+										{{lang('order.checkouted.transfer')}}: 
+										<strong>{{group.iban}}</strong>
+								</small>
+							{% endif %}
+						</div>
+					</div>
+					<div class="col-md-6">
+						<div class="info-order margin-top-xs">
+							<strong>{{lang('order.status')}}</strong><br>
+							<div class="heading">{{ lang(orderStatusList[order.status]) }}</div>
+							{% if order.status == 3 %}
+								{% set tracking = getTrackingUrl(idOrder) %}
+								{% if tracking.urls.0.url != '' %}
+									<a href="{{tracking.urls.0.url}}" target="_blank">{{lang('track.shipping')}} <i class="fa fa-external-link"></i></a><br>
+								{% endif %}
+							{% endif %}
+							{% if order.status == 3 and order.details != '' %}
+								{{order.details}}
+							{% endif %}
+							{% if order.status == 3%}
+							<br><a data-id="{{idOrder}}" class="btn-received pointer"><i class="fa fa-check"></i> {{lang('set.as.received')}}</a>
+							{% endif %}
+							<script>
+								$(document).on('click', '.btn-received', function(e){
+									e.preventDefault();
+									var id = $(this).attr('data-id');
+									Storeden.setOrderAsReceived(id, function(res){ window.location = window.location; })
+								});
+							</script>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="clearfix"></div>
+			<br>
+			<div class="order-detail">
+				<div class="row">
+					<div class="col-md-6 col-sm-12 col-xs-12">
+						<address>
+							<div class="heading">{{lang('shipping.address')}}</div>
+								{{order.delivery.fullname}}<br>
+								{{order.delivery.addr1}}<br>
+								{{order.delivery.city}}, {{order.delivery.zip}} {{ getState(order.delivery.state) }} 
+								{{ getCountry(order.delivery.nation) }}<br>
+								{{order.delivery.vat}}<br>
+								{{order.delivery.phone}}<br>
+								{{order.delivery.email}}<br>
+						</address>
+					</div>
+					<div class="col-md-6 col-sm-12 col-xs-12">
+						<address>
+							<div class="heading">{{lang('billing.address')}}</div>
+							{{order.billing.fullname}}<br>
+							{{order.billing.addr1}}<br>
+							{{order.billing.city}}, {{order.billing.zip}} {{ getState(order.billing.state) }} 
+							{{ getCountry(order.billing.nation) }}<br>
+							{{order.billing.vat}}<br>
+							{{order.billing.phone}}<br>
+							{{order.billing.email}}<br>
+						</address>
+					</div>
+				</div>
+			</div>
+				
+			<div class="row order-details-content">
+				<div class="col-md-12">
+					<div class="heading">{{lang('order.items.bought')}}</div>
+					
+						<table class="cart_table table table-condensed">
+							<thead>
+								<tr>
+									<th style="width:50%">{{lang('cart.item')}}</th>
+									<th style="width:12%" class="text-end">{{lang('item.price')}}</th>
+									<th style="width:12%" class="text-end">{{lang('cart.subtotal')}}</th>
+								</tr>
+							</thead>
+							<tbody>
+								{% set totalItems = 0 %}
+								{% for k,item in order.cart.items %}
+								{% set exp = explode('#|#', k) %}
+								{% set itemUID = exp.0 %}
+								{% set product = getCompleteItem(itemUID, false, true, false) %}
+								{% if product.title == ''%}
+									{% set productTitle = item.title %}
+								{% else %}
+									{% set productTitle = product.title %}
+								{% endif %}
+								{% set totalItem = item.price*item.count  %}
+								{% set options = explode('_', exp.1) %}
+								<script>
+								    console.log("exp:", {{exp|json}});
+								    console.log("options:", {{options|json}});
+								</script>
+								{% set totalItems = totalItems + totalItem %}
+								{% set img = "https://cdn.storeden.net/secache/" ~product.image_id|default(shop_rules.placeholder) %}
+								{% for var in product.variants %}
+            						{% if var.superkey | replace({"." : "-DOT-"}) == exp.1 and var.image != '' %}
+            							{% set img = var.image %}
+            						{% endif %}
+            					{% endfor %}
+								<tr id="row_{{itemUID}}_{{exp.1}}">
+									<td data-th="{{lang('cart.item')}}">
+										<div class="row cart_table_row">
+											<div class="col-sm-3 col-md-3 col-xs-3 cart_table_image noPaddingLeft">
+												<img src="{{ img }}" class="img-responsive" alt="{{productTitle}}">
+											</div>
+											<div class="col-sm-9 col-md-9 col-xs-9 cart_table_content">
+												<a class="strong" href="{{request.script_name}}/product/{{itemUID}}/{{product.slug}}">{{productTitle}}</a>
+												{% set l = options | length %}
+												{% if l > 0 %}
+    												<br>
+    												<span class="options">
+    													{% for option in options %}
+    														{% for k, vars in product.vars %}
+        														{% for j,value in vars.options %}
+        														    {% if value.option == option %}
+        														        <strong>{{vars.title}}</strong>: {{ value.title}} 
+        														    {% endif %}
+        														{% endfor %}
+    														{% endfor %}
+    													{% endfor %}
+    												</span>
+												{% endif %}
+												{{lang('item.quantity') | raw }}: {{item.count}}
+											</div>
+										</div>
+									</td>
+									<td data-th="{{lang('item.price')}}" class="text-start text-md-end">{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency|raw}}{% endif%} {{item.price | nfx}}</td>
+									<td data-th="{{lang('cart.subtotal')}}" class="text-start text-md-end">
+										{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency|raw}}{% endif%} {{totalItem | nfx}}
+									</td>
+								</tr>
+								{% endfor %}
+							</tbody>						
+							<tfoot>
+								<tr>
+									<td colspan="2" class="text-end">{{lang('cart.total.price')}}</td>
+									<td  class="text-end">{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency | raw }}{% endif%} {{ totalItems | nfx }}</td>
+								</tr>
+								{% if order.isGift and order.giftCost > 0 %}
+									<tr>
+										<td colspan="2" class="text-end">{{lang('front.gift.total')}}</td>
+										<td  class="text-end">{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency | raw }}{% endif%} {{ order.giftCost | nfx }}</td>
+									</tr>
+								{% endif %}
+								{% if order.cart.shippingProfile != '' %}
+    								<tr>
+    									<td colspan="2" class="text-end">
+    									    {{lang('cart.shipping.amount')}} ({{order.cart.shippingProfile}})
+    								    </td>
+    									<td class="text-end">{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency | raw }}{% endif%} {{order.cart.shippingAmount | nfx}}</td>
+    								</tr>
+    							{% endif %}
+								{% if order.cart.paymentAmount > 0 %}
+								<tr>
+									<td colspan="2" class="text-end">
+									    {{getOrderPaymentMethod(order.payment)}}
+								    </td>
+									<td class="text-end">{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency | raw }}{% endif%} {{order.cart.paymentAmount | nfx}}</td>
+								</tr>
+								{% endif %}
+								{% if order.cart.saleAmount > 0 %}
+								<tr>
+									<td colspan="2" class="text-end">{{lang('cart.coupon.amount')}} ({{order.cart.saleCode}})</td>
+									<td class="text-end text-success">{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency | raw }}{% endif%} -{{order.cart.saleAmount | nfx}}</td>
+								</tr>
+								{% endif %}
+								<tr>
+									<td colspan="2" class="text-end"><strong>{{lang('order.total')}}</strong></td>
+									<td class="text-end"><strong>{% if order.currency!=''%}{{lang('symbol.'~order.currency)|raw}}{% else %}{{currency | raw }}{% endif%} {{order.total | nfx}}</strong></td>
+								</tr>
+							
+					
+						{% if order.isGift %}
+							<tr>
+								<td colspan="3" class="text-start">
+									<i class="fa fa-gift"></i> {{lang('front.this.order.is.a.gift')}}.
+									{% if order.giftMessage != '' %}
+										<p>{{order.giftMessage}}</p>
+									{% endif %}
+								</td>
+							<tr>
+						{% endif %}
+					
+						{% if order.message != ''%}
+								<tr>
+									<td colspan="3" class="text-start">
+										<strong>{{lang('message.to.store')}}: </strong> {{order.message}}
+									</td>
+								</tr>	
+						{% endif %}
+								
+						{% if order.attaches_files | length > 0 %}
+								<tr>
+									<td colspan="3" class="text-start" id="order_attachments">
+										{% for attachment in order.attaches_files %}
+											<a class="dn-btn dn-btn-brand-1 dn-btn-filled attachment_btn" href="{{attachment.url}}" class="{{attachment.class}}" target="_blank"><i class="fa fa-paperclip"></i> {{attachment.label}}</a>										
+										{% endfor %}
+									</td>
+								</tr>	
+						{% endif %}
+					
+						</tfoot>
+					</table>
+					
+				</div>
+			</div>
+		{% endif %}
+		</div>
+	</div>
+</div>

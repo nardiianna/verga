@@ -1,0 +1,122 @@
+<div class="order_response_container">
+	{% if (request.path.2 == 'paypal') %}
+		<div class="container">
+			<div class="heading text-success"><i class="fa fa-check fa-lg"></i> {{lang('your.order.is.complete')}}</div>
+			<p>
+				{{lang('pay.on.paypal.text')}}<br>
+				{{lang('front.auth.pay.click')}}
+			</p>
+		</div>
+		<br>
+		<div class="text-center">
+			<form method="post" name="paypal_form" target="_top" action="https://www.paypal.com/cgi-bin/webscr">
+				<input type="hidden" name="business" value="{{group.pay_address}}">
+				<input type="hidden" name="return" value="http://{{group.friendlyURL}}/payments/success/{{ order.orderID }}">
+				<input type="hidden" name="cancel_return" value="http://{{group.friendlyURL}}/payments/cancel/{{ order.orderID }}">
+				<input type="hidden" name="notify_url" value="http://ipn.storeden.com/ipn/paypal.php">
+				<input type="hidden" name="item_name" value="Ordine N: {{ order.orderID }}">
+				<input type="hidden" name="address_override" value="0">
+				<input type="hidden" name="email" value="{{user.email}}">
+				<input type="hidden" name="cmd" value="_xclick">
+				<input type="hidden" name="currency_code" value="{% if order.currency != ""%}{{order.currency}}{% else %}{{group.currency}}{% endif %}">
+				<input type="hidden" name="custom" value="{{ order.orderID }}">
+				<input type="hidden" name="transaction_subject" value="{{ order.orderID }}">
+				<input type="hidden" name="amount" value="{{ order.total }}">
+				<input type="hidden" name="rm" value="2">
+				<input type="hidden" name="bn" value="projectmoon_SP_Storeden">
+				<button type="submit" class="btn btn-lg btn-primary" id="paypalPayNow"><i class="fa fa-paypal"></i> {{lang('pay.on.paypal')}}</button>
+			</form>
+			<script>
+				$('#paypalPayNow').trigger("click")
+			</script>
+		</div>
+	{% endif %}
+
+	{% if (request.path.2 == 'mark') %}
+		<div class="container order_response_container">
+			<div class="heading text-success"><i class="fa fa-check fa-lg"></i> {{lang('your.order.is.complete')}}</div>
+			<p>
+			{{lang('order.id')}}  <strong>{{request.path.3}}</strong><br>
+			{{lang('order.payment')}}: <strong>{{lang('admin.payments.mark')}} </strong>
+			</p>
+		</div>
+		<div class="container">{% include 'order.html' %}</div>
+	{% endif %}
+
+	{% if (request.path.2 == 'transfer') %}
+		<div class="container order_response_container">
+			<div class="heading text-success"><i class="fa fa-check fa-lg"></i> {{lang('your.order.is.complete')}}</div>
+			<p>
+			{{lang('order.id')}}  <strong>{{request.path.3}}</strong><br>
+			{{lang('order.payment')}}: <strong>{{lang('admin.payments.transfer')}} </strong><br>
+			{% if paymentconfig.transfer.owner > '' %} {{lang('order.checkouted.transfer.owner')}}: <strong>{{paymentconfig.transfer.owner}}</strong><br /> {% endif %} {% if paymentconfig.transfer.swift > '' %} {{lang('order.checkouted.transfer.swift')}}: <strong>{{paymentconfig.transfer.swift}}</strong><br /> {% endif %} {{lang('order.checkouted.transfer')}}: <strong>{{group.iban}}</strong><br />
+			</p>
+		</div>
+		<div class="container">{% include 'order.html' %}</div>
+	{% endif %}
+	
+	{% if (request.path.2 == 'findomestic') %}
+		<div class="container order_response_container">
+			<div class="heading text-success"><i class="fa fa-check fa-lg"></i> {{lang('your.order.is.complete')}}</div>
+			<p>
+			{{lang('order.id')}}  <strong>{{request.path.3}}</strong><br>
+			{{lang('order.payment')}}: <strong>{{lang('admin.payments.findomesticfinancing')}} </strong>
+			</p>
+			<style> .pay-now-order { display: none !important; } </style>
+			{% if request.query.esito == 'OK' or request.query.esito == 'ok' %}
+				<div class="text-start">
+					<p class="text-success"><strong>{{lang('findomestic.confirm.and.wait')}}</strong></p>
+				</div>
+			{% endif %}
+		</div>
+		<div class="container">{% include 'order.html' %}</div>
+	{% endif %}
+	
+	<!-- google ecommerce analytics -->
+	{% if group.analytics != ''%}
+		{% if request.path.2 != 'paypal' %}
+			{% set affiliation_title = group.title|replace({' ':'-'}) %}
+			{% set order = getOrderById(request.path.3) %}
+			<script type="text/javascript" data-pagespeed-no-defer>
+			    var analyticsSended = {{ order.analytics_sended | json_encode }};
+                if (analyticsSended !== true) {
+    			    ga('require', 'ecommerce');
+    				ga('ecommerce:clear');
+    				{% for k,item in order.cart.items %}
+    					{% set product_handler = ( k | split('#|#') ) %}
+    					{% set product_object = getItem(product_handler.0) %}
+    					{% set category_id = product_object.categoryUID[0] %}
+    					{% set category_path = '' %}
+    					{% if category_id > 0 %}
+    						{% set list = getCategoryList(category_id) %}
+    						{% for i,cat in list %}
+    							{% if i == 0 %}
+    								{% set category_path = '' ~ cat.name %}
+    							{% else %}
+    								{% set category_path = category_path ~ '/' ~ cat.name %}
+    							{% endif %}
+    						{% endfor %}
+    					{% endif %}
+    					ga('ecommerce:addItem', {
+    						'id': '{{order.orderID}}',
+    						'name': {{ item.title | json_encode | raw }},
+    						'sku': {{ item.sku | json_encode | raw}},
+    						'category': {{ category_path | json_encode | raw }},
+    						'price': '{{ item.price | replace({',':'.'}) }}',
+    						'quantity': '{{ item.count }}',
+    						'currency': '{{group.currency}}'
+    					});
+    				{% endfor %}
+    				ga('ecommerce:addTransaction', {
+    				  'id': '{{order.orderID}}',                    
+    				  'affiliation': '{{affiliation_title}}',   
+    				  'revenue': '{{order.total| replace({',':'.'})}}',
+    				  'currency': '{{group.currency}}'
+    				});
+    				ga('ecommerce:send');
+                }
+			</script>
+		{% endif %}
+	{% endif %}
+	
+</div>

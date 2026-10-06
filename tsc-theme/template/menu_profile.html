@@ -1,0 +1,152 @@
+{# Mappa dei dati, uno per agente uno per tutti #}
+
+{% set menu = [
+    {
+        url: '/profile',
+        label: lang('user.account.settings'),
+        match: { p1: 'profile', p2: '' },
+        enabled: true
+    },
+    {
+        url: '/profile/edit',
+        label: lang('edit.password'),
+        match: { p1: 'profile', p2: 'edit' },
+        enabled: true
+    },
+    {
+        url: '/profile/addresses',
+        label: lang('user.addresses'),
+        match: { p1: 'profile', p2: 'addresses' },
+        enabled: not is_agent
+    },
+    {
+        url: '/orders',
+        label: lang('profile.orders'),
+        match: { p1: ['order', 'orders', 'pay'] },
+        enabled: not is_agent
+    },
+    {
+        url: '/profile/proposals',
+        label: lang('profile.agent.customer_proposals'),
+        match: { p1: 'profile', p2: 'proposals' },
+        enabled: not is_agent
+    },
+    {
+        url: '/messages',
+        label: lang('store.messages'),
+        match: { p1: 'messages' },
+        enabled: false
+    },
+    {
+        url: '/order_status',
+        label: lang('page.order.status'),
+        match: { p1: 'order_status' },
+        enabled: false
+    },
+    {
+        url: '/wishlist',
+        label: lang('front.wishlist'),
+        match: { p1: 'wishlist' },
+        enabled: false
+    }
+] %}
+
+
+{% set agent_menu = [
+    {
+        url: '/profile/choose-customer',
+        label: lang('profile.agent.choose_customer'),
+        match: { p1: 'profile', p2: 'choose-customer' },
+        enabled: true
+    },
+    {
+        url: '/profile/customer-review',
+        label: lang('profile.agent.customer_review'),
+        match: { p1: 'profile', p2: 'customer-review' },
+        enabled: true
+    },
+    {
+        url: '/profile/proposals',
+        label: lang('profile.agent.customer_proposals'),
+        match: { p1: 'profile', p2: 'proposals' },
+        enabled: not new_customer
+    },
+    {
+        url: '/profile/orders',
+        label: lang('user.orders'),
+        match: { p1: 'profile', p2: 'orders' },
+        enabled: not new_customer
+    }
+] %}
+
+
+{# MACRO per gestire classe active #}
+
+{% macro isActive(match, path) %}
+    {% set active = false %}
+
+    {% if match.p1 is defined %}
+        {% if match.p1 is iterable %}
+            {% set active = path[1] in match.p1 %}
+        {% else %}
+            {% set active = path[1] == match.p1 %}
+        {% endif %}
+    {% endif %}
+
+    {% if active and match.p2 is defined %}
+        {% set active = path[2] == match.p2 %}
+    {% endif %}
+
+    {{ active ? 'active' : '' }}
+{% endmacro %}
+
+{% import _self as helper %}
+
+
+{# Stampa html #}
+
+<div class="navigation-block">
+    <nav class="user-nav" role="navigation">
+
+        <input id="user-menu-state" data-target="#user-menu" class="menu-state" type="checkbox" />
+        <label class="main-menu-btn" for="user-menu-state">
+            <span class="main-menu-btn-icon"></span>
+        </label>
+
+        {# ===== MENU AGENTE ===== #}
+        {% if is_agent %}
+            <span class="nav-user heading nav-title">
+                <a href="#">{{ lang('user.profile_agent') }}</a>
+            </span>
+
+            <ul class="sm sm-vertical sm-clean menu vertical-menu">
+                {% for item in agent_menu if item.enabled %}
+                    <li>
+                        <a class="{{ helper.isActive(item.match, request.path) }}" href="{{ item.url }}">
+                            {{ item.label }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+
+        {# ===== MENU UTENTE ===== #}
+        <span class="nav-user heading nav-title">
+            <a href="#">{{ lang('user.profile') }}</a>
+        </span>
+
+        <ul id="user-menu" class="sm sm-vertical sm-clean menu vertical-menu">
+            {% if user.uid > 0 %}
+                {% for item in menu if item.enabled %}
+                    <li>
+                        <a class="{{ helper.isActive(item.match, request.path) }}" href="{{ item.url }}">
+                            {{ item.label }}
+                        </a>
+                    </li>
+                {% endfor %}
+            {% endif %}
+        </ul>
+        
+    </nav>
+</div>

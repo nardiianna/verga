@@ -1,0 +1,31 @@
+<div class="container">
+	{% if user.uid > 0 %}
+		<div class="row">
+			<div class='col-md-3 col-sm-4 third-column-product'>	
+				{% include 'menu_profile.html' %}
+			</div>
+			<div class="col-md-9 col-sm-8  col-xs-12 profileLeft">
+				<div class="heading">{{lang('front.wishlist')}}</div>
+				<div class="row">
+					{% set countItems = wishlist_products | length %}
+					{% if countItems > 0 %}
+						<div class="product_container shop_product_container d-flex flex-wrap align-items-stretch">
+							{% for item in wishlist_products  %}
+								<div class="product_wrapper col-6 col-sm-6 col-lg-4 col-md-4">
+									{% include 'product_preview.html' %}
+								</div>
+							{% endfor %}
+						</div>
+					{% endif %}	
+				</div>
+			</div>
+		</div>
+	{% else %}
+		<div class="row">
+			<div class="col-md-12">
+				<p>{{lang('store.not.logged.in')}}</p>				
+				<a href="{{request.script_name}}/login" class="btn btn-primary">{{lang('sign.in')}}</a>
+			</div>
+		</div>
+	{% endif %}
+</div>
