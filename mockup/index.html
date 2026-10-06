@@ -404,6 +404,51 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
   .chead h1{font-size:26px}
   .pad{grid-template-columns:repeat(3,64px)}
 }
+/* riparazioni */
+.dotl{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+.mini-steps{display:flex;gap:3px;margin-top:6px}
+.mini-steps i{flex:1;height:4px;border-radius:2px;background:var(--line)}
+.mini-steps i.done{background:var(--ok)} .mini-steps i.cur{background:var(--accent)} .mini-steps i.skip{background:repeating-linear-gradient(90deg,var(--line) 0 3px,transparent 3px 5px)}
+.steps5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.st{padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;gap:2px;min-width:0}
+.st .n{font-size:10.5px;font-weight:700;letter-spacing:.1em;color:var(--faint)}
+.st b{font-size:13.5px;font-weight:600} .st small{font-size:12px;color:var(--muted)}
+.st.done{background:var(--ok-bg);border-color:transparent} .st.done small,.st.done .n{color:var(--ok)}
+.st.cur{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)} .st.cur .n{color:var(--accent)}
+.st.skip{border-style:dashed;background:transparent;opacity:.65}
+.task{display:flex;align-items:center;gap:14px;padding:12px 20px;border-bottom:1px solid var(--line);cursor:pointer;min-height:52px}
+.task input{width:22px;height:22px;accent-color:var(--accent);margin:0;flex:none}
+.task:hover{background:var(--surface-2)}
+.voce{display:flex;gap:12px;align-items:center;padding:12px 20px;border-bottom:1px solid var(--line)}
+.voce:last-child{border-bottom:0}
+.voce .grow,.task .grow{flex:1;min-width:0}
+.kv{margin:0}
+.voce input[type=checkbox]{width:22px;height:22px;accent-color:var(--accent);margin:0;flex:none}
+.voce-add{display:grid;grid-template-columns:minmax(0,1fr) 120px auto;gap:8px}
+.rip-tipi{grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-flow:row}
+.rip-tipi button{align-items:flex-start;text-align:left;justify-content:flex-start;padding:12px 14px}
+.rip-tipi button small{font-weight:500;color:var(--muted);font-size:12px}
+.thumbs{display:flex;flex-wrap:wrap;gap:10px}
+.th{position:relative;width:96px;height:96px;border-radius:10px;overflow:hidden;border:1px solid var(--line);flex:none}
+.th.sm{width:64px;height:64px}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th .ph{width:100%;height:100%;display:grid;place-items:center;background:var(--surface-2);color:var(--faint)}
+.th button{all:unset;cursor:pointer;position:absolute;top:4px;right:4px;width:24px;height:24px;border-radius:50%;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center}
+.th button svg.i{width:14px;height:14px}
+.th.add{border:1.5px dashed var(--line-strong);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--accent);font-size:12px;background:var(--surface)}
+.th.add svg.i{width:26px;height:26px}
+.att{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.att .tag button{all:unset;cursor:pointer;display:grid;place-items:center}
+.paper{background:#fff;color:#1a1a1a;border:1px solid var(--line);border-radius:8px;padding:22px 24px;font-size:12.5px;line-height:1.5}
+.paper h4{margin:14px 0 2px;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#666}
+.paper p{margin:0} .paper .faint{color:#777}
+.labels{display:flex;flex-wrap:wrap;gap:14px}
+.label-prev{background:#fff;color:#1a1a1a;border:1.5px dashed #bbb;border-radius:8px;padding:12px 14px;width:250px;font-size:12px;display:flex;flex-direction:column;gap:2px}
+.lbl-k{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#777;margin-bottom:4px}
+.bars{height:26px;margin-top:8px;background:repeating-linear-gradient(90deg,#1a1a1a 0 2px,transparent 2px 4px,#1a1a1a 4px 5px,transparent 5px 8px)}
+@media (max-width:960px){.steps5{grid-template-columns:repeat(5,minmax(150px,1fr));overflow-x:auto;padding-bottom:4px}.rip-tipi{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.rip-tipi{grid-template-columns:minmax(0,1fr)}.voce-add{grid-template-columns:minmax(0,1fr) 90px}.voce-add .btn{grid-column:1/-1}}
+@media print{.notes-fab,.no-print,.side,.top,.modal-h,.modal-f,.modal .field{display:none!important}body:has(.overlay) #app{display:none}.overlay{position:static;background:none;padding:0}.modal{box-shadow:none;max-height:none}.auto{padding:0}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -464,6 +509,11 @@ const I = {
   bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
   eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
   eyeOff:'<path d="M9.9 4.2A10 10 0 0 1 12 4c6.5 0 10 8 10 8a17 17 0 0 1-2.2 3.2M6.6 6.6A17 17 0 0 0 2 12s3.5 8 10 8a9.7 9.7 0 0 0 5.4-1.6M14.1 14.1a3 3 0 1 1-4.2-4.2M2 2l20 20"/>',
+  camera:'<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3z"/><circle cx="12" cy="13" r="3.5"/>',
+  print:'<path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>',
+  clip:'<path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/>',
+  tag:'<path d="M12.6 2.6A2 2 0 0 0 11.2 2H4a2 2 0 0 0-2 2v7.2a2 2 0 0 0 .6 1.4l8.7 8.7a2.4 2.4 0 0 0 3.4 0l6.6-6.6a2.4 2.4 0 0 0 0-3.4z"/><circle cx="7.5" cy="7.5" r="1"/>',
+  pin:'<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
   send:'<path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/>',
 };
 const ic = (n, cls='') => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${I[n]}</svg>`;
@@ -527,23 +577,23 @@ const links = [
 ];
 /* campi aggiuntivi richiesti da Verga (misure, fatturazione, valutazione, lingua…) */
 const EXTRA = {
-  c1:{sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:5,email2:'m.rossi@rossiholding.example.com',
+  c1:{cf:'RSSMRA68C12F205X',sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:5,email2:'m.rossi@rossiholding.example.com',
       addresses:[{label:'Casa Milano',via:'Via Esempio 1',cap:'20121',citta:'Milano',prov:'MI',naz:'Italia'},{label:'Casa Londra',via:'10 Example Street',cap:'SW1A 1AA',citta:'Londra',prov:'',naz:'Regno Unito'}],
       billing:{rs:'Rossi Holding S.p.A.',ind:'Via Esempio 20, 20121 Milano (MI)',piva:'IT01234567890',sdi:'M5UXCR1'},
       misure:{polso:'18,5',dxMedio:'21',dxAnulare:'20',sxMedio:'20',sxAnulare:'19'},
       notes:[{by:'Sara Colombo',date:'2025-12-03T17:40',text:'Ha chiesto di essere avvisato per le serate dedicate a Patek Philippe.'},{by:'Marco Verdi',date:'2024-06-11T12:05',text:'Preferisce essere contattato su WhatsApp dopo le 18. Collezionista di Rolex sportivi.'}],
       tasks:[{to:'Sara Colombo',by:'Marco Verdi',text:'Mandare gli auguri a Mario per l\'anniversario di matrimonio',due:'2026-10-12',rec:'Ogni anno',done:false}]},
   c2:{sesso:'F',lingua:'Italiano',tipo:'Prospect',rating:0,notes:[{by:'Marco Verdi',date:'2026-09-18T16:30',text:'Riferito dal marito: interessata a Pomellato.'}]},
-  c3:{sesso:'F',lingua:'Italiano',tipo:'Cliente',rating:4,misure:{polso:'15',dxMedio:'13',dxAnulare:'12',sxMedio:'12',sxAnulare:'12'},billing:{rs:'Studio Bianchi Architetti',ind:'Corso Esempio 12, Milano',piva:'IT09876543210',sdi:'0000000'}},
+  c3:{cf:'BNCLRA85S45F205Y',sesso:'F',lingua:'Italiano',tipo:'Cliente',rating:4,misure:{polso:'15',dxMedio:'13',dxAnulare:'12',sxMedio:'12',sxAnulare:'12'},billing:{rs:'Studio Bianchi Architetti',ind:'Corso Esempio 12, Milano',piva:'IT09876543210',sdi:'0000000'}},
   c4:{sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:5,notes:[{by:'Giorgia Costa',date:'2026-07-01T11:00',text:'Riservatezza massima: non citare in eventi pubblici.'}]},
   c5:{sesso:'F',lingua:'Italiano',tipo:'Prospect',rating:0},
   c6:{sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:3},
   c7:{sesso:'F',lingua:'Inglese',tipo:'Cliente',rating:5},
-  c8:{sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:3},
+  c8:{cf:'CNTRRT52B08F205Z',sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:3},
   c9:{sesso:'F',lingua:'Italiano',tipo:'Cliente',rating:4},
   c10:{sesso:'M',lingua:'Spagnolo',tipo:'Commerciante',rating:4},
 };
-const blankExtra = () => ({sesso:'',lingua:'',tipo:'Prospect',rating:0,email2:'',addresses:[],billing:{},misure:{},notes:[],tasks:[],privacy:null});
+const blankExtra = () => ({cf:'',pec:'',sesso:'',lingua:'',tipo:'Prospect',rating:0,email2:'',addresses:[],billing:{},misure:{},notes:[],tasks:[],privacy:null});
 clients.forEach(c => { Object.assign(c, blankExtra(), EXTRA[c.id] || {}); if (!c.addresses.length && c.indirizzo) c.addresses = [{label:'Casa',via:c.indirizzo,cap:'',citta:'',prov:'',naz:'Italia'}]; });
 clients.find(c => c.id === 'c1').privacy = '2014-05-10';
 clients.find(c => c.id === 'c7').privacy = '2018-10-01';
@@ -612,6 +662,7 @@ const S = {
   pf:{q:'',brand:'',tipo:'',stato:''},
   evf:{type:'',boutique:''},
   pdaf:'aperta',
+  rf:{chip:'aperte', q:'', tipo:'', boutique:'', tecnico:''}, rn:null, pv:null,
   cart:{clientId:null, items:[], pay:'Carta'},
   auto:{step:1, brands:[], interests:[], noYear:false, decade:''},
   nc:{brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk:{type:'', back:'', q:'', otherId:null, quick:false}, pending:[], addr:[], rating:0},
@@ -678,27 +729,32 @@ const NOTES = {
   cassa:{from:['La cassa crea un Ordine su TSC, che parte verso il gestionale (TSE) tramite eCube senza conferma di ritorno.','La fattura si chiede da qui: il gestionale la emette e restituisce subito il PDF da stampare. L\'operatore non apre mai il gestionale.','Intestazione: alla persona (scontrino) o alla sua società (fattura).','Il primo ordine trasforma il Prospect in Cliente.'],open:['Scontrino di cortesia: soluzione tipo Scontrini in Cloud da valutare.','Cosa fa l\'operatore se la fattura non arriva in tempo (timeout)?','Mostrare lo stato "inviato / confermato" dell\'ordine?']},
   passaggi:{from:['Registro di visite, chiamate e mail, con motivo.','Ogni evento salva operatore, cliente, tipo e data: da qui si ricavano ultima visita e clienti dormienti.','Il follow-up dopo la visita può far partire una mail automatica.'],open:['Eventi del brand (serate, mostre) vanno gestiti qui o a parte?']},
   pda:{from:['Stati della PDA: Manifestazione, Preordine, Associata, Ordine, Annullata (configurabili).','Associare e dissociare un prodotto: solo direttore vendite e titolare. Trasformare in ordine: qualsiasi venditore.','Notifica a chi ha creato la PDA quando il prodotto viene associato.','PDA visibili in tutte le boutique: un interesse nato in multimarca può essere soddisfatto dalla boutique Rolex.','Alla creazione parte la mail di presa in carico.'],open:['Il ramo Preordine va validato con Verga.','Quali campi della PDA passano al gestionale quando diventa ordine?','Circa 1.000 manifestazioni attive da migrare.']},
-  riparazioni:{from:['Le riparazioni sono una delle 3 attività di Verga: in scheda compariranno lette dal gestionale.','Automazioni previste: mail di presa in carico con numero riparazione, recall revisione dopo X anni dall\'acquisto.'],open:['Flusso da definire: sola consultazione dal gestionale o anche apertura da TSC? Per ora in stand-by.']},
+  riparazioni:{from:['Stesso portale dei venditori: entrando in Riparazioni il colore passa dal verde al grafite. Usa la sezione solo il venditore, che registra a mano anche le fasi di laboratorio.','Monitoraggio buste al posto dell\'Excel "DB RIP": semaforo (rosso da fare o in ritardo, ambra in attesa del cliente, verde in lavorazione, blu pronto al ritiro).','Filtro "preventivo accettato, non assegnato" richiesto da Verga.','Per ogni busta: dove si trova fisicamente, chi ce l\'ha e la presunta consegna.','5 step per tutti i tipi di busta: gli step che non servono (es. preventivo in garanzia) vengono saltati.'],open:['Confermare i 5 step: Accettazione, Preventivo, Risposta cliente, Lavorazione, Riconsegna.','Numerazione delle buste: la genera il portale o sono prestampate? Diversa per laboratorio?','Posizioni a magazzino: elenco reale (stanze, cassetti, banchi).','Come calcolare la presunta consegna quando non esistono tempi standard.','Migrazione dello storico da "DB RIP" e da Arca.','2 licenze TSC: come si condividono clienti e storico tra le due.']},
+  'rip-new':{from:['Accettazione in negozio con i campi della scheda di Arca, senza Attività/Processo: l\'area si ricava dalla boutique.','Tipo busta: Riparazione, Garanzia, Cambio pila, CPO, Quotazione, Conto vendita (cliente sempre Verga Vintage, con numero e data CV).','Pulsante "Scatta foto" che su iPad apre la fotocamera; allegati multipli con un tocco.','Note principali (le vede il cliente in ricevuta) e note interne separate.','Alla conferma si crea in automatico la bolla del ciclo attivo con l\'articolo RIPARAZIONE, senza ricopiare i dati.','Subito dopo: ricevuta da firmare e 2 etichette per la busta.'],open:['Significato esatto di Nc, Nm e Cal.','Campo "Attributi" di Arca: cosa contiene?','Testo delle clausole della ricevuta.','Contenuto della seconda etichetta.','Codice fiscale e PEC: aggiunti all\'anagrafica cliente perché servono in ricevuta.']},
+  busta:{from:['Per ogni step le attività sono divise tra eseguite e da fare; una sola data per attività (inizio e fine coincidono), salvata con il venditore.','Il venditore inserisce le voci del preventivo dettate dal laboratorio e lo invia con un link privato.','Se il cliente rifiuta: preventivo chiuso, eventuale costo del solo preventivo, orologio restituito.','In chiusura più file allegati (documenti di scarico). Lo scarico dei componenti resta su TSE con il numero di busta, via eCube.','Avviso di ritiro con lo scontrino incluso.','CPO: dopo l\'offerta accettata la stessa busta passa da intestata al cliente a intestata a Verga; storico completo sulla busta.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni step (via eCube).']},
+  prev:{from:['Preventivo online al posto del PDF: una casella per ogni voce e il totale.','Il cliente sceglie le voci e conferma; paga al ritiro. Può anche stampare.','Accesso con link privato oppure con email e password: Verga li vuole entrambi.','La risposta torna sulla busta e va registrata nel gestionale.'],open:['Serve una firma o basta la conferma online?','Come torna il preventivo accettato nel gestionale.']},
   auto:{from:['Form a due step. Step 1 obbligatorio e breve: nome, cognome, email (obbligatoria), telefono, brand di interesse facoltativi.','Step 2 facoltativo: dati utili per la comunicazione. Se non li compila, li chiede il venditore in negozio.','Ogni nuovo contatto nasce come Prospect.','Dopo il go-live Verga vuole mandare ai clienti una mail con un breve questionario (es. misura del polso).'],open:['Dove viene pubblicato il form (sito, QR in boutique, tablet)?','Consenso privacy: firma su iPad in negozio, online con checkbox?']},
 };
 NOTES.pdaList = NOTES.pda;
 
 /* ---------------- layout ---------------- */
+const RIP_VIEWS = ['riparazioni','rip-new','busta'];
 function render(){
   const app = document.getElementById('app');
-  if (S.view === 'riparazioni') document.documentElement.dataset.area = 'rip'; else delete document.documentElement.dataset.area;
+  if (RIP_VIEWS.includes(S.view)) document.documentElement.dataset.area = 'rip'; else delete document.documentElement.dataset.area;
   if (S.view === 'login') app.innerHTML = vLogin();
   else if (S.view === 'auto') app.innerHTML = vAuto();
-  else app.innerHTML = shell(({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,cassa:vCassa,passaggi:vPassaggi,pda:vPda,riparazioni:vRip})[S.view]());
+  else if (S.view === 'prev') app.innerHTML = vPrev();
+  else app.innerHTML = shell(({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,cassa:vCassa,passaggi:vPassaggi,pda:vPda,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
   renderDrawer();
   if (S.view === 'clienti') renderResults();
 }
 function shell(content){
-  const n = (v, icon, label, badge='') => `<button class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="badge num">${badge}</span>` : ''}</button>`;
+  const n = (v, icon, label, badge='') => `<button class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="badge num">${badge}</span>` : ''}</button>`;
   const compat = openPdas().filter(p => compatible(p).length).length;
   return `<div class="shell">
   <aside class="side ${S.navOpen ? 'open' : ''}">
-    <div class="side-brand"><span class="logo">${LOGO_MARK}</span><div><b>VERGA</b><small>${S.view === 'riparazioni' ? 'Riparazioni' : 'Portale venditori'}</small></div></div>
+    <div class="side-brand"><span class="logo">${LOGO_MARK}</span><div><b>VERGA</b><small>${RIP_VIEWS.includes(S.view) ? 'Riparazioni' : 'Portale venditori'}</small></div></div>
     <nav class="nav" aria-label="Sezioni">
       ${n('dashboard','home','Home')}
       <div class="grp">Clienti</div>
@@ -925,7 +981,7 @@ function vCliente(){
   if (S.tab === 'pda') body = `<section class="card"><div class="card-h">${ic('heart')}<h2>Manifestazioni di interesse</h2><span class="faint" style="font-size:12px">Registrate sul CRM</span><span class="sp"></span><button class="btn btn-sm" data-act="pda-new" data-id="${c.id}">${ic('plus')}Nuova</button></div><div>${cp.length ? cp.map(pdaCard).join('') : '<div class="empty">Nessuna manifestazione di interesse.</div>'}</div></section>`;
   if (S.tab === 'passaggi') body = `<section class="card"><div class="card-h"><h2>Storico passaggi e contatti</h2><span class="sp"></span><button class="btn btn-sm" data-act="evento" data-id="${c.id}">${ic('plus')}Aggiungi con nota</button></div><div class="timeline">${evs.length ? evs.map(tlRow).join('') : '<div class="empty">Nessun passaggio registrato.</div>'}</div></section>`;
   if (S.tab === 'acquisti') body = `<section class="card tbl-wrap"><div class="card-h">${ic('bag')}<h2>Acquisti</h2><span class="faint" style="font-size:12px">Documenti letti in tempo reale dal gestionale</span><span class="sp"></span><span class="muted num">Totale ${eur(spent(c.id))}</span></div>${ps.length ? purchTable(ps) : '<div class="empty">Nessun acquisto registrato.</div>'}</section>`;
-  if (S.tab === 'riparazioni') body = ripPlaceholder();
+  if (S.tab === 'riparazioni') body = ripPlaceholderCliente(c);
   const sl = sleeping(c.id);
   return `
   <div><button class="link" data-go="clienti" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Clienti</button></div>
@@ -964,7 +1020,7 @@ function vCliente(){
     </div>
   </section>
   <nav class="tabs" aria-label="Sezioni scheda">
-    ${tab('panoramica','Panoramica')}${tab('anagrafica','Anagrafica')}${tab('pda','Manifestazioni', cp.length)}${tab('acquisti','Acquisti', ps.length)}${tab('riparazioni','Riparazioni', 0)}${tab('passaggi','Passaggi', evs.length)}
+    ${tab('panoramica','Panoramica')}${tab('anagrafica','Anagrafica')}${tab('pda','Manifestazioni', cp.length)}${tab('acquisti','Acquisti', ps.length)}${tab('riparazioni','Riparazioni', clientRepairs(c.id).length)}${tab('passaggi','Passaggi', evs.length)}
   </nav>
   ${body}`;
 }
@@ -1072,6 +1128,8 @@ function clientForm(c){
       ${inp('f-azienda','Azienda',c?.azienda,'placeholder="Campo libero"')}
       ${inp('f-email','Email principale <em>*</em>',c?.email,'type="email" data-dup autocapitalize="none"')}
       ${inp('f-email2','Email secondaria',c?.email2,'type="email" autocapitalize="none"')}
+      ${inp('f-cf','Codice fiscale',c?.cf,'class="in mono" autocapitalize="characters" maxlength="16"')}
+      ${inp('f-pec','PEC',c?.pec,'type="email" autocapitalize="none"')}
       ${inp('f-tel','Cellulare',c?.tel,'type="tel" data-dup')}
       <label class="field"><span>Lingua</span><select class="sel" id="f-lingua">${opts(LANGS, c?.lingua || 'Italiano')}</select></label>
       <label class="field"><span>Boutique di riferimento</span><select class="sel" id="f-boutique">${opts(BOUTIQUES.map(x => x.name), c?.boutique || S.boutique)}</select></label>
@@ -1282,14 +1340,367 @@ function vPda(){
 }
 
 /* ---------------- RIPARAZIONI ---------------- */
-function ripPlaceholder(){
-  return `<section class="card"><div class="empty" style="padding:48px 20px;display:flex;flex-direction:column;align-items:center;gap:12px">
-    <span class="av lg" style="background:var(--surface-2);color:var(--muted)">${ic('wrench')}</span>
-    <b style="font-size:16px;color:var(--ink)">Modulo riparazioni in definizione</b>
-    <p style="margin:0;max-width:52ch">Qui il venditore vedrà le riparazioni del cliente: accettazione dell'orologio, preventivo, lavorazione in laboratorio e riconsegna. Il flusso va definito con Verga.</p>
-  </div></section>`;
+/* Usa la sezione solo il venditore: registra a mano anche le fasi di laboratorio. */
+const TECNICI = ['Andrea Galli','Paolo Riva','Davide Sala','Casa madre (esterno)'];
+const UBICAZIONI = ['Cassaforte boutique','Laboratorio Mazzini · banco','Laboratorio Capelli · banco','Laboratorio Patek · banco','Casa madre (riparazione esterna)','Pronto in boutique per il ritiro','Riconsegnato al cliente'];
+const AREA_OF = {'Bottega Storica':'Laboratorio Mazzini','Boutique Multibrand':'Laboratorio Capelli','Boutique Patek Philippe':'Laboratorio Patek','Boutique Portofino':'Laboratorio Mazzini'};
+const MOTIVI_RIP = ['Preventivo riparazione','Revisione completa','Cambio pila','Sostituzione vetro','Regolazione bracciale','Lucidatura','Valutazione CPO','Quotazione'];
+const SKIP = s => ({n:s.n, skip:s.skip});
+const STD = [
+  {n:'Accettazione', t:['Modulo compilato','Foto scattate davanti al cliente','Ricevuta firmata dal cliente','Etichette stampate sulla busta']},
+  {n:'Preventivo', t:['Presa in carico del tecnico','Preventivo redatto','Preventivo inviato al cliente']},
+  {n:'Risposta cliente', t:['Risposta del cliente registrata']},
+  {n:'Lavorazione', t:['Riparazione assegnata','Riparazione eseguita','Documento di scarico allegato']},
+  {n:'Riconsegna', t:['Avviso di ritiro inviato con scontrino','Orologio ritirato']},
+];
+const RIP_TIPI = {
+  'Riparazione':{d:'Preventivo, accettazione del cliente e lavorazione', steps:STD},
+  'Garanzia':{d:'Nessun preventivo, il resto del flusso è uguale', steps:[STD[0], SKIP({n:'Preventivo', skip:'Non previsto in garanzia'}), SKIP({n:'Risposta cliente', skip:'Non prevista in garanzia'}), STD[3], STD[4]]},
+  'Cambio pila':{d:'Preventivo accettato subito', steps:[{n:'Accettazione', t:['Modulo compilato','Ricevuta firmata dal cliente']}, SKIP({n:'Preventivo', skip:'Accettato subito'}), SKIP({n:'Risposta cliente', skip:'Accettato subito'}), {n:'Lavorazione', t:['Pila sostituita']}, STD[4]]},
+  'CPO':{d:'Valutazione Rolex Certified Pre-Owned, 10 giorni per l\'offerta', steps:[STD[0],
+    {n:'Valutazione', t:['Prima valutazione del tecnico','Offerta redatta','Offerta comunicata al cliente']},
+    {n:'Risposta cliente', t:['Offerta accettata: la busta passa a Verga']},
+    {n:'Lavorazione e certificazione', t:['Riparazione assegnata','Riparazione chiusa','Inviato a certificazione Rolex','Rientro certificazione con documento allegato']},
+    {n:'In vendita', t:['Foto pubblicate','Orologio in vendita']}]},
+  'Quotazione':{d:'Valutazione come servizio, senza acquisto', steps:[STD[0], {n:'Valutazione', t:['Valutazione del tecnico','Quotazione comunicata al cliente']}, SKIP({n:'Risposta cliente', skip:'Non prevista'}), SKIP({n:'Lavorazione', skip:'Non prevista'}), {n:'Riconsegna', t:['Avviso di ritiro inviato','Orologio ritirato']}]},
+  'Conto vendita':{d:'Accettazione CV nell\'area Verga Vintage', steps:[{n:'Accettazione CV', t:['Modulo compilato','Foto scattate']}, {n:'Lavori da fare', t:['Lavori segnalati','Lavori eseguiti']}, SKIP({n:'Risposta cliente', skip:'Non prevista'}), SKIP({n:'Lavorazione', skip:'Inclusa nei lavori'}), {n:'In vendita', t:['Orologio in vendita']}]},
+};
+const VERGA_VINTAGE = {id:'vv', nome:'Verga', cognome:'Vintage', email:'vintage@verga1947.it', tel:'', incomplete:false};
+const RC = id => id === 'vv' ? VERGA_VINTAGE : C(id);
+const tk = (s, i) => `${s}-${i}`;
+const doneUpTo = (tipo, step, extra = {}) => { const d = {}; RIP_TIPI[tipo].steps.forEach((s, si) => { if (si < step && s.t) s.t.forEach((_, ti) => d[tk(si, ti)] = {date:'', by:''}); }); return Object.assign(d, extra); };
+let ripSeq = 430;
+const repairs = [
+  {id:'r1', busta:'B-2026-0418', tipo:'Riparazione', clientId:'c1', boutique:'Bottega Storica', by:'Marco Verdi', acc:'2026-09-10T11:20',
+   obj:{tipo:'Orologio', marca:'Rolex', modello:'Submariner', ref:'124060', materiale:'Acciaio', nc:'9X41K2', nm:'', cal:'3230', quadrante:'Nero', meccanismo:'Automatico', bracciale:'Oyster'},
+   motivo:'Revisione completa', valore:9000, ritiro:'2026-10-20', garanzia:false, foto:6,
+   noteCliente:'Ritarda di circa 20 secondi al giorno.', noteInterne:'Graffio sulla lunetta già presente all\'accettazione.',
+   step:3, done:doneUpTo('Riparazione', 3, {[tk(3,0)]:{date:'2026-09-22T10:00', by:'Marco Verdi'}}), tecnico:'Andrea Galli', ubic:'Laboratorio Mazzini · banco', presunta:'2026-10-08', ass:'2026-09-22',
+   prev:{stato:'accettato', voci:[{d:'Revisione completa movimento cal. 3230', p:780, ok:true},{d:'Sostituzione guarnizioni e test impermeabilità', p:120, ok:true},{d:'Lucidatura cassa e bracciale', p:220, ok:false}]},
+   log:[{date:'2026-09-10T11:20', by:'Marco Verdi', t:'Busta aperta in Bottega Storica'},{date:'2026-09-14T16:05', by:'Marco Verdi', t:'Preventivo inviato al cliente: 3 voci, € 1.120'},{date:'2026-09-16T09:12', by:'Cliente', t:'Preventivo accettato online: 2 voci su 3 (€ 900)'},{date:'2026-09-22T10:00', by:'Marco Verdi', t:'Riparazione assegnata ad Andrea Galli'}]},
+  {id:'r2', busta:'B-2026-0421', tipo:'Riparazione', clientId:'c8', boutique:'Bottega Storica', by:'Marco Verdi', acc:'2026-09-17T15:40',
+   obj:{tipo:'Orologio', marca:'Rolex', modello:'Datejust 41', ref:'126334', materiale:'Acciaio e oro bianco', nc:'', nm:'', cal:'3235', quadrante:'Blu', meccanismo:'Automatico', bracciale:'Jubilee'},
+   motivo:'Preventivo riparazione', valore:8000, ritiro:'', garanzia:false, foto:4, noteCliente:'Si ferma dopo poche ore.', noteInterne:'',
+   step:2, done:doneUpTo('Riparazione', 2), tecnico:'Paolo Riva', ubic:'Cassaforte boutique', presunta:'',
+   prev:{stato:'inviato', link:'verga1947.it/p/R2K7-QW91', voci:[{d:'Revisione completa movimento cal. 3235', p:820, ok:true},{d:'Sostituzione massa oscillante', p:260, ok:true}]},
+   log:[{date:'2026-09-17T15:40', by:'Marco Verdi', t:'Busta aperta in Bottega Storica'},{date:'2026-09-21T12:30', by:'Marco Verdi', t:'Preventivo inviato al cliente: 2 voci, € 1.080'}]},
+  {id:'r3', busta:'B-2026-0425', tipo:'Riparazione', clientId:'c3', boutique:'Boutique Multibrand', by:'Sara Colombo', acc:'2026-09-19T10:15',
+   obj:{tipo:'Orologio', marca:'Cartier', modello:'Tank Must', ref:'WSTA0041', materiale:'Acciaio', nc:'', nm:'', cal:'', quadrante:'Argenté', meccanismo:'Quarzo', bracciale:'Cinturino in pelle'},
+   motivo:'Sostituzione vetro', valore:3200, ritiro:'', garanzia:false, foto:3, noteCliente:'Vetro scheggiato a ore 3.', noteInterne:'',
+   step:1, done:doneUpTo('Riparazione', 1), tecnico:'', ubic:'Cassaforte boutique', presunta:'', prev:{stato:'bozza', voci:[]},
+   log:[{date:'2026-09-19T10:15', by:'Sara Colombo', t:'Busta aperta in Boutique Multibrand'}]},
+  {id:'r4', busta:'B-2026-0409', tipo:'Riparazione', clientId:'c10', boutique:'Boutique Portofino', by:'Giorgia Costa', acc:'2026-08-28T17:00',
+   obj:{tipo:'Orologio', marca:'Rolex', modello:'Yacht-Master 42', ref:'226659', materiale:'Oro bianco', nc:'', nm:'', cal:'3235', quadrante:'Nero', meccanismo:'Automatico', bracciale:'Oysterflex'},
+   motivo:'Revisione completa', valore:12400, ritiro:'2026-09-30', garanzia:false, foto:5, noteCliente:'', noteInterne:'Inviato alla casa madre per la revisione.',
+   step:3, done:doneUpTo('Riparazione', 3, {[tk(3,0)]:{date:'2026-09-02T11:00', by:'Giorgia Costa'}}), tecnico:'Casa madre (esterno)', ubic:'Casa madre (riparazione esterna)', presunta:'2026-09-23', ass:'2026-09-02', est:'2026-09-02',
+   prev:{stato:'accettato', voci:[{d:'Revisione completa presso Rolex', p:1150, ok:true}]},
+   log:[{date:'2026-08-28T17:00', by:'Giorgia Costa', t:'Busta aperta in Boutique Portofino'},{date:'2026-09-02T11:00', by:'Giorgia Costa', t:'Inviato alla casa madre, rientro previsto il 23/09'}]},
+  {id:'r5', busta:'B-2026-0402', tipo:'Riparazione', clientId:'c7', boutique:'Boutique Patek Philippe', by:'Luca Ferrari', acc:'2026-08-20T12:10',
+   obj:{tipo:'Orologio', marca:'Patek Philippe', modello:'Aquanaut', ref:'5168G', materiale:'Oro bianco', nc:'', nm:'', cal:'324 S C', quadrante:'Kaki', meccanismo:'Automatico', bracciale:'Composite'},
+   motivo:'Regolazione bracciale', valore:52000, ritiro:'2026-09-26', garanzia:false, foto:4, noteCliente:'', noteInterne:'',
+   step:4, done:doneUpTo('Riparazione', 4), tecnico:'Davide Sala', ubic:'Pronto in boutique per il ritiro', presunta:'2026-09-24', ass:'2026-08-26', chiusura:'2026-09-23',
+   prev:{stato:'accettato', voci:[{d:'Sostituzione cinturino composite e regolazione', p:640, ok:true}]}, att:['Scarico_B-2026-0402.pdf'],
+   log:[{date:'2026-08-20T12:10', by:'Luca Ferrari', t:'Busta aperta in Boutique Patek Philippe'},{date:'2026-09-23T17:30', by:'Luca Ferrari', t:'Riparazione chiusa, documento di scarico allegato'}]},
+  {id:'r6', busta:'B-2026-0427', tipo:'Garanzia', clientId:'c4', boutique:'Boutique Portofino', by:'Giorgia Costa', acc:'2026-09-21T11:30',
+   obj:{tipo:'Orologio', marca:'Tudor', modello:'Black Bay 58', ref:'M79030B-0001', materiale:'Acciaio', nc:'', nm:'', cal:'MT5402', quadrante:'Blu', meccanismo:'Automatico', bracciale:'Acciaio'},
+   motivo:'Preventivo riparazione', valore:4200, ritiro:'', garanzia:true, foto:4, noteCliente:'La corona non si avvita bene.', noteInterne:'Acquistato da noi a maggio 2026.',
+   step:3, done:doneUpTo('Garanzia', 3), tecnico:'', ubic:'Cassaforte boutique', presunta:'', prev:{stato:'', voci:[]},
+   log:[{date:'2026-09-21T11:30', by:'Giorgia Costa', t:'Busta in garanzia aperta in Boutique Portofino'}]},
+  {id:'r7', busta:'CPO-2026-0031', tipo:'CPO', clientId:'c10', boutique:'Bottega Storica', by:'Marco Verdi', acc:'2026-09-18T10:00',
+   obj:{tipo:'Orologio', marca:'Rolex', modello:'Submariner', ref:'116610LN', materiale:'Acciaio', nc:'', nm:'', cal:'3135', quadrante:'Nero', meccanismo:'Automatico', bracciale:'Oyster'},
+   motivo:'Valutazione CPO', valore:11000, ritiro:'', garanzia:false, foto:8, noteCliente:'Scatola e garanzia originali.', noteInterne:'Offerta entro il 28/09 (10 giorni).',
+   step:1, done:doneUpTo('CPO', 1, {[tk(1,0)]:{date:'2026-09-20T15:00', by:'Marco Verdi'}}), tecnico:'Andrea Galli', ubic:'Laboratorio Mazzini · banco', presunta:'2026-09-28', owner:'cliente', prev:{stato:'bozza', voci:[]},
+   log:[{date:'2026-09-18T10:00', by:'Marco Verdi', t:'Busta CPO aperta a nome del cliente'},{date:'2026-09-20T15:00', by:'Marco Verdi', t:'Prima valutazione del tecnico registrata'}]},
+  {id:'r8', busta:'B-2026-0398', tipo:'Riparazione', clientId:'c9', boutique:'Boutique Multibrand', by:'Sara Colombo', acc:'2026-08-05T16:00',
+   obj:{tipo:'Orologio', marca:'Cartier', modello:'Panthère', ref:'WSPN0007', materiale:'Acciaio', nc:'', nm:'', cal:'', quadrante:'Argenté', meccanismo:'Quarzo', bracciale:'Acciaio'},
+   motivo:'Preventivo riparazione', valore:4500, ritiro:'', garanzia:false, foto:3, noteCliente:'', noteInterne:'',
+   step:4, done:doneUpTo('Riparazione', 5), closed:true, esito:'rifiutato', tecnico:'Paolo Riva', ubic:'Riconsegnato al cliente', rifiuto:'2026-08-14', ritiroD:'2026-08-20', costoPrev:50,
+   prev:{stato:'rifiutato', voci:[{d:'Sostituzione modulo al quarzo', p:390, ok:false}]},
+   log:[{date:'2026-08-05T16:00', by:'Sara Colombo', t:'Busta aperta'},{date:'2026-08-14T10:00', by:'Cliente', t:'Preventivo rifiutato online'},{date:'2026-08-20T12:00', by:'Sara Colombo', t:'Orologio riconsegnato, costo del preventivo € 50'}]},
+];
+const R = id => repairs.find(r => r.id === id);
+const rSteps = r => RIP_TIPI[r.tipo].steps;
+const prevTot = (r, onlyOk) => (r.prev?.voci || []).filter(v => !onlyOk || v.ok).reduce((s, v) => s + v.p, 0);
+const clientRepairs = id => repairs.filter(r => r.clientId === id).sort((a,b) => dt(b.acc) - dt(a.acc));
+/* semaforo: rosso = da fare, ambra = in attesa del cliente, verde = in lavorazione, blu = pronto al ritiro */
+function ripLight(r){
+  if (r.closed) return {k:'closed', c:'', l:'Chiusa'};
+  const s = rSteps(r)[r.step];
+  if (r.presunta && dday(r.presunta) < 0 && r.step < 4) return {k:'late', c:'red', l:'In ritardo'};
+  if (r.step === 2) return {k:'wait', c:'amber', l:'In attesa del cliente'};
+  if (r.step === 4) return {k:'ready', c:'blue', l:s.n === 'In vendita' ? 'Da mettere in vendita' : 'Pronto al ritiro'};
+  if (r.step === 3 && r.done[tk(3,0)]) return {k:'work', c:'ok', l:'In lavorazione'};
+  return {k:'todo', c:'red', l:'Da fare'};
 }
-function vRip(){ return `<div class="page-h"><div><div class="label">Assistenza</div><h1>Riparazioni</h1></div></div>${ripPlaceholder()}`; }
+const light = r => { const x = ripLight(r); return `<span class="tag ${x.c}"><span class="dotl ${x.c}"></span>${x.l}</span>`; };
+const accNotAss = r => !r.closed && r.step === 3 && !r.done[tk(3,0)] && r.prev?.stato === 'accettato';
+const objName = r => `${r.obj.marca} ${r.obj.modello}`;
+
+function vRip(){
+  const f = S.rf, q = f.q.trim().toLowerCase();
+  const tests = {aperte:r => !r.closed, todo:r => ['todo','late'].includes(ripLight(r).k), wait:r => ripLight(r).k === 'wait', nass:accNotAss, ready:r => ripLight(r).k === 'ready', chiuse:r => r.closed, tutte:() => true};
+  const base = repairs.filter(r => (!q || `${r.busta} ${fullName(RC(r.clientId))} ${objName(r)} ${r.obj.ref}`.toLowerCase().includes(q)) && (!f.tipo || r.tipo === f.tipo) && (!f.boutique || r.boutique === f.boutique) && (!f.tecnico || r.tecnico === f.tecnico));
+  const list = base.filter(tests[f.chip]).sort((a,b) => dt(a.acc) - dt(b.acc));
+  const cnt = k => repairs.filter(tests[k]).length;
+  return `
+  <div class="page-h"><div><div class="label">Assistenza · tutte le boutique</div><h1>Riparazioni</h1></div><span class="sp"></span><button class="btn btn-primary" data-go="rip-new">${ic('plus')}Nuova accettazione</button></div>
+  <div class="kpis">
+    <div class="kpi alert"><span class="label">Da fare</span><b class="num">${cnt('todo')}</b><span class="muted">di cui ${repairs.filter(r => ripLight(r).k === 'late').length} in ritardo</span></div>
+    <div class="kpi"><span class="label">In attesa del cliente</span><b class="num">${cnt('wait')}</b><span class="muted">preventivi inviati</span></div>
+    <div class="kpi"><span class="label">Accettati non assegnati</span><b class="num">${cnt('nass')}</b><span class="muted">da passare al tecnico</span></div>
+    <div class="kpi"><span class="label">Pronti al ritiro</span><b class="num">${cnt('ready')}</b><span class="muted">avvisare il cliente</span></div>
+  </div>
+  <div class="chips">${[['aperte','Aperte'],['todo','Da fare'],['wait','In attesa del cliente'],['nass','Preventivo accettato, non assegnato'],['ready','Pronti al ritiro'],['chiuse','Chiuse'],['tutte','Tutte']].map(([k,l]) => `<button class="chip ${f.chip === k ? 'on' : ''}" data-act="rf-chip" data-v="${k}">${l} <span class="num" style="opacity:.7">${cnt(k)}</span></button>`).join('')}</div>
+  <div class="card card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+    <label class="field"><span>Busta, cliente, marca o referenza</span><input class="in" id="rf-q" value="${esc(f.q)}" placeholder="Es. B-2026-0418"></label>
+    <label class="field"><span>Tipo</span><select class="sel" data-rf="tipo">${opts(Object.keys(RIP_TIPI), f.tipo, 'Tutti')}</select></label>
+    <label class="field"><span>Boutique</span><select class="sel" data-rf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
+    <label class="field"><span>Tecnico</span><select class="sel" data-rf="tecnico">${opts(TECNICI, f.tecnico, 'Tutti')}</select></label>
+  </div>
+  <div class="card tbl-wrap"><table class="tbl">
+    <thead><tr><th>Stato</th><th>Busta</th><th>Cliente</th><th>Oggetto</th><th>Step</th><th>Dove si trova · tecnico</th><th>Presunta consegna</th><th style="text-align:right">Preventivo</th></tr></thead>
+    <tbody>${list.map(r => { const c = RC(r.clientId), st = rSteps(r); return `<tr class="click" data-go="busta" data-id="${r.id}">
+      <td>${light(r)}</td>
+      <td style="white-space:nowrap"><b class="mono">${esc(r.busta)}</b><div class="faint" style="font-size:12px">${esc(r.tipo)} · ${fmtD(r.acc)}</div></td>
+      <td style="min-width:140px"><b>${esc(fullName(c))}</b><div class="faint" style="font-size:12px">${esc(r.boutique)}</div></td>
+      <td style="min-width:170px"><b>${esc(objName(r))}</b><div class="faint mono" style="font-size:12px">${esc(r.obj.ref)}</div><div class="faint" style="font-size:12px">${esc(r.motivo)}</div></td>
+      <td style="min-width:140px">${r.closed ? '<span class="faint">Chiusa</span>' : `<div style="font-weight:600;font-size:13px">${r.step + 1}/5 · ${esc(st[r.step].n)}</div><div class="mini-steps">${st.map((s, i) => `<i class="${s.skip || r.skipped?.[i] ? 'skip' : i < r.step ? 'done' : i === r.step ? 'cur' : ''}"></i>`).join('')}</div>`}</td>
+      <td>${esc(r.ubic)}<div class="faint" style="font-size:12px">${esc(r.tecnico || 'Nessun tecnico')}</div></td>
+      <td class="num">${r.presunta ? `${fmtD(r.presunta)}<div class="faint" style="font-size:12px">${r.closed ? '' : dday(r.presunta) < 0 ? `<span style="color:var(--red)">${-dday(r.presunta)} giorni di ritardo</span>` : `tra ${dday(r.presunta)} giorni`}</div>` : '<span class="faint">—</span>'}</td>
+      <td class="num" style="text-align:right">${r.prev?.voci?.length ? `${eur(r.prev.stato === 'accettato' ? prevTot(r, true) : prevTot(r))}<div class="faint" style="font-size:12px">${({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || ''}</div>` : '<span class="faint">—</span>'}</td>
+    </tr>`; }).join('') || '<tr><td colspan="8"><div class="empty">Nessuna busta in questo stato.</div></td></tr>'}</tbody>
+  </table></div>`;
+}
+
+/* ---- accettazione ---- */
+const blankRn = (clientId = null) => ({clientId, tipo:'Riparazione', obj:{tipo:'Orologio', marca:'', modello:'', ref:'', materiale:'', nc:'', nm:'', cal:'', quadrante:'', colQ:'', meccanismo:'', bracciale:''}, motivo:'Preventivo riparazione', valore:'', ritiro:'', garanzia:false, photos:[], att:[], noteCliente:'', noteInterne:'', prom:'', promD:'', cv:{n:'', d:'2026-09-24', valore:''}, q:''});
+function vRipNew(){
+  const n = S.rn, cv = n.tipo === 'Conto vendita', c = cv ? VERGA_VINTAGE : n.clientId ? C(n.clientId) : null;
+  const inp = (k, label, extra = '') => `<label class="field"><span>${label}</span><input class="in" data-rn="obj.${k}" value="${esc(n.obj[k])}" ${extra}></label>`;
+  const area = cv ? 'Verga Vintage' : n.tipo === 'CPO' ? 'CPO' : AREA_OF[S.boutique];
+  return `
+  <div><button class="link" data-go="riparazioni" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Riparazioni</button></div>
+  <div class="page-h"><div><div class="label">${esc(S.boutique)} · ${esc(area)}</div><h1>Nuova accettazione</h1></div></div>
+  <section class="card">
+    <div class="fsec"><h3>${ic('box')}Tipo di busta</h3>
+      <div class="seg rip-tipi">${Object.entries(RIP_TIPI).map(([k, t]) => `<button type="button" class="${n.tipo === k ? 'on' : ''}" data-act="rn-tipo" data-v="${k}"><b>${k}</b><small>${t.d}</small></button>`).join('')}</div>
+    </div>
+    <div class="fsec"><h3>${ic('users')}Cliente</h3>
+      ${cv ? `<div class="picked">${avatar(c)}<div class="grow"><b>Verga Vintage</b><div class="muted" style="font-size:12px">Nel conto vendita il cliente è sempre Verga Vintage</div></div></div>
+        <div class="fgrid"><label class="field"><span>Numero CV</span><input class="in" data-rn="cv.n" value="${esc(n.cv.n)}"></label><label class="field"><span>Data CV</span><input class="in" type="date" data-rn="cv.d" value="${esc(n.cv.d)}"></label><label class="field"><span>Valore</span><input class="in" inputmode="decimal" data-rn="cv.valore" value="${esc(n.cv.valore)}" placeholder="€"></label></div>`
+      : c ? `<div class="picked">${avatar(c)}<div class="grow"><b>${esc(fullName(c))}</b><div class="muted" style="font-size:12px">${esc(c.email || '')} · ${esc(c.tel || '')}${c.cf ? ' · CF ' + esc(c.cf) : ''}</div></div><button type="button" class="link" data-act="rn-unpick">Cambia</button></div>
+        ${!c.cf || !c.addresses.length ? `<div class="banner">${ic('info')}<div class="grow"><p>Per la ricevuta servono <b>indirizzo e codice fiscale</b>. <button class="link" data-go="cliente" data-id="${c.id}">Completa la scheda</button></p></div></div>` : ''}`
+      : `<div class="scan-wrap">${ic('search')}<input class="in" id="rn-cs" style="padding-left:44px" value="${esc(n.q)}" placeholder="Cerca il cliente per nome, email o telefono" autocomplete="off"></div><div class="picklist" id="rn-cs-list">${clientPick(n.q, 'rn-pick')}</div><button type="button" class="link" data-go="nuovo" style="align-self:flex-start">${ic('userPlus')} Non c'è? Crea nuovo cliente</button>`}
+    </div>
+    <div class="fsec"><h3>${ic('watch')}Oggetto</h3>
+      <div class="fgrid">
+        <label class="field"><span>Tipo</span><select class="sel" data-rn="obj.tipo">${opts(['Orologio','Orologio da tavolo','Gioiello','Altro'], n.obj.tipo)}</select></label>
+        <label class="field"><span>Marca <em>*</em></span><select class="sel" data-rn="obj.marca">${opts([...BRANDS.filter(b => !['Rolex CPO','Verga Pre-Owned'].includes(b)), 'Altra marca'], n.obj.marca, 'Seleziona')}</select></label>
+        ${inp('modello','Modello <em>*</em>','placeholder="Es. Submariner"')}
+        ${inp('ref','Referenza','class="in mono" placeholder="Es. 124060"')}
+        ${inp('materiale','Materiale','placeholder="Es. acciaio, oro giallo"')}
+        ${inp('nc','Numero cassa (Nc)')}
+        ${inp('nm','Numero movimento (Nm)')}
+        ${inp('cal','Calibro (Cal)')}
+        ${inp('quadrante','Quadrante')}
+        ${inp('colQ','Colore quadrante')}
+        <label class="field"><span>Meccanismo</span><select class="sel" data-rn="obj.meccanismo">${opts(['Automatico','Carica manuale','Quarzo'], n.obj.meccanismo, '—')}</select></label>
+        ${inp('bracciale','Bracciale','placeholder="Es. Oyster, pelle"')}
+      </div>
+    </div>
+    <div class="fsec"><h3>${ic('wrench')}Intervento</h3>
+      <div class="field"><span>Motivo</span><div class="chips">${MOTIVI_RIP.map(v => `<button type="button" class="chip ${n.motivo === v ? 'on' : ''}" data-act="rn-motivo" data-v="${v}">${v}</button>`).join('')}</div></div>
+      <div class="fgrid">
+        <label class="field"><span>Valore dichiarato (assicurazione)</span><input class="in num" inputmode="decimal" data-rn="valore" value="${esc(n.valore)}" placeholder="€"></label>
+        <label class="field"><span>Ritiro previsto</span><input class="in" type="date" data-rn="ritiro" value="${esc(n.ritiro)}"></label>
+      </div>
+      <label class="check"><input type="checkbox" data-act="rn-garanzia" ${n.garanzia || n.tipo === 'Garanzia' ? 'checked' : ''}> In garanzia</label>
+    </div>
+    <div class="fsec"><h3>${ic('camera')}Foto e allegati</h3>
+      <div class="thumbs">${n.photos.map((p, i) => `<span class="th">${p ? `<img src="${p}" alt="Foto ${i + 1}">` : `<span class="ph">${ic('watch')}</span>`}<button type="button" data-act="rn-ph-rm" data-i="${i}" aria-label="Rimuovi foto">${ic('x')}</button></span>`).join('')}
+        <label class="th add">${ic('camera')}<b>Scatta foto</b><input type="file" id="rn-cam" accept="image/*" capture="environment" multiple hidden></label></div>
+      <p class="faint" style="margin:0;font-size:12px">Su iPad il pulsante apre direttamente la fotocamera. Foto scattate davanti al cliente: <b class="num">${n.photos.length}</b> (vanno in ricevuta).</p>
+      <div class="field"><span>Allegati (garanzia, documenti del cliente…)</span>
+        <div class="att">${n.att.map((a, i) => `<span class="tag">${ic('clip')}${esc(a)}<button type="button" data-act="rn-att-rm" data-i="${i}" aria-label="Rimuovi">${ic('x')}</button></span>`).join('')}<label class="btn btn-sm">${ic('clip')}Aggiungi file<input type="file" id="rn-att" multiple hidden></label></div></div>
+    </div>
+    <div class="fsec"><h3>${ic('edit')}Note e promemoria</h3>
+      <div class="fgrid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        <label class="field"><span>Note principali · le vede il cliente in ricevuta</span><textarea class="ta" data-rn="noteCliente" placeholder="Es. ritarda di 20 secondi al giorno">${esc(n.noteCliente)}</textarea></label>
+        <label class="field"><span>Note interne di riparazione</span><textarea class="ta" data-rn="noteInterne" placeholder="Es. graffio sulla lunetta già presente">${esc(n.noteInterne)}</textarea></label>
+      </div>
+      <div class="fgrid"><label class="field"><span>Promemoria</span><input class="in" data-rn="prom" value="${esc(n.prom)}" placeholder="Es. richiamare per il preventivo"></label><label class="field"><span>Quando</span><input class="in" type="date" data-rn="promD" value="${esc(n.promD)}"></label></div>
+    </div>
+    <div class="modal-f" style="border-radius:0 0 12px 12px"><span class="auto-info">${ic('info')}Creata da ${esc(S.operator)} · ${esc(S.boutique)} · ${esc(area)}</span><button class="btn" data-go="riparazioni">Annulla</button><button class="btn btn-primary btn-lg" data-act="rn-save">${ic('check')}Apri busta e stampa ricevuta</button></div>
+  </section>`;
+}
+
+/* ---- scheda busta ---- */
+function vBusta(){
+  const r = R(S.id); if (!r) return '<div class="empty">Busta non trovata.</div>';
+  const c = RC(r.clientId), st = rSteps(r), cur = st[r.step], lt = ripLight(r);
+  const owner = r.tipo === 'CPO' && r.owner === 'verga';
+  return `
+  <div><button class="link" data-go="riparazioni" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Riparazioni</button></div>
+  <section class="card">
+    <div class="chead">
+      <span class="av lg" style="border-radius:14px">${ic(r.obj.tipo === 'Gioiello' ? 'gem' : 'watch')}</span>
+      <div class="who">
+        <div class="tags">${light(r)}<span class="tag">${esc(r.tipo)}</span>${r.garanzia ? '<span class="tag ok">In garanzia</span>' : ''}${r.tipo === 'CPO' ? `<span class="tag ${owner ? 'brand' : 'amber'}">Intestata a ${owner ? 'Verga' : 'cliente'}</span>` : ''}</div>
+        <h1>${esc(r.busta)}</h1>
+        <div style="font-weight:600">${esc(objName(r))} <span class="muted mono" style="font-weight:500">${esc(r.obj.ref)}</span></div>
+        <div class="meta"><span>${ic('users')}<button class="link" ${c.id !== 'vv' ? `data-go="cliente" data-id="${c.id}"` : ''}>${esc(fullName(c))}</button></span><span>${ic('store')}${esc(r.boutique)}</span><span>${ic('clock')}Accettata ${fmtD(r.acc)} da ${esc(r.by)}</span><span>${ic('wrench')}${esc(r.motivo)}</span></div>
+      </div>
+      <div class="oneclick" style="min-width:220px">
+        <span class="label">Stampe</span>
+        <button class="btn" data-act="rb-ricevuta" data-id="${r.id}">${ic('print')}Ricevuta per il cliente</button>
+        <button class="btn" data-act="rb-etichette" data-id="${r.id}">${ic('tag')}Etichette busta</button>
+      </div>
+    </div>
+  </section>
+  <div class="steps5">${st.map((s, i) => { const tot = s.t ? s.t.length : 0, d = s.t ? s.t.filter((_, ti) => r.done[tk(i, ti)]).length : 0; const sk = s.skip || r.skipped?.[i]; const cls = sk ? 'skip' : (i < r.step || r.closed) ? 'done' : i === r.step ? 'cur' : '';
+    return `<div class="st ${cls}"><span class="n">STEP ${i + 1}</span><b>${esc(s.n)}</b><small>${sk ? esc(sk) : cls === 'done' ? 'Completato' : `${d} di ${tot} eseguite`}</small></div>`; }).join('')}</div>
+  <div class="grid2">
+    <div class="stack">
+      ${r.closed ? `<section class="card"><div class="empty">${ic('check')} Busta chiusa${r.esito === 'rifiutato' ? ': preventivo rifiutato, orologio restituito' : ''}${r.ritiroD ? ` · ritirata il ${fmtD(r.ritiroD)}` : ''}.</div></section>` : `
+      <section class="card">
+        <div class="card-h">${ic('list')}<h2>Step ${r.step + 1} · ${esc(cur.n)}</h2><span class="sp"></span><span class="faint" style="font-size:12px">Spunta quello che è stato fatto: data e venditore si salvano da soli</span></div>
+        ${taskList(r, r.step)}
+        ${stepPanel(r)}
+      </section>`}
+      ${prevCard(r)}
+      ${logCard(r)}
+    </div>
+    <div class="stack">
+      <section class="card">
+        <div class="card-h">${ic('pin')}<h2>Dove si trova</h2></div>
+        <div class="card-b stack" style="gap:12px">
+          <label class="field"><span>Posizione fisica</span><select class="sel" data-rb="ubic" data-id="${r.id}">${opts(UBICAZIONI, r.ubic)}</select></label>
+          <label class="field"><span>In mano a</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
+          <label class="field"><span>Presunta consegna</span><input class="in" type="date" data-rb="presunta" data-id="${r.id}" value="${esc(r.presunta || '')}"></label>
+          ${r.presunta && !r.closed ? `<p class="faint" style="margin:0;font-size:12.5px">${dday(r.presunta) < 0 ? `<b style="color:var(--red)">In ritardo di ${-dday(r.presunta)} giorni</b>` : `Arriva tra <b>${dday(r.presunta)} giorni</b>`}${r.tecnico ? ` · ce l'ha ${esc(r.tecnico)}` : ''}</p>` : ''}
+        </div>
+      </section>
+      <section class="card">
+        <div class="card-h">${ic('calendar')}<h2>Date</h2></div>
+        <div class="card-b"><dl class="kv">
+          <dt>Accettazione</dt><dd class="num">${fmtD(r.acc)}</dd>
+          <dt>Assegnazione</dt><dd class="num">${fmtD(r.ass)}</dd>
+          <dt>Riparazione esterna</dt><dd class="num">${fmtD(r.est)}</dd>
+          <dt>Chiusura</dt><dd class="num">${fmtD(r.chiusura)}</dd>
+          <dt>Preventivo rifiutato</dt><dd class="num">${fmtD(r.rifiuto)}</dd>
+          <dt>Ritiro previsto</dt><dd class="num">${fmtD(r.ritiro)}</dd>
+          <dt>Ritiro</dt><dd class="num">${fmtD(r.ritiroD)}</dd>
+          ${r.scontrino ? `<dt>Scontrino</dt><dd class="num">${esc(r.scontrino.n)} · ${eur(r.scontrino.tot)}</dd>` : ''}
+        </dl></div>
+      </section>
+      <section class="card">
+        <div class="card-h">${ic('watch')}<h2>Oggetto</h2></div>
+        <div class="card-b stack" style="gap:14px"><dl class="kv">
+          ${[['Tipo', r.obj.tipo],['Materiale', r.obj.materiale],['Nc', r.obj.nc],['Nm', r.obj.nm],['Calibro', r.obj.cal],['Quadrante', r.obj.quadrante],['Meccanismo', r.obj.meccanismo],['Bracciale', r.obj.bracciale],['Valore dichiarato', r.valore ? eur(+r.valore) : '']].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || '—')}</dd>`).join('')}
+        </dl>
+        <div class="thumbs">${(r.photos && r.photos.length ? r.photos : Array(Math.min(r.foto, 6)).fill('')).map(p => `<span class="th sm">${p ? `<img src="${p}" alt="">` : `<span class="ph">${ic('watch')}</span>`}</span>`).join('')}</div>
+        <span class="faint" style="font-size:12px">${r.foto} foto scattate all'accettazione</span>
+        ${r.noteCliente ? `<div><div class="label" style="margin-bottom:4px">Note per il cliente</div>${esc(r.noteCliente)}</div>` : ''}
+        ${r.noteInterne ? `<div><div class="label" style="margin-bottom:4px">Note interne</div>${esc(r.noteInterne)}</div>` : ''}
+        ${(r.att || []).length ? `<div class="att">${r.att.map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('')}</div>` : ''}
+        </div>
+      </section>
+    </div>
+  </div>`;
+}
+function taskList(r, si){
+  const s = rSteps(r)[si];
+  return `<div>${s.t.map((t, ti) => { const d = r.done[tk(si, ti)]; return `<label class="task"><input type="checkbox" data-act="rb-task" data-id="${r.id}" data-k="${tk(si, ti)}" ${d ? 'checked' : ''}><span class="grow" style="${d ? 'color:var(--muted)' : ''}">${esc(t)}</span>${d ? `<span class="faint" style="font-size:12px">${d.date ? fmtDT(d.date) + ' · ' + esc(d.by) : 'Eseguita'}</span>` : '<span class="tag red" style="height:22px">Da fare</span>'}</label>`; }).join('')}</div>`;
+}
+function stepPanel(r){
+  const s = rSteps(r)[r.step], name = s.n;
+  if (name === 'Preventivo' || (name === 'Valutazione' && r.tipo === 'CPO')) {
+    const v = r.prev.voci, lbl = r.tipo === 'CPO' ? 'offerta' : 'preventivo';
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      <div class="label">Voci del ${lbl} · dal listino della casa madre o lavorazioni interne</div>
+      ${v.length ? `<div class="card">${v.map((x, i) => `<div class="voce"><span class="grow">${esc(x.d)}</span><b class="num">${eur(x.p)}</b><button class="btn btn-ghost btn-sm" data-act="pv-rm" data-id="${r.id}" data-i="${i}" aria-label="Rimuovi voce">${ic('trash')}</button></div>`).join('')}<div class="voce" style="background:var(--surface-2)"><span class="grow label">Totale</span><b class="num" style="font-size:16px">${eur(prevTot(r))}</b></div></div>` : '<p class="faint" style="margin:0">Nessuna voce. Aggiungi le lavorazioni indicate dal laboratorio.</p>'}
+      <div class="voce-add"><input class="in" id="pv-d" placeholder="${r.tipo === 'CPO' ? 'Es. offerta di acquisto' : 'Es. revisione completa movimento'}"><input class="in num" id="pv-p" inputmode="decimal" placeholder="€"><button class="btn" data-act="pv-add" data-id="${r.id}">${ic('plus')}Aggiungi</button></div>
+      <p class="faint" style="margin:0;font-size:12px">Il ${lbl} si può aggiornare anche dopo l'invio, se il laboratorio trova altri problemi.</p>
+      <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" data-act="pv-send" data-id="${r.id}" ${v.length ? '' : 'disabled'}>${ic('send')}Invia ${lbl} al cliente</button></div>
+    </div>`;
+  }
+  if (name === 'Risposta cliente') {
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      <div class="banner info">${ic('link')}<div class="grow"><p>${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} con link privato <b class="mono">${esc(r.prev.link || '')}</b>. Il cliente sceglie le voci online, oppure accede con email e password. Una conferma al telefono non vale.</p></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="prev" data-id="${r.id}">${ic('arrow')}Apri la vista del cliente (demo)</button><button class="btn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button><span class="sp" style="flex:1"></span><button class="btn btn-ghost" data-act="pv-refuse" data-id="${r.id}">Il cliente ha rifiutato</button></div>
+    </div>`;
+  }
+  if (name === 'Lavorazione' || name === 'Lavorazione e certificazione' || name === 'Lavori da fare') {
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      <div class="label">Documenti di scarico e certificazioni · più file per busta</div>
+      <div class="att">${(r.att || []).map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('') || '<span class="faint">Nessun file allegato</span>'}<label class="btn btn-sm">${ic('clip')}Allega file<input type="file" class="rb-att" data-id="${r.id}" multiple hidden></label></div>
+      <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b> (via eCube).</p>
+    </div>`;
+  }
+  if (name === 'Riconsegna') {
+    const tot = r.esito === 'rifiutato' ? (r.costoPrev || 0) : r.prev?.stato === 'accettato' ? prevTot(r, true) : 0;
+    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
+      ${r.esito === 'rifiutato' ? `<div class="banner">${ic('info')}<div class="grow"><p>Preventivo rifiutato: si restituisce l'orologio. Costo del solo preventivo: <b>${eur(r.costoPrev || 0)}</b>.</p></div></div>` : ''}
+      <div class="fgrid"><label class="field"><span>Numero scontrino</span><input class="in mono" id="rb-sn" value="${esc(r.scontrino?.n || '')}" placeholder="Es. 0042-0815"></label><label class="field"><span>Totale scontrino</span><input class="in num" id="rb-st" value="${tot}" inputmode="decimal"></label></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="btn" data-act="rb-avviso" data-id="${r.id}">${ic('mail')}Invia avviso di ritiro con scontrino</button><button class="btn btn-primary" data-act="rb-ritiro" data-id="${r.id}">${ic('check')}Registra il ritiro</button></div>
+    </div>`;
+  }
+  return '';
+}
+function prevCard(r){
+  if (!r.prev?.voci?.length || ['bozza'].includes(r.prev.stato) && r.step === 1) return '';
+  const st = {inviato:['Inviato, in attesa','amber'],accettato:['Accettato','ok'],rifiutato:['Rifiutato','red'],bozza:['In bozza','']}[r.prev.stato] || ['',''];
+  return `<section class="card"><div class="card-h">${ic('bag')}<h2>${r.tipo === 'CPO' ? 'Offerta' : 'Preventivo'}</h2><span class="tag ${st[1]}">${st[0]}</span><span class="sp"></span>${r.prev.stato === 'accettato' ? `<span class="muted num">Accettato ${eur(prevTot(r, true))} su ${eur(prevTot(r))}</span>` : `<span class="muted num">${eur(prevTot(r))}</span>`}</div>
+    ${r.prev.voci.map(v => `<div class="voce"><span style="color:var(--${r.prev.stato === 'inviato' ? 'faint' : v.ok ? 'ok' : 'red'})">${ic(r.prev.stato === 'inviato' ? 'clock' : v.ok ? 'check' : 'x')}</span><span class="grow" style="${r.prev.stato !== 'inviato' && !v.ok ? 'text-decoration:line-through;color:var(--muted)' : ''}">${esc(v.d)}</span><b class="num">${eur(v.p)}</b></div>`).join('')}</section>`;
+}
+function logCard(r){
+  return `<section class="card"><div class="card-h">${ic('clock')}<h2>Storico della busta</h2></div><div class="timeline">${[...r.log].sort((a,b) => dt(b.date) - dt(a.date)).map(l => `<div class="tl"><span class="dot">${ic(l.by === 'Cliente' ? 'users' : 'check')}</span><div><b>${esc(l.t)}</b><div class="muted" style="font-size:12.5px">${fmtDT(l.date)} · ${esc(l.by)}</div></div></div>`).join('')}</div></section>`;
+}
+function ripLog(r, t, by = S.operator){ r.log.push({date:nowISO(), by, t}); }
+/* avanza quando tutte le attività dello step sono eseguite, saltando gli step non previsti */
+function ripAdvance(r){
+  const st = rSteps(r);
+  while (r.step < st.length && (st[r.step].skip || st[r.step].t.every((_, ti) => r.done[tk(r.step, ti)]))) {
+    if (r.step === st.length - 1) { r.closed = true; r.ubic = r.tipo === 'CPO' || r.tipo === 'Conto vendita' ? r.ubic : 'Riconsegnato al cliente'; ripLog(r, r.tipo === 'CPO' || r.tipo === 'Conto vendita' ? 'Orologio in vendita: busta chiusa' : 'Busta chiusa'); return true; }
+    r.step++;
+    if (!st[r.step].skip) { toast(`Passata allo step ${r.step + 1}: ${st[r.step].n}`); return true; }
+  }
+  return false;
+}
+function ripTick(r, si, ti, on = true){ const k = tk(si, ti); if (on) r.done[k] = {date:nowISO(), by:S.operator}; else delete r.done[k]; }
+function ripPlaceholderCliente(c){
+  const rs = clientRepairs(c.id);
+  return `<section class="card"><div class="card-h">${ic('wrench')}<h2>Riparazioni</h2><span class="sp"></span><button class="btn btn-sm btn-primary" data-act="rip-for" data-id="${c.id}">${ic('plus')}Nuova riparazione</button></div>
+    <div class="list">${rs.length ? rs.map(r => `<div class="row click" data-go="busta" data-id="${r.id}">${ic('watch')}<div class="grow"><div class="t"><span class="mono">${esc(r.busta)}</span> · ${esc(objName(r))}</div><div class="s">${esc(r.tipo)} · ${esc(r.motivo)} · accettata ${fmtD(r.acc)} in ${esc(r.boutique)}</div></div>${light(r)}${ic('arrow')}</div>`).join('') : '<div class="empty">Nessuna riparazione per questo cliente.</div>'}</div></section>`;
+}
+
+/* ---- preventivo online: vista del cliente (link privato) ---- */
+function vPrev(){
+  const r = R(S.id), c = RC(r.clientId), p = r.prev, done = p.stato !== 'inviato';
+  const sel = S.pv || p.voci.map(() => true), tot = p.voci.reduce((s, v, i) => s + (sel[i] ? v.p : 0), 0);
+  return `<div class="auto">
+    <div class="auto-top no-print"><span class="demo-tag">Vista cliente · link privato · demo</span><button class="link" data-go="busta" data-id="${r.id}">${ic('back')} Torna al portale</button></div>
+    <div class="auto-card" style="max-width:720px">
+      <span class="logo" style="height:110px">${LOGO_FULL}</span>
+      <div style="text-align:center"><div class="label">${r.tipo === 'CPO' ? 'Offerta di acquisto' : 'Preventivo di riparazione'} · busta <span class="mono">${esc(r.busta)}</span></div><h1 style="margin-top:8px">Gentile ${esc(c.nome)}</h1></div>
+      <p class="lead">${done ? 'Grazie, abbiamo ricevuto la sua risposta. Le scriveremo quando l\'orologio sarà pronto.' : `Ecco le lavorazioni proposte dal nostro laboratorio per il suo <b>${esc(objName(r))}</b>. Scelga quali accettare: il pagamento avviene al ritiro.`}</p>
+      <section class="card">
+        <div class="card-h">${ic('watch')}<h2>${esc(objName(r))} <span class="muted mono" style="font-weight:500">${esc(r.obj.ref)}</span></h2><span class="sp"></span><span class="faint" style="font-size:12px">Accettato il ${fmtD(r.acc)} in ${esc(r.boutique)}</span></div>
+        ${p.voci.map((v, i) => `<label class="voce" style="cursor:${done ? 'default' : 'pointer'}"><input type="checkbox" class="pv-box" data-act="pv-sel" data-i="${i}" ${(done ? v.ok : sel[i]) ? 'checked' : ''} ${done ? 'disabled' : ''}><span class="grow">${esc(v.d)}</span><b class="num">${eur(v.p)}</b></label>`).join('')}
+        <div class="voce" style="background:var(--surface-2)"><span class="grow"><span class="label">Totale ${done ? 'accettato' : 'selezionato'}</span></span><b class="num" style="font-size:20px">${eur(done ? prevTot(r, true) : tot)}</b></div>
+      </section>
+      ${done ? '' : `<p class="faint" style="margin:0;font-size:12px;text-align:center">I tempi indicati valgono per i lavori standard. Se durante la lavorazione emergono altri interventi, la contatteremo prima di procedere.</p>
+      <div class="no-print" style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap"><button class="btn btn-ghost btn-lg" data-act="pv-c-refuse">Rifiuto il preventivo</button><span style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-lg" data-act="pv-print">${ic('print')}Stampa</button><button class="btn btn-primary btn-lg" data-act="pv-c-ok" ${tot ? '' : 'disabled'}>${ic('check')}Confermo le voci selezionate</button></span></div>`}
+      <p class="faint no-print" style="margin:0;font-size:12px;text-align:center">Ha un account Verga? Può ritrovare i suoi preventivi anche accedendo con email e password.</p>
+    </div>
+  </div>
+  <button class="notes-fab" data-act="notes">${ic('info')}Note di progetto</button>`;
+}
+function ripRefuse(r, by, t){
+  r.prev.stato = 'rifiutato'; r.prev.voci.forEach(x => x.ok = false); r.esito = 'rifiutato'; r.rifiuto = '2026-09-24'; r.costoPrev = r.costoPrev || 0;
+  ripTick(r, 2, 0); r.skipped = {3:'Saltato: preventivo rifiutato'}; ripLog(r, t, by); r.step = 4; toast('Preventivo rifiutato: si passa alla riconsegna dell\'orologio');
+}
+const keepY = fn => { const y = window.scrollY; fn(); window.scrollTo(0, y); };
 
 /* ---------------- AUTOREGISTRAZIONE ---------------- */
 function vAuto(){
@@ -1421,6 +1832,29 @@ function renderModal(){
       <p class="faint" style="margin:0;font-size:12px;text-align:center">Al cliente parte la mail di acquisto personalizzata con brand e referenza.</p>`;
     f = `<button class="btn" data-act="m-close">Nuova vendita</button><button class="btn btn-primary" data-act="m-open-client" data-id="${M.clientId}">Apri scheda cliente</button>`;
   }
+  if (M.kind === 'ricevuta') {
+    const r = R(M.rid), c = RC(r.clientId), a = c.addresses?.[0];
+    h = 'Ricevuta di consegna';
+    b = `<div class="paper" id="print-area">
+        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span class="logo" style="height:56px;--logo-a:#004d43;--logo-b:#007565">${LOGO_MARK}</span><div style="text-align:right"><b>Ricevuta n. <span class="mono">${esc(r.busta)}</span></b><br>${fmtDT(r.acc)} · ${esc(r.boutique)}</div></div>
+        <h4>Cliente</h4><p>${esc(fullName(c))}${a ? ` · ${esc(a.via)}${a.citta ? ', ' + esc(a.cap) + ' ' + esc(a.citta) : ''}` : ''}<br>CF ${esc(c.cf || '—')} · Tel. ${esc(c.tel || '—')} · ${esc(c.email || '—')}${c.pec ? ` · PEC ${esc(c.pec)}` : ''}</p>
+        <h4>Oggetto</h4><p>${esc(r.obj.tipo)} ${esc(objName(r))} · ref. ${esc(r.obj.ref || '—')}${r.obj.nc ? ` · Nc ${esc(r.obj.nc)}` : ''}${r.obj.cal ? ` · cal. ${esc(r.obj.cal)}` : ''}<br>${[r.obj.materiale, r.obj.quadrante && 'quadrante ' + r.obj.quadrante, r.obj.bracciale].filter(Boolean).map(esc).join(' · ')}<br><b>${r.foto}</b> foto scattate alla presenza del cliente</p>
+        <h4>Intervento richiesto</h4><p>${esc(r.motivo)}${r.garanzia ? ' · in garanzia' : ''} · valore dichiarato ${r.valore ? eur(+r.valore) : '—'}${r.noteCliente ? `<br>Note: ${esc(r.noteCliente)}` : ''}</p>
+        <h4>Clausole</h4><p class="faint">L'oggetto è custodito gratuitamente fino al termine ultimo di ritiro. <i>Testo definitivo delle clausole da ricevere da Verga.</i></p>
+      </div>
+      <div class="field"><span>Firma del cliente</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>`;
+    f = `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button><button class="btn" data-act="m-close">Più tardi</button><button class="btn btn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
+  }
+  if (M.kind === 'etichette') {
+    const r = R(M.rid), c = RC(r.clientId);
+    h = 'Etichette per la busta';
+    b = `<div class="labels" id="print-area">
+        <div class="label-prev"><div class="lbl-k">Etichetta 1 · cliente</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(fullName(c))}</div><div>${esc(c.tel || '')}</div><div>${esc(objName(r))} · ${esc(r.obj.ref)}</div><div class="bars" aria-hidden="true"></div></div>
+        <div class="label-prev"><div class="lbl-k">Etichetta 2 · contenuto da definire</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(r.tipo)} · ${esc(r.motivo)}</div><div>${esc(AREA_OF[r.boutique] || '')} · ${fmtD(r.acc)}</div><div class="bars" aria-hidden="true"></div></div>
+      </div>
+      <p class="faint" style="margin:0;font-size:12px">Il contenuto della seconda etichetta va concordato con Verga.</p>`;
+    f = `<button class="btn" data-act="m-close">Più tardi</button><button class="btn btn-primary" data-act="m-save-et">${ic('print')}Stampa etichette</button>`;
+  }
   setTimeout(initSig, 0);
   r.innerHTML = `<div class="overlay" data-act="m-bg"><div class="modal" role="dialog" aria-modal="true" aria-label="${esc(h)}"><div class="modal-h"><h2>${h}</h2><button class="btn btn-ghost btn-sm" data-act="m-close" aria-label="Chiudi">${ic('x')}</button></div><div class="modal-b">${b}</div><div class="modal-f">${f}</div></div></div>`;
 }
@@ -1441,7 +1875,7 @@ function renderDrawer(){
   const r = document.getElementById('drawer-root');
   if (!S.notes) { r.innerHTML = ''; return; }
   const n = NOTES[S.view] || NOTES.dashboard;
-  const titles = {login:'Login',dashboard:'Home',clienti:'Clienti e filtri',cliente:'Scheda cliente',nuovo:'Nuovo cliente',prodotti:'Catalogo',cassa:'Cassa',passaggi:'Passaggi',pda:'Manifestazioni di interesse',riparazioni:'Riparazioni',auto:'Autoregistrazione'};
+  const titles = {login:'Login',dashboard:'Home',clienti:'Clienti e filtri',cliente:'Scheda cliente',nuovo:'Nuovo cliente',prodotti:'Catalogo',cassa:'Cassa',passaggi:'Passaggi',pda:'Manifestazioni di interesse',riparazioni:'Riparazioni','rip-new':'Nuova accettazione',busta:'Scheda busta',prev:'Preventivo online',auto:'Autoregistrazione'};
   r.innerHTML = `<aside class="drawer" aria-label="Note di progetto"><div class="modal-h"><h2 style="font-size:20px">${titles[S.view] || ''}</h2><button class="btn btn-ghost btn-sm" data-act="notes" aria-label="Chiudi">${ic('x')}</button></div>
     <div class="drawer-b"><p class="muted" style="margin:8px 0 0;font-size:13px">Da dove arriva questa schermata: appunti della call del 24/09/2026 con Dario e Vanessa.</p>
     <h4>Cosa abbiamo raccolto</h4><ul>${n.from.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
@@ -1471,6 +1905,48 @@ function act(el, ev){
       Object.assign(S, {operator:o.name, boutique:o.b, loginEmail:em, showPw:false}); go('dashboard'); toast(`Accesso come ${o.name} · ${o.b}`); break; }
     case 'pw-toggle': { const em = document.getElementById('l-email').value, pw = document.getElementById('l-pw').value; S.loginEmail = em; S.showPw = !S.showPw; render(); document.getElementById('l-pw').value = pw; break; }
     case 'pw-forgot': toast('Nel portale reale parte la mail per reimpostare la password (demo)'); break;
+    /* riparazioni */
+    case 'rf-chip': S.rf.chip = v; render(); break;
+    case 'rip-for': S.rn = blankRn(id); go('rip-new', null, {keepRn:true}); break;
+    case 'rn-tipo': S.rn.tipo = v; if (v === 'Cambio pila') S.rn.motivo = 'Cambio pila'; if (v === 'CPO') S.rn.motivo = 'Valutazione CPO'; if (v === 'Quotazione') S.rn.motivo = 'Quotazione'; if (v === 'Garanzia') S.rn.garanzia = true; keepY(render); break;
+    case 'rn-pick': S.rn.clientId = id; keepY(render); break;
+    case 'rn-unpick': S.rn.clientId = null; keepY(render); break;
+    case 'rn-motivo': S.rn.motivo = v; keepY(render); break;
+    case 'rn-garanzia': S.rn.garanzia = el.checked; break;
+    case 'rn-ph-rm': S.rn.photos.splice(+el.dataset.i, 1); keepY(render); break;
+    case 'rn-att-rm': S.rn.att.splice(+el.dataset.i, 1); keepY(render); break;
+    case 'rn-save': {
+      const n = S.rn, cv = n.tipo === 'Conto vendita';
+      if (!cv && !n.clientId) { toast('Seleziona il cliente'); break; }
+      if (!n.obj.marca || !n.obj.modello.trim()) { toast('Indica marca e modello dell\'oggetto'); break; }
+      const pre = n.tipo === 'CPO' ? 'CPO' : cv ? 'CV' : 'B', num = String(++ripSeq).padStart(4, '0');
+      const r = {id:'r' + ripSeq, busta:`${pre}-2026-${num}`, tipo:n.tipo, clientId:cv ? 'vv' : n.clientId, boutique:S.boutique, by:S.operator, acc:nowISO(), obj:{...n.obj}, motivo:n.motivo, valore:cv ? n.cv.valore : n.valore, ritiro:n.ritiro, garanzia:n.garanzia || n.tipo === 'Garanzia', foto:n.photos.length, photos:[...n.photos], att:[...n.att], noteCliente:n.noteCliente, noteInterne:n.noteInterne, step:0, done:{}, tecnico:'', ubic:'Cassaforte boutique', presunta:'', owner:'cliente', prev:{stato:'bozza', voci:[]}, log:[], cv:cv ? {...n.cv} : null};
+      const t0 = rSteps(r)[0].t; ripTick(r, 0, 0); const fi = t0.findIndex(x => x.startsWith('Foto')); if (fi >= 0 && n.photos.length) ripTick(r, 0, fi);
+      ripLog(r, `Busta ${r.tipo === 'Riparazione' ? '' : r.tipo + ' '}aperta in ${S.boutique}${n.photos.length ? ` con ${n.photos.length} foto` : ''}`);
+      if (n.prom) ripLog(r, `Promemoria${n.promD ? ' per il ' + fmtD(n.promD) : ''}: ${n.prom}`);
+      repairs.push(r); S.rn = blankRn(); go('busta', r.id); toast('Busta aperta · bolla di riparazione creata sul gestionale con i dati della busta');
+      openModal({kind:'ricevuta', rid:r.id}); break; }
+    case 'rb-task': { const r = R(id), [si, ti] = el.dataset.k.split('-').map(Number); ripTick(r, si, ti, el.checked); if (el.checked) ripLog(r, rSteps(r)[si].t[ti]); ripAdvance(r); keepY(render); break; }
+    case 'rb-ricevuta': openModal({kind:'ricevuta', rid:id}); break;
+    case 'rb-etichette': openModal({kind:'etichette', rid:id}); break;
+    case 'pv-add': { const r = R(id), d = document.getElementById('pv-d').value.trim(), pr = parseFloat(document.getElementById('pv-p').value.replace(',', '.')); if (!d || isNaN(pr)) { toast('Scrivi la voce e il prezzo'); break; } r.prev.voci.push({d, p:pr, ok:true}); keepY(render); break; }
+    case 'pv-rm': R(id).prev.voci.splice(+el.dataset.i, 1); keepY(render); break;
+    case 'pv-send': { const r = R(id); r.prev.stato = 'inviato'; r.prev.link = `verga1947.it/p/${r.busta.slice(-4)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`; rSteps(r)[r.step].t.forEach((_, ti) => { if (!r.done[tk(r.step, ti)]) ripTick(r, r.step, ti); });
+      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} al cliente: ${r.prev.voci.length} ${r.prev.voci.length === 1 ? 'voce' : 'voci'}, ${eur(prevTot(r))}`); ripAdvance(r); render(); toast('Mail con il link privato inviata al cliente'); break; }
+    case 'pv-resend': toast('Sollecito inviato al cliente con lo stesso link'); ripLog(R(id), 'Sollecito inviato al cliente'); render(); break;
+    case 'pv-refuse': ripRefuse(R(id), S.operator, 'Rifiuto registrato dal venditore (risposta scritta del cliente)'); render(); break;
+    case 'pv-sel': { const r = R(S.id); S.pv = S.pv || r.prev.voci.map(() => true); S.pv[+el.dataset.i] = el.checked; render(); break; }
+    case 'pv-print': window.print(); break;
+    case 'pv-c-ok': { const r = R(S.id), sel = S.pv || r.prev.voci.map(() => true); r.prev.voci.forEach((x, i) => x.ok = !!sel[i]); r.prev.stato = 'accettato'; r.esito = 'accettato'; ripTick(r, 2, 0);
+      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta accettata' : 'Preventivo accettato'} online: ${sel.filter(Boolean).length} ${sel.filter(Boolean).length === 1 ? 'voce' : 'voci'} su ${r.prev.voci.length} (${eur(prevTot(r, true))})`, 'Cliente');
+      if (r.tipo === 'CPO') { r.owner = 'verga'; ripLog(r, 'La busta passa a Verga: cambio intestatario', 'Sistema'); }
+      ripAdvance(r); S.pv = null; render(); window.scrollTo(0, 0); break; }
+    case 'pv-c-refuse': ripRefuse(R(S.id), 'Cliente', 'Preventivo rifiutato online'); S.pv = null; render(); window.scrollTo(0, 0); break;
+    case 'rb-avviso': { const r = R(id), n = document.getElementById('rb-sn').value.trim(), t = parseFloat(document.getElementById('rb-st').value.replace(',', '.')) || 0; if (!n) { toast('Inserisci il numero dello scontrino'); break; } r.scontrino = {n, tot:t}; ripTick(r, 4, 0); r.ubic = 'Pronto in boutique per il ritiro'; ripLog(r, `Avviso di ritiro inviato con scontrino ${n} (${eur(t)})`); render(); toast('Mail di avviso ritiro inviata al cliente'); break; }
+    case 'rb-ritiro': { const r = R(id); if (!r.done[tk(4, 0)]) { toast('Prima invia l\'avviso di ritiro con lo scontrino'); break; } ripTick(r, 4, 1); r.ritiroD = '2026-09-24'; ripLog(r, 'Orologio ritirato dal cliente'); ripAdvance(r); render(); toast('Ritiro registrato · busta chiusa'); break; }
+    case 'ric-print': window.print(); break;
+    case 'm-save-ric': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } const r = R(M.rid), i = rSteps(r)[0].t.indexOf('Ricevuta firmata dal cliente'); if (i >= 0) ripTick(r, 0, i); ripLog(r, 'Ricevuta firmata dal cliente'); ripAdvance(r); closeModal(); render(); openModal({kind:'etichette', rid:r.id}); break; }
+    case 'm-save-et': { const r = R(M.rid), i = rSteps(r)[0].t.indexOf('Etichette stampate sulla busta'); if (i >= 0 && !r.done[tk(0, i)]) { ripTick(r, 0, i); ripLog(r, 'Etichette stampate sulla busta'); } ripAdvance(r); closeModal(); render(); toast('Etichette inviate alla stampante (demo)'); break; }
     case 'pick-b': S.boutique = v; S.operator = OPERATORS.find(o => o.b === v).name; render(); break;
     case 'pick-op': S.operator = v; render(); break;
     case 'pin':
@@ -1597,7 +2073,7 @@ function act(el, ev){
 function toggle(arr, v){ const i = arr.indexOf(v); if (i >= 0) arr.splice(i,1); else arr.push(v); }
 /* conserva i valori digitati quando il form viene ridisegnato */
 function keepForm(fn){
-  const ids = ['f-tipo','f-nome','f-cognome','f-sesso','f-prof','f-azienda','f-email','f-email2','f-tel','f-lingua','f-boutique','f-rs','f-bind','f-piva','f-sdi','f-bd','f-bm','f-by','f-dec','f-polso','f-dxm','f-dxa','f-sxm','f-sxa','f-note','f-nl','new-note','task-text'];
+  const ids = ['f-tipo','f-nome','f-cognome','f-sesso','f-prof','f-azienda','f-email','f-email2','f-cf','f-pec','f-tel','f-lingua','f-boutique','f-rs','f-bind','f-piva','f-sdi','f-bd','f-bm','f-by','f-dec','f-polso','f-dxm','f-dxa','f-sxm','f-sxa','f-note','f-nl','new-note','task-text'];
   const vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.type === 'checkbox' ? el.checked : el.value; });
   const y = window.scrollY; fn(); ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] !== undefined) el[el.type === 'checkbox' ? 'checked' : 'value'] = vals[i]; }); window.scrollTo(0, y);
 }
@@ -1612,7 +2088,7 @@ function saveClient(id){
   const birth = {d:+v('f-bd') || null, m:+v('f-bm') || null};
   if (S.nc.noYear) birth.decade = v('f-dec'); else birth.y = +v('f-by') || null;
   const addresses = S.nc.addr.filter(a => a.via || a.citta).map(a => ({...a}));
-  const data = {tipo:v('f-tipo'), nome:v('f-nome'), cognome:v('f-cognome'), sesso:v('f-sesso'), prof:v('f-prof'), azienda:v('f-azienda'), email:v('f-email').toLowerCase(), email2:v('f-email2').toLowerCase(), tel:v('f-tel'), lingua:v('f-lingua'), addresses, indirizzo:addresses[0] ? `${addresses[0].via}, ${addresses[0].citta}` : '', boutique:v('f-boutique'), birth,
+  const data = {tipo:v('f-tipo'), nome:v('f-nome'), cognome:v('f-cognome'), sesso:v('f-sesso'), prof:v('f-prof'), azienda:v('f-azienda'), email:v('f-email').toLowerCase(), email2:v('f-email2').toLowerCase(), tel:v('f-tel'), cf:v('f-cf').toUpperCase(), pec:v('f-pec').toLowerCase(), lingua:v('f-lingua'), addresses, indirizzo:addresses[0] ? `${addresses[0].via}, ${addresses[0].citta}` : '', boutique:v('f-boutique'), birth,
     billing:{rs:v('f-rs'), ind:v('f-bind'), piva:v('f-piva'), sdi:v('f-sdi').toUpperCase()}, misure:{polso:v('f-polso'), dxMedio:v('f-dxm'), dxAnulare:v('f-dxa'), sxMedio:v('f-sxm'), sxAnulare:v('f-sxa')}, rating:S.nc.rating,
     brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : '', newsletter:document.getElementById('f-nl').checked};
   if (id) { const c = C(id); Object.assign(c, data); if (c.email && c.tel) c.incomplete = false; S.tab = 'panoramica'; render(); toast('Anagrafica aggiornata'); }
@@ -1632,6 +2108,8 @@ function checkout(){
 const _go = go;
 go = function(view, id=null, extra={}){
   const lk = {type:'', back:'', q:'', otherId:null, quick:false};
+  if (view === 'rip-new' && !extra.keepRn) S.rn = blankRn();
+  if (view === 'prev') S.pv = null;
   if (view === 'nuovo') S.nc = {brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk, pending:[], addr:[{label:'Casa',via:'',cap:'',citta:'',prov:'',naz:'Italia'}], rating:0};
   if (view === 'cliente' && id) { const c = C(id); if (c) S.nc = {brands:[...c.brands], interests:[...c.interests], modelli:[...c.modelli], noYear:!!(c.birth && c.birth.decade), decade:c.birth?.decade || '', celeb:c.celeb || 'Nessuna', lk, pending:[], addr:c.addresses.map(a => ({...a})), rating:c.rating || 0}; }
   _go(view, id, extra);
@@ -1651,6 +2129,9 @@ document.addEventListener('input', e => {
   if (t.id === 'lk-back') { S.nc.lk.back = t.value; S.nc.lk.backEdited = !!t.value; return; }
   if (['f-email','f-email2','a-email','fs-email'].includes(t.id) && t.value !== t.value.toLowerCase()) { const pos = t.selectionStart; t.value = t.value.toLowerCase(); try { t.setSelectionRange(pos, pos); } catch (_) {} }
   if (t.dataset.addr !== undefined) { const [i, k] = t.dataset.addr.split(':'); S.nc.addr[+i][k] = t.value; return; }
+  if (t.dataset.rn !== undefined) { const [a, b] = t.dataset.rn.split('.'); if (b) S.rn[a][b] = t.value; else S.rn[a] = t.value; return; }
+  if (t.id === 'rn-cs') { S.rn.q = t.value; document.getElementById('rn-cs-list').innerHTML = clientPick(t.value, 'rn-pick'); return; }
+  if (t.id === 'rf-q') { S.rf.q = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('rf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
   if (t.dataset.dup !== undefined) return dupCheck();
 });
 document.addEventListener('change', e => {
@@ -1658,6 +2139,14 @@ document.addEventListener('change', e => {
   if (t.id === 'boutique-sel') { S.boutique = t.value; render(); toast(`Boutique attiva: ${t.value}`); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'SELECT') { S.pf[t.dataset.pf] = t.value; render(); return; }
   if (t.dataset.evf !== undefined) { S.evf[t.dataset.evf] = t.value; render(); return; }
+  if (t.dataset.rf !== undefined) { S.rf[t.dataset.rf] = t.value; render(); return; }
+  if (t.id === 'rn-cam' || t.id === 'rn-att') { [...t.files].forEach(f => t.id === 'rn-cam' ? S.rn.photos.push(URL.createObjectURL(f)) : S.rn.att.push(f.name)); keepY(render); return; }
+  if (t.classList.contains('rb-att')) { const r = R(t.dataset.id); r.att = r.att || []; [...t.files].forEach(f => r.att.push(f.name)); ripLog(r, `Allegati: ${[...t.files].map(f => f.name).join(', ')}`); const i = rSteps(r)[r.step].t?.findIndex(x => /scarico|certificazione con documento/i.test(x)); if (i >= 0) ripTick(r, r.step, i); ripAdvance(r); keepY(render); return; }
+  if (t.dataset.rb !== undefined) { const r = R(t.dataset.id), k = t.dataset.rb; r[k] = t.value;
+    if (k === 'tecnico' && t.value) { const st = rSteps(r)[r.step]; const i = st.t ? st.t.findIndex(x => /Presa in carico|assegnata|Prima valutazione/.test(x)) : -1; if (i >= 0 && !r.done[tk(r.step, i)]) ripTick(r, r.step, i); if (r.step === 3) r.ass = '2026-09-24'; if (t.value.startsWith('Casa madre')) { r.est = '2026-09-24'; r.ubic = 'Casa madre (riparazione esterna)'; } ripLog(r, `In mano a ${t.value}`); ripAdvance(r); }
+    if (k === 'ubic') ripLog(r, `Spostato: ${t.value}`);
+    if (k === 'presunta') ripLog(r, `Presunta consegna: ${fmtD(t.value)}`);
+    keepY(render); return; }
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { if (M) closeModal(); else if (S.notes) { S.notes = false; renderDrawer(); } }
