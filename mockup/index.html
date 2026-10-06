@@ -332,7 +332,7 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
 .pad button:hover{border-color:var(--accent)}
 
 /* autoreg */
-.auto{min-height:100%;background:var(--surface);display:flex;flex-direction:column;align-items:center;padding:32px 16px 64px}
+.auto{min-height:100vh;min-height:100dvh;background:var(--surface);display:flex;flex-direction:column;align-items:center;padding:32px 16px 64px}
 .auto-top{width:100%;max-width:1100px;display:flex;justify-content:space-between;align-items:center}
 .auto-card{width:100%;max-width:620px;display:flex;flex-direction:column;gap:26px;margin-top:8px}
 .auto-card .logo{height:150px;align-self:center}
@@ -1335,7 +1335,7 @@ function vAuto(){
     <h1>Benvenuto in Verga</h1>
     <p class="lead">Ti abbiamo inviato una email di conferma. Ti aspettiamo in boutique.</p>
     <div class="banner info" style="text-align:left">${ic('info')}<div class="grow"><p><b>Nel portale:</b> la scheda di ${esc(a.nome || 'questo cliente')} è comparsa tra i clienti con l'etichetta "Autoregistrato online". Il venditore completerà i dati mancanti alla prima visita.</p></div></div>
-    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn btn-lg" data-act="a-reset">Nuova registrazione</button><button class="btn btn-primary btn-lg" data-act="a-open">Apri la scheda nel portale</button></div>`;
+    <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn btn-lg" data-act="a-reset">Nuova registrazione</button></div>`;
   return `<div class="auto">
     <div class="auto-top"><span class="demo-tag">Vista cliente · demo</span><button class="link" data-go="${S.operator ? 'dashboard' : 'login'}">${ic('back')} Torna al portale</button></div>
     <div class="auto-card"><span class="logo">${LOGO_FULL}</span>${body}</div>
