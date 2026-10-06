@@ -1710,7 +1710,8 @@ function dupCheck(){
   S.tab = q.tab || 'panoramica';
   S.operator = (VPD.user && (VPD.user.fullname || VPD.user.email)) || 'Venditore';
   const cfB = String((VPD.customer && VPD.customer.custom_fields && VPD.customer.custom_fields.boutique) || '').trim();
-  const fieldBoutique = (BOUTIQUES.find(b => b.name.toLowerCase() === cfB.toLowerCase()) || {}).name;
+  const normB = x => String(x).toLowerCase().replace(/[^a-z0-9]/g, '');
+  const fieldBoutique = (BOUTIQUES.find(b => normB(b.name) === normB(cfB)) || {}).name;
   try { S.boutique = sessionStorage.getItem('vp_boutique') || fieldBoutique || BOUTIQUES[0].name; S.betaHidden = localStorage.getItem('vp_beta_hidden') === '1'; } catch (_) { S.boutique = BOUTIQUES[0].name; }
   try { const ct = JSON.parse(sessionStorage.getItem('vp_cart') || 'null'); if (ct) S.cart = {pay:'Carta', inv:'persona', ...ct}; } catch (_) {}
   if (S.view === 'cassa' && !S.cart.clientId && SEL_ID) S.cart.clientId = SEL_ID;
