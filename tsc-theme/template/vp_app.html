@@ -156,7 +156,7 @@ const BRAND_NAMES = {}; asList(VPD.brands).forEach(b => { if (b) BRAND_NAMES[Str
 const products = asList(VPD.products).map(it => {
   const d = it.data || {}, bid = String(it.brand ?? it.brandUID ?? d.brand ?? '');
   const stock = +(it.stockCount ?? d.stockCount ?? 0), unl = +(d.unlimited || 0);
-  return {id:String(it.uid ?? it.id), tsc:true, tipo:/anell|collan|bracciale|orecchin|gioiell/i.test(it.title || '') ? 'gioiello' : 'orologio', brand:BRAND_NAMES[bid] || it.brand_name || '', modello:it.title || '', ref:it.sku || d.sku || it.code || '', det:'', seriale:'', price:+(it.final_price ?? it.price ?? 0) || 0, boutique:'', stato:stock > 0 || unl ? 'disponibile' : 'esaurito', link:`/product/${it.uid}/${it.slug || ''}`};
+  return {id:String(it.uid ?? it.id), tsc:true, tipo:/anell|collan|bracciale|orecchin|gioiell/i.test(it.title || '') ? 'gioiello' : 'orologio', brand:BRAND_NAMES[bid] || it.brand_name || '', modello:it.title || '', ref:d.mpn || it.sku || d.sku || it.code || '', code:it.code || '', ean:d.ean13 || '', img:it.image_id ? `https://cdn.storeden.net/secache/${it.image_id}` : '', det:'', seriale:'', price:+(it.final_price ?? it.price ?? 0) || 0, boutique:'', stato:stock > 0 || unl ? 'disponibile' : 'esaurito', link:`/product/${it.uid}/${it.slug || ''}`};
 });
 /* ordini del cliente selezionato (order_frontend.php del middleware) */
 const purchases = [];
@@ -214,7 +214,7 @@ const birthText = b => { if (!b || (!b.d && !b.y && !b.decade)) return null; con
 const sourceTag = c => c.source === 'Autoregistrazione' ? `<span class="tag blue">${ic('send')}Autoregistrato online</span>` : c.source === 'Legame' ? `<span class="tag">${ic('link')}Creato da legame</span>` : '';
 const PDA_ST = {aperta:['Manifestazione','amber'],preordine:['Preordine','blue'],assegnata:['Associata','ok'],venduta:['Ordine',''],annullata:['Annullata','red']};
 const stateTag = p => `<span class="tag ${PDA_ST[p.stato][1]}">${PDA_ST[p.stato][0]}</span>`;
-const prodState = p => p.stato === 'disponibile' ? '<span class="tag ok">Disponibile</span>' : p.stato === 'in_arrivo' ? `<span class="tag blue">In arrivo ${fmtD(p.arrivo).slice(0,5)}</span>` : p.stato === 'riservato' ? `<span class="tag amber">Riservato a ${esc(fullName(C(p.reservedFor)))}</span>` : '<span class="tag">Venduto</span>';
+const prodState = p => p.stato === 'disponibile' ? '<span class="tag ok">Disponibile</span>' : p.stato === 'in_arrivo' ? `<span class="tag blue">In arrivo ${fmtD(p.arrivo).slice(0,5)}</span>` : p.stato === 'riservato' ? `<span class="tag amber">Riservato a ${esc(fullName(C(p.reservedFor)))}</span>` : p.stato === 'esaurito' ? '<span class="tag red">Esaurito</span>' : '<span class="tag">Venduto</span>';
 const avatar = (c, cls='') => c.incomplete && !c.email ? `<span class="av ghost ${cls}">${initials(c)}</span>` : `<span class="av ${cls}">${initials(c)}</span>`;
 const opts = (arr, sel, empty) => (empty !== undefined ? `<option value="">${empty}</option>` : '') + arr.map(v => `<option ${v === sel ? 'selected' : ''}>${esc(v)}</option>`).join('');
 
@@ -809,22 +809,25 @@ function vNuovo(){
 }
 
 /* ---------------- CATALOGO ---------------- */
+const prodThumb = p => p.img ? `<span class="av" style="border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#fff"><img src="${p.img}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover"></span>` : `<span class="av" style="border-radius:10px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span>`;
 function vProdotti(){
   const f = S.pf, q = f.q.trim().toLowerCase();
-  const list = products.filter(p => (!q || `${p.ref} ${p.modello} ${p.seriale} ${p.brand}`.toLowerCase().includes(q)) && (!f.brand || p.brand === f.brand) && (!f.tipo || p.tipo === f.tipo) && (!f.stato || p.stato === f.stato));
+  const list = products.filter(p => (!q || `${p.ref} ${p.code} ${p.ean} ${p.modello} ${p.seriale} ${p.brand}`.toLowerCase().includes(q)) && (!f.brand || p.brand === f.brand) && (!f.tipo || p.tipo === f.tipo) && (!f.stato || p.stato === f.stato));
+  const realBrands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
+  const hasSer = products.some(p => p.seriale), hasBq = products.some(p => p.boutique);
   return `
-  <div class="page-h"><div><div class="label">Vendita</div><h1>Catalogo</h1></div><span class="sp"></span><span class="muted">Sincronizzato da TSC · ogni pezzo ha un seriale unico</span></div>
+  <div class="page-h"><div><div class="label">Vendita</div><h1>Catalogo</h1></div><span class="sp"></span><span class="muted num">${products.length} ${products.length === 1 ? 'prodotto' : 'prodotti'} da TSC</span></div>
   <div class="vcard card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-    <label class="field"><span>Referenza, modello o seriale</span><input class="in" id="pf-q" data-pf="q" value="${esc(f.q)}" placeholder="Es. 126610LN"></label>
-    <label class="field"><span>Brand</span><select class="sel" data-pf="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
+    <label class="field"><span>Referenza, codice o modello</span><input class="in" id="pf-q" data-pf="q" value="${esc(f.q)}" placeholder="Es. 126610LN"></label>
+    <label class="field"><span>Brand</span><select class="sel" data-pf="brand">${opts(realBrands.length ? realBrands : BRANDS, f.brand, 'Tutti')}</select></label>
     <label class="field"><span>Tipo</span><select class="sel" data-pf="tipo">${[['','Tutti'],['orologio','Orologi'],['gioiello','Gioielli']].map(([v,l]) => `<option value="${v}" ${f.tipo === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-    <label class="field"><span>Stato</span><select class="sel" data-pf="stato">${[['','Tutti'],['disponibile','Disponibile'],['in_arrivo','In arrivo'],['riservato','Riservato']].map(([v,l]) => `<option value="${v}" ${f.stato === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="field"><span>Stato</span><select class="sel" data-pf="stato">${[['','Tutti'],['disponibile','Disponibile'],['in_arrivo','In arrivo'],['riservato','Riservato'],['esaurito','Esaurito']].map(([v,l]) => `<option value="${v}" ${f.stato === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
   </div>
   <div class="vcard tbl-wrap"><table class="tbl">
-    <thead><tr><th>Prodotto</th><th>Referenza (MPN)</th><th>Seriale</th><th>Boutique</th><th>Stato</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
+    <thead><tr><th>Prodotto</th><th>Referenza</th>${hasSer ? '<th>Seriale</th>' : ''}${hasBq ? '<th>Boutique</th>' : ''}<th>Stato</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
     <tbody>${list.map(p => `<tr>
-      <td><div class="cell-person"><span class="av" style="border-radius:10px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div><b>${esc(p.brand)} ${esc(p.modello)}</b><small>${p.tipo === 'gioiello' ? 'Collezione ' + esc(p.modello) + ' · ' : ''}${esc(p.det)}</small></div></div></td>
-      <td class="mono">${esc(p.ref)}</td><td class="mono">${esc(p.seriale)}</td><td>${esc(p.boutique)}</td><td>${prodState(p)}</td>
+      <td><div class="cell-person">${prodThumb(p)}<div><b>${p.link ? `<a href="${p.link}" class="link">${esc([p.brand, p.modello].filter(Boolean).join(' '))}</a>` : esc([p.brand, p.modello].filter(Boolean).join(' '))}</b><small>${p.code && p.code !== p.ref ? 'Codice ' + esc(p.code) : esc(p.det)}${p.ean ? ' · EAN ' + esc(p.ean) : ''}</small></div></div></td>
+      <td class="mono">${esc(p.ref)}</td>${hasSer ? `<td class="mono">${esc(p.seriale)}</td>` : ''}${hasBq ? `<td>${esc(p.boutique)}</td>` : ''}<td>${prodState(p)}</td>
       <td class="num" style="text-align:right">${eur(p.price)}</td>
       <td style="text-align:right">${p.stato === 'disponibile' || p.stato === 'riservato' ? `<button class="vbtn vbtn-sm" data-act="add-cart" data-id="${p.id}">${ic('cart')}In cassa</button>` : ''}</td>
     </tr>`).join('') || '<tr><td colspan="7"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
@@ -856,7 +859,7 @@ function vCassa(){
     </div>
     <section class="vcard receipt">
       <div class="card-h">${ic('bag')}<h2>Ordine</h2><span class="sp"></span><span class="muted num">${cart.items.length} ${cart.items.length === 1 ? 'articolo' : 'articoli'}</span></div>
-      ${cart.items.length ? cart.items.map(id => { const p = P(id); return `<div class="ritem"><span class="wm" style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><b>${esc(p.brand)} ${esc(p.modello)}</b><div class="muted" style="font-size:12.5px"><span class="mono">${esc(p.ref)}</span> · seriale <span class="mono">${esc(p.seriale)}</span></div>${p.reservedFor && p.reservedFor !== cart.clientId ? `<div class="tag red" style="margin-top:6px">Riservato a ${esc(fullName(C(p.reservedFor)))}</div>` : ''}</div><span class="p num">${eur(p.price)}</span><button class="vbtn vbtn-ghost vbtn-sm" data-act="rm-cart" data-id="${id}" aria-label="Rimuovi">${ic('trash')}</button></div>`; }).join('') : '<div class="empty">Scansiona una referenza o aggiungi un pre-acquisto del cliente.</div>'}
+      ${cart.items.length ? cart.items.map(id => { const p = P(id); return `<div class="ritem">${prodThumb(p)}<div class="grow"><b>${esc([p.brand, p.modello].filter(Boolean).join(' '))}</b><div class="muted" style="font-size:12.5px">${[p.ref && `<span class="mono">${esc(p.ref)}</span>`, p.seriale && `seriale <span class="mono">${esc(p.seriale)}</span>`].filter(Boolean).join(' · ')}</div>${p.reservedFor && p.reservedFor !== cart.clientId ? `<div class="tag red" style="margin-top:6px">Riservato a ${esc(fullName(C(p.reservedFor)))}</div>` : ''}</div><span class="p num">${eur(p.price)}</span><button class="vbtn vbtn-ghost vbtn-sm" data-act="rm-cart" data-id="${id}" aria-label="Rimuovi">${ic('trash')}</button></div>`; }).join('') : '<div class="empty">Scansiona una referenza o aggiungi un pre-acquisto del cliente.</div>'}
       <div class="tot"><div class="muted"><span>Imponibile</span><span class="num">${eur(tot / 1.22)}</span></div><div class="muted"><span>IVA 22%</span><span class="num">${eur(tot - tot / 1.22)}</span></div><div><span class="label" style="align-self:center">Totale</span><span class="big num">${eur(tot)}</span></div></div>
       ${c ? `<div style="padding:0 20px 12px;display:flex;flex-direction:column;gap:8px"><span class="label">Intestazione</span><div class="pay" style="padding:0"><button class="${S.cart.inv !== 'societa' ? 'on' : ''}" data-act="inv" data-v="persona">${esc(fullName(c))}</button><button class="${S.cart.inv === 'societa' ? 'on' : ''}" data-act="inv" data-v="societa" ${c.billing?.rs ? '' : 'disabled title="Nessun dato di fatturazione in anagrafica"'}>${c.billing?.rs ? esc(c.billing.rs) : 'Società (non inserita)'}</button></div></div>` : ''}
       <div class="pay">${['Carta','Bonifico','Contanti','Finanziamento'].map(m => `<button class="${cart.pay === m ? 'on' : ''}" data-act="pay" data-v="${m}">${m}</button>`).join('')}</div>
@@ -867,8 +870,8 @@ function vCassa(){
 }
 function scanList(q){
   q = q.trim().toLowerCase();
-  const list = products.filter(p => ['disponibile','riservato'].includes(p.stato) && !S.cart.items.includes(p.id) && (!q || `${p.ref} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q))).slice(0,5);
-  return list.map(p => `<div class="vrow" data-act="add-cart" data-id="${p.id}"><span style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><div class="t">${esc(p.brand)} ${esc(p.modello)}</div><div class="s"><span class="mono">${esc(p.ref)}</span> · <span class="mono">${esc(p.seriale)}</span> · ${esc(p.boutique)}</div></div>${prodState(p)}<span class="num" style="font-weight:600">${eur(p.price)}</span></div>`).join('') || '<div class="empty">Nessun prodotto disponibile con questa referenza.</div>';
+  const list = products.filter(p => ['disponibile','riservato'].includes(p.stato) && !S.cart.items.includes(p.id) && (!q || `${p.ref} ${p.code} ${p.ean} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q))).slice(0,5);
+  return list.map(p => `<div class="vrow" data-act="add-cart" data-id="${p.id}">${prodThumb(p)}<div class="grow"><div class="t">${esc([p.brand, p.modello].filter(Boolean).join(' '))}</div><div class="s">${[p.ref && `<span class="mono">${esc(p.ref)}</span>`, p.seriale && `<span class="mono">${esc(p.seriale)}</span>`, esc(p.boutique)].filter(Boolean).join(' · ')}</div></div>${prodState(p)}<span class="num" style="font-weight:600">${eur(p.price)}</span></div>`).join('') || '<div class="empty">Nessun prodotto disponibile con questa referenza.</div>';
 }
 function clientPick(q, act, sel){
   q = q.trim().toLowerCase();
@@ -1537,7 +1540,7 @@ function actInner(el, ev){
     case 'cart-client-clear': S.cart.clientId = null; render(); break;
     case 'add-cart': { const p = P(id); if (!S.cart.items.includes(id)) S.cart.items.push(id); if (p.reservedFor && !S.cart.clientId) S.cart.clientId = p.reservedFor; if (S.view !== 'cassa') go('cassa'); else render(); toast(`${p.brand} ${p.modello} aggiunto`); break; }
     case 'rm-cart': S.cart.items = S.cart.items.filter(x => x !== id); render(); break;
-    case 'scan-add': { const q = document.getElementById('scan').value.trim().toLowerCase(); const p = products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && (x.ref.toLowerCase() === q || x.seriale.toLowerCase() === q)) || products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && q && `${x.ref} ${x.seriale}`.toLowerCase().includes(q)); if (p) { S.cart.items.push(p.id); render(); toast(`${p.brand} ${p.modello} aggiunto`); } else toast('Nessun prodotto disponibile con questa referenza'); break; }
+    case 'scan-add': { const q = document.getElementById('scan').value.trim().toLowerCase(); const p = products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && ([x.ref, x.code, x.ean, x.seriale].some(v => v && String(v).toLowerCase() === q))) || products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && q && `${x.ref} ${x.seriale}`.toLowerCase().includes(q)); if (p) { S.cart.items.push(p.id); render(); toast(`${p.brand} ${p.modello} aggiunto`); } else toast('Nessun prodotto disponibile con questa referenza'); break; }
     case 'pay': S.cart.pay = v; render(); break;
     case 'inv': S.cart.inv = v; render(); break;
     case 'checkout': tscCheckout(); break;
