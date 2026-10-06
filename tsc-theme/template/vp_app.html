@@ -132,6 +132,13 @@ function fromTsc(x){
 const asList = v => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v) : []);
 const clients = [];
 asList(VPD.customers).forEach(x => { const c = fromTsc(x); if (c.id) clients.push(c); });
+/* formato semplice per il campo associations scritto a mano dal backoffice (che taglia le virgolette doppie):
+   id|Nome Cognome|email|telefono, clienti separati da punto e virgola. Es: 27|Mario Rossi|mario@example.com|+39 333 1 */
+(() => {
+  const raw = VPD.customer && VPD.customer.custom_fields && VPD.customer.custom_fields.associations;
+  if (clients.length || typeof raw !== 'string' || raw.trim().startsWith('[')) return;
+  raw.split(/[;\n]+/).map(r => r.split('|').map(x => x.trim())).filter(f => f[0]).forEach(([id, fullname, email, phone]) => clients.push(fromTsc({customer_id:id, billing:{fullname:fullname || id, email:email || '', phone:phone || ''}})));
+})();
 if (VPD.customerData && VPD.customerData.billing) {
   const cd = fromTsc(VPD.customerData), ex = clients.find(c => c.id === cd.id);
   if (ex) Object.assign(ex, Object.fromEntries(Object.entries(cd).filter(([, v]) => v !== '' && !(Array.isArray(v) && !v.length)))); else if (cd.id) clients.push(cd);
