@@ -486,3 +486,58 @@ body.vp{padding:0!important;font-weight:400}
 .vp-public{max-width:640px;margin:0 auto;padding:40px 16px;font-family:var(--sans);color:var(--ink)}
 .vp-public-back{display:inline-block;margin-bottom:16px;color:var(--accent)}
 #cookie-warning{display:none!important}
+
+/* ---------- tablet (iPad) ---------- */
+.side{height:100dvh}
+.vmodal{max-height:calc(100dvh - 48px)}
+.fmore{display:none}
+/* iPad verticale e orizzontale: menu a icone, piu' spazio ai contenuti */
+@media (min-width:768px) and (max-width:1199px){
+  .shell{grid-template-columns:76px minmax(0,1fr)}
+  .side{position:sticky;transform:none;width:auto;padding:16px 10px;gap:16px;align-items:center;transition:none}
+  .side.open{box-shadow:none}
+  .side-brand{padding:0;justify-content:center}
+  .side-brand>div{display:none}
+  .side-brand .logo{height:40px}
+  .vnav{align-items:center;width:100%}
+  .vnav .grp{display:none}
+  .vnav button{justify-content:center;width:56px;height:52px;padding:0;font-size:0;gap:0;position:relative}
+  .vnav button svg.i{width:22px;height:22px}
+  .vnav button .vbadge{position:absolute;top:4px;right:0;font-size:10px;padding:0 5px;margin:0}
+  .top .menu-btn{display:none}
+  .top{padding:10px 20px;flex-wrap:nowrap}
+  .top .hide-s{display:flex}
+  .gsearch{flex:1 1 auto;max-width:none}
+  .top-sp,.op>span:last-child{display:none!important}
+  .content{padding:22px 20px}
+  /* filtri clienti: compatti, gli altri si aprono con "Altri filtri" */
+  .flt-panel .fsec{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 14px}
+  .flt-panel .fsec>h3,.flt-panel .fsec>.label{grid-column:1/-1}
+  .flt-panel:not(.more) .fsec:not(:first-child){display:none}
+  .fmore{display:inline-flex;align-self:end;justify-self:start}
+}
+/* iPad verticale: pulsanti in alto solo con icona */
+@media (min-width:768px) and (max-width:1023px){
+  .top .vbtn-primary .hide-s{display:none!important}
+}
+/* iPad orizzontale: due colonne in scheda cliente e cassa */
+@media (min-width:981px) and (max-width:1199px){
+  .grid2{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)}
+  .pos{grid-template-columns:minmax(0,1.2fr) minmax(300px,1fr)}
+  .receipt{position:sticky}
+  .qa,.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .kpi:nth-child(2){border-right:1px solid var(--line)}
+  .kpi:nth-child(-n+2){border-bottom:0}
+}
+/* schermi touch: niente zoom sui campi (iOS zooma sotto i 16px) e bersagli da almeno 44px */
+@media (pointer:coarse){
+  .vp *{-webkit-tap-highlight-color:transparent}
+  .in,.sel,.ta,.gsearch input,.pill-btn select{font-size:16px}
+  .vbtn{min-height:44px}
+  .vbtn-sm{height:40px;padding:0 14px;font-size:13.5px}
+  .chip{height:44px;padding:0 16px}
+  .tabs button{padding:14px 18px}
+  .stars button{font-size:32px;padding:0 4px}
+  .link{padding:6px 0}
+  .th button{width:32px;height:32px}
+}

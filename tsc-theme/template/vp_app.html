@@ -299,7 +299,7 @@ function render(){
   if (S.view === 'clienti') renderResults();
 }
 function shell(content){
-  const n = (v, icon, label, badge='') => `<button class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) || (S.view === 'tsc' && TSC_NAV() === v) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="vbadge num">${badge}</span>` : ''}</button>`;
+  const n = (v, icon, label, badge='') => `<button title="${label}" aria-label="${label}" class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) || (S.view === 'tsc' && TSC_NAV() === v) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="vbadge num">${badge}</span>` : ''}</button>`;
   const compat = openPdas().filter(p => compatible(p).length).length;
   return `<div class="shell">
   <aside class="side ${S.navOpen ? 'open' : ''}">
@@ -316,8 +316,8 @@ function shell(content){
       ${n('riparazioni','wrench','Riparazioni')}
     </nav>
     <div class="side-foot vnav">
-      <button data-go="auto">${ic('send')}Autoregistrazione cliente</button>
-      <button data-act="logout">${ic('logout')}Esci</button>
+      <button data-go="auto" title="Autoregistrazione cliente" aria-label="Autoregistrazione cliente">${ic('send')}Autoregistrazione cliente</button>
+      <button data-act="logout" title="Esci" aria-label="Esci">${ic('logout')}Esci</button>
     </div>
   </aside>
   <div class="main">
@@ -444,12 +444,13 @@ function vClienti(){
     <button class="vbtn" data-act="export">${ic('mail')}Esporta segmento su MailUp</button>
     <button class="vbtn vbtn-primary" data-go="nuovo">${ic('userPlus')}Nuovo cliente</button></div>
   <div class="flt">
-    <aside class="vcard flt-panel" aria-label="Filtri">
+    <aside class="vcard flt-panel ${S.fMore ? 'more' : ''}" aria-label="Filtri">
       <div class="fsec"><h3>${ic('filter')}Filtri</h3>
         <label class="field"><span>Cerca ovunque</span><input class="in" data-f="q" value="${esc(f.q)}" placeholder="Nome, email, cellulare, azienda, note…"></label>
         <label class="field"><span>Tipologia</span><select class="sel" data-f="tipo">${opts(TIPI, f.tipo, 'Tutte')}</select></label>
         <label class="field"><span>Fascia acquisti</span><select class="sel" data-f="tier">${opts(TIERS.map(t => t.n), f.tier, 'Tutte')}</select></label>
         <label class="field"><span>Valutazione venditore</span><select class="sel" data-f="rating">${[['','Qualsiasi'],['5','★★★★★'],['4','★★★★ o più'],['3','★★★ o più']].map(([v,l]) => `<option value="${v}" ${f.rating === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <button type="button" class="vbtn vbtn-sm fmore" data-act="f-more">${ic('filter')}${S.fMore ? 'Meno filtri' : 'Altri filtri'}</button>
       </div>
       <div class="fsec"><div class="label">Acquisti</div>
         <label class="field"><span>Brand acquistato</span><select class="sel" data-f="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
@@ -1430,6 +1431,7 @@ function actInner(el, ev){
       Storeden.login(em, pw, res => { if (!res || res.status == false) { el.disabled = false; el.textContent = 'Accedi'; err.hidden = false; err.textContent = 'Email o password non corrette.'; } else window.location.href = '/'; });
       break; }
     case 'pw-toggle': { const em = document.getElementById('l-email').value, pw = document.getElementById('l-pw').value; S.loginEmail = em; S.showPw = !S.showPw; render(); document.getElementById('l-pw').value = pw; break; }
+    case 'f-more': S.fMore = !S.fMore; render(); break;
     case 'beta-hide': S.betaHidden = true; try { localStorage.setItem('vp_beta_hidden', '1'); } catch (_) {} render(); break;
     /* riparazioni */
     case 'rf-chip': S.rf.chip = v; render(); break;
