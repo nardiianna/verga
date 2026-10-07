@@ -115,9 +115,11 @@ function saveStore(){
   store.seq = {ev:evSeq, pda:pdaSeq, rip:ripSeq};
   store.events = events; store.pdas = pdas; store.links = links; store.repairs = repairs; store.notifs = NOTIFS;
   store.localClients = clients.filter(c => c.local).map(c => ({...c}));
-  clients.filter(c => !c.local).forEach(c => { const x = {}; CRM_KEYS.forEach(k => x[k] = c[k]); store.extra[c.id] = x; });
+  clients.filter(c => !c.local).forEach(c => { const x = {}; CRM_KEYS.filter(k => !(c.tsc && TSC_KEYS.includes(k))).forEach(k => x[k] = c[k]); store.extra[c.id] = x; });
   try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (_) {}
 }
+/* per i clienti TSC questi dati arrivano sempre da TSC: nel browser non li salviamo */
+const TSC_KEYS = ['nome','cognome','email','tel','cf','pec','addresses','billing'];
 const CRM_KEYS = ['nome','cognome','sesso','lingua','tipo','rating','email','email2','tel','cf','pec','addresses','billing','misure','notes','tasks','privacy','prof','azienda','celeb','birth','brands','modelli','interests','boutique','newsletter','incomplete'];
 const blankExtra = () => ({cf:'',pec:'',sesso:'',lingua:'',tipo:'Prospect',rating:0,email2:'',addresses:[],billing:{},misure:{},notes:[],tasks:[],privacy:null});
 const splitName = full => { const p = String(full || '').trim().split(/\s+/); return p.length > 1 ? [p[0], p.slice(1).join(' ')] : [p[0] || '', '']; };
@@ -144,7 +146,7 @@ if (VPD.customerData && VPD.customerData.billing) {
   if (ex) Object.assign(ex, Object.fromEntries(Object.entries(cd).filter(([, v]) => v !== '' && !(Array.isArray(v) && !v.length)))); else if (cd.id) clients.push(cd);
 }
 store.localClients.forEach(c => clients.push({...c, local:true}));
-clients.forEach(c => { const base = blankExtra(); Object.keys(base).forEach(k => { if (c[k] === undefined || c[k] === '' && base[k] !== '') c[k] = base[k]; }); Object.assign(c, store.extra[c.id] || {}); c.notes = c.notes || []; c.tasks = c.tasks || []; });
+clients.forEach(c => { const base = blankExtra(); Object.keys(base).forEach(k => { if (c[k] === undefined || c[k] === '' && base[k] !== '') c[k] = base[k]; }); Object.assign(c, Object.fromEntries(Object.entries(store.extra[c.id] || {}).filter(([k]) => !(c.tsc && TSC_KEYS.includes(k))))); c.notes = c.notes || []; c.tasks = c.tasks || []; });
 const links = store.links;
 const NOTIFS = store.notifs;
 let evSeq = store.seq.ev;
