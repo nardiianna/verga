@@ -680,6 +680,9 @@ const products = [
   {id:'pr17',tipo:'orologio',brand:'Tudor',modello:'Black Bay 58',ref:'M79030N-0001',det:'Quadrante nero · acciaio · 39 mm',seriale:'T-552310',price:4000,boutique:'Boutique Multibrand',stato:'in_arrivo',arrivo:'2026-10-03'},
 ];
 const LOCS = [...BOUTIQUES.map(b => b.name), 'Magazzino'];
+/* nome completo del modello come arriva dal gestionale: si ricava dalla referenza */
+const NOMI = {'126500LN':'COSMOGRAPH DAYTONA 40MM ACCIAIO OYSTERSTEEL','126610LN':'SUBMARINER DATE 41MM ACCIAIO OYSTERSTEEL','126234':'DATEJUST 36MM ACCIAIO E ORO BIANCO','126710BLRO':'GMT-MASTER II 40MM ACCIAIO OYSTERSTEEL','126710BLNR':'GMT-MASTER II 40MM ACCIAIO OYSTERSTEEL','124270':'EXPLORER 36MM ACCIAIO OYSTERSTEEL','5811/1G':'NAUTILUS 41MM ORO BIANCO','6119G':'CALATRAVA 39MM ORO BIANCO','WSSA0018':'SANTOS DE CARTIER MEDIUM ACCIAIO','M79030N-0001':'BLACK BAY 58 39MM ACCIAIO','M25407N-0001':'PELAGOS 39 TITANIO'};
+const pdaNome = p => p.nome || NOMI[(p.ref || '').toUpperCase()] || '';
 const purchases = [
   {clientId:'c1',date:'2025-06-03',brand:'Rolex',modello:'Oyster Perpetual 41',ref:'124300',price:6600,boutique:'Bottega Storica',seller:'Marco Verdi'},
   {clientId:'c1',date:'2023-04-12',brand:'Rolex',modello:'Submariner',ref:'124060',price:9100,boutique:'Bottega Storica',seller:'Marco Verdi'},
@@ -1131,6 +1134,7 @@ function pdaCard(p){
     <span class="wm">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}</span>
     <div class="grow">
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ttl">${esc(p.brand)} ${esc(p.modello)}</span>${p.stato !== 'aperta' ? stateTag(p) : ''}</div>
+      ${pdaNome(p) ? `<div class="faint" style="font-size:12px;letter-spacing:.02em;margin-top:-4px">${esc(pdaNome(p))}</div>` : ''}
       <div class="spec">${p.ref ? `<span>Referenza <b class="mono">${esc(p.ref)}</b></span>` : '<span>Referenza <b>qualsiasi</b></span>'}<span>Quadrante <b>${esc(p.quadrante || '—')}</b></span><span>Bracciale <b>${esc(p.bracciale || '—')}</b></span></div>
       ${pr ? `<div class="match">${ic('check')}Prodotto associato: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span></div>` : ''}
       ${m.length ? `<div class="match">${ic('sparkle')}${m.length === 1 ? '1 pezzo compatibile' : m.length + ' pezzi compatibili'}</div>` : ''}
@@ -1438,7 +1442,7 @@ function vManif(){
       <section class="card">
         <div class="card-h">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}<h2>Cosa desidera il cliente</h2></div>
         <div class="card-b"><dl class="kv">
-          <dt>Brand</dt><dd>${esc(p.brand)}</dd><dt>Modello</dt><dd>${esc(p.modello)}</dd>
+          <dt>Brand</dt><dd>${esc(p.brand)}</dd><dt>Modello</dt><dd>${esc(p.modello)}</dd><dt>Nome modello</dt><dd>${esc(pdaNome(p) || '—')}</dd>
           <dt>Referenza</dt><dd>${p.ref ? `<span class="mono">${esc(p.ref)}</span>` : 'Qualsiasi'}</dd>
           <dt>Quadrante</dt><dd>${esc(p.quadrante || '—')}</dd><dt>Bracciale</dt><dd>${esc(p.bracciale || '—')}</dd>
           <dt>Note</dt><dd>${esc(p.note || '—')}</dd>
@@ -1908,6 +1912,7 @@ function renderModal(){
       ${M.brand ? `<div class="field"><span>Modello</span><div class="chips">${(MODELS[M.brand] || []).map(v => `<button class="chip ${M.modello === v ? 'on' : ''}" data-act="m-model" data-v="${v}">${v}</button>`).join('')}</div></div>` : ''}
       <div class="fgrid">
         <label class="field"><span>Referenza (se il cliente la sa)</span><input class="in mono" id="m-ref" placeholder="Es. 126500LN"></label>
+        <label class="field" style="grid-column:1/-1"><span>Nome modello</span><input class="in" id="m-nome" placeholder="Si compila dalla referenza, es. EXPLORER 36MM ACCIAIO OYSTERSTEEL"></label>
         <label class="field"><span>Quadrante</span><input class="in" id="m-quad" placeholder="Es. bianco"></label>
         <label class="field"><span>Bracciale</span><input class="in" id="m-brac" placeholder="Es. Oyster, Jubilee"></label>
       </div>
@@ -2203,7 +2208,7 @@ function act(el, ev){
     case 'm-pstato': M.stato = v; renderModal(); break;
     case 'm-save-pda': {
       const val = x => document.getElementById(x).value.trim();
-      pdas.push({id:'p' + (++pdaSeq), clientId:M.clientId, brand:M.brand, modello:M.modello, ref:val('m-ref'), quadrante:val('m-quad'), bracciale:val('m-brac'), note:val('m-pnote'), date:'2026-09-24', operator:S.operator, stato:M.stato || 'aperta'});
+      pdas.push({id:'p' + (++pdaSeq), clientId:M.clientId, brand:M.brand, modello:M.modello, ref:val('m-ref'), nome:val('m-nome'), quadrante:val('m-quad'), bracciale:val('m-brac'), note:val('m-pnote'), date:'2026-09-24', operator:S.operator, stato:M.stato || 'aperta'});
       const cid = M.clientId; closeModal();
       if (S.view === 'cliente' && S.id === cid) render(); else go('cliente', cid);
       toast('Manifestazione registrata · mail di presa in carico inviata al cliente'); break; }
@@ -2280,6 +2285,7 @@ document.addEventListener('input', e => {
   if (t.id === 'gs') return gsearch(t.value);
   if (t.id === 'm-cs') { document.getElementById('m-cs-list').innerHTML = clientPick(t.value, 'm-pick'); return; }
   if (t.id === 'cart-cs') { document.getElementById('cart-cs-list').innerHTML = clientPick(t.value, 'cart-client'); return; }
+  if (t.id === 'm-ref') { const n = NOMI[t.value.trim().toUpperCase()]; if (n) document.getElementById('m-nome').value = n; return; }
   if (t.id === 'scan') { document.getElementById('scan-list').innerHTML = scanList(t.value); return; }
   if (t.dataset.pdf !== undefined && t.tagName === 'INPUT') { S.pdf[t.dataset.pdf] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('pdf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'INPUT') { S.pf[t.dataset.pf] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('pf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
