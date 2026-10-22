@@ -139,6 +139,7 @@ svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .av.ghost{background:transparent;border:1.5px dashed var(--line-strong);color:var(--faint)}
 .tag{display:inline-flex;align-items:center;gap:5px;height:24px;padding:0 9px;border-radius:99px;font-size:11.5px;font-weight:600;background:var(--surface-2);border:1px solid var(--line);color:var(--muted);white-space:nowrap}
 .tag svg.i{width:13px;height:13px}
+.btn.btn-done{background:var(--ok-bg);border-color:transparent;color:var(--ok);cursor:default;pointer-events:none}
 .tag.brand{background:var(--brand-soft);border-color:transparent;color:var(--brand)}
 .tag.amber{background:var(--amber-bg);border-color:transparent;color:var(--amber)}
 .tag.ok{background:var(--ok-bg);border-color:transparent;color:var(--ok)}
@@ -1138,6 +1139,7 @@ function pdaCard(p){
     </div>
     <div class="act">
       ${p.stato === 'assegnata' ? `<button class="btn btn-sm btn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>` : ''}
+      ${pr ? `<span class="tag ok">${ic('check')}Prodotto associato</span>` : ''}
       <button class="btn btn-sm" data-go="manifestazione" data-id="${p.id}">Dettaglio</button>
     </div>
   </div>`;
@@ -1432,7 +1434,7 @@ function vManif(){
   if (!p) return back + '<section class="card"><div class="empty">Manifestazione non trovata.</div></section>';
   const c = C(p.clientId), m = compatible(p), pr = p.productId ? P(p.productId) : null, lock = !canAssign(), open = ['aperta','preordine'].includes(p.stato);
   return `${back}
-  <div class="page-h"><div><div class="label">Manifestazione di interesse</div><h1>${esc(p.brand)} ${esc(p.modello)}</h1></div><span class="sp"></span>${stateTag(p)}</div>
+  <div class="page-h"><div><div class="label">Manifestazione di interesse · inserita il ${fmtD(p.date)}</div><h1>${esc(p.brand)} ${esc(p.modello)}</h1></div><span class="sp"></span>${stateTag(p)}</div>
   <div class="grid2">
     <div class="stack">
       <section class="card">
@@ -1442,7 +1444,7 @@ function vManif(){
           <dt>Referenza</dt><dd>${p.ref ? `<span class="mono">${esc(p.ref)}</span>` : 'Qualsiasi'}</dd>
           <dt>Quadrante</dt><dd>${esc(p.quadrante || '—')}</dd><dt>Bracciale</dt><dd>${esc(p.bracciale || '—')}</dd>
           <dt>Note</dt><dd>${esc(p.note || '—')}</dd>
-          <dt>Registrata</dt><dd>il ${fmtD(p.date)} da ${esc(p.operator)}</dd>
+          <dt>Inserita</dt><dd>il ${fmtD(p.date)} da ${esc(p.operator)}</dd>
           ${open ? `<dt>In attesa da</dt><dd>${rel(p.date).replace(' fa','')}</dd>` : ''}
         </dl></div>
       </section>
@@ -1458,7 +1460,7 @@ function vManif(){
         <div class="list"><div class="row click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.email || c.tel || 'Scheda da completare')} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div></div>
       </section>
       <section class="card card-b" style="display:flex;flex-direction:column;gap:10px">
-        ${open ? `<button class="btn ${m.length && !lock ? 'btn-primary' : ''}" data-act="assegna" data-id="${p.id}" ${m.length && !lock ? '' : 'disabled'}>${lock ? '🔒 ' : ''}Associa prodotto</button>` : ''}
+        ${pr ? `<span class="btn btn-done" role="status">${ic('check')}Prodotto associato</span>` : ''}
         ${p.stato === 'assegnata' ? `<button class="btn btn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>${lock ? '' : `<button class="btn" data-act="dissocia" data-id="${p.id}">Dissocia prodotto</button>`}` : ''}
         <button class="btn btn-danger" data-act="pda-del" data-id="${p.id}">${ic('trash')}Elimina manifestazione</button>
         ${lock ? '<span class="faint" style="font-size:12px">Associare e dissociare: solo direttore vendite o titolare.</span>' : ''}
