@@ -820,7 +820,7 @@ function shell(content){
       ${n('pda','heart','Manifestazioni', compat || '')}
       <div class="grp">Vendita</div>
       ${n('cassa','cart','Cassa', S.cart.items.length || '')}
-      ${n('prodotti','box','Catalogo')}
+      ${n('prodotti','box','Magazzino')}
       ${n('riparazioni','wrench','Riparazioni')}
     </nav>
     <div class="side-foot nav">
@@ -1288,12 +1288,12 @@ function vNuovo(){
 function vProdotti(){
   const f = S.pf, q = f.q.trim().toLowerCase();
   const hit = p => (!q || `${p.ref} ${p.modello} ${p.seriale} ${p.brand}`.toLowerCase().includes(q)) && (!f.brand || p.brand === f.brand) && (!f.tipo || p.tipo === f.tipo) && (!f.stato || p.stato === f.stato) && (!f.loc || p.boutique === f.loc);
-  const groups = refGroups(products.filter(p => p.stato !== 'venduto')).filter(g => g.some(hit));
+  const list = products.filter(p => p.stato !== 'venduto' && hit(p)).sort((a, b) => `${a.brand} ${a.modello} ${a.ref} ${a.seriale}`.localeCompare(`${b.brand} ${b.modello} ${b.ref} ${b.seriale}`));
   const w = watchesInStock(), wMag = w.filter(p => p.boutique === 'Magazzino').length;
   return `
-  <div class="page-h"><div><div class="label">Vendita</div><h1>Catalogo</h1></div><span class="sp"></span><span class="muted">Sincronizzato da TSC · una riga per referenza, ogni pezzo ha la sua matricola</span></div>
+  <div class="page-h"><div><div class="label">Vendita</div><h1>Magazzino</h1></div><span class="sp"></span><span class="muted">Sincronizzato da TSC · una riga per pezzo, la stessa referenza può avere più matricole</span></div>
   <div class="kpis">
-    <div class="kpi"><span class="label">Orologi in magazzino</span><b class="num">${w.length}</b><span class="muted">totale pezzi disponibili</span></div>
+    <div class="kpi"><span class="label">Orologi disponibili</span><b class="num">${w.length}</b><span class="muted">totale pezzi disponibili</span></div>
     <div class="kpi"><span class="label">Magazzino centrale</span><b class="num">${wMag}</b><span class="muted">orologi</span></div>
     <div class="kpi"><span class="label">Nelle boutique</span><b class="num">${w.length - wMag}</b><span class="muted">orologi</span></div>
     <div class="kpi"><span class="label">In arrivo</span><b class="num">${products.filter(p => p.tipo === 'orologio' && p.stato === 'in_arrivo').length}</b><span class="muted">orologi</span></div>
@@ -1302,22 +1302,23 @@ function vProdotti(){
     <label class="field"><span>Referenza, modello o seriale</span><input class="in" id="pf-q" data-pf="q" value="${esc(f.q)}" placeholder="Es. 126610LN"></label>
     <label class="field"><span>Brand</span><select class="sel" data-pf="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
     <label class="field"><span>Tipo</span><select class="sel" data-pf="tipo">${[['','Tutti'],['orologio','Orologi'],['gioiello','Gioielli']].map(([v,l]) => `<option value="${v}" ${f.tipo === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-    <label class="field"><span>Dove</span><select class="sel" data-pf="loc">${opts(LOCS, f.loc, 'Ovunque')}</select></label>
+    <label class="field"><span>Locazione</span><select class="sel" data-pf="loc">${opts(LOCS, f.loc, 'Ovunque')}</select></label>
     <label class="field"><span>Stato</span><select class="sel" data-pf="stato">${[['','Tutti'],['disponibile','Disponibile'],['in_arrivo','In arrivo'],['riservato','Riservato']].map(([v,l]) => `<option value="${v}" ${f.stato === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
   </div>
   <div class="card tbl-wrap"><table class="tbl">
-    <thead><tr><th>Prodotto</th><th>Referenza (MPN)</th><th>Disponibilità</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
-    <tbody>${groups.map(g => { const p = g[0], n = g.filter(x => x.stato === 'disponibile').length, arr = g.filter(x => x.stato === 'in_arrivo').length, ris = g.filter(x => x.stato === 'riservato').length; return `<tr class="click" data-go="prodotto" data-id="${esc(p.ref)}">
+    <thead><tr><th>Prodotto</th><th>Referenza (MPN)</th><th>Matricola</th><th>Locazione</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
+    <tbody>${list.map(p => `<tr class="click" data-go="prodotto" data-id="${esc(p.ref)}">
       <td><div class="cell-person"><span class="av" style="border-radius:12px;background:var(--bg);color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div><b>${esc(p.brand)} ${esc(p.modello)}</b><small>${p.tipo === 'gioiello' ? 'Collezione ' + esc(p.modello) + ' · ' : ''}${esc(p.det)}</small></div></div></td>
       <td class="mono">${esc(p.ref)}</td>
-      <td><b class="num" style="font-size:16px">${n}</b> <span class="muted">${n === 1 ? 'disponibile' : 'disponibili'}</span>${arr || ris ? `<div class="faint" style="font-size:12px">${[arr ? `+${arr} in arrivo` : '', ris ? `${ris} riservat${ris === 1 ? 'o' : 'i'}` : ''].filter(Boolean).join(' · ')}</div>` : ''}</td>
+      <td class="mono">${esc(p.seriale)}</td>
+      <td><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(p.boutique === 'Magazzino' ? 'Magazzino centrale' : p.boutique)}</b>${prodState(p)}</div></td>
       <td class="num" style="text-align:right">${eur(p.price)}</td>
       <td style="text-align:right"><button class="btn btn-sm" data-go="prodotto" data-id="${esc(p.ref)}">Dettaglio</button></td>
-    </tr>`; }).join('') || '<tr><td colspan="5"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
+    </tr>`).join('') || '<tr><td colspan="6"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
   </table></div>`;
 }
 function vProdotto(){
-  const back = `<div><button class="link" data-go="prodotti" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Catalogo</button></div>`;
+  const back = `<div><button class="link" data-go="prodotti" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Magazzino</button></div>`;
   const ps = pieces(S.id);
   if (!ps.length) return back + '<section class="card"><div class="empty">Nessun pezzo in catalogo per questa referenza.</div></section>';
   const p = ps[0], n = ps.filter(x => x.stato === 'disponibile').length, pd = pdasFor(p.ref);
@@ -2029,7 +2030,7 @@ function renderDrawer(){
   const r = document.getElementById('drawer-root');
   if (!S.notes) { r.innerHTML = ''; return; }
   const n = NOTES[S.view] || NOTES.dashboard;
-  const titles = {login:'Login',dashboard:'Home',clienti:'Clienti e filtri',cliente:'Scheda cliente',nuovo:'Nuovo cliente',prodotti:'Catalogo',prodotto:'Scheda prodotto',cassa:'Cassa',passaggi:'Passaggi',pda:'Manifestazioni di interesse',manifestazione:'Dettaglio manifestazione',riparazioni:'Riparazioni','rip-new':'Nuova accettazione',busta:'Scheda busta',prev:'Preventivo online',auto:'Autoregistrazione'};
+  const titles = {login:'Login',dashboard:'Home',clienti:'Clienti e filtri',cliente:'Scheda cliente',nuovo:'Nuovo cliente',prodotti:'Magazzino',prodotto:'Scheda prodotto',cassa:'Cassa',passaggi:'Passaggi',pda:'Manifestazioni di interesse',manifestazione:'Dettaglio manifestazione',riparazioni:'Riparazioni','rip-new':'Nuova accettazione',busta:'Scheda busta',prev:'Preventivo online',auto:'Autoregistrazione'};
   r.innerHTML = `<aside class="drawer" aria-label="Note di progetto"><div class="modal-h"><h2 style="font-size:20px">${titles[S.view] || ''}</h2><button class="btn btn-ghost btn-sm" data-act="notes" aria-label="Chiudi">${ic('x')}</button></div>
     <div class="drawer-b"><p class="muted" style="margin:8px 0 0;font-size:13px">Da dove arriva questa schermata: appunti della call del 24/09/2026 con Dario e Vanessa.</p>
     <h4>Cosa abbiamo raccolto</h4><ul>${n.from.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
