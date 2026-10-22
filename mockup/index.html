@@ -1434,7 +1434,7 @@ function vManif(){
   const back = `<div><button class="link" data-go="pda" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Manifestazioni</button></div>`;
   const p = pdas.find(x => x.id === S.id);
   if (!p) return back + '<section class="card"><div class="empty">Manifestazione non trovata.</div></section>';
-  const c = C(p.clientId), m = compatible(p), pr = p.productId ? P(p.productId) : null, lock = !canAssign(), open = ['aperta','preordine'].includes(p.stato);
+  const c = C(p.clientId), pr = p.productId ? P(p.productId) : null, lock = !canAssign(), open = ['aperta','preordine'].includes(p.stato);
   return `${back}
   <div class="page-h"><div><div class="label">Manifestazione di interesse · inserita il ${fmtD(p.date)}</div><h1>${esc(p.brand)} ${esc(p.modello)}</h1></div><span class="sp"></span>${stateTag(p)}</div>
   <div class="grid2">
@@ -1450,11 +1450,10 @@ function vManif(){
           ${open ? `<dt>In attesa da</dt><dd>${rel(p.date).replace(' fa','')}</dd>` : ''}
         </dl></div>
       </section>
-      <section class="card">
-        <div class="card-h">${ic(pr ? 'check' : 'sparkle')}<h2>${pr ? 'Prodotto associato' : 'Pezzi compatibili'}</h2></div>
-        <div class="list">${pr ? `<div class="row click" data-go="prodotto" data-id="${esc(pr.ref)}">${ic('watch')}<div class="grow"><div class="t">${esc(pr.brand)} ${esc(pr.modello)} · <span class="mono">${esc(pr.ref)}</span></div><div class="s">Matricola <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)} · ${eur(pr.price)}</div></div>${ic('arrow')}</div>` :
-          m.map(x => `<div class="row">${ic('watch')}<div class="grow"><div class="t">${esc(x.brand)} ${esc(x.modello)} · <span class="mono">${esc(x.ref)}</span></div><div class="s">Matricola <span class="mono">${esc(x.seriale)}</span> · ${esc(x.boutique)} · ${prodState(x)}</div></div><button class="btn btn-sm ${lock ? '' : 'btn-primary'}" data-act="assegna-pr" data-id="${p.id}" data-v="${x.id}" ${lock ? 'disabled title="Solo direttore vendite o titolare"' : ''}>${lock ? '🔒 ' : ''}Associa</button></div>`).join('') || '<div class="empty">Nessun pezzo compatibile al momento.</div>'}</div>
-      </section>
+      ${pr ? `<section class="card">
+        <div class="card-h">${ic('check')}<h2>Prodotto associato</h2></div>
+        <div class="list"><div class="row click" data-go="prodotto" data-id="${esc(pr.ref)}">${ic('watch')}<div class="grow"><div class="t">${esc(pr.brand)} ${esc(pr.modello)} · <span class="mono">${esc(pr.ref)}</span></div><div class="s">Matricola <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)} · ${eur(pr.price)}</div></div>${ic('arrow')}</div></div>
+      </section>` : ''}
     </div>
     <div class="stack">
       <section class="card">
