@@ -1307,22 +1307,20 @@ function vProdotti(){
   </div>
   <div class="card tbl-wrap"><table class="tbl">
     <thead><tr><th>Prodotto</th><th>Referenza (MPN)</th><th>Matricola</th><th>Locazione</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
-    <tbody>${list.map(p => `<tr class="click" data-go="prodotto" data-id="${esc(p.ref)}">
+    <tbody>${list.map(p => `<tr class="click" data-go="prodotto" data-id="${p.id}">
       <td><div class="cell-person"><span class="av" style="border-radius:12px;background:var(--bg);color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div><b>${esc(p.brand)} ${esc(p.modello)}</b><small>${p.tipo === 'gioiello' ? 'Collezione ' + esc(p.modello) + ' · ' : ''}${esc(p.det)}</small></div></div></td>
       <td class="mono">${esc(p.ref)}</td>
       <td class="mono">${esc(p.seriale)}</td>
       <td><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(p.boutique === 'Magazzino' ? 'Magazzino centrale' : p.boutique)}</b>${prodState(p)}</div></td>
       <td class="num" style="text-align:right">${eur(p.price)}</td>
-      <td style="text-align:right"><button class="btn btn-sm" data-go="prodotto" data-id="${esc(p.ref)}">Dettaglio</button></td>
+      <td style="text-align:right"><button class="btn btn-sm" data-go="prodotto" data-id="${p.id}">Dettaglio</button></td>
     </tr>`).join('') || '<tr><td colspan="6"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
   </table></div>`;
 }
 function vProdotto(){
   const back = `<div><button class="link" data-go="prodotti" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Magazzino</button></div>`;
-  const ps = pieces(S.id);
-  if (!ps.length) return back + '<section class="card"><div class="empty">Nessun pezzo in catalogo per questa referenza.</div></section>';
-  const p = ps[0], n = ps.filter(x => x.stato === 'disponibile').length, pd = pdasFor(p.ref);
-  const locs = LOCS.map(l => ({l, ps:ps.filter(x => x.boutique === l)})).filter(x => x.ps.length);
+  const p = products.find(x => x.id === S.id) || pieces(S.id)[0];
+  if (!p) return back + '<section class="card"><div class="empty">Prodotto non trovato.</div></section>';
   return `${back}
   <section class="card pdp">
     <div class="pdp-img">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</div>
@@ -1330,22 +1328,10 @@ function vProdotto(){
       <div class="label">${esc(p.brand)} · ${p.tipo === 'gioiello' ? 'Gioiello' : 'Orologio'}</div>
       <h1>${esc(p.modello)}</h1>
       <div class="muted">${esc(p.det)}</div>
-      <dl class="kv"><dt>Referenza (MPN)</dt><dd class="mono">${esc(p.ref)}</dd><dt>Prezzo</dt><dd class="num">${eur(p.price)}</dd><dt>Disponibilità</dt><dd>${n} ${n === 1 ? 'pezzo disponibile' : 'pezzi disponibili'} su ${ps.length}</dd></dl>
+      <dl class="kv"><dt>Referenza (MPN)</dt><dd class="mono">${esc(p.ref)}</dd><dt>Matricola</dt><dd class="mono">${esc(p.seriale)}</dd><dt>Locazione</dt><dd>${esc(p.boutique === 'Magazzino' ? 'Magazzino centrale' : p.boutique)}</dd><dt>Stato</dt><dd>${prodState(p)}</dd><dt>Prezzo</dt><dd class="num">${eur(p.price)}</dd></dl>
+      ${inStock(p) ? `<div><button class="btn btn-primary" data-act="add-cart" data-id="${p.id}">${ic('cart')}In cassa</button></div>` : ''}
     </div>
-  </section>
-  <div class="grid2">
-    <section class="card tbl-wrap">
-      <div class="card-h">${ic('store')}<h2>Disponibilità per sede</h2><span class="sp"></span><span class="faint" style="font-size:12px">Stessa referenza, matricole diverse</span></div>
-      <div class="locs">${locs.map(x => { const k = x.ps.filter(inStock).length, a = x.ps.length - k; return `<div class="${x.l === S.boutique ? 'here' : ''}"><span class="label">${esc(x.l)}</span><b class="num">${k}</b><small class="muted">${a ? `+${a} in arrivo` : x.l === S.boutique ? 'la tua boutique' : x.l === 'Magazzino' ? 'magazzino centrale' : 'spedibile in boutique'}</small></div>`; }).join('')}</div>
-      <table class="tbl"><thead><tr><th>Sede</th><th>Matricola</th><th>Stato</th><th></th></tr></thead><tbody>
-        ${ps.map(x => `<tr><td>${esc(x.boutique)}</td><td class="mono">${esc(x.seriale)}</td><td>${prodState(x)}</td><td style="text-align:right">${inStock(x) ? `<button class="btn btn-sm" data-act="add-cart" data-id="${x.id}">${ic('cart')}In cassa</button>` : ''}</td></tr>`).join('')}
-      </tbody></table>
-    </section>
-    <section class="card">
-      <div class="card-h">${ic('heart')}<h2>Manifestazioni associate</h2></div>
-      <div class="list">${pd.map(x => { const c = C(x.clientId); return `<div class="row click" data-go="manifestazione" data-id="${x.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.boutique)} · in attesa da ${rel(x.date).replace(' fa','')}</div></div>${ic('arrow')}</div>`; }).join('') || '<div class="empty">Nessun cliente aspetta questa referenza.</div>'}</div>
-    </section>
-  </div>`;
+  </section>`;
 }
 
 /* ---------------- CASSA ---------------- */
@@ -1453,7 +1439,7 @@ function vManif(){
       </section>
       ${pr ? `<section class="card">
         <div class="card-h">${ic('check')}<h2>Prodotto associato</h2></div>
-        <div class="list"><div class="row click" data-go="prodotto" data-id="${esc(pr.ref)}">${ic('watch')}<div class="grow"><div class="t">${esc(pr.brand)} ${esc(pr.modello)} · <span class="mono">${esc(pr.ref)}</span></div><div class="s">Matricola <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)} · ${eur(pr.price)}</div></div>${ic('arrow')}</div></div>
+        <div class="list"><div class="row click" data-go="prodotto" data-id="${pr.id}">${ic('watch')}<div class="grow"><div class="t">${esc(pr.brand)} ${esc(pr.modello)} · <span class="mono">${esc(pr.ref)}</span></div><div class="s">Matricola <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)} · ${eur(pr.price)}</div></div>${ic('arrow')}</div></div>
       </section>` : ''}
     </div>
     <div class="stack">
