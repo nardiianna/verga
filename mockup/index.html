@@ -925,7 +925,6 @@ function vClienti(){
   const f = S.f;
   return `
   <div class="page-h"><div><div class="label">Anagrafiche</div><h1>Clienti</h1></div><span class="sp"></span>
-    <button class="btn" data-act="export">${ic('mail')}Esporta segmento su MailUp</button>
     <button class="btn btn-primary" data-go="nuovo">${ic('userPlus')}Nuovo cliente</button></div>
   <div class="flt">
     <aside class="card flt-panel" aria-label="Filtri">
@@ -1127,9 +1126,7 @@ function tasksCard(c){
   </section>`;
 }
 function pdaCard(p){
-  const m = compatible(p);
   const pr = p.productId ? P(p.productId) : null;
-  const lock = !canAssign();
   return `<div class="pda">
     <span class="wm">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}</span>
     <div class="grow">
@@ -1137,10 +1134,9 @@ function pdaCard(p){
       ${pdaNome(p) ? `<div class="faint" style="font-size:12px;letter-spacing:.02em;margin-top:-4px">${esc(pdaNome(p))}</div>` : ''}
       <div class="spec">${p.ref ? `<span>Referenza <b class="mono">${esc(p.ref)}</b></span>` : '<span>Referenza <b>qualsiasi</b></span>'}<span>Quadrante <b>${esc(p.quadrante || '—')}</b></span><span>Bracciale <b>${esc(p.bracciale || '—')}</b></span></div>
       ${pr ? `<div class="match">${ic('check')}Prodotto associato: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span></div>` : ''}
-      ${m.length ? `<div class="match">${ic('sparkle')}${m.length === 1 ? '1 pezzo compatibile' : m.length + ' pezzi compatibili'}</div>` : ''}
+      <div class="match">${ic('calendar')}Inserita il ${fmtD(p.date)}</div>
     </div>
     <div class="act">
-      ${['aperta','preordine'].includes(p.stato) ? `<button class="btn btn-sm ${m.length && !lock ? 'btn-primary' : ''}" data-act="assegna" data-id="${p.id}" ${m.length && !lock ? '' : 'disabled'} ${lock ? 'title="Solo direttore vendite o titolare"' : ''}>${lock ? '🔒 ' : ''}Associa prodotto</button>` : ''}
       ${p.stato === 'assegnata' ? `<button class="btn btn-sm btn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>` : ''}
       <button class="btn btn-sm" data-go="manifestazione" data-id="${p.id}">Dettaglio</button>
     </div>
@@ -1341,7 +1337,7 @@ function vProdotto(){
       </tbody></table>
     </section>
     <section class="card">
-      <div class="card-h">${ic('heart')}<h2>Manifestazioni compatibili</h2></div>
+      <div class="card-h">${ic('heart')}<h2>Manifestazioni associate</h2></div>
       <div class="list">${pd.map(x => { const c = C(x.clientId); return `<div class="row click" data-go="manifestazione" data-id="${x.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.boutique)} · in attesa da ${rel(x.date).replace(' fa','')}</div></div>${ic('arrow')}</div>`; }).join('') || '<div class="empty">Nessun cliente aspetta questa referenza.</div>'}</div>
     </section>
   </div>`;
@@ -1940,7 +1936,7 @@ function renderModal(){
       h = `${p.brand} ${p.modello}`;
       b = `<button class="link" data-act="m-disp-ref" data-v="" style="display:inline-flex;gap:6px;align-items:center;align-self:flex-start">${ic('back')}Tutti i prodotti</button>
         <p style="margin:0"><span class="mono">${esc(p.ref)}</span> · ${esc(p.det)} · ${g.map(x => `${esc(x.boutique)}${x.stato === 'in_arrivo' ? ' (in arrivo)' : ''}`).join(', ')}</p>
-        <div class="label">Manifestazioni compatibili</div>
+        <div class="label">Manifestazioni associate</div>
         <div class="picklist" style="max-height:none">${pd.map(x => { const c = C(x.clientId); return `<div class="row" data-act="m-go-pda" data-id="${x.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.boutique)} · registrata da ${esc(x.operator)} · in attesa da ${rel(x.date).replace(' fa','')}</div></div>${canAssign() ? `<button class="btn btn-sm btn-primary" data-act="assegna-pr" data-id="${x.id}" data-v="${compatible(x).find(y => y.ref === M.ref).id}">Associa</button>` : ''}</div>`; }).join('') || '<div class="empty">Nessuno aspetta questa referenza.</div>'}</div>`;
     }
     f = `${M.ref ? `<button class="btn" data-act="m-go-prod" data-v="${esc(M.ref)}">Apri scheda prodotto</button>` : ''}<button class="btn" data-act="m-close">Chiudi</button>`;
@@ -2120,7 +2116,6 @@ function act(el, ev){
     case 'fu-done': { const x = events.find(z => z.id === id); x.done = true; render(); toast('Follow-up segnato come fatto'); break; }
     case 'clr-f': S.f[el.dataset.k] = ''; render(); break;
     case 'clr-all': Object.keys(S.f).forEach(x => S.f[x] = ''); render(); break;
-    case 'export': toast(`${filteredClients().length} clienti pronti per l'invio a MailUp (demo)`); break;
     case 'evf': S.evf[el.dataset.k] = v; render(); break;
     case 'pdaf': S.pdaf = v; render(); break;
     case 'soon': toast('Le voci degli elenchi si gestiscono dalle impostazioni (demo)'); break;
