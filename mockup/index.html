@@ -251,6 +251,8 @@ table.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
 .spec b{color:var(--ink);font-weight:600}
 .pda .wm svg.i{width:32px;height:32px}
 .pda .act{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.pda .act.col{flex-direction:column;align-items:stretch;flex-wrap:nowrap}
+.pda .act.col .tag{justify-content:center}
 .match{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ok);font-weight:600}
 .lk{display:flex;align-items:center;gap:12px;padding:12px 20px}
 .lk .grow{flex:1;min-width:0}
@@ -1137,9 +1139,9 @@ function pdaCard(p){
       ${pr ? `<div class="match">${ic('check')}Prodotto associato: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span></div>` : ''}
       <div class="match">${ic('calendar')}Inserita il ${fmtD(p.date)}</div>
     </div>
-    <div class="act">
-      ${p.stato === 'assegnata' ? `<button class="btn btn-sm btn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>` : ''}
+    <div class="act ${pr ? 'col' : ''}">
       ${pr ? `<span class="tag ok">${ic('check')}Prodotto associato</span>` : ''}
+      ${p.stato === 'assegnata' ? `<button class="btn btn-sm btn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>` : ''}
       <button class="btn btn-sm" data-go="manifestazione" data-id="${p.id}">Dettaglio</button>
     </div>
   </div>`;
