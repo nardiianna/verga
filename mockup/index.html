@@ -631,8 +631,9 @@ const EXTRA = {
 };
 const blankExtra = () => ({cf:'',pec:'',sesso:'',lingua:'',tipo:'Prospect',rating:0,email2:'',addresses:[],billing:{},misure:{},notes:[],tasks:[],privacy:null});
 clients.forEach(c => { Object.assign(c, blankExtra(), EXTRA[c.id] || {}); if (!c.addresses.length && c.indirizzo) c.addresses = [{label:'Casa',via:c.indirizzo,cap:'',citta:'',prov:'',naz:'Italia'}]; });
-clients.find(c => c.id === 'c1').privacy = '2014-05-10';
-clients.find(c => c.id === 'c7').privacy = '2018-10-01';
+clients.find(c => c.id === 'c1').privacy = {at:'2014-05-10T11:20', by:'cliente'};
+clients.find(c => c.id === 'c7').privacy = {at:'2018-10-01T16:45', by:'venditore', operator:'Luca Ferrari'};
+const privTxt = p => `${fmtDT(p.at)} · ${p.by === 'cliente' ? 'dato dal cliente' : 'segnato da ' + p.operator}`;
 const NOTIFS = [
   {text:'Luca Ferrari ha associato un Patek Philippe Nautilus 5811/1G alla manifestazione di Francesca Gallo.', date:'2026-09-23T18:02', clientId:'c7', read:false},
   {text:'Nuova autoregistrazione online: Anna Neri.', date:'2026-09-22T21:14', clientId:'c5', read:false},
@@ -775,7 +776,7 @@ function go(view, id=null, extra={}){
 const NOTES = {
   login:{from:['Login con email e password del venditore.','La boutique si imposta in automatico da quella dell\'utente e si può cambiare dal selettore in alto: eventi e vendite la prendono da lì.','Ruoli: direttore vendite e titolare possono associare i prodotti alle PDA e vedono tutte le PDA aziendali (relazione tecnica di Dario). Marco Verdi è direttore vendite: entra con un altro venditore per vedere i permessi ridotti.'],open:['Le credenziali sono quelle degli utenti TSC o un accesso separato?','Su iPad condiviso in negozio serve un cambio utente rapido (es. PIN) oltre al login?','Boutique: la relazione tecnica parla di 1 boutique monomarca Rolex, 2 multimarca a Milano e Portofino stagionale; il sito elenca anche la boutique Patek Philippe. Nomi corretti da confermare.']},
   dashboard:{from:['L\'operatore deve fare 3 cose: gestire anagrafiche, fare la cassa, gestire gli eventi. Sono le azioni rapide in alto.','In home il venditore vede le ultime manifestazioni inserite; gli arrivi da associare si gestiscono da Manifestazioni > Prodotti disponibili (direttore vendite).','Follow-up dopo la visita in negozio; task periodiche per compleanni e anniversari (lista requisiti Verga).'],open:['Quali numeri vuole vedere la direzione sulla home?','Collegamento con file Excel esterni (programmazione consegne Rolex): uso reale da chiarire, TSC non pianifica consegne.']},
-  clienti:{from:['Ricerca su qualunque voce: nominativo, mail, cellulare, azienda, note; referenza cercata separatamente tra acquisti e manifestazioni (lista requisiti).','Filtri: brand, modello, referenza, ultimo acquisto, passaggio in negozio, tipologia, fascia, valutazione, lingua.','Venduto da: un venditore vede le sue vendite di un brand (es. "Claudia, le sue vendite Rolex").','Clienti dormienti: nessun passaggio, chiamata o mail da oltre 6 mesi.','Esportazione verso MailUp (sostituisce SALESmanago).'],open:['Filtri obbligatori richiesti dai brand.','Soglie delle fasce Bronzo/Argento/Oro/Platino per categoria.','Dopo quanto tempo un cliente è "dormiente"?']},
+  clienti:{from:['Ricerca su qualunque voce: nominativo, mail, cellulare, azienda, note; referenza cercata separatamente tra acquisti e manifestazioni (lista requisiti).','Filtri: brand, modello, referenza, ultimo acquisto, passaggio in negozio, tipologia, fascia, valutazione, lingua.','Venduto da: un venditore vede le sue vendite di un brand (es. "Claudia, le sue vendite Rolex").','Clienti dormienti: nessun passaggio, chiamata o mail da oltre 6 mesi.'],open:['Filtri obbligatori richiesti dai brand.','Soglie delle fasce Bronzo/Argento/Oro/Platino per categoria.','Dopo quanto tempo un cliente è "dormiente"?']},
   cliente:{from:['Tre sezioni separate: acquisti e riparazioni letti dal gestionale, manifestazioni registrate sul CRM.','Registrazione passaggio con un clic: visita, chiamata ricevuta, chiamata fatta, mail. Motivo: nuova manifestazione, aggiornamento manifestazione, acquisto, riparazione.','Tipologia Prospect / Cliente / Commerciante: il Prospect diventa Cliente al primo ordine (relazione tecnica).','Valutazione del venditore 1-5, separata dalla fascia calcolata sugli acquisti.','Note multiple firmate con utente, data e ora; non si modificano le note degli altri.','Chat interna: messaggi e task ai colleghi legati alla scheda, anche periodici.','Privacy firmata dal cliente su iPad (fondamentale per Verga).'],open:['Relazioni: bastano quelle standard di TSC?','"Acquisti" in scheda: fatture o ordini di vendita?','La relazione tecnica segnala che TSC non consente modifiche di interfaccia: quanto di questo layout è realizzabile?']},
   nuovo:{from:['Due email (principale e secondaria), sempre in minuscolo.','Più indirizzi per la stessa anagrafica (via, CAP, città, provincia, nazione).','Data di nascita GG-MM-AAAA, sesso, professione (menu), azienda (libero), lingua (IT, EN, ES, AR, ZH).','Dati di fatturazione: ragione sociale, indirizzo, P.IVA, SDI (l\'SDI resta su TSC e non va al gestionale).','Misure: polso e anello, medio e anulare, mano destra e sinistra.','Brand e interessi: liste chiuse, il venditore non può aggiungere voci.'],open:['Elenco definitivo degli interessi "legati al settore".','Misure: campo del cliente o variante di prodotto?','Celebrità: campo a parte o voce VIP nella professione? La lista di Verga ha VIP tra le professioni.','Elenco completo delle professioni.']},
   prodotti:{from:['Catalogo con ricerca per referenza (MPN), modello, seriale.','I venditori cercano per referenza: stessa referenza, matricole diverse. La disponibilità somma i pezzi del magazzino e delle boutique; tra boutique i pezzi si spediscono.','Cliccando un prodotto si apre la scheda con la disponibilità per sede e le manifestazioni compatibili.','Ogni pezzo venduto è un prodotto unico (seriale).','Gioielli Pomellato/Messika registrati come brand + collezione + referenza.'],open:['Il magazzino centrale è una sede a sé su TSE? Nome da usare nel portale.','Articoli a taglia (anelli): oggi la misura viene usata come matricola, ma il gestionale non accetta matricole duplicate. Serve un\'altra codifica.']},
@@ -1062,7 +1063,7 @@ function vCliente(){
     <div class="lastline">${ic('clock')}
       ${lv ? `Ultimo passaggio in negozio: <b>${fmtDT(lv.date)}</b> (${rel(lv.date)}) · ${esc(lv.boutique)} · con ${esc(lv.operator)}` : 'Nessun passaggio in negozio registrato'}
       ${lc && lc !== lv ? `<span class="faint">·</span> Ultimo contatto: <b>${EV[lc.type].short.toLowerCase()}</b> ${rel(lc.date)}` : ''}
-      <span style="margin-left:auto" class="faint">${c.privacy ? `Privacy firmata il ${fmtD(c.privacy)} · ` : ''}In anagrafica dal ${fmtD(c.since)}</span>
+      <span style="margin-left:auto" class="faint">${c.privacy ? `Consenso privacy: ${privTxt(c.privacy)} · ` : ''}In anagrafica dal ${fmtD(c.since)}</span>
     </div>
   </section>
   <nav class="tabs" aria-label="Sezioni scheda">
@@ -1232,9 +1233,10 @@ function clientForm(c){
     <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${ints.includes(v) ? 'on' : ''}" data-act="nc-int" data-v="${v}">${ints.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
     <p class="faint" style="margin:0;font-size:12px">Brand e interessi sono liste chiuse definite da Verga: il venditore può solo scegliere.</p>
   </div>
-  <div class="fsec"><h3>${ic('edit')}${c ? 'Newsletter' : 'Prima nota e newsletter'}</h3>
+  <div class="fsec"><h3>${ic('edit')}${c ? 'Privacy' : 'Prima nota e privacy'}</h3>
     ${c ? '<p class="faint" style="margin:0;font-size:12.5px">Le note interne si aggiungono dalla Panoramica: ogni nota è firmata con nome, data e ora.</p>' : `<label class="field"><span>Prima nota interna (verrà firmata con il tuo nome)</span><textarea class="ta" id="f-note"></textarea></label>`}
-    <label class="check"><input type="checkbox" id="f-nl" ${c?.newsletter ? 'checked' : ''}> Consenso a newsletter e comunicazioni (MailUp)</label>
+    <label class="check"><input type="checkbox" id="f-priv" ${c?.privacy ? 'checked' : ''}> Il cliente ha dato il consenso all'informativa privacy</label>
+    <p class="faint" style="margin:0;font-size:12px">${c?.privacy ? `Consenso registrato: ${privTxt(c.privacy)}.` : 'Se spunti tu la casella, il consenso viene registrato con data, ora e il tuo nome. Se lo firma il cliente sul tablet, risulta dato dal cliente.'}</p>
   </div>`;
 }
 function linkSection(c){
@@ -1957,7 +1959,7 @@ function renderModal(){
       </div>
       <div style="max-height:110px;overflow:auto;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;color:var(--muted)">Informativa ai sensi dell'art. 13 del Regolamento UE 2016/679. Verga Luigi S.r.l. tratta i suoi dati per gestire acquisti, riparazioni e richieste. <i>Testo definitivo da ricevere da Verga.</i></div>
       <label class="check"><input type="checkbox" checked disabled> Ho letto l'informativa (obbligatorio)</label>
-      <label class="check"><input type="checkbox" checked> Acconsento a ricevere newsletter e inviti (MailUp)</label>
+      <label class="check"><input type="checkbox" checked> Acconsento a ricevere newsletter e inviti</label>
       <label class="check"><input type="checkbox"> Acconsento alla profilazione in base ai miei acquisti</label>
       <div class="field"><span>Firma qui</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>`;
     f = `<button class="btn" data-act="m-close">Annulla</button><button class="btn btn-primary btn-lg" data-act="m-save-sig" data-id="${c.id}">${ic('check')}Firma e conferma</button>`;
@@ -2171,7 +2173,7 @@ function act(el, ev){
       if (!S.auto.nome || !S.auto.cognome || !S.auto.email || !S.auto.tel) { err.hidden = false; err.textContent = 'Compila nome, cognome, email e telefono per continuare.'; break; }
       if (!/^\S+@\S+\.\S+$/.test(S.auto.email)) { err.hidden = false; err.textContent = 'Controlla l\'indirizzo email: sembra incompleto.'; break; }
       if (!document.getElementById('a-priv').checked) { err.hidden = false; err.textContent = 'Per registrarti serve il consenso all\'informativa privacy.'; break; }
-      const nc = {...blankExtra(), id:'c' + (clients.length + 1 + Math.floor(Math.random()*1000)), nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, tel:S.auto.tel, indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[...S.auto.brands], modelli:[], interests:[], boutique:S.boutique, source:'Autoregistrazione', incomplete:true, newsletter:true, since:'2026-09-24', note:''};
+      const nc = {...blankExtra(), id:'c' + (clients.length + 1 + Math.floor(Math.random()*1000)), nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, tel:S.auto.tel, indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[...S.auto.brands], modelli:[], interests:[], boutique:S.boutique, source:'Autoregistrazione', incomplete:true, newsletter:true, privacy:{at:nowISO(), by:'cliente'}, since:'2026-09-24', note:''};
       clients.push(nc); S.auto.createdId = nc.id; S.auto.step = 2; render(); window.scrollTo(0,0); break; }
     case 'a-done': { const c = C(S.auto.createdId); if (c) c.interests = [...S.auto.interests]; S.auto.step = 3; render(); window.scrollTo(0,0); break; }
     case 'a-reset': S.auto = {step:1, brands:[], interests:[], noYear:false, decade:''}; render(); break;
@@ -2215,7 +2217,7 @@ function act(el, ev){
     case 'm-dto': M.to = v; renderModal(); break;
     case 'm-save-dis': { const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId); pr.reservedFor = null; if (pr.stato === 'riservato') pr.stato = 'disponibile'; p.productId = null; p.stato = M.to; closeModal(); render(); toast('Prodotto dissociato'); break; }
     case 'sig-clear': { const cv = document.getElementById('sig'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv.dataset.signed = ''; break; }
-    case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = '2026-09-24'; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
+    case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = {at:nowISO(), by:'cliente'}; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
   }
 }
 function toggle(arr, v){ const i = arr.indexOf(v); if (i >= 0) arr.splice(i,1); else arr.push(v); }
@@ -2238,7 +2240,9 @@ function saveClient(id){
   const addresses = S.nc.addr.filter(a => a.via || a.citta).map(a => ({...a}));
   const data = {tipo:v('f-tipo'), nome:v('f-nome'), cognome:v('f-cognome'), sesso:v('f-sesso'), prof:v('f-prof'), azienda:v('f-azienda'), email:v('f-email').toLowerCase(), email2:v('f-email2').toLowerCase(), tel:v('f-tel'), cf:v('f-cf').toUpperCase(), pec:v('f-pec').toLowerCase(), lingua:v('f-lingua'), addresses, indirizzo:addresses[0] ? `${addresses[0].via}, ${addresses[0].citta}` : '', boutique:v('f-boutique'), birth,
     billing:{rs:v('f-rs'), ind:v('f-bind'), piva:v('f-piva'), sdi:v('f-sdi').toUpperCase()}, misure:{polso:v('f-polso'), dxMedio:v('f-dxm'), dxAnulare:v('f-dxa'), sxMedio:v('f-sxm'), sxAnulare:v('f-sxa')}, rating:S.nc.rating,
-    brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : '', newsletter:document.getElementById('f-nl').checked};
+    brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : ''};
+  const priv = document.getElementById('f-priv').checked, old = id ? C(id).privacy : null;
+  data.privacy = priv ? old || {at:nowISO(), by:'venditore', operator:S.operator} : null;
   if (id) { const c = C(id); Object.assign(c, data); if (c.email && c.tel) c.incomplete = false; S.tab = 'panoramica'; render(); toast('Anagrafica aggiornata'); }
   else { const c = {...blankExtra(), id:'c' + (clients.length + 200), source:'Negozio', since:'2026-09-24', ...data, notes: v('f-note') ? [{by:S.operator, date:nowISO(), text:v('f-note')}] : []}; clients.push(c); const pend = S.nc.pending; pend.forEach(l => links.push({from:c.id, ...l})); go('cliente', c.id); toast(pend.length ? `Cliente registrato con ${pend.length} ${pend.length === 1 ? 'legame' : 'legami'}` : 'Cliente registrato'); }
 }
