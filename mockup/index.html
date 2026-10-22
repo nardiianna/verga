@@ -706,7 +706,7 @@ const S = {
   pf:{q:'',brand:'',tipo:'',stato:'',loc:''},
   pdf:{q:'',brand:'',boutique:'',operator:''},
   evf:{type:'',boutique:''},
-  pdaf:'aperta',
+  pdaf:'',
   rf:{chip:'aperte', q:'', tipo:'', boutique:'', tecnico:''}, rn:null, pv:null,
   cart:{clientId:null, items:[], pay:'Carta'},
   auto:{step:1, brands:[], interests:[], noYear:false, decade:''},
@@ -1415,7 +1415,7 @@ function vPassaggi(){
 function vPda(){
   const f = S.pdf, q = f.q.trim().toLowerCase();
   const list = pdas.filter(p => { const c = C(p.clientId); return (!S.pdaf || p.stato === S.pdaf) && (!f.brand || p.brand === f.brand) && (!f.boutique || c.boutique === f.boutique) && (!f.operator || p.operator === f.operator) && (!q || `${fullName(c)} ${p.brand} ${p.modello} ${p.ref}`.toLowerCase().includes(q)); })
-    .sort((a,b) => compatible(b).length - compatible(a).length || dt(a.date) - dt(b.date));
+    .sort((a,b) => (b.stato === 'assegnata') - (a.stato === 'assegnata') || compatible(b).length - compatible(a).length || dt(a.date) - dt(b.date));
   return `
   <div class="page-h"><div><div class="label">Clienti</div><h1>Manifestazioni di interesse</h1></div><span class="sp"></span><button class="btn" data-act="pda-disp">${ic('box')}Prodotti disponibili</button><button class="btn btn-primary" data-act="pda-new">${ic('plus')}Nuova manifestazione</button></div>
   <div class="banner info">${ic('info')}<div class="grow"><p>Una manifestazione è una <b>PDA con prodotto generico e senza prezzo</b>. Quando arriva un pezzo compatibile, il direttore vendite o il titolare lo <b>associa</b> e chi ha creato la PDA riceve una notifica. Quando il cliente viene a comprare, qualsiasi venditore la trasforma in <b>ordine</b>. Le PDA sono visibili in tutte le boutique.</p></div></div>
