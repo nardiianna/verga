@@ -2112,7 +2112,7 @@ function renderModal(){
   }
   if (M.kind === 'ricevuta') {
     const r = R(M.rid), c = RC(r.clientId), a = c.addresses?.[0];
-    h = 'Ricevuta di consegna';
+    h = 'Ricevuta di presa in carico';
     b = `<div class="paper" id="print-area">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span class="logo" style="height:56px;--logo-a:#004d43;--logo-b:#007565">${LOGO_MARK}</span><div style="text-align:right"><b>Ricevuta n. <span class="mono">${esc(r.busta)}</span></b><br>${fmtDT(r.acc)} · ${esc(r.boutique)}</div></div>
         <h4>Cliente</h4><p>${esc(fullName(c))}${a ? ` · ${esc(a.via)}${a.citta ? ', ' + esc(a.cap) + ' ' + esc(a.citta) : ''}` : ''}<br>CF ${esc(c.cf || '—')} · Tel. ${esc(c.tel || '—')} · ${esc(c.email || '—')}${c.pec ? ` · PEC ${esc(c.pec)}` : ''}</p>
