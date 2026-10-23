@@ -1066,7 +1066,7 @@ function vCliente(){
     <div class="lastline">${ic('clock')}
       ${lv ? `Ultimo passaggio in negozio: <b>${fmtDT(lv.date)}</b> (${rel(lv.date)}) · ${esc(lv.boutique)} · con ${esc(lv.operator)}` : 'Nessun passaggio in negozio registrato'}
       ${lc && lc !== lv ? `<span class="faint">·</span> Ultimo contatto: <b>${EV[lc.type].short.toLowerCase()}</b> ${rel(lc.date)}` : ''}
-      <span style="margin-left:auto" class="faint">${c.privacy ? `Consenso privacy: ${privTxt(c.privacy)} · ` : ''}In anagrafica dal ${fmtD(c.since)}</span>
+      <span style="margin-left:auto" class="faint">${c.privacy ? `Consenso privacy: ${privTxt(c.privacy)}${c.privacy.firma ? ' · firma salvata' : ''} · ` : ''}In anagrafica dal ${fmtD(c.since)}</span>
     </div>
   </section>
   <nav class="tabs" aria-label="Sezioni scheda">
@@ -1240,6 +1240,7 @@ function clientForm(c){
     ${c ? '<p class="faint" style="margin:0;font-size:12.5px">Le note interne si aggiungono dalla Panoramica: ogni nota è firmata con nome, data e ora.</p>' : `<label class="field"><span>Prima nota interna (verrà firmata con il tuo nome)</span><textarea class="ta" id="f-note"></textarea></label>`}
     <label class="check"><input type="checkbox" id="f-priv" ${c?.privacy ? 'checked' : ''}> Il cliente ha dato il consenso all'informativa privacy</label>
     <p class="faint" style="margin:0;font-size:12px">${c?.privacy ? `Consenso registrato: ${privTxt(c.privacy)}.` : 'Se spunti tu la casella, il consenso viene registrato con data, ora e il tuo nome. Se lo firma il cliente sul tablet, risulta dato dal cliente.'}</p>
+    ${c?.privacy?.firma ? `<div class="field"><span>Firma del cliente</span>${sigImg(c.privacy.firma)}</div>` : ''}
   </div>`;
 }
 function linkSection(c){
@@ -2119,9 +2120,10 @@ function renderModal(){
         <h4>Oggetto</h4><p>${esc(r.obj.tipo)} ${esc(objName(r))} · ref. ${esc(r.obj.ref || '—')}${r.obj.nc ? ` · Nc ${esc(r.obj.nc)}` : ''}${r.obj.cal ? ` · cal. ${esc(r.obj.cal)}` : ''}<br>${[r.obj.materiale, r.obj.quadrante && 'quadrante ' + r.obj.quadrante, r.obj.bracciale].filter(Boolean).map(esc).join(' · ')}<br><b>${r.foto}</b> foto scattate alla presenza del cliente</p>
         <h4>Intervento richiesto</h4><p>${esc(r.motivo)}${r.garanzia ? ' · in garanzia' : ''} · valore dichiarato ${r.valore ? eur(+r.valore) : '—'}${r.noteCliente ? `<br>Note: ${esc(r.noteCliente)}` : ''}</p>
         <h4>Clausole</h4><p class="faint">L'oggetto è custodito gratuitamente fino al termine ultimo di ritiro. <i>Testo definitivo delle clausole da ricevere da Verga.</i></p>
+        ${r.firma ? `<h4>Firma del cliente</h4>${sigImg(r.firma, 70)}<p class="faint">Firmata sul tablet il ${fmtDT(r.firmaAt)}</p>` : ''}
       </div>
-      <div class="field"><span>Firma del cliente</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>`;
-    f = `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button><button class="btn" data-act="m-close">Più tardi</button><button class="btn btn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
+      ${r.firma ? '' : r.ric ? '<p class="faint" style="margin:0;font-size:12px">Ricevuta già firmata dal cliente (firma su carta, prima del portale).</p>' : '<div class="field"><span>Firma del cliente</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>'}`;
+    f = r.ric ? `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button><button class="btn btn-primary" data-act="m-close">Chiudi</button>` : `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button><button class="btn" data-act="m-close">Più tardi</button><button class="btn btn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
   }
   if (M.kind === 'etichette') {
     const r = R(M.rid), c = RC(r.clientId);
@@ -2147,6 +2149,14 @@ function initSig(){
   cv.addEventListener('pointermove', e => { if (!on) return; g.lineTo(...pt(e)); g.stroke(); cv.dataset.signed = '1'; });
   ['pointerup','pointercancel'].forEach(t => cv.addEventListener(t, () => on = false));
 }
+/* firma salvata come immagine: tratto scuro su fondo bianco, leggibile anche se il portale è in tema scuro */
+function sigData(){
+  const cv = document.getElementById('sig'), t = document.createElement('canvas'); t.width = cv.width; t.height = cv.height;
+  const g = t.getContext('2d'); g.drawImage(cv, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#1a1a1a'; g.fillRect(0, 0, t.width, t.height);
+  g.globalCompositeOperation = 'destination-over'; g.fillStyle = '#fff'; g.fillRect(0, 0, t.width, t.height);
+  return t.toDataURL('image/png');
+}
+const sigImg = (src, h = 90) => `<img src="${src}" alt="Firma del cliente" style="height:${h}px;max-width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;display:block">`;
 const others = p => pdas.filter(x => x.id !== p.id && ['aperta','preordine'].includes(x.stato) && x.brand === p.brand && x.modello === p.modello);
 /* ---------------- DRAWER NOTE ---------------- */
 function renderDrawer(){
@@ -2227,7 +2237,7 @@ function act(el, ev){
     case 'rb-avviso': { const r = R(id), n = document.getElementById('rb-sn').value.trim(), t = parseFloat(document.getElementById('rb-st').value.replace(',', '.')) || 0; if (!n) { toast('Inserisci il numero dello scontrino'); break; } r.scontrino = {n, tot:t}; r.avviso = true; r.ubic = 'Pronto in boutique per il ritiro'; ripLog(r, `Avviso di ritiro inviato con scontrino ${n} (${eur(t)})`, S.operator, false); render(); toast('Mail di avviso ritiro inviata al cliente'); break; }
     case 'rb-ritiro': { const r = R(id); if (!r.avviso) { toast('Prima invia l\'avviso di ritiro con lo scontrino'); break; } r.ritiroD = '2026-09-24'; r.closed = true; r.ubic = 'Riconsegnato al cliente'; ripLog(r, 'Orologio ritirato dal cliente: pratica chiusa', S.operator, false); render(); toast('Ritiro registrato · busta chiusa'); break; }
     case 'ric-print': window.print(); break;
-    case 'm-save-ric': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } const r = R(M.rid); r.ric = true; ripLog(r, 'Ricevuta firmata dal cliente', S.operator, false); closeModal(); render(); if (!r.et) openModal({kind:'etichette', rid:r.id}); break; }
+    case 'm-save-ric': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } const r = R(M.rid); r.ric = true; r.firma = sigData(); r.firmaAt = nowISO(); ripLog(r, 'Ricevuta firmata dal cliente', S.operator, false); closeModal(); render(); if (!r.et) openModal({kind:'etichette', rid:r.id}); break; }
     case 'm-save-et': { const r = R(M.rid); if (!r.et) ripLog(r, 'Etichette busta e orologio stampate', S.operator, false); r.et = true; closeModal(); render(); toast('Etichette inviate alla stampante (demo)'); break; }
     case 'pick-b': S.boutique = v; S.operator = OPERATORS.find(o => o.b === v).name; render(); break;
     case 'pick-op': S.operator = v; render(); break;
@@ -2358,7 +2368,7 @@ function act(el, ev){
     case 'm-dto': M.to = v; renderModal(); break;
     case 'm-save-dis': { const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId); pr.reservedFor = null; if (pr.stato === 'riservato') pr.stato = 'disponibile'; p.productId = null; p.stato = M.to; closeModal(); render(); toast('Prodotto dissociato'); break; }
     case 'sig-clear': { const cv = document.getElementById('sig'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv.dataset.signed = ''; break; }
-    case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = {at:nowISO(), by:'cliente'}; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
+    case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = {at:nowISO(), by:'cliente', firma:sigData()}; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
   }
 }
 function toggle(arr, v){ const i = arr.indexOf(v); if (i >= 0) arr.splice(i,1); else arr.push(v); }
