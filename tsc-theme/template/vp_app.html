@@ -166,17 +166,25 @@ const SEL_ID = VPD.selected && VPD.selected.id ? String(VPD.selected.id) : null;
 asList(VPD.orders && VPD.orders.list).forEach(o => purchases.push({clientId:SEL_ID, date:String(o.date || '').slice(0, 10), brand:'Ordine', modello:'n° ' + o.orderID, ref:'', price:+o.total || 0, boutique:'', seller:'', orderID:o.orderID, status:o.status}));
 /* proposte (PDA) del cliente selezionato (proposal_frontend.php) */
 const PROPOSALS = asList(VPD.proposals && VPD.proposals.list);
+/* consenso privacy: {at, by:'cliente'|'venditore', operator, firma}. Le schede salvate prima avevano solo la data. */
+clients.forEach(c => { if (typeof c.privacy === 'string') c.privacy = c.privacy ? {at:c.privacy, by:'venditore', operator:''} : null; });
+const privTxt = p => `${fmtDT(p.at)} · ${p.by === 'cliente' ? 'dato dal cliente' : 'segnato da ' + (p.operator || 'un venditore')}`;
+const LOCS = [...BOUTIQUES.map(b => b.name), 'Magazzino'];
+/* nome completo del modello come arriva dal gestionale: si ricava dalla referenza del prodotto TSC */
+const NOMI = Object.fromEntries(products.filter(p => p.ref).map(p => [p.ref.toUpperCase(), [p.brand, p.modello].filter(Boolean).join(' ').toUpperCase()]));
+const pdaNome = p => p.nome || NOMI[(p.ref || '').toUpperCase()] || '';
 
 /* ---------------- stato UI ---------------- */
 const S = {
   view:'login', id:null, tab:'panoramica', navOpen:false, notes:false,
   boutique:'Bottega Storica', operator:'Marco Verdi', pin:'',
   f:{q:'',tipo:'',tier:'',rating:'',brand:'',modello:'',ref:'',seller:'',pref:'',interest:'',ibrand:'',lingua:'',prof:'',last:'',visit:'',boutique:'',celeb:''},
-  pf:{q:'',brand:'',tipo:'',stato:''},
-  evf:{type:'',boutique:''},
-  pdaf:'aperta',
-  rf:{chip:'aperte', q:'', tipo:'', boutique:'', tecnico:''}, rn:null, pv:null,
-  cart:{clientId:null, items:[], pay:'Carta'},
+  pf:{q:'',brand:'',tipo:'',sub:'',stato:'',loc:''},
+  pdf:{q:'',brand:'',boutique:'',operator:''},
+  evf:{type:'',boutique:'',op:'',per:'',q:''},
+  pdaf:'',
+  rf:{chip:'aperte', q:'', tipo:'', boutique:'', tecnico:'', resp:''}, rn:null, pv:null, ripBO:false,
+  cart:{clientId:null, items:[], pay:'Carta', acc:''},
   auto:{step:1, brands:[], interests:[], noYear:false, decade:''},
   nc:{brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk:{type:'', back:'', q:'', otherId:null, quick:false}, pending:[], addr:[], rating:0},
 };
@@ -215,14 +223,20 @@ const clientLinks = id => links.map((l, i) => ({l, i})).filter(({l}) => l.from =
 const birthText = b => { if (!b || (!b.d && !b.y && !b.decade)) return null; const dm = b.d ? `${b.d} ${MESI[b.m-1]}` : ''; if (b.y) return `${dm} ${b.y}`.trim(); if (b.decade) return `${dm}${dm ? ' · ' : ''}${b.decade}`; return dm; };
 const sourceTag = c => c.source === 'Autoregistrazione' ? `<span class="tag blue">${ic('send')}Autoregistrato online</span>` : c.source === 'Legame' ? `<span class="tag">${ic('link')}Creato da legame</span>` : '';
 const PDA_ST = {aperta:['Manifestazione','amber'],preordine:['Preordine','blue'],assegnata:['Associata','ok'],venduta:['Ordine',''],annullata:['Annullata','red']};
+const inStock = p => ['disponibile','riservato'].includes(p.stato);
+const refGroups = list => { const m = new Map(); list.forEach(p => { if (!m.has(p.ref)) m.set(p.ref, []); m.get(p.ref).push(p); }); return [...m.values()]; };
+const pieces = ref => products.filter(p => p.ref === ref && p.stato !== 'venduto');
+const pdasFor = ref => openPdas().filter(x => compatible(x).some(p => p.ref === ref));
+const watchesInStock = () => products.filter(p => p.tipo === 'orologio' && inStock(p));
+const recentPdas = () => pdas.map((p, i) => ({p, i})).sort((a, b) => dt(b.p.date) - dt(a.p.date) || b.i - a.i).map(x => x.p);
 const stateTag = p => `<span class="tag ${PDA_ST[p.stato][1]}">${PDA_ST[p.stato][0]}</span>`;
 const prodState = p => p.stato === 'disponibile' ? '<span class="tag ok">Disponibile</span>' : p.stato === 'in_arrivo' ? `<span class="tag blue">In arrivo ${fmtD(p.arrivo).slice(0,5)}</span>` : p.stato === 'riservato' ? `<span class="tag amber">Riservato a ${esc(fullName(C(p.reservedFor)))}</span>` : p.stato === 'esaurito' ? '<span class="tag red">Esaurito</span>' : '<span class="tag">Venduto</span>';
 const avatar = (c, cls='') => c.incomplete && !c.email ? `<span class="av ghost ${cls}">${initials(c)}</span>` : `<span class="av ${cls}">${initials(c)}</span>`;
 const opts = (arr, sel, empty) => (empty !== undefined ? `<option value="">${empty}</option>` : '') + arr.map(v => `<option ${v === sel ? 'selected' : ''}>${esc(v)}</option>`).join('');
 
 /* ---------------- navigazione: ogni vista ha il suo URL su TSC ---------------- */
-const ROUTES = {dashboard:'/', clienti:'/profile/clienti', cliente:'/profile/cliente/', nuovo:'/profile/nuovo-cliente', passaggi:'/profile/passaggi', pda:'/profile/manifestazioni', prodotti:'/profile/catalogo', cassa:'/profile/cassa', riparazioni:'/profile/riparazioni', 'rip-new':'/profile/accettazione', busta:'/profile/busta/', prev:'/profile/preventivo/', auto:'/profile/autoregistrazione', login:'/login'};
-const SLUG_VIEW = {clienti:'clienti', cliente:'cliente', 'nuovo-cliente':'nuovo', passaggi:'passaggi', manifestazioni:'pda', catalogo:'prodotti', cassa:'cassa', riparazioni:'riparazioni', accettazione:'rip-new', busta:'busta', preventivo:'prev', autoregistrazione:'auto'};
+const ROUTES = {dashboard:'/', clienti:'/profile/clienti', cliente:'/profile/cliente/', nuovo:'/profile/nuovo-cliente', passaggi:'/profile/passaggi', pda:'/profile/manifestazioni', prodotti:'/profile/magazzino', prodotto:'/profile/prodotto/', manifestazione:'/profile/manifestazione/', cassa:'/profile/cassa', riparazioni:'/profile/riparazioni', 'rip-new':'/profile/accettazione', busta:'/profile/busta/', prev:'/profile/preventivo/', auto:'/profile/autoregistrazione', login:'/login'};
+const SLUG_VIEW = {clienti:'clienti', cliente:'cliente', 'nuovo-cliente':'nuovo', passaggi:'passaggi', manifestazioni:'pda', manifestazione:'manifestazione', magazzino:'prodotti', catalogo:'prodotti', prodotto:'prodotto', cassa:'cassa', riparazioni:'riparazioni', accettazione:'rip-new', busta:'busta', preventivo:'prev', autoregistrazione:'auto'};
 let NAVIGATING = false;
 function toast(msg){
   if (NAVIGATING) { try { sessionStorage.setItem('vp_toast', msg); } catch (_) {} return; }
@@ -239,7 +253,7 @@ function selectTscClient(id){
 function go(view, id=null, extra={}){
   saveStore();
   let url = ROUTES[view] || '/';
-  if (['cliente','busta','prev'].includes(view)) url += encodeURIComponent(id || '');
+  if (['cliente','busta','prev','prodotto','manifestazione'].includes(view)) url += encodeURIComponent(id || '');
   const q = new URLSearchParams();
   if (extra.tab) q.set('tab', extra.tab);
   if (view === 'rip-new' && extra.keepRn && S.rn && S.rn.clientId) q.set('cliente', S.rn.clientId);
@@ -270,22 +284,24 @@ function tscCheckout(){
 
 /* ---------------- note di progetto (per il team) ---------------- */
 const NOTES = {
-  login:{from:['Login con email e password del venditore.','La boutique si imposta in automatico da quella dell\'utente e si può cambiare dal selettore in alto: eventi e vendite la prendono da lì.','Ruoli: direttore vendite e titolare possono associare i prodotti alle PDA e vedono tutte le PDA aziendali (relazione tecnica di Dario). Marco Verdi è direttore vendite: entra con un altro venditore per vedere i permessi ridotti.'],open:['Le credenziali sono quelle degli utenti TSC o un accesso separato?','Su iPad condiviso in negozio serve un cambio utente rapido (es. PIN) oltre al login?','Boutique: la relazione tecnica parla di 1 boutique monomarca Rolex, 2 multimarca a Milano e Portofino stagionale; il sito elenca anche la boutique Patek Philippe. Nomi corretti da confermare.']},
-  dashboard:{from:['L\'operatore deve fare 3 cose: gestire anagrafiche, fare la cassa, gestire gli eventi. Sono le azioni rapide in alto.','Arrivi compatibili: quando arriva un pezzo, il direttore vendite verifica a mano le PDA in sospeso di tutte le boutique e lo associa. Non c\'è controllo automatico dello stock sul gestionale.','Follow-up dopo la visita in negozio; task periodiche per compleanni e anniversari (lista requisiti Verga).'],open:['Quali numeri vuole vedere la direzione sulla home?','Collegamento con file Excel esterni (programmazione consegne Rolex): uso reale da chiarire, TSC non pianifica consegne.']},
-  clienti:{from:['Ricerca su qualunque voce: nominativo, mail, cellulare, azienda, note; referenza cercata separatamente tra acquisti e manifestazioni (lista requisiti).','Filtri: brand, modello, referenza, ultimo acquisto, passaggio in negozio, tipologia, fascia, valutazione, lingua.','Venduto da: un venditore vede le sue vendite di un brand (es. "Claudia, le sue vendite Rolex").','Clienti dormienti: nessun passaggio, chiamata o mail da oltre 6 mesi.','Esportazione verso MailUp (sostituisce SALESmanago).'],open:['Filtri obbligatori richiesti dai brand.','Soglie delle fasce Bronzo/Argento/Oro/Platino per categoria.','Dopo quanto tempo un cliente è "dormiente"?']},
+  login:{from:['Login con email e password del venditore.','La boutique si imposta in automatico da quella dell\'utente e si può cambiare dal selettore in alto: eventi e vendite la prendono da lì.','Ruoli: direttore vendite e titolare possono associare i prodotti alle PDA e vedono tutte le PDA aziendali (relazione tecnica di Dario). Marco Verdi è direttore vendite: entra con un altro venditore per vedere i permessi ridotti.','Profili del documento di analisi: venditore/responsabile, amministrazione e backoffice (vista anteprima in Riparazioni), marketing, cliente (autoregistrazione su tablet).'],open:['Profilo marketing: quali pagine vede (anagrafiche, manifestazioni, storico)?','Le credenziali sono quelle degli utenti TSC o un accesso separato?','Su iPad condiviso in negozio serve un cambio utente rapido (es. PIN) oltre al login?','Boutique: la relazione tecnica parla di 1 boutique monomarca Rolex, 2 multimarca a Milano e Portofino stagionale; il sito elenca anche la boutique Patek Philippe. Nomi corretti da confermare.']},
+  dashboard:{from:['L\'operatore deve fare 3 cose: gestire anagrafiche, fare la cassa, gestire gli eventi. Sono le azioni rapide in alto.','In home il venditore vede le ultime manifestazioni inserite; gli arrivi da associare si gestiscono da Manifestazioni > Prodotti disponibili (direttore vendite).','Follow-up dopo la visita in negozio; task periodiche per compleanni e anniversari (lista requisiti Verga).'],open:['Quali numeri vuole vedere la direzione sulla home?','Collegamento con file Excel esterni (programmazione consegne Rolex): uso reale da chiarire, TSC non pianifica consegne.']},
+  clienti:{from:['Ricerca su qualunque voce: nominativo, mail, cellulare, azienda, note; referenza cercata separatamente tra acquisti e manifestazioni (lista requisiti).','Filtri: brand, modello, referenza, ultimo acquisto, passaggio in negozio, tipologia, fascia, valutazione, lingua.','Venduto da: un venditore vede le sue vendite di un brand (es. "Claudia, le sue vendite Rolex").','Clienti dormienti: nessun passaggio, chiamata o mail da oltre 6 mesi.'],open:['Filtri obbligatori richiesti dai brand.','Soglie delle fasce Bronzo/Argento/Oro/Platino per categoria.','Dopo quanto tempo un cliente è "dormiente"?']},
   cliente:{from:['Tre sezioni separate: acquisti e riparazioni letti dal gestionale, manifestazioni registrate sul CRM.','Registrazione passaggio con un clic: visita, chiamata ricevuta, chiamata fatta, mail. Motivo: nuova manifestazione, aggiornamento manifestazione, acquisto, riparazione.','Tipologia Prospect / Cliente / Commerciante: il Prospect diventa Cliente al primo ordine (relazione tecnica).','Valutazione del venditore 1-5, separata dalla fascia calcolata sugli acquisti.','Note multiple firmate con utente, data e ora; non si modificano le note degli altri.','Chat interna: messaggi e task ai colleghi legati alla scheda, anche periodici.','Privacy firmata dal cliente su iPad (fondamentale per Verga).'],open:['Relazioni: bastano quelle standard di TSC?','"Acquisti" in scheda: fatture o ordini di vendita?','La relazione tecnica segnala che TSC non consente modifiche di interfaccia: quanto di questo layout è realizzabile?']},
   nuovo:{from:['Due email (principale e secondaria), sempre in minuscolo.','Più indirizzi per la stessa anagrafica (via, CAP, città, provincia, nazione).','Data di nascita GG-MM-AAAA, sesso, professione (menu), azienda (libero), lingua (IT, EN, ES, AR, ZH).','Dati di fatturazione: ragione sociale, indirizzo, P.IVA, SDI (l\'SDI resta su TSC e non va al gestionale).','Misure: polso e anello, medio e anulare, mano destra e sinistra.','Brand e interessi: liste chiuse, il venditore non può aggiungere voci.'],open:['Elenco definitivo degli interessi "legati al settore".','Misure: campo del cliente o variante di prodotto?','Celebrità: campo a parte o voce VIP nella professione? La lista di Verga ha VIP tra le professioni.','Elenco completo delle professioni.']},
-  prodotti:{from:['Catalogo con ricerca per referenza (MPN), modello, seriale.','Ogni pezzo venduto è un prodotto unico (seriale).','Gioielli Pomellato/Messika registrati come brand + collezione + referenza.'],open:['Articoli a taglia (anelli): oggi la misura viene usata come matricola, ma il gestionale non accetta matricole duplicate. Serve un\'altra codifica.']},
-  cassa:{from:['La cassa crea un Ordine su TSC, che parte verso il gestionale (TSE) tramite eCube senza conferma di ritorno.','La fattura si chiede da qui: il gestionale la emette e restituisce subito il PDF da stampare. L\'operatore non apre mai il gestionale.','Intestazione: alla persona (scontrino) o alla sua società (fattura).','Il primo ordine trasforma il Prospect in Cliente.'],open:['Scontrino di cortesia: soluzione tipo Scontrini in Cloud da valutare.','Cosa fa l\'operatore se la fattura non arriva in tempo (timeout)?','Mostrare lo stato "inviato / confermato" dell\'ordine?']},
+  prodotti:{from:['Catalogo con ricerca per referenza (MPN), modello, seriale.','I venditori cercano per referenza: stessa referenza, matricole diverse. La disponibilità somma i pezzi del magazzino e delle boutique; tra boutique i pezzi si spediscono.','Cliccando un prodotto si apre la scheda con la disponibilità per sede e le manifestazioni compatibili.','Ogni pezzo venduto è un prodotto unico (seriale).','Gioielli Pomellato/Messika registrati come brand + collezione + referenza.','Ricerca per marca, modello, referenza, famiglia e sottofamiglia (documento di analisi).'],open:['Elenco definitivo di famiglie e sottofamiglie da TSE e regole di visibilità (es. ricambi nascosti).','Il magazzino centrale è una sede a sé su TSE? Nome da usare nel portale.','Articoli a taglia (anelli): oggi la misura viene usata come matricola, ma il gestionale non accetta matricole duplicate. Serve un\'altra codifica.']},
+  cassa:{from:['La cassa crea un Ordine su TSC, che parte verso il gestionale (TSE) tramite eCube senza conferma di ritorno.','La fattura si chiede da qui: il gestionale la emette e restituisce subito il PDF da stampare. L\'operatore non apre mai il gestionale.','Intestazione: alla persona (scontrino) o alla sua società (fattura).','Il primo ordine trasforma il Prospect in Cliente.','Pagamento a saldo o con acconto; documento commerciale (scontrino non fiscale) o fattura emessi dal gestionale e restituiti in PDF.','Lo scontrino fiscale resta sul registratore telematico: Cassa in Cloud non serve (documento di analisi).'],open:['Regole aziendali per acconti e saldi (importo minimo, metodi ammessi).','Cosa fa l\'operatore se la fattura non arriva in tempo (timeout)?','Mostrare lo stato "inviato / confermato" dell\'ordine?']},
   passaggi:{from:['Registro di visite, chiamate e mail, con motivo.','Ogni evento salva operatore, cliente, tipo e data: da qui si ricavano ultima visita e clienti dormienti.','Il follow-up dopo la visita può far partire una mail automatica.'],open:['Eventi del brand (serate, mostre) vanno gestiti qui o a parte?']},
-  pda:{from:['Stati della PDA: Manifestazione, Preordine, Associata, Ordine, Annullata (configurabili).','Associare e dissociare un prodotto: solo direttore vendite e titolare. Trasformare in ordine: qualsiasi venditore.','Notifica a chi ha creato la PDA quando il prodotto viene associato.','PDA visibili in tutte le boutique: un interesse nato in multimarca può essere soddisfatto dalla boutique Rolex.','Alla creazione parte la mail di presa in carico.'],open:['Il ramo Preordine va validato con Verga.','Quali campi della PDA passano al gestionale quando diventa ordine?','Circa 1.000 manifestazioni attive da migrare.']},
-  riparazioni:{from:['Stesso portale dei venditori: entrando in Riparazioni il colore passa dal verde al grafite. Usa la sezione solo il venditore, che registra a mano anche le fasi di laboratorio.','Monitoraggio buste al posto dell\'Excel "DB RIP": semaforo (rosso da fare o in ritardo, ambra in attesa del cliente, verde in lavorazione, blu pronto al ritiro).','Filtro "preventivo accettato, non assegnato" richiesto da Verga.','Per ogni busta: dove si trova fisicamente, chi ce l\'ha e la presunta consegna.','5 step per tutti i tipi di busta: gli step che non servono (es. preventivo in garanzia) vengono saltati.'],open:['Confermare i 5 step: Accettazione, Preventivo, Risposta cliente, Lavorazione, Riconsegna.','Numerazione delle buste: la genera il portale o sono prestampate? Diversa per laboratorio?','Posizioni a magazzino: elenco reale (stanze, cassetti, banchi).','Come calcolare la presunta consegna quando non esistono tempi standard.','Migrazione dello storico da "DB RIP" e da Arca.','2 licenze TSC: come si condividono clienti e storico tra le due.']},
-  'rip-new':{from:['Accettazione in negozio con i campi della scheda di Arca, senza Attività/Processo: l\'area si ricava dalla boutique.','Tipo busta: Riparazione, Garanzia, Cambio pila, CPO, Quotazione, Conto vendita (cliente sempre Verga Vintage, con numero e data CV).','Pulsante "Scatta foto" che su iPad apre la fotocamera; allegati multipli con un tocco.','Note principali (le vede il cliente in ricevuta) e note interne separate.','Alla conferma si crea in automatico la bolla del ciclo attivo con l\'articolo RIPARAZIONE, senza ricopiare i dati.','Subito dopo: ricevuta da firmare e 2 etichette per la busta.'],open:['Significato esatto di Nc, Nm e Cal.','Campo "Attributi" di Arca: cosa contiene?','Testo delle clausole della ricevuta.','Contenuto della seconda etichetta.','Codice fiscale e PEC: aggiunti all\'anagrafica cliente perché servono in ricevuta.']},
-  busta:{from:['Per ogni step le attività sono divise tra eseguite e da fare; una sola data per attività (inizio e fine coincidono), salvata con il venditore.','Il venditore inserisce le voci del preventivo dettate dal laboratorio e lo invia con un link privato.','Se il cliente rifiuta: preventivo chiuso, eventuale costo del solo preventivo, orologio restituito.','In chiusura più file allegati (documenti di scarico). Lo scarico dei componenti resta su TSE con il numero di busta, via eCube.','Avviso di ritiro con lo scontrino incluso.','CPO: dopo l\'offerta accettata la stessa busta passa da intestata al cliente a intestata a Verga; storico completo sulla busta.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni step (via eCube).']},
+  pda:{from:['Stati della PDA: Manifestazione, Preordine, Associata, Ordine, Annullata (configurabili).','Associare e dissociare un prodotto: solo direttore vendite e titolare. Trasformare in ordine: qualsiasi venditore.','Notifica a chi ha creato la PDA quando il prodotto viene associato.','PDA visibili in tutte le boutique: un interesse nato in multimarca può essere soddisfatto dalla boutique Rolex.','Alla creazione parte la mail di presa in carico.','Prodotti disponibili: per ogni pezzo libero si vede chi lo aspetta e si associa da lì.','Per ogni manifestazione: evento particolare legato all\'acquisto e venditore incaricato.','Se il cliente rinuncia la PDA resta nello storico come Annullata e il pezzo torna disponibile.'],open:['Verga manda gli screen delle manifestazioni attuali per allineare la pagina di dettaglio.','Il ramo Preordine va validato con Verga.','Quali campi della PDA passano al gestionale quando diventa ordine?','Circa 1.000 manifestazioni attive da migrare.']},
+  riparazioni:{from:['Documento di analisi (bozza 02): i venditori aprono le pratiche, ne seguono lo stato e riconsegnano l\'orologio; avanzamento del workflow, assegnazioni e aggiornamento degli stati sono del backoffice.','Il venditore vede 5 fasi semplificate: Accettazione, Valutazione, Attesa cliente, Lavorazione, Riconsegna (variano per tipo: es. CPO e Vintage finiscono "In vendita").','Il bottone "Vista amministrazione" mostra cosa vedrà il backoffice: workflow completo, responsabile, tecnico, posizione, filtri dedicati.','Monitoraggio al posto dell\'Excel "DB RIP": ricerca per busta, cliente, marca, referenza, matricola.','Stesso portale: entrando in Riparazioni il colore passa dal verde al grafite.'],open:['Come entra il backoffice: stesso portale con un ruolo diverso o una licenza TSC dedicata?','Numerazione delle buste: la genera il portale o sono prestampate?','Posizioni a magazzino: elenco reale (stanze, cassetti, banchi).','Migrazione dello storico da "DB RIP" e da Arca.','Cambio pila: lo chiude il venditore in boutique (come nel mockup) o passa comunque dal backoffice?']},
+  'rip-new':{from:['Tipi di pratica: Riparazione, Garanzia, Cambio pila, CPO, Quotazione, Conto vendita (Verga Vintage, cliente sempre Verga Vintage, numerazione separata VV).','Dati dell\'orologio: marca, modello, referenza, matricola e altri identificativi; motivo, note e valore dichiarato a fini assicurativi.','Foto scattate direttamente dalla fotocamera del tablet, senza salvataggi intermedi; più allegati per pratica.','Note per il cliente (vanno sui documenti) separate dalle note interne di laboratorio.','All\'apertura: ricevuta di presa in carico, etichette busta e orologio, e documento di presa in carico inviato al gestionale.'],open:['Significato esatto di Nc, Nm e Cal.','Testo delle clausole della ricevuta.','Modelli attuali delle etichette (contenuto e formato).']},
+  busta:{from:['Vista venditore: fase attuale, presunta consegna, preventivo e riconsegna (avviso di ritiro con scontrino, poi ritiro).','Vista amministrazione: stati completi del documento di analisi con data e utente per ognuno; Accettazione e Avviso ritiro restano al venditore.','Workflow per tipo: Riparazione (8 stati), Garanzia senza preventivo, Cambio pila, Riparazione esterna (invio, attesa, rientro, controllo), CPO in due fasi, Quotazione, Conto vendita Vintage.','Preventivo online: il cliente sceglie le voci; se rifiuta la pratica salta alla riconsegna con il costo del solo preventivo.','Documenti collegati a numero pratica e busta: presa in carico, preventivo, scarichi componenti (più di uno), chiusura, avviso di ritiro.','CPO e Vintage: scheda economica con costi di revisione e certificazione, valore di acquisto e vendita, acquirente finale.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni stato (via eCube).']},
   prev:{from:['Preventivo online al posto del PDF: una casella per ogni voce e il totale.','Il cliente sceglie le voci e conferma; paga al ritiro. Può anche stampare.','Accesso con link privato oppure con email e password: Verga li vuole entrambi.','La risposta torna sulla busta e va registrata nel gestionale.'],open:['Serve una firma o basta la conferma online?','Come torna il preventivo accettato nel gestionale.']},
   auto:{from:['Form a due step. Step 1 obbligatorio e breve: nome, cognome, email (obbligatoria), telefono, brand di interesse facoltativi.','Step 2 facoltativo: dati utili per la comunicazione. Se non li compila, li chiede il venditore in negozio.','Ogni nuovo contatto nasce come Prospect.','Dopo il go-live Verga vuole mandare ai clienti una mail con un breve questionario (es. misura del polso).'],open:['Dove viene pubblicato il form (sito, QR in boutique, tablet)?','Consenso privacy: firma su iPad in negozio, online con checkbox?']},
 };
 NOTES.pdaList = NOTES.pda;
+NOTES.manifestazione = NOTES.pda;
+NOTES.prodotto = NOTES.prodotti;
 
 /* ---------------- layout ---------------- */
 const RIP_VIEWS = ['riparazioni','rip-new','busta'];
@@ -297,11 +313,13 @@ function render(){
   else if (S.view === 'prev') app.innerHTML = vPrev();
   else if (S.view === 'customer') app.innerHTML = vCustomer();
   else if (S.view === 'tsc') { app.innerHTML = shell(`${betaBanner()}<div id="vp-tsc-slot" class="vp-tsc"></div>`); const src = document.getElementById('vp-tsc-src'), slot = document.getElementById('vp-tsc-slot'); if (src && slot) { slot.appendChild(src); src.hidden = false; } }
-  else app.innerHTML = shell(betaBanner() + ({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,cassa:vCassa,passaggi:vPassaggi,pda:vPda,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
+  else app.innerHTML = shell(betaBanner() + ({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,prodotto:vProdotto,cassa:vCassa,passaggi:vPassaggi,pda:vPda,manifestazione:vManif,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
+  const key = S.view + ':' + S.id;
+  if (key !== render.key) { render.key = key; (app.querySelector('.content') || app.firstElementChild)?.classList.add('vfade'); }
   if (S.view === 'clienti') renderResults();
 }
 function shell(content){
-  const n = (v, icon, label, badge='') => `<button title="${label}" aria-label="${label}" class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) || (S.view === 'tsc' && TSC_NAV() === v) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="vbadge num">${badge}</span>` : ''}</button>`;
+  const n = (v, icon, label, badge='') => `<button title="${label}" aria-label="${label}" class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'prodotti' && S.view === 'prodotto') || (v === 'pda' && S.view === 'manifestazione') || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) || (S.view === 'tsc' && TSC_NAV() === v) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="vbadge num">${badge}</span>` : ''}</button>`;
   const compat = openPdas().filter(p => compatible(p).length).length;
   return `<div class="shell">
   <aside class="side ${S.navOpen ? 'open' : ''}">
@@ -314,7 +332,7 @@ function shell(content){
       ${n('pda','heart','Manifestazioni', compat || '')}
       <div class="grp">Vendita</div>
       ${n('cassa','cart','Cassa', S.cart.items.length || '')}
-      ${n('prodotti','box','Catalogo')}
+      ${n('prodotti','box','Magazzino')}
       ${n('riparazioni','wrench','Riparazioni')}
     </nav>
     <div class="side-foot vnav">
@@ -378,10 +396,9 @@ const TSC_NAV = () => { const p = (VPD.path || [])[1], q = (VPD.path || [])[2]; 
 /* ---------------- DASHBOARD ---------------- */
 function vDash(){
   const todayEv = events.filter(e => sameDay(e.date) && e.boutique === S.boutique);
-  const matches = openPdas().flatMap(p => compatible(p).map(pr => ({p, pr})));
-  const fu = events.filter(e => e.followup && !e.done && dday(e.followup) <= 3).sort((a,b) => dt(a.followup) - dt(b.followup));
   const bdays = clients.filter(c => inWeek(c.birth));
   const recent = [...events].sort((a,b) => dt(b.date) - dt(a.date)).slice(0,6);
+  const latest = recentPdas().filter(p => p.stato !== 'annullata').slice(0,6);
   return `
   <div class="hello page-h"><div><div class="label">${NOW.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'})} · ${S.boutique}</div><h1>Buongiorno, ${S.operator.split(' ')[0]}</h1></div></div>
   <div class="qa">
@@ -393,39 +410,30 @@ function vDash(){
   <div class="kpis">
     <div class="kpi"><span class="label">Passaggi oggi</span><b class="num">${todayEv.length}</b><span class="muted">in ${S.boutique}</span></div>
     <div class="kpi"><span class="label">Manifestazioni aperte</span><b class="num">${openPdas().length}</b><span class="muted">in tutte le boutique</span></div>
-    <div class="kpi alert"><span class="label">Arrivi compatibili</span><b class="num">${matches.length}</b><span class="muted">da assegnare</span></div>
-    <div class="kpi"><span class="label">Follow-up</span><b class="num">${fu.length}</b><span class="muted">entro 3 giorni</span></div>
+    <div class="kpi"><span class="label">Compleanni</span><b class="num">${bdays.length}</b><span class="muted">questa settimana</span></div>
+    <div class="kpi"><span class="label">Orologi in magazzino</span><b class="num">${watchesInStock().length}</b><span class="muted">tra boutique e magazzino centrale</span></div>
   </div>
   <div class="grid2">
     <div class="stack">
       <section class="vcard">
-        <div class="card-h">${ic('sparkle')}<h2>Arrivi compatibili con le manifestazioni</h2><span class="sp"></span><button class="link" data-go="pda">Vedi tutte</button></div>
-        <div class="list">${matches.length ? matches.map(({p, pr}) => { const c = C(p.clientId); return `
-          <div class="vrow">
+        <div class="card-h">${ic('heart')}<h2>Ultime manifestazioni inserite</h2><span class="sp"></span><button class="link" data-go="pda">Vedi tutte</button></div>
+        <div class="list">${latest.map(p => { const c = C(p.clientId); return `
+          <div class="vrow click" data-go="manifestazione" data-id="${p.id}">
             ${avatar(c)}
-            <div class="grow"><div class="t">${esc(fullName(c))} <span class="faint">aspetta</span> ${esc(p.brand)} ${esc(p.modello)}</div>
-            <div class="s">Disponibile: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)} · ${prodState(pr)}</div></div>
-            <button class="vbtn vbtn-sm ${canAssign() ? 'vbtn-primary' : ''}" data-act="assegna" data-id="${p.id}" ${canAssign() ? '' : 'disabled title="Solo direttore vendite o titolare"'}>${canAssign() ? '' : '🔒 '}Associa</button>
-          </div>`; }).join('') : '<div class="empty">Nessun arrivo compatibile.</div>'}</div>
-      </section>
-      <section class="vcard">
-        <div class="card-h">${ic('clock')}<h2>Ultimi passaggi</h2><span class="sp"></span><button class="link" data-go="passaggi">Registro completo</button></div>
-        <div class="list">${recent.map(evRow).join('')}</div>
+            <div class="grow"><div class="t">${esc(fullName(c))} <span class="faint" style="font-weight:500">desidera</span> ${esc(p.brand)} ${esc(p.modello)}</div>
+            <div class="s">${sameDay(p.date) ? 'Oggi' : fmtD(p.date)} · ${esc(c.boutique)} · ${esc(p.operator)}</div></div>
+            ${p.stato !== 'aperta' ? stateTag(p) : ''}${ic('arrow')}
+          </div>`; }).join('') || '<div class="empty">Nessuna manifestazione inserita.</div>'}</div>
       </section>
     </div>
     <div class="stack">
       <section class="vcard">
-        <div class="card-h">${ic('check')}<h2>Follow-up da fare</h2></div>
-        <div class="list">${fu.length ? fu.map(e => { const c = C(e.clientId); const late = dday(e.followup) <= 0; return `
-          <div class="vrow">
-            <button class="vbtn vbtn-sm" data-act="fu-done" data-id="${e.id}" aria-label="Segna come fatto">${ic('check')}</button>
-            <div class="grow click" data-go="cliente" data-id="${c.id}" style="cursor:pointer"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(e.note || EV[e.type].label)}</div></div>
-            <span class="tag ${late ? 'red' : 'amber'}">${late ? 'Oggi' : fmtD(e.followup).slice(0,5)}</span>
-          </div>`; }).join('') : '<div class="empty">Tutto fatto.</div>'}</div>
+        <div class="card-h">${ic('gift')}<h2>Compleanni della settimana</h2></div>
+        <div class="list">${bdays.map(c => `<div class="vrow click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${c.birth.d} ${MESI[c.birth.m-1]} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div>`).join('') || '<div class="empty">Nessun compleanno questa settimana.</div>'}</div>
       </section>
       <section class="vcard">
-        <div class="card-h">${ic('gift')}<h2>Compleanni della settimana</h2></div>
-        <div class="list">${bdays.map(c => `<div class="vrow click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${c.birth.d} ${MESI[c.birth.m-1]} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div>`).join('')}</div>
+        <div class="card-h">${ic('clock')}<h2>Ultime attività inserite</h2><span class="sp"></span><button class="link" data-go="passaggi">Registro completo</button></div>
+        <div class="list">${recent.map(evRow).join('')}</div>
       </section>
     </div>
   </div>`;
@@ -578,7 +586,7 @@ function vCliente(){
     <div class="lastline">${ic('clock')}
       ${lv ? `Ultimo passaggio in negozio: <b>${fmtDT(lv.date)}</b> (${rel(lv.date)}) · ${esc(lv.boutique)} · con ${esc(lv.operator)}` : 'Nessun passaggio in negozio registrato'}
       ${lc && lc !== lv ? `<span class="faint">·</span> Ultimo contatto: <b>${EV[lc.type].short.toLowerCase()}</b> ${rel(lc.date)}` : ''}
-      <span style="margin-left:auto" class="faint">${c.privacy ? `Privacy firmata il ${fmtD(c.privacy)} · ` : ''}In anagrafica dal ${fmtD(c.since)}</span>
+      <span style="margin-left:auto" class="faint">${c.privacy ? `Consenso privacy: ${privTxt(c.privacy)}${c.privacy.firma ? ' · firma salvata' : ''} · ` : ''}In anagrafica dal ${fmtD(c.since)}</span>
     </div>
   </section>
   <nav class="tabs" aria-label="Sezioni scheda">
@@ -645,22 +653,20 @@ function tasksCard(c){
   </section>`;
 }
 function pdaCard(p){
-  const m = compatible(p);
   const pr = p.productId ? P(p.productId) : null;
-  const lock = !canAssign();
   return `<div class="pda">
     <span class="wm">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}</span>
     <div class="grow">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ttl">${esc(p.brand)} ${esc(p.modello)}</span>${stateTag(p)}</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ttl">${esc(p.brand)} ${esc(p.modello)}</span>${p.stato !== 'aperta' ? stateTag(p) : ''}</div>
+      ${pdaNome(p) ? `<div class="faint" style="font-size:12px;letter-spacing:.02em;margin-top:-4px">${esc(pdaNome(p))}</div>` : ''}
       <div class="spec">${p.ref ? `<span>Referenza <b class="mono">${esc(p.ref)}</b></span>` : '<span>Referenza <b>qualsiasi</b></span>'}<span>Quadrante <b>${esc(p.quadrante || '—')}</b></span><span>Bracciale <b>${esc(p.bracciale || '—')}</b></span></div>
-      ${p.note ? `<div class="muted" style="font-size:13px">${esc(p.note)}</div>` : ''}
-      <div class="faint" style="font-size:12px">Registrata il ${fmtD(p.date)} da ${esc(p.operator)}${['aperta','preordine'].includes(p.stato) ? ` · in attesa da ${rel(p.date).replace(' fa','')}` : ''}</div>
-      ${pr ? `<div class="match">${ic('check')}Prodotto associato: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span> · ${eur(pr.price)}</div>` : ''}
-      ${m.length ? `<div class="match">${ic('sparkle')}${m.length === 1 ? '1 pezzo compatibile' : m.length + ' pezzi compatibili'}: ${m.map(x => `${esc(x.ref)} (${x.stato === 'in_arrivo' ? 'in arrivo' : esc(x.boutique)})`).join(', ')}</div>` : ''}
+      ${pr ? `<div class="match">${ic('check')}Prodotto associato: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span></div>` : ''}
+      <div class="match">${ic('calendar')}Inserita il ${fmtD(p.date)}</div>
     </div>
-    <div class="act">
-      ${['aperta','preordine'].includes(p.stato) ? `<button class="vbtn vbtn-sm ${m.length && !lock ? 'vbtn-primary' : ''}" data-act="assegna" data-id="${p.id}" ${m.length && !lock ? '' : 'disabled'}>${lock ? '🔒 ' : ''}Associa prodotto</button>${lock && m.length ? '<span class="faint" style="font-size:11px;max-width:150px;text-align:right">Solo direttore vendite o titolare</span>' : ''}<button class="vbtn vbtn-sm vbtn-ghost" data-act="pda-cancel" data-id="${p.id}">Annulla</button>` : ''}
-      ${p.stato === 'assegnata' ? `<button class="vbtn vbtn-sm vbtn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>${!lock ? `<button class="vbtn vbtn-sm vbtn-ghost" data-act="dissocia" data-id="${p.id}">Dissocia</button>` : ''}` : ''}
+    <div class="act ${pr ? 'col' : ''}">
+      ${pr ? `<span class="tag ok">${ic('check')}Prodotto associato</span>` : ''}
+      ${p.stato === 'assegnata' ? `<button class="vbtn vbtn-sm vbtn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>` : ''}
+      <button class="vbtn vbtn-sm" data-go="manifestazione" data-id="${p.id}">Dettaglio</button>
     </div>
   </div>`;
 }
@@ -674,7 +680,7 @@ function tlRow(e){
   return `<div class="tl"><span class="dot ${t.cls}">${ic(t.icon)}</span><div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>${t.label}</b><span class="faint">${fmtDT(e.date)}</span>${e.motivo ? `<span class="tag">${esc(e.motivo)}</span>` : ''}${e.followup ? `<span class="tag ${e.done ? 'ok' : 'amber'}">${e.done ? 'Follow-up fatto' : 'Follow-up ' + fmtD(e.followup).slice(0,5)}</span>` : ''}</div>
   <div class="muted" style="font-size:13px">${esc(e.boutique)} · ${esc(e.operator)}</div>${e.note ? `<div style="margin-top:4px">${esc(e.note)}</div>` : ''}</div></div>`;
 }
-function cAnagrafica(c){ return `<section class="vcard">${clientForm(c)}<div class="modal-f" style="border-radius:0 0 12px 12px"><button class="vbtn" data-act="tab" data-v="panoramica">Annulla</button><button class="vbtn vbtn-primary" data-act="save-client" data-id="${c.id}">${ic('check')}Salva modifiche</button></div></section>`; }
+function cAnagrafica(c){ return `<section class="vcard">${clientForm(c)}<div class="modal-f" style="border-radius:0 0 25px 25px"><button class="vbtn" data-act="tab" data-v="panoramica">Annulla</button><button class="vbtn vbtn-primary" data-act="save-client" data-id="${c.id}">${ic('check')}Salva modifiche</button></div></section>`; }
 function clientForm(c){
   const n = S.nc; const b = c ? c.birth || {} : {};
   const brands = n.brands, ints = n.interests, bl = c?.billing || {}, ms = c?.misure || {};
@@ -750,9 +756,11 @@ function clientForm(c){
     <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${ints.includes(v) ? 'on' : ''}" data-act="nc-int" data-v="${v}">${ints.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
     <p class="faint" style="margin:0;font-size:12px">Brand e interessi sono liste chiuse definite da Verga: il venditore può solo scegliere.</p>
   </div>
-  <div class="fsec"><h3>${ic('edit')}${c ? 'Newsletter' : 'Prima nota e newsletter'}</h3>
+  <div class="fsec"><h3>${ic('edit')}${c ? 'Privacy' : 'Prima nota e privacy'}</h3>
     ${c ? '<p class="faint" style="margin:0;font-size:12.5px">Le note interne si aggiungono dalla Panoramica: ogni nota è firmata con nome, data e ora.</p>' : `<label class="field"><span>Prima nota interna (verrà firmata con il tuo nome)</span><textarea class="ta" id="f-note"></textarea></label>`}
-    <label class="check"><input type="checkbox" id="f-nl" ${c?.newsletter ? 'checked' : ''}> Consenso a newsletter e comunicazioni (MailUp)</label>
+    <label class="check"><input type="checkbox" id="f-priv" ${c?.privacy ? 'checked' : ''}> Il cliente ha dato il consenso all'informativa privacy</label>
+    <p class="faint" style="margin:0;font-size:12px">${c?.privacy ? `Consenso registrato: ${privTxt(c.privacy)}.` : 'Se spunti tu la casella, il consenso viene registrato con data, ora e il tuo nome. Se lo firma il cliente sul tablet, risulta dato dal cliente.'}</p>
+    ${c?.privacy?.firma ? `<div class="field"><span>Firma del cliente</span>${sigImg(c.privacy.firma)}</div>` : ''}
   </div>`;
 }
 function linkSection(c){
@@ -806,7 +814,7 @@ function vNuovo(){
   <div class="page-h"><div><div class="label">Anagrafica</div><h1>Nuovo cliente</h1></div></div>
   <div class="banner info">${ic('search')}<div class="grow"><p>Prima di registrare, controlla che il cliente non esista già: mentre scrivi nome, email o telefono ti mostriamo le schede simili.</p></div></div>
   <section class="vcard">${clientForm(null)}
-    <div class="modal-f" style="border-radius:0 0 12px 12px"><span class="auto-info">${ic('info')}Registrato da ${S.operator} · ${S.boutique}</span><button class="vbtn" data-go="clienti">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="save-client">${ic('check')}Registra cliente</button></div>
+    <div class="modal-f" style="border-radius:0 0 25px 25px"><span class="auto-info">${ic('info')}Registrato da ${S.operator} · ${S.boutique}</span><button class="vbtn" data-go="clienti">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="save-client">${ic('check')}Registra cliente</button></div>
   </section>`;
 }
 
@@ -814,26 +822,53 @@ function vNuovo(){
 const prodThumb = p => p.img ? `<span class="av" style="border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#fff"><img src="${p.img}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover"></span>` : `<span class="av" style="border-radius:10px;background:var(--surface-2);color:var(--muted);border:1px solid var(--line)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span>`;
 function vProdotti(){
   const f = S.pf, q = f.q.trim().toLowerCase();
-  const list = products.filter(p => (!q || `${p.ref} ${p.code} ${p.ean} ${p.modello} ${p.seriale} ${p.brand}`.toLowerCase().includes(q)) && (!f.brand || p.brand === f.brand) && (!f.tipo || p.tipo === f.tipo) && (!f.stato || p.stato === f.stato));
+  const hit = p => (!q || `${p.ref} ${p.code} ${p.ean} ${p.modello} ${p.seriale} ${p.brand}`.toLowerCase().includes(q)) && (!f.brand || p.brand === f.brand) && (!f.tipo || p.tipo === f.tipo) && (!f.sub || p.modello === f.sub) && (!f.stato || p.stato === f.stato) && (!f.loc || p.boutique === f.loc);
+  const list = products.filter(p => !['venduto','esaurito'].includes(p.stato) && hit(p)).sort((a, b) => `${a.brand} ${a.modello} ${a.ref} ${a.seriale}`.localeCompare(`${b.brand} ${b.modello} ${b.ref} ${b.seriale}`));
   const realBrands = [...new Set(products.map(p => p.brand).filter(Boolean))].sort();
-  const hasSer = products.some(p => p.seriale), hasBq = products.some(p => p.boutique);
+  const w = watchesInStock(), wMag = w.filter(p => p.boutique === 'Magazzino').length;
   return `
-  <div class="page-h"><div><div class="label">Vendita</div><h1>Catalogo</h1></div><span class="sp"></span><span class="muted num">${products.length} ${products.length === 1 ? 'prodotto' : 'prodotti'} da TSC</span></div>
-  <div class="vcard card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-    <label class="field"><span>Referenza, codice o modello</span><input class="in" id="pf-q" data-pf="q" value="${esc(f.q)}" placeholder="Es. 126610LN"></label>
+  <div class="page-h"><div><div class="label">Vendita</div><h1>Magazzino</h1></div><span class="sp"></span><span class="muted">Da TSC · una riga per pezzo, la stessa referenza può avere più matricole</span></div>
+  <div class="kpis">
+    <div class="kpi"><span class="label">Orologi disponibili</span><b class="num">${w.length}</b><span class="muted">totale pezzi disponibili</span></div>
+    <div class="kpi"><span class="label">Magazzino centrale</span><b class="num">${wMag}</b><span class="muted">orologi</span></div>
+    <div class="kpi"><span class="label">Nelle boutique</span><b class="num">${w.length - wMag}</b><span class="muted">orologi</span></div>
+    <div class="kpi"><span class="label">In arrivo</span><b class="num">${products.filter(p => p.tipo === 'orologio' && p.stato === 'in_arrivo').length}</b><span class="muted">orologi</span></div>
+  </div>
+  <div class="vcard card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+    <label class="field"><span>Referenza, modello o matricola</span><input class="in" id="pf-q" data-pf="q" value="${esc(f.q)}" placeholder="Es. 126610LN"></label>
     <label class="field"><span>Brand</span><select class="sel" data-pf="brand">${opts(realBrands.length ? realBrands : BRANDS, f.brand, 'Tutti')}</select></label>
-    <label class="field"><span>Tipo</span><select class="sel" data-pf="tipo">${[['','Tutti'],['orologio','Orologi'],['gioiello','Gioielli']].map(([v,l]) => `<option value="${v}" ${f.tipo === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-    <label class="field"><span>Stato</span><select class="sel" data-pf="stato">${[['','Tutti'],['disponibile','Disponibile'],['in_arrivo','In arrivo'],['riservato','Riservato'],['esaurito','Esaurito']].map(([v,l]) => `<option value="${v}" ${f.stato === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="field"><span>Sottofamiglia · collezione</span><select class="sel" data-pf="sub">${opts([...new Set(products.filter(p => (!f.brand || p.brand === f.brand) && (!f.tipo || p.tipo === f.tipo)).map(p => p.modello))].sort(), f.sub, 'Tutte')}</select></label>
+    <label class="field"><span>Famiglia</span><select class="sel" data-pf="tipo">${[['','Tutte'],['orologio','Orologi'],['gioiello','Gioielli']].map(([v,l]) => `<option value="${v}" ${f.tipo === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+    <label class="field"><span>Locazione</span><select class="sel" data-pf="loc">${opts(LOCS, f.loc, 'Ovunque')}</select></label>
+    <label class="field"><span>Stato</span><select class="sel" data-pf="stato">${[['','Tutti'],['disponibile','Disponibile'],['in_arrivo','In arrivo'],['riservato','Riservato']].map(([v,l]) => `<option value="${v}" ${f.stato === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
   </div>
   <div class="vcard tbl-wrap"><table class="tbl">
-    <thead><tr><th>Prodotto</th><th>Referenza</th>${hasSer ? '<th>Seriale</th>' : ''}${hasBq ? '<th>Boutique</th>' : ''}<th>Stato</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
-    <tbody>${list.map(p => `<tr>
-      <td><div class="cell-person">${prodThumb(p)}<div><b>${p.link ? `<a href="${p.link}" class="link">${esc([p.brand, p.modello].filter(Boolean).join(' '))}</a>` : esc([p.brand, p.modello].filter(Boolean).join(' '))}</b><small>${p.code && p.code !== p.ref ? 'Codice ' + esc(p.code) : esc(p.det)}${p.ean ? ' · EAN ' + esc(p.ean) : ''}</small></div></div></td>
-      <td class="mono">${esc(p.ref)}</td>${hasSer ? `<td class="mono">${esc(p.seriale)}</td>` : ''}${hasBq ? `<td>${esc(p.boutique)}</td>` : ''}<td>${prodState(p)}</td>
+    <thead><tr><th>Prodotto</th><th>Referenza (MPN)</th><th>Matricola</th><th>Locazione</th><th style="text-align:right">Prezzo</th><th></th></tr></thead>
+    <tbody>${list.map(p => `<tr class="click" data-go="prodotto" data-id="${p.id}">
+      <td><div class="cell-person">${prodThumb(p)}<div><b>${esc(p.brand)} ${esc(p.modello)}</b><small>${p.tipo === 'gioiello' ? 'Collezione ' + esc(p.modello) + ' · ' : ''}${p.code && p.code !== p.ref ? 'Codice ' + esc(p.code) : esc(p.det)}${p.ean ? ' · EAN ' + esc(p.ean) : ''}</small></div></div></td>
+      <td class="mono">${esc(p.ref)}</td>
+      <td class="mono">${esc(p.seriale) || '<span class="faint">—</span>'}</td>
+      <td><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">${p.boutique ? `<b>${esc(p.boutique === 'Magazzino' ? 'Magazzino centrale' : p.boutique)}</b>` : ''}${prodState(p)}</div></td>
       <td class="num" style="text-align:right">${eur(p.price)}</td>
-      <td style="text-align:right">${p.stato === 'disponibile' || p.stato === 'riservato' ? `<button class="vbtn vbtn-sm" data-act="add-cart" data-id="${p.id}">${ic('cart')}In cassa</button>` : ''}</td>
-    </tr>`).join('') || '<tr><td colspan="7"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
+      <td style="text-align:right"><button class="vbtn vbtn-sm" data-go="prodotto" data-id="${p.id}">Dettaglio</button></td>
+    </tr>`).join('') || '<tr><td colspan="6"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
   </table></div>`;
+}
+function vProdotto(){
+  const back = `<div><button class="link" data-go="prodotti" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Magazzino</button></div>`;
+  const p = products.find(x => x.id === S.id) || pieces(S.id)[0];
+  if (!p) return back + '<section class="vcard"><div class="empty">Prodotto non trovato.</div></section>';
+  return `${back}
+  <section class="vcard pdp">
+    <div class="pdp-img">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</div>
+    <div class="pdp-info">
+      <div class="label">${esc(p.brand)} · ${p.tipo === 'gioiello' ? 'Gioiello' : 'Orologio'}</div>
+      <h1>${esc(p.modello)}</h1>
+      <div class="muted">${esc(p.det)}</div>
+      <dl class="kv"><dt>Referenza (MPN)</dt><dd class="mono">${esc(p.ref)}</dd><dt>Matricola</dt><dd class="mono">${esc(p.seriale)}</dd><dt>Locazione</dt><dd>${esc(p.boutique === 'Magazzino' ? 'Magazzino centrale' : p.boutique)}</dd><dt>Stato</dt><dd>${prodState(p)}</dd><dt>Prezzo</dt><dd class="num">${eur(p.price)}</dd></dl>
+      ${inStock(p) ? `<div><button class="vbtn vbtn-primary" data-act="add-cart" data-id="${p.id}">${ic('cart')}In cassa</button></div>` : ''}
+    </div>
+  </section>`;
 }
 
 /* ---------------- CASSA ---------------- */
@@ -865,6 +900,8 @@ function vCassa(){
       <div class="tot"><div class="muted"><span>Imponibile</span><span class="num">${eur(tot / 1.22)}</span></div><div class="muted"><span>IVA 22%</span><span class="num">${eur(tot - tot / 1.22)}</span></div><div><span class="label" style="align-self:center">Totale</span><span class="big num">${eur(tot)}</span></div></div>
       ${c ? `<div style="padding:0 20px 12px;display:flex;flex-direction:column;gap:8px"><span class="label">Intestazione</span><div class="pay" style="padding:0"><button class="${S.cart.inv !== 'societa' ? 'on' : ''}" data-act="inv" data-v="persona">${esc(fullName(c))}</button><button class="${S.cart.inv === 'societa' ? 'on' : ''}" data-act="inv" data-v="societa" ${c.billing?.rs ? '' : 'disabled title="Nessun dato di fatturazione in anagrafica"'}>${c.billing?.rs ? esc(c.billing.rs) : 'Società (non inserita)'}</button></div></div>` : ''}
       <div class="pay">${['Carta','Bonifico','Contanti','Finanziamento'].map(m => `<button class="${cart.pay === m ? 'on' : ''}" data-act="pay" data-v="${m}">${m}</button>`).join('')}</div>
+      <div style="padding:0 20px 12px;display:flex;flex-direction:column;gap:8px"><span class="label">Pagamento</span><div class="pay" style="padding:0"><button class="${cart.acc === '' ? 'on' : ''}" data-act="paytype" data-v="saldo">Saldo completo</button><button class="${cart.acc !== '' ? 'on' : ''}" data-act="paytype" data-v="acconto">Acconto</button></div>
+        ${cart.acc !== '' ? `<label class="field"><span>Importo dell'acconto</span><input class="in num" id="cart-acc" inputmode="decimal" value="${esc(cart.acc)}" placeholder="€"></label><span class="faint" style="font-size:12px">Il saldo si registra sullo stesso ordine quando il cliente torna.</span>` : ''}</div>
       <div style="padding:0 20px 20px"><button class="vbtn vbtn-primary vbtn-lg" style="width:100%" data-act="checkout" ${cart.items.length && c ? '' : 'disabled'}>${ic('check')}Crea ordine</button>
       ${!c ? '<p class="faint" style="font-size:12px;margin:8px 0 0;text-align:center">Associa un cliente per concludere la vendita.</p>' : ''}</div>
     </section>
@@ -884,11 +921,15 @@ function clientPick(q, act, sel){
 /* ---------------- PASSAGGI ---------------- */
 function vPassaggi(){
   const f = S.evf;
-  const list = [...events].filter(e => (!f.type || e.type === f.type) && (!f.boutique || e.boutique === f.boutique)).sort((a,b) => dt(b.date) - dt(a.date));
+  const q = f.q.trim().toLowerCase();
+  const list = [...events].filter(e => (!f.type || e.type === f.type) && (!f.boutique || e.boutique === f.boutique) && (!f.op || e.operator === f.op) && (!f.per || dday(e.date) >= -f.per) && (!q || fullName(C(e.clientId)).toLowerCase().includes(q))).sort((a,b) => dt(b.date) - dt(a.date));
   return `
   <div class="page-h"><div><div class="label">Registro attività</div><h1>Passaggi e contatti</h1></div><span class="sp"></span><button class="vbtn vbtn-primary" data-act="evento">${ic('plus')}Registra passaggio</button></div>
   <div class="chips">${[['','Tutti'],['visita','Passaggi in negozio'],['chiamata_in','Chiamate ricevute'],['chiamata_out','Chiamate fatte'],['mail','Mail']].map(([v,l]) => `<button class="chip ${f.type === v ? 'on' : ''}" data-act="evf" data-k="type" data-v="${v}">${l}</button>`).join('')}
-    <select class="sel" style="width:auto;height:38px;border-radius:99px" data-evf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte le boutique')}</select></div>
+    <select class="sel" style="width:auto;height:38px;border-radius:99px" data-evf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte le boutique')}</select>
+    <select class="sel" style="width:auto;height:38px;border-radius:99px" data-evf="op">${opts(OPERATORS.map(o => o.name), f.op, 'Tutti i venditori')}</select>
+    <select class="sel" style="width:auto;height:38px;border-radius:99px" data-evf="per">${[['','Sempre'],['7','Ultimi 7 giorni'],['30','Ultimi 30 giorni'],['90','Ultimi 3 mesi'],['365','Ultimo anno']].map(([v,l]) => `<option value="${v}" ${f.per === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
+    <input class="in" style="width:200px;height:38px;border-radius:99px" data-evf="q" value="${esc(f.q)}" placeholder="Cliente"></div>
   <div class="vcard tbl-wrap"><table class="tbl">
     <thead><tr><th>Quando</th><th>Cliente</th><th>Tipo</th><th>Motivo e nota</th><th>Boutique · Venditore</th><th>Follow-up</th></tr></thead>
     <tbody>${list.map(e => { const c = C(e.clientId), t = EV[e.type]; return `<tr class="click" data-go="cliente" data-id="${c.id}">
@@ -904,97 +945,169 @@ function vPassaggi(){
 
 /* ---------------- MANIFESTAZIONI ---------------- */
 function vPda(){
-  const list = pdas.filter(p => !S.pdaf || p.stato === S.pdaf).sort((a,b) => compatible(b).length - compatible(a).length || dt(a.date) - dt(b.date));
+  const f = S.pdf, q = f.q.trim().toLowerCase();
+  const list = pdas.filter(p => { const c = C(p.clientId); return (!S.pdaf || p.stato === S.pdaf) && (!f.brand || p.brand === f.brand) && (!f.boutique || c.boutique === f.boutique) && (!f.operator || p.operator === f.operator) && (!q || `${fullName(c)} ${p.brand} ${p.modello} ${p.ref}`.toLowerCase().includes(q)); })
+    .sort((a,b) => (b.stato === 'assegnata') - (a.stato === 'assegnata') || compatible(b).length - compatible(a).length || dt(a.date) - dt(b.date));
   return `
-  <div class="page-h"><div><div class="label">Clienti</div><h1>Manifestazioni di interesse</h1></div><span class="sp"></span><button class="vbtn vbtn-primary" data-act="pda-new">${ic('plus')}Nuova manifestazione</button></div>
+  <div class="page-h"><div><div class="label">Clienti</div><h1>Manifestazioni di interesse</h1></div><span class="sp"></span><button class="vbtn" data-act="pda-disp">${ic('box')}Prodotti disponibili</button><button class="vbtn vbtn-primary" data-act="pda-new">${ic('plus')}Nuova manifestazione</button></div>
   <div class="banner info">${ic('info')}<div class="grow"><p>Una manifestazione è una <b>PDA con prodotto generico e senza prezzo</b>. Quando arriva un pezzo compatibile, il direttore vendite o il titolare lo <b>associa</b> e chi ha creato la PDA riceve una notifica. Quando il cliente viene a comprare, qualsiasi venditore la trasforma in <b>ordine</b>. Le PDA sono visibili in tutte le boutique.</p></div></div>
+  <div class="vcard card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+    <label class="field"><span>Cliente, modello o referenza</span><input class="in" id="pdf-q" data-pdf="q" value="${esc(f.q)}" placeholder="Es. Rossi o Daytona"></label>
+    <label class="field"><span>Brand</span><select class="sel" data-pdf="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
+    <label class="field"><span>Boutique del cliente</span><select class="sel" data-pdf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
+    <label class="field"><span>Registrata da</span><select class="sel" data-pdf="operator">${opts(OPERATORS.map(o => o.name), f.operator, 'Tutti')}</select></label>
+  </div>
   <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['assegnata','Associata'],['venduta','Ordine'],['annullata','Annullata'],['','Tutte']].map(([v,l]) => `<button class="chip ${S.pdaf === v ? 'on' : ''}" data-act="pdaf" data-v="${v}">${l} <span class="num" style="opacity:.7">${pdas.filter(p => !v || p.stato === v).length}</span></button>`).join('')}</div>
-  <section class="vcard">${list.map(p => { const c = C(p.clientId); return `<div style="border-bottom:1px solid var(--line)"><div style="padding:12px 20px 0;display:flex;align-items:center;gap:10px">${avatar(c)}<button class="link" data-go="cliente" data-id="${c.id}">${esc(fullName(c))}</button><span class="faint">· ${esc(c.boutique)}</span></div>${pdaCard(p)}</div>`; }).join('') || '<div class="empty">Nessuna manifestazione in questo stato.</div>'}</section>`;
+  <section class="vcard pda-list">${list.map(p => { const c = C(p.clientId); return `<div class="pda-it"><div style="padding:14px 20px 0;display:flex;align-items:center;gap:10px">${avatar(c)}<button class="link" data-go="cliente" data-id="${c.id}">${esc(fullName(c))}</button><span class="faint">· ${esc(c.boutique)}</span></div>${pdaCard(p)}</div>`; }).join('') || '<div class="empty">Nessuna manifestazione con questi filtri.</div>'}</section>`;
+}
+function vManif(){
+  const back = `<div><button class="link" data-go="pda" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Manifestazioni</button></div>`;
+  const p = pdas.find(x => x.id === S.id);
+  if (!p) return back + '<section class="vcard"><div class="empty">Manifestazione non trovata.</div></section>';
+  const c = C(p.clientId), pr = p.productId ? P(p.productId) : null, lock = !canAssign(), open = ['aperta','preordine'].includes(p.stato);
+  return `${back}
+  <div class="page-h"><div><div class="label">Manifestazione di interesse · inserita il ${fmtD(p.date)}</div><h1>${esc(p.brand)} ${esc(p.modello)}</h1></div><span class="sp"></span>${stateTag(p)}</div>
+  <div class="grid2">
+    <div class="stack">
+      <section class="vcard">
+        <div class="card-h">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}<h2>Cosa desidera il cliente</h2></div>
+        <div class="card-b"><dl class="kv">
+          <dt>Brand</dt><dd>${esc(p.brand)}</dd><dt>Modello</dt><dd>${esc(p.modello)}</dd><dt>Nome modello</dt><dd>${esc(pdaNome(p) || '—')}</dd>
+          <dt>Referenza</dt><dd>${p.ref ? `<span class="mono">${esc(p.ref)}</span>` : 'Qualsiasi'}</dd>
+          <dt>Quadrante</dt><dd>${esc(p.quadrante || '—')}</dd><dt>Bracciale</dt><dd>${esc(p.bracciale || '—')}</dd>
+          <dt>Evento particolare</dt><dd>${esc(p.evento || '—')}</dd><dt>Venditore incaricato</dt><dd>${esc(p.incaricato || p.operator)}</dd>
+          <dt>Note</dt><dd>${esc(p.note || '—')}</dd>
+          <dt>Inserita</dt><dd>il ${fmtD(p.date)} da ${esc(p.operator)}</dd>
+          ${open ? `<dt>In attesa da</dt><dd>${rel(p.date).replace(' fa','')}</dd>` : ''}
+        </dl></div>
+      </section>
+      ${pr ? `<section class="vcard">
+        <div class="card-h">${ic('check')}<h2>Prodotto associato</h2></div>
+        <div class="list"><div class="vrow click" data-go="prodotto" data-id="${pr.id}">${ic('watch')}<div class="grow"><div class="t">${esc(pr.brand)} ${esc(pr.modello)} · <span class="mono">${esc(pr.ref)}</span></div><div class="s">Matricola <span class="mono">${esc(pr.seriale)}</span> · ${esc(pr.boutique)} · ${eur(pr.price)}</div></div>${ic('arrow')}</div></div>
+      </section>` : ''}
+    </div>
+    <div class="stack">
+      <section class="vcard">
+        <div class="card-h">${ic('users')}<h2>Cliente</h2></div>
+        <div class="list"><div class="vrow click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.email || c.tel || 'Scheda da completare')} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div></div>
+      </section>
+      <section class="vcard card-b" style="display:flex;flex-direction:column;gap:10px">
+        ${pr ? `<span class="vbtn vbtn-done" role="status">${ic('check')}Prodotto associato</span>` : ''}
+        ${p.stato === 'assegnata' ? `<button class="vbtn vbtn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>${lock ? '' : `<button class="vbtn" data-act="dissocia" data-id="${p.id}">Dissocia prodotto</button>`}` : ''}
+        <button class="vbtn vbtn-danger" data-act="pda-del" data-id="${p.id}">${ic('trash')}Elimina manifestazione</button>
+        ${lock ? '<span class="faint" style="font-size:12px">Associare e dissociare: solo direttore vendite o titolare.</span>' : ''}
+      </section>
+    </div>
+  </div>`;
 }
 
 /* ---------------- RIPARAZIONI ---------------- */
-/* Usa la sezione solo il venditore: registra a mano anche le fasi di laboratorio. */
+/* Il portale è dei venditori: aprono la busta, seguono 5 fasi semplificate e riconsegnano l'orologio.
+   Il workflow completo (valutazione, preventivo, assegnazione, lavorazione, chiusura, documenti) è dell'amministrazione/backoffice:
+   il bottone "Vista amministrazione" (S.ripBO) mostra in anteprima cosa vedranno loro. */
 const TECNICI = ['Andrea Galli','Paolo Riva','Davide Sala','Casa madre (esterno)'];
+const BACKOFFICE = ['Elena Bassi','Chiara Rinaldi'];
 const UBICAZIONI = ['Cassaforte boutique','Laboratorio Mazzini · banco','Laboratorio Capelli · banco','Laboratorio Patek · banco','Casa madre (riparazione esterna)','Pronto in boutique per il ritiro','Riconsegnato al cliente'];
 const AREA_OF = {'Bottega Storica':'Laboratorio Mazzini','Boutique Multibrand':'Laboratorio Capelli','Boutique Patek Philippe':'Laboratorio Patek','Boutique Portofino':'Laboratorio Mazzini'};
 const MOTIVI_RIP = ['Preventivo riparazione','Revisione completa','Cambio pila','Sostituzione vetro','Regolazione bracciale','Lucidatura','Valutazione CPO','Quotazione'];
-const SKIP = s => ({n:s.n, skip:s.skip});
-const STD = [
-  {n:'Accettazione', t:['Modulo compilato','Foto scattate davanti al cliente','Ricevuta firmata dal cliente','Etichette stampate sulla busta']},
-  {n:'Preventivo', t:['Presa in carico del tecnico','Preventivo redatto','Preventivo inviato al cliente']},
-  {n:'Risposta cliente', t:['Risposta del cliente registrata']},
-  {n:'Lavorazione', t:['Riparazione assegnata','Riparazione eseguita','Documento di scarico allegato']},
-  {n:'Riconsegna', t:['Avviso di ritiro inviato con scontrino','Orologio ritirato']},
-];
+/* stati del workflow (documento di analisi): [nome, fase che vede il venditore, chi lo gestisce: v venditore, b backoffice, c cliente] */
+const FASI_STD = ['Accettazione','Valutazione','Attesa cliente','Lavorazione','Riconsegna'];
 const RIP_TIPI = {
-  'Riparazione':{d:'Preventivo, accettazione del cliente e lavorazione', steps:STD},
-  'Garanzia':{d:'Nessun preventivo, il resto del flusso è uguale', steps:[STD[0], SKIP({n:'Preventivo', skip:'Non previsto in garanzia'}), SKIP({n:'Risposta cliente', skip:'Non prevista in garanzia'}), STD[3], STD[4]]},
-  'Cambio pila':{d:'Preventivo accettato subito', steps:[{n:'Accettazione', t:['Modulo compilato','Ricevuta firmata dal cliente']}, SKIP({n:'Preventivo', skip:'Accettato subito'}), SKIP({n:'Risposta cliente', skip:'Accettato subito'}), {n:'Lavorazione', t:['Pila sostituita']}, STD[4]]},
-  'CPO':{d:'Valutazione Rolex Certified Pre-Owned, 10 giorni per l\'offerta', steps:[STD[0],
-    {n:'Valutazione', t:['Prima valutazione del tecnico','Offerta redatta','Offerta comunicata al cliente']},
-    {n:'Risposta cliente', t:['Offerta accettata: la busta passa a Verga']},
-    {n:'Lavorazione e certificazione', t:['Riparazione assegnata','Riparazione chiusa','Inviato a certificazione Rolex','Rientro certificazione con documento allegato']},
-    {n:'In vendita', t:['Foto pubblicate','Orologio in vendita']}]},
-  'Quotazione':{d:'Valutazione come servizio, senza acquisto', steps:[STD[0], {n:'Valutazione', t:['Valutazione del tecnico','Quotazione comunicata al cliente']}, SKIP({n:'Risposta cliente', skip:'Non prevista'}), SKIP({n:'Lavorazione', skip:'Non prevista'}), {n:'Riconsegna', t:['Avviso di ritiro inviato','Orologio ritirato']}]},
-  'Conto vendita':{d:'Accettazione CV nell\'area Verga Vintage', steps:[{n:'Accettazione CV', t:['Modulo compilato','Foto scattate']}, {n:'Lavori da fare', t:['Lavori segnalati','Lavori eseguiti']}, SKIP({n:'Risposta cliente', skip:'Non prevista'}), SKIP({n:'Lavorazione', skip:'Inclusa nei lavori'}), {n:'In vendita', t:['Orologio in vendita']}]},
+  'Riparazione':{d:'Preventivo, risposta del cliente e lavorazione', fasi:FASI_STD, stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Redazione preventivo',1,'b'],['Invio preventivo',2,'c'],['Preventivo accettato',3,'b'],['Lavorazione',3,'b'],['Chiusura riparazione',3,'b'],['Avviso ritiro',4,'v']]},
+  'Garanzia':{d:'Come la riparazione, senza preventivo', fasi:['Accettazione','Valutazione','Lavorazione','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Lavorazione',2,'b'],['Chiusura riparazione',2,'b'],['Avviso ritiro',3,'v']]},
+  'Cambio pila':{d:'Intervento rapido fatto in boutique', fasi:['Accettazione','Intervento','Riconsegna'], stati:[['Accettazione',0,'v'],['Esecuzione intervento',1,'v'],['Chiusura pratica',2,'v']]},
+  'CPO':{d:'Rolex Certified Pre-Owned: offerta, poi preparazione alla vendita', fasi:['Accettazione','Valutazione','Attesa cliente','Preparazione','In vendita'], stati:[['Accettazione CPO',0,'v'],['Valutazione tecnica',1,'b'],['Redazione offerta',1,'b'],['Comunicazione offerta',2,'c'],['Accettazione o rifiuto del cliente',2,'c'],['Revisione interna o esterna',3,'b'],['Certificazione Rolex',3,'b'],['Rientro certificazione',3,'b'],['Pubblicazione',4,'b'],['Pronto alla vendita',4,'b'],['Vendita finale',4,'b']]},
+  'Quotazione':{d:'Valutazione economica, senza vendita', fasi:['Accettazione','Valutazione','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Comunicazione quotazione',1,'b'],['Chiusura pratica',2,'v']]},
+  'Conto vendita':{d:'Verga Vintage: dalla presa in carico alla vendita', fasi:['Accettazione','Valutazione','Lavorazione','In vendita'], stati:[['Accettazione Vintage',0,'v'],['Valutazione tecnica',1,'b'],['Eventuale lavorazione interna o esterna',2,'b'],['Pubblicazione per la vendita',3,'b'],['Pronto alla vendita',3,'b'],['Vendita finale',3,'b']]},
 };
+/* riparazione affidata a un laboratorio esterno o alla casa madre: la decide il backoffice dopo la valutazione */
+const ESTERNA = {fasi:['Accettazione','Valutazione','Lavorazione esterna','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Invio laboratorio esterno',2,'b'],['Attesa lavorazione',2,'b'],['Rientro oggetto',2,'b'],['Lavorazione/controllo',2,'b'],['Chiusura pratica',3,'v']]};
 const VERGA_VINTAGE = {id:'vv', nome:'Verga', cognome:'Vintage', email:'vintage@verga1947.it', tel:'', incomplete:false};
 const RC = id => id === 'vv' ? VERGA_VINTAGE : C(id);
-const tk = (s, i) => `${s}-${i}`;
-const doneUpTo = (tipo, step, extra = {}) => { const d = {}; RIP_TIPI[tipo].steps.forEach((s, si) => { if (si < step && s.t) s.t.forEach((_, ti) => d[tk(si, ti)] = {date:'', by:''}); }); return Object.assign(d, extra); };
+/* date di ingresso negli stati: D(['2026-09-10T11:20','Marco Verdi'], …) → {0:{date,by}, 1:…} */
+const D = (...xs) => Object.fromEntries(xs.map((x, i) => [i, x && {date:x[0], by:x[1]}]).filter(x => x[1]));
 let ripSeq = store.seq.rip;
 const repairs = store.repairs;
+/* buste salvate con la versione precedente del portale (step e attività): ripartono da "Accettazione" */
+repairs.forEach(r => { if (r.si === undefined) { r.si = 1; r.dates = D([r.acc, r.by], [r.acc, r.by]); r.resp = r.resp || ''; r.log = r.log || []; r.foto = r.foto || 0; delete r.step; delete r.done; } });
 const R = id => repairs.find(r => r.id === id);
-const rSteps = r => RIP_TIPI[r.tipo].steps;
+const wf = r => r.esterna ? ESTERNA : RIP_TIPI[r.tipo];
+const stato = r => wf(r).stati[r.si];
+const nextStato = r => wf(r).stati[r.si + 1];
+const faseN = r => r.reso ? 'Riconsegna' : wf(r).fasi[stato(r)[1]];
+/* la riconsegna (avviso di ritiro e ritiro) la fa il venditore; anche dopo un'offerta CPO rifiutata */
+const inRic = r => !r.closed && (r.reso || (r.si === wf(r).stati.length - 1 && stato(r)[2] === 'v'));
 const prevTot = (r, onlyOk) => (r.prev?.voci || []).filter(v => !onlyOk || v.ok).reduce((s, v) => s + v.p, 0);
 const clientRepairs = id => repairs.filter(r => r.clientId === id).sort((a,b) => dt(b.acc) - dt(a.acc));
-/* semaforo: rosso = da fare, ambra = in attesa del cliente, verde = in lavorazione, blu = pronto al ritiro */
+const objName = r => `${r.obj.marca} ${r.obj.modello}`;
+const late = r => !r.closed && !inRic(r) && r.presunta && dday(r.presunta) < 0;
+const LAV = ['Lavorazione','Intervento','Preparazione','Lavorazione esterna'];
+/* semaforo del venditore: per fase */
 function ripLight(r){
   if (r.closed) return {k:'closed', c:'', l:'Chiusa'};
-  const s = rSteps(r)[r.step];
-  if (r.presunta && dday(r.presunta) < 0 && r.step < 4) return {k:'late', c:'red', l:'In ritardo'};
-  if (r.step === 2) return {k:'wait', c:'amber', l:'In attesa del cliente'};
-  if (r.step === 4) return {k:'ready', c:'blue', l:s.n === 'In vendita' ? 'Da mettere in vendita' : 'Pronto al ritiro'};
-  if (r.step === 3 && r.done[tk(3,0)]) return {k:'work', c:'ok', l:'In lavorazione'};
-  return {k:'todo', c:'red', l:'Da fare'};
+  if (inRic(r)) return {k:'ready', c:'blue', l:r.tipo === 'Cambio pila' || r.reso || r.tipo === 'Quotazione' ? 'Da riconsegnare' : 'Pronto al ritiro'};
+  if (r.tipo === 'Cambio pila') return {k:'todo', c:'red', l:'Da fare in boutique'};
+  if (late(r)) return {k:'late', c:'red', l:'In ritardo'};
+  const f = faseN(r);
+  if (f === 'Attesa cliente') return {k:'wait', c:'amber', l:'Attesa cliente'};
+  if (LAV.includes(f)) return {k:'work', c:'ok', l:f === 'Lavorazione esterna' ? 'Laboratorio esterno' : f === 'Preparazione' ? 'In preparazione' : 'In lavorazione'};
+  if (f === 'In vendita') return {k:'sale', c:'blue', l:'In vendita'};
+  return {k:'val', c:'', l:'In valutazione'};
 }
-const light = r => { const x = ripLight(r); return `<span class="tag ${x.c}"><span class="dotl ${x.c}"></span>${x.l}</span>`; };
-const accNotAss = r => !r.closed && r.step === 3 && !r.done[tk(3,0)] && r.prev?.stato === 'accettato';
-const objName = r => `${r.obj.marca} ${r.obj.modello}`;
+/* semaforo del backoffice: chi deve muoversi */
+function boLight(r){
+  if (r.closed) return {k:'closed', c:'', l:'Chiusa'};
+  if (inRic(r)) return {k:'v', c:'blue', l:'Al venditore'};
+  if (stato(r)[2] === 'c') return {k:'wait', c:'amber', l:'Attesa cliente'};
+  if (stato(r)[2] === 'v') return {k:'v', c:'blue', l:'In boutique'};
+  if (late(r)) return {k:'late', c:'red', l:'In ritardo'};
+  if (stato(r)[0] === 'Preventivo accettato') return {k:'nass', c:'red', l:'Da assegnare'};
+  return r.tecnico ? {k:'work', c:'ok', l:'In corso'} : {k:'todo', c:'red', l:'Da gestire'};
+}
+const light = r => { const x = S.ripBO ? boLight(r) : ripLight(r); return `<span class="tag ${x.c}"><span class="dotl ${x.c}"></span>${x.l}</span>`; };
+const boBtn = () => `<button class="vbtn" data-act="rip-bo">${ic(S.ripBO ? 'eyeOff' : 'eye')}${S.ripBO ? 'Torna alla vista venditore' : 'Vista amministrazione'}</button>`;
+const boBanner = () => S.ripBO ? `<div class="banner bo">${ic('eye')}<div class="grow"><p><b>Vista amministrazione e backoffice · anteprima.</b> Qui si gestisce tutto il workflow: valutazione tecnica, preventivo, assegnazione, lavorazione, chiusura e documenti verso il gestionale. Il venditore vede solo le fasi semplificate e fa accettazione e riconsegna.</p></div></div>` : '';
+const RIP_CHIPS = {
+  v:[['aperte','Aperte',r => !r.closed],['val','In valutazione',r => ripLight(r).k === 'val'],['wait','Attesa cliente',r => ripLight(r).k === 'wait'],['work','In lavorazione',r => ['work','sale'].includes(ripLight(r).k)],['ready','Da fare in boutique',r => ['ready','todo'].includes(ripLight(r).k)],['late','In ritardo',late],['chiuse','Chiuse',r => r.closed],['tutte','Tutte',() => true]],
+  b:[['aperte','Aperte',r => !r.closed],['todo','Da gestire',r => ['todo','late','nass'].includes(boLight(r).k)],['nass','Preventivo accettato, non assegnato',r => boLight(r).k === 'nass'],['wait','Attesa cliente',r => boLight(r).k === 'wait'],['est','Laboratori esterni',r => !r.closed && r.esterna],['cpo','CPO e Vintage',r => !r.closed && ['CPO','Conto vendita'].includes(r.tipo)],['late','In ritardo',late],['chiuse','Chiuse',r => r.closed],['tutte','Tutte',() => true]],
+};
+const miniSteps = (n, cur, done) => `<div class="mini-steps">${Array.from({length:n}, (_, i) => `<i class="${done || i < cur ? 'done' : i === cur ? 'cur' : ''}"></i>`).join('')}</div>`;
 
 function vRip(){
-  const f = S.rf, q = f.q.trim().toLowerCase();
-  const tests = {aperte:r => !r.closed, todo:r => ['todo','late'].includes(ripLight(r).k), wait:r => ripLight(r).k === 'wait', nass:accNotAss, ready:r => ripLight(r).k === 'ready', chiuse:r => r.closed, tutte:() => true};
-  const base = repairs.filter(r => (!q || `${r.busta} ${fullName(RC(r.clientId))} ${objName(r)} ${r.obj.ref}`.toLowerCase().includes(q)) && (!f.tipo || r.tipo === f.tipo) && (!f.boutique || r.boutique === f.boutique) && (!f.tecnico || r.tecnico === f.tecnico));
-  const list = base.filter(tests[f.chip]).sort((a,b) => dt(a.acc) - dt(b.acc));
-  const cnt = k => repairs.filter(tests[k]).length;
+  const bo = S.ripBO, f = S.rf, q = f.q.trim().toLowerCase(), chips = RIP_CHIPS[bo ? 'b' : 'v'];
+  const test = (chips.find(c => c[0] === f.chip) || chips[0])[2];
+  const base = repairs.filter(r => (!q || `${r.busta} ${fullName(RC(r.clientId))} ${objName(r)} ${r.obj.ref} ${r.obj.nc}`.toLowerCase().includes(q)) && (!f.tipo || r.tipo === f.tipo) && (!f.boutique || r.boutique === f.boutique) && (!bo || ((!f.tecnico || r.tecnico === f.tecnico) && (!f.resp || r.resp === f.resp))));
+  const list = base.filter(test).sort((a,b) => dt(a.acc) - dt(b.acc));
+  const cnt = fn => repairs.filter(fn).length, ch = k => chips.find(c => c[0] === k)[2];
+  const kpis = bo ? [['Da gestire', cnt(ch('todo')), 'stati in mano al backoffice', true],['Accettati non assegnati', cnt(ch('nass')), 'da passare al tecnico'],['Laboratori esterni', cnt(ch('est')), 'fuori sede'],['In ritardo', cnt(late), 'oltre la presunta consegna']]
+    : [['Aperte', cnt(ch('aperte')), 'in tutte le boutique'],['Attesa cliente', cnt(ch('wait')), 'preventivi da confermare'],['Da fare in boutique', cnt(ch('ready')), 'riconsegne e cambi pila', true],['In ritardo', cnt(late), 'oltre la presunta consegna']];
+  const prevCell = r => `<td class="num" style="text-align:right">${r.prev?.voci?.length ? `${eur(r.prev.stato === 'accettato' ? prevTot(r, true) : prevTot(r))}<div class="faint" style="font-size:12px">${({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || ''}</div>` : '<span class="faint">—</span>'}</td>`;
+  const consegna = r => `<td class="num">${r.presunta ? `${fmtD(r.presunta)}<div class="faint" style="font-size:12px">${r.closed || inRic(r) ? '' : dday(r.presunta) < 0 ? `<span style="color:var(--red)">${-dday(r.presunta)} giorni di ritardo</span>` : `tra ${dday(r.presunta)} giorni`}</div>` : '<span class="faint">—</span>'}</td>`;
   return `
-  <div class="page-h"><div><div class="label">Assistenza · tutte le boutique</div><h1>Riparazioni</h1></div><span class="sp"></span><button class="vbtn vbtn-primary" data-go="rip-new">${ic('plus')}Nuova accettazione</button></div>
-  <div class="kpis">
-    <div class="kpi alert"><span class="label">Da fare</span><b class="num">${cnt('todo')}</b><span class="muted">di cui ${repairs.filter(r => ripLight(r).k === 'late').length} in ritardo</span></div>
-    <div class="kpi"><span class="label">In attesa del cliente</span><b class="num">${cnt('wait')}</b><span class="muted">preventivi inviati</span></div>
-    <div class="kpi"><span class="label">Accettati non assegnati</span><b class="num">${cnt('nass')}</b><span class="muted">da passare al tecnico</span></div>
-    <div class="kpi"><span class="label">Pronti al ritiro</span><b class="num">${cnt('ready')}</b><span class="muted">avvisare il cliente</span></div>
-  </div>
-  <div class="chips">${[['aperte','Aperte'],['todo','Da fare'],['wait','In attesa del cliente'],['nass','Preventivo accettato, non assegnato'],['ready','Pronti al ritiro'],['chiuse','Chiuse'],['tutte','Tutte']].map(([k,l]) => `<button class="chip ${f.chip === k ? 'on' : ''}" data-act="rf-chip" data-v="${k}">${l} <span class="num" style="opacity:.7">${cnt(k)}</span></button>`).join('')}</div>
+  <div class="page-h"><div><div class="label">${bo ? 'Amministrazione e backoffice' : 'Assistenza · tutte le boutique'}</div><h1>Riparazioni</h1></div><span class="sp"></span>${boBtn()}<button class="vbtn vbtn-primary" data-go="rip-new">${ic('plus')}Nuova accettazione</button></div>
+  ${boBanner()}
+  <div class="kpis">${kpis.map(([l, n, s, a]) => `<div class="kpi ${a ? 'alert' : ''}"><span class="label">${l}</span><b class="num">${n}</b><span class="muted">${s}</span></div>`).join('')}</div>
+  <div class="chips">${chips.map(([k, l, fn]) => `<button class="chip ${f.chip === k ? 'on' : ''}" data-act="rf-chip" data-v="${k}">${l} <span class="num" style="opacity:.7">${cnt(fn)}</span></button>`).join('')}</div>
   <div class="vcard card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-    <label class="field"><span>Busta, cliente, marca o referenza</span><input class="in" id="rf-q" value="${esc(f.q)}" placeholder="Es. B-2026-0418"></label>
+    <label class="field"><span>Busta, cliente, marca, referenza o matricola</span><input class="in" id="rf-q" value="${esc(f.q)}" placeholder="Es. B-2026-0418"></label>
     <label class="field"><span>Tipo</span><select class="sel" data-rf="tipo">${opts(Object.keys(RIP_TIPI), f.tipo, 'Tutti')}</select></label>
     <label class="field"><span>Boutique</span><select class="sel" data-rf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
-    <label class="field"><span>Tecnico</span><select class="sel" data-rf="tecnico">${opts(TECNICI, f.tecnico, 'Tutti')}</select></label>
+    ${bo ? `<label class="field"><span>Responsabile</span><select class="sel" data-rf="resp">${opts(BACKOFFICE, f.resp, 'Tutti')}</select></label>
+    <label class="field"><span>Tecnico</span><select class="sel" data-rf="tecnico">${opts(TECNICI, f.tecnico, 'Tutti')}</select></label>` : ''}
   </div>
   <div class="vcard tbl-wrap"><table class="tbl">
-    <thead><tr><th>Stato</th><th>Busta</th><th>Cliente</th><th>Oggetto</th><th>Step</th><th>Dove si trova · tecnico</th><th>Presunta consegna</th><th style="text-align:right">Preventivo</th></tr></thead>
-    <tbody>${list.map(r => { const c = RC(r.clientId), st = rSteps(r); return `<tr class="click" data-go="busta" data-id="${r.id}">
+    <thead><tr><th>Stato</th><th>Busta</th><th>Cliente</th><th>Oggetto</th><th>${bo ? 'Workflow' : 'Fase'}</th>${bo ? '<th>Responsabile · tecnico · dove</th>' : ''}<th>Presunta consegna</th><th style="text-align:right">Preventivo</th></tr></thead>
+    <tbody>${list.map(r => { const c = RC(r.clientId), w = wf(r); return `<tr class="click" data-go="busta" data-id="${r.id}">
       <td>${light(r)}</td>
-      <td style="white-space:nowrap"><b class="mono">${esc(r.busta)}</b><div class="faint" style="font-size:12px">${esc(r.tipo)} · ${fmtD(r.acc)}</div></td>
+      <td style="white-space:nowrap"><b class="mono">${esc(r.busta)}</b><div class="faint" style="font-size:12px">${esc(r.tipo)}${r.esterna ? ' esterna' : ''} · ${fmtD(r.acc)}</div></td>
       <td style="min-width:140px"><b>${esc(fullName(c))}</b><div class="faint" style="font-size:12px">${esc(r.boutique)}</div></td>
       <td style="min-width:170px"><b>${esc(objName(r))}</b><div class="faint mono" style="font-size:12px">${esc(r.obj.ref)}</div><div class="faint" style="font-size:12px">${esc(r.motivo)}</div></td>
-      <td style="min-width:140px">${r.closed ? '<span class="faint">Chiusa</span>' : `<div style="font-weight:600;font-size:13px">${r.step + 1}/5 · ${esc(st[r.step].n)}</div><div class="mini-steps">${st.map((s, i) => `<i class="${s.skip || r.skipped?.[i] ? 'skip' : i < r.step ? 'done' : i === r.step ? 'cur' : ''}"></i>`).join('')}</div>`}</td>
-      <td>${esc(r.ubic)}<div class="faint" style="font-size:12px">${esc(r.tecnico || 'Nessun tecnico')}</div></td>
-      <td class="num">${r.presunta ? `${fmtD(r.presunta)}<div class="faint" style="font-size:12px">${r.closed ? '' : dday(r.presunta) < 0 ? `<span style="color:var(--red)">${-dday(r.presunta)} giorni di ritardo</span>` : `tra ${dday(r.presunta)} giorni`}</div>` : '<span class="faint">—</span>'}</td>
-      <td class="num" style="text-align:right">${r.prev?.voci?.length ? `${eur(r.prev.stato === 'accettato' ? prevTot(r, true) : prevTot(r))}<div class="faint" style="font-size:12px">${({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || ''}</div>` : '<span class="faint">—</span>'}</td>
-    </tr>`; }).join('') || '<tr><td colspan="8"><div class="empty">Nessuna busta in questo stato.</div></td></tr>'}</tbody>
+      <td style="min-width:150px">${r.closed ? '<span class="faint">Chiusa</span>' : bo
+        ? `<div style="font-weight:600;font-size:13px">${r.si + 1}/${w.stati.length} · ${esc(stato(r)[0])}</div>${miniSteps(w.stati.length, r.si)}`
+        : `<div style="font-weight:600;font-size:13px">${esc(faseN(r))}</div>${miniSteps(w.fasi.length, r.reso ? w.fasi.length - 1 : stato(r)[1])}`}</td>
+      ${bo ? `<td style="min-width:150px">${esc(r.resp || 'Da assegnare')}<div class="faint" style="font-size:12px">${esc(r.tecnico || 'Nessun tecnico')}</div><div class="faint" style="font-size:12px">${esc(r.ubic)}</div></td>` : ''}
+      ${consegna(r)}${prevCell(r)}
+    </tr>`; }).join('') || `<tr><td colspan="${bo ? 8 : 7}"><div class="empty">Nessuna busta in questo stato.</div></td></tr>`}</tbody>
   </table></div>`;
 }
 
@@ -1056,144 +1169,220 @@ function vRipNew(){
       </div>
       <div class="fgrid"><label class="field"><span>Promemoria</span><input class="in" data-rn="prom" value="${esc(n.prom)}" placeholder="Es. richiamare per il preventivo"></label><label class="field"><span>Quando</span><input class="in" type="date" data-rn="promD" value="${esc(n.promD)}"></label></div>
     </div>
-    <div class="modal-f" style="border-radius:0 0 12px 12px"><span class="auto-info">${ic('info')}Creata da ${esc(S.operator)} · ${esc(S.boutique)} · ${esc(area)}</span><button class="vbtn" data-go="riparazioni">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="rn-save">${ic('check')}Apri busta e stampa ricevuta</button></div>
+    <div class="modal-f" style="border-radius:0 0 25px 25px"><span class="auto-info">${ic('info')}Creata da ${esc(S.operator)} · ${esc(S.boutique)} · ${esc(area)}</span><button class="vbtn" data-go="riparazioni">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="rn-save">${ic('check')}Apri busta e stampa ricevuta</button></div>
   </section>`;
 }
 
 /* ---- scheda busta ---- */
 function vBusta(){
   const r = R(S.id); if (!r) return '<div class="empty">Busta non trovata.</div>';
-  const c = RC(r.clientId), st = rSteps(r), cur = st[r.step], lt = ripLight(r);
-  const owner = r.tipo === 'CPO' && r.owner === 'verga';
+  const bo = S.ripBO, c = RC(r.clientId), owner = r.tipo === 'CPO' && r.owner === 'verga';
   return `
-  <div><button class="link" data-go="riparazioni" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Riparazioni</button></div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><button class="link" data-go="riparazioni" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Riparazioni</button><span class="sp" style="flex:1"></span>${boBtn()}</div>
+  ${boBanner()}
   <section class="vcard">
     <div class="chead">
       <span class="av lg" style="border-radius:14px">${ic(r.obj.tipo === 'Gioiello' ? 'gem' : 'watch')}</span>
       <div class="who">
-        <div class="tags">${light(r)}<span class="tag">${esc(r.tipo)}</span>${r.garanzia ? '<span class="tag ok">In garanzia</span>' : ''}${r.tipo === 'CPO' ? `<span class="tag ${owner ? 'brand' : 'amber'}">Intestata a ${owner ? 'Verga' : 'cliente'}</span>` : ''}</div>
+        <div class="tags">${light(r)}<span class="tag">${esc(r.tipo)}${r.esterna ? ' · laboratorio esterno' : ''}</span>${r.garanzia ? '<span class="tag ok">In garanzia</span>' : ''}${r.tipo === 'CPO' ? `<span class="tag ${owner ? 'brand' : 'amber'}">Intestata a ${owner ? 'Verga' : 'cliente'}</span>` : ''}${r.tipo === 'Conto vendita' ? '<span class="tag brand">Verga Vintage S.r.l.</span>' : ''}</div>
         <h1>${esc(r.busta)}</h1>
         <div style="font-weight:600">${esc(objName(r))} <span class="muted mono" style="font-weight:500">${esc(r.obj.ref)}</span></div>
         <div class="meta"><span>${ic('users')}<button class="link" ${c.id !== 'vv' ? `data-go="cliente" data-id="${c.id}"` : ''}>${esc(fullName(c))}</button></span><span>${ic('store')}${esc(r.boutique)}</span><span>${ic('clock')}Accettata ${fmtD(r.acc)} da ${esc(r.by)}</span><span>${ic('wrench')}${esc(r.motivo)}</span></div>
       </div>
       <div class="oneclick" style="min-width:220px">
         <span class="label">Stampe</span>
-        <button class="vbtn" data-act="rb-ricevuta" data-id="${r.id}">${ic('print')}Ricevuta per il cliente</button>
-        <button class="vbtn" data-act="rb-etichette" data-id="${r.id}">${ic('tag')}Etichette busta</button>
+        <button class="vbtn" data-act="rb-ricevuta" data-id="${r.id}">${ic('print')}Ricevuta di presa in carico</button>
+        <button class="vbtn" data-act="rb-etichette" data-id="${r.id}">${ic('tag')}Etichette busta e orologio</button>
       </div>
     </div>
   </section>
-  <div class="steps5">${st.map((s, i) => { const tot = s.t ? s.t.length : 0, d = s.t ? s.t.filter((_, ti) => r.done[tk(i, ti)]).length : 0; const sk = s.skip || r.skipped?.[i]; const cls = sk ? 'skip' : (i < r.step || r.closed) ? 'done' : i === r.step ? 'cur' : '';
-    return `<div class="st ${cls}"><span class="n">STEP ${i + 1}</span><b>${esc(s.n)}</b><small>${sk ? esc(sk) : cls === 'done' ? 'Completato' : `${d} di ${tot} eseguite`}</small></div>`; }).join('')}</div>
+  ${bo ? boSteps(r) : sellerSteps(r)}
   <div class="grid2">
     <div class="stack">
-      ${r.closed ? `<section class="vcard"><div class="empty">${ic('check')} Busta chiusa${r.esito === 'rifiutato' ? ': preventivo rifiutato, orologio restituito' : ''}${r.ritiroD ? ` · ritirata il ${fmtD(r.ritiroD)}` : ''}.</div></section>` : `
-      <section class="vcard">
-        <div class="card-h">${ic('list')}<h2>Step ${r.step + 1} · ${esc(cur.n)}</h2><span class="sp"></span><span class="faint" style="font-size:12px">Spunta quello che è stato fatto: data e venditore si salvano da soli</span></div>
-        ${taskList(r, r.step)}
-        ${stepPanel(r)}
-      </section>`}
+      ${bo ? boPanel(r) : sellerPanel(r)}
       ${prevCard(r)}
       ${logCard(r)}
     </div>
     <div class="stack">
-      <section class="vcard">
-        <div class="card-h">${ic('pin')}<h2>Dove si trova</h2></div>
-        <div class="card-b stack" style="gap:12px">
-          <label class="field"><span>Posizione fisica</span><select class="sel" data-rb="ubic" data-id="${r.id}">${opts(UBICAZIONI, r.ubic)}</select></label>
-          <label class="field"><span>In mano a</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
-          <label class="field"><span>Presunta consegna</span><input class="in" type="date" data-rb="presunta" data-id="${r.id}" value="${esc(r.presunta || '')}"></label>
-          ${r.presunta && !r.closed ? `<p class="faint" style="margin:0;font-size:12.5px">${dday(r.presunta) < 0 ? `<b style="color:var(--red)">In ritardo di ${-dday(r.presunta)} giorni</b>` : `Arriva tra <b>${dday(r.presunta)} giorni</b>`}${r.tecnico ? ` · ce l'ha ${esc(r.tecnico)}` : ''}</p>` : ''}
-        </div>
-      </section>
-      <section class="vcard">
-        <div class="card-h">${ic('calendar')}<h2>Date</h2></div>
-        <div class="card-b"><dl class="kv">
-          <dt>Accettazione</dt><dd class="num">${fmtD(r.acc)}</dd>
-          <dt>Assegnazione</dt><dd class="num">${fmtD(r.ass)}</dd>
-          <dt>Riparazione esterna</dt><dd class="num">${fmtD(r.est)}</dd>
-          <dt>Chiusura</dt><dd class="num">${fmtD(r.chiusura)}</dd>
-          <dt>Preventivo rifiutato</dt><dd class="num">${fmtD(r.rifiuto)}</dd>
-          <dt>Ritiro previsto</dt><dd class="num">${fmtD(r.ritiro)}</dd>
-          <dt>Ritiro</dt><dd class="num">${fmtD(r.ritiroD)}</dd>
-          ${r.scontrino ? `<dt>Scontrino</dt><dd class="num">${esc(r.scontrino.n)} · ${eur(r.scontrino.tot)}</dd>` : ''}
-        </dl></div>
-      </section>
-      <section class="vcard">
-        <div class="card-h">${ic('watch')}<h2>Oggetto</h2></div>
-        <div class="card-b stack" style="gap:14px"><dl class="kv">
-          ${[['Tipo', r.obj.tipo],['Materiale', r.obj.materiale],['Nc', r.obj.nc],['Nm', r.obj.nm],['Calibro', r.obj.cal],['Quadrante', r.obj.quadrante],['Meccanismo', r.obj.meccanismo],['Bracciale', r.obj.bracciale],['Valore dichiarato', r.valore ? eur(+r.valore) : '']].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || '—')}</dd>`).join('')}
-        </dl>
-        <div class="thumbs">${(r.photos && r.photos.length ? r.photos : Array(Math.min(r.foto, 6)).fill('')).map(p => `<span class="th sm">${p ? `<img src="${p}" alt="">` : `<span class="ph">${ic('watch')}</span>`}</span>`).join('')}</div>
-        <span class="faint" style="font-size:12px">${r.foto} foto scattate all'accettazione</span>
-        ${r.noteCliente ? `<div><div class="label" style="margin-bottom:4px">Note per il cliente</div>${esc(r.noteCliente)}</div>` : ''}
-        ${r.noteInterne ? `<div><div class="label" style="margin-bottom:4px">Note interne</div>${esc(r.noteInterne)}</div>` : ''}
-        ${(r.att || []).length ? `<div class="att">${r.att.map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('')}</div>` : ''}
-        </div>
-      </section>
+      ${bo ? gestioneCard(r) + dateCard(r) + docCard(r) + ecoCard(r) : consegnaCard(r)}
+      ${oggettoCard(r)}
     </div>
   </div>`;
 }
-function taskList(r, si){
-  const s = rSteps(r)[si];
-  return `<div>${s.t.map((t, ti) => { const d = r.done[tk(si, ti)]; return `<label class="task"><input type="checkbox" data-act="rb-task" data-id="${r.id}" data-k="${tk(si, ti)}" ${d ? 'checked' : ''}><span class="grow" style="${d ? 'color:var(--muted)' : ''}">${esc(t)}</span>${d ? `<span class="faint" style="font-size:12px">${d.date ? fmtDT(d.date) + ' · ' + esc(d.by) : 'Eseguita'}</span>` : '<span class="tag red" style="height:22px">Da fare</span>'}</label>`; }).join('')}</div>`;
+/* data in cui la busta è entrata in una fase (prima data degli stati di quella fase) */
+const faseDate = (r, fi) => Object.entries(r.dates || {}).filter(([i]) => wf(r).stati[i]?.[1] === fi).map(([, d]) => d.date).sort()[0];
+function sellerSteps(r){
+  const w = wf(r), cur = r.reso ? w.fasi.length - 1 : stato(r)[1];
+  return `<div class="steps5" style="--n:${w.fasi.length}">${w.fasi.map((f, i) => { const cls = r.closed || i < cur ? 'done' : i === cur ? 'cur' : ''; const d = faseDate(r, i);
+    return `<div class="st ${cls}"><span class="n">FASE ${i + 1}</span><b>${esc(f)}</b><small>${cls === 'done' ? (d ? 'Dal ' + fmtD(d) : 'Completata') : cls === 'cur' ? (d ? 'Dal ' + fmtD(d) : 'In corso') : '—'}</small></div>`; }).join('')}</div>`;
 }
-function stepPanel(r){
-  const s = rSteps(r)[r.step], name = s.n;
-  if (name === 'Preventivo' || (name === 'Valutazione' && r.tipo === 'CPO')) {
-    const v = r.prev.voci, lbl = r.tipo === 'CPO' ? 'offerta' : 'preventivo';
-    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
-      <div class="label">Voci del ${lbl} · dal listino della casa madre o lavorazioni interne</div>
-      ${v.length ? `<div class="vcard">${v.map((x, i) => `<div class="voce"><span class="grow">${esc(x.d)}</span><b class="num">${eur(x.p)}</b><button class="vbtn vbtn-ghost vbtn-sm" data-act="pv-rm" data-id="${r.id}" data-i="${i}" aria-label="Rimuovi voce">${ic('trash')}</button></div>`).join('')}<div class="voce" style="background:var(--surface-2)"><span class="grow label">Totale</span><b class="num" style="font-size:16px">${eur(prevTot(r))}</b></div></div>` : '<p class="faint" style="margin:0">Nessuna voce. Aggiungi le lavorazioni indicate dal laboratorio.</p>'}
-      <div class="voce-add"><input class="in" id="pv-d" placeholder="${r.tipo === 'CPO' ? 'Es. offerta di acquisto' : 'Es. revisione completa movimento'}"><input class="in num" id="pv-p" inputmode="decimal" placeholder="€"><button class="vbtn" data-act="pv-add" data-id="${r.id}">${ic('plus')}Aggiungi</button></div>
-      <p class="faint" style="margin:0;font-size:12px">Il ${lbl} si può aggiornare anche dopo l'invio, se il laboratorio trova altri problemi.</p>
-      <div style="display:flex;justify-content:flex-end"><button class="vbtn vbtn-primary" data-act="pv-send" data-id="${r.id}" ${v.length ? '' : 'disabled'}>${ic('send')}Invia ${lbl} al cliente</button></div>
-    </div>`;
-  }
-  if (name === 'Risposta cliente') {
-    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
-      <div class="banner info">${ic('link')}<div class="grow"><p>${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} con link privato <b class="mono">${esc(r.prev.link || '')}</b>. Il cliente sceglie le voci online, oppure accede con email e password. Una conferma al telefono non vale.</p></div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="vbtn" data-go="prev" data-id="${r.id}">${ic('arrow')}Apri la vista del cliente (demo)</button><button class="vbtn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button><span class="sp" style="flex:1"></span><button class="vbtn vbtn-ghost" data-act="pv-refuse" data-id="${r.id}">Il cliente ha rifiutato</button></div>
-    </div>`;
-  }
-  if (name === 'Lavorazione' || name === 'Lavorazione e certificazione' || name === 'Lavori da fare') {
-    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
-      <div class="label">Documenti di scarico e certificazioni · più file per busta</div>
+function boSteps(r){
+  const w = wf(r);
+  return `<div class="steps5 many" style="--n:${w.stati.length}">${w.stati.map(([n, , who], i) => { const d = r.dates?.[i]; const sk = !d && i < r.si; const cls = sk ? 'skip' : r.closed || i < r.si ? 'done' : i === r.si ? 'cur' : '';
+    return `<div class="st ${cls}"><span class="n">${i + 1} · ${who === 'v' ? 'VENDITORE' : who === 'c' ? 'CLIENTE' : 'BACKOFFICE'}</span><b>${esc(n)}</b><small>${d ? fmtD(d.date) : sk ? 'Saltato' : cls === 'cur' ? 'In corso' : '—'}</small></div>`; }).join('')}</div>`;
+}
+const FASE_MSG = {'Accettazione':'Busta aperta in boutique.','Valutazione':'Il laboratorio sta valutando l\'orologio.','Attesa cliente':'Abbiamo inviato la proposta al cliente: aspettiamo la sua risposta.','Lavorazione':'L\'orologio è in lavorazione.','Lavorazione esterna':'L\'orologio è presso un laboratorio esterno o la casa madre.','Preparazione':'L\'orologio è in revisione e certificazione per la vendita.','In vendita':'L\'orologio è in vendita.','Intervento':'Intervento da fare in boutique.'};
+function sellerPanel(r){
+  if (r.closed) return `<section class="vcard"><div class="empty">${ic('check')} Busta chiusa${r.esito === 'rifiutato' ? `: ${r.tipo === 'CPO' ? 'offerta' : 'preventivo'} rifiutato, orologio restituito` : ''}${r.ritiroD ? ` · ritirata il ${fmtD(r.ritiroD)}` : ''}.</div></section>`;
+  const acc = !r.ric || !r.et ? `<div class="card-b stack" style="gap:8px;border-top:1px solid var(--line)"><div class="label">Da completare all'accettazione</div>
+    ${!r.ric ? `<button class="vbtn" data-act="rb-ricevuta" data-id="${r.id}">${ic('edit')}Fai firmare la ricevuta al cliente</button>` : ''}${!r.et ? `<button class="vbtn" data-act="rb-etichette" data-id="${r.id}">${ic('tag')}Stampa le etichette</button>` : ''}</div>` : '';
+  if (inRic(r)) return `<section class="vcard"><div class="card-h">${ic('bag')}<h2>Riconsegna al cliente</h2></div>${riconsegna(r)}${acc}</section>`;
+  if (r.tipo === 'Cambio pila') return `<section class="vcard"><div class="card-h">${ic('wrench')}<h2>Cambio pila in boutique</h2></div>
+    <div class="card-b stack" style="gap:12px"><p class="muted" style="margin:0">Intervento rapido: lo fa il venditore senza passare dal laboratorio.</p><div style="display:flex;justify-content:flex-end"><button class="vbtn vbtn-primary" data-act="rb-pila" data-id="${r.id}">${ic('check')}Pila sostituita</button></div></div>${acc}</section>`;
+  const f = faseN(r), wait = stato(r)[2] === 'c';
+  return `<section class="vcard">
+    <div class="card-h">${ic('list')}<h2>A che punto è</h2></div>
+    <div class="card-b stack" style="gap:12px">
+      <p style="margin:0;font-size:15px"><b>${esc(f)}.</b> ${FASE_MSG[f] || ''}</p>
+      ${r.presunta ? `<p class="muted" style="margin:0">Presunta consegna <b>${fmtD(r.presunta)}</b>${late(r) ? ` · <span style="color:var(--red)">in ritardo di ${-dday(r.presunta)} giorni</span>` : ''}</p>` : '<p class="faint" style="margin:0">Presunta consegna non ancora indicata dal laboratorio.</p>'}
+      ${wait ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="vbtn" data-go="prev" data-id="${r.id}">${ic('arrow')}Vedi la proposta come il cliente</button><button class="vbtn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button></div>` : ''}
+      <p class="faint" style="margin:0;font-size:12px">Lo stato lo aggiorna l'amministrazione. Quando l'orologio torna in boutique ti arriva una notifica per l'avviso di ritiro.</p>
+    </div>${acc}
+  </section>`;
+}
+function riconsegna(r){
+  const tot = r.esito === 'rifiutato' ? (r.costoPrev || 0) : r.prev?.stato === 'accettato' ? prevTot(r, true) : 0;
+  return `<div class="card-b stack" style="gap:12px">
+    ${r.esito === 'rifiutato' ? `<div class="banner">${ic('info')}<div class="grow"><p>${r.tipo === 'CPO' ? 'Offerta rifiutata' : 'Preventivo rifiutato'}: si restituisce l'orologio.${r.tipo === 'CPO' ? '' : ` Costo del solo preventivo: <b>${eur(r.costoPrev || 0)}</b>.`}</p></div></div>` : ''}
+    ${r.tipo === 'Quotazione' ? `<p class="muted" style="margin:0">Quotazione comunicata: ${r.prev?.voci?.length ? `<b>${eur(prevTot(r))}</b>` : '—'}. Riconsegna l'orologio al cliente.</p>` : ''}
+    <div class="fgrid"><label class="field"><span>Numero scontrino</span><input class="in mono" id="rb-sn" value="${esc(r.scontrino?.n || '')}" placeholder="Es. 0042-0815"></label><label class="field"><span>Totale scontrino</span><input class="in num" id="rb-st" value="${tot}" inputmode="decimal"></label></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="vbtn" data-act="rb-avviso" data-id="${r.id}">${ic('mail')}${r.avviso ? 'Invia di nuovo l\'avviso' : 'Invia avviso di ritiro con scontrino'}</button><button class="vbtn vbtn-primary" data-act="rb-ritiro" data-id="${r.id}">${ic('check')}Registra il ritiro</button></div>
+    ${r.avviso ? '<p class="faint" style="margin:0;font-size:12px">Avviso di ritiro già inviato al cliente.</p>' : ''}
+  </div>`;
+}
+function consegnaCard(r){
+  return `<section class="vcard">
+    <div class="card-h">${ic('calendar')}<h2>Date</h2></div>
+    <div class="card-b"><dl class="kv">
+      <dt>Accettazione</dt><dd class="num">${fmtDT(r.acc)}</dd>
+      <dt>Presunta consegna</dt><dd class="num">${fmtD(r.presunta)}</dd>
+      <dt>Ritiro previsto</dt><dd class="num">${fmtD(r.ritiro)}</dd>
+      <dt>Ritiro</dt><dd class="num">${fmtD(r.ritiroD)}</dd>
+      ${r.scontrino ? `<dt>Scontrino</dt><dd class="num">${esc(r.scontrino.n)} · ${eur(r.scontrino.tot)}</dd>` : ''}
+    </dl></div>
+  </section>`;
+}
+function oggettoCard(r){
+  const bo = S.ripBO;
+  return `<section class="vcard">
+    <div class="card-h">${ic('watch')}<h2>Oggetto</h2></div>
+    <div class="card-b stack" style="gap:14px"><dl class="kv">
+      ${[['Tipo', r.obj.tipo],['Materiale', r.obj.materiale],['Matricola (Nc)', r.obj.nc],['Nm', r.obj.nm],['Calibro', r.obj.cal],['Quadrante', r.obj.quadrante],['Meccanismo', r.obj.meccanismo],['Bracciale', r.obj.bracciale],['Valore dichiarato', r.valore ? eur(+r.valore) : ''],...(r.cv ? [['Conto vendita', `${r.cv.n} del ${fmtD(r.cv.d)}`]] : [])].map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || '—')}</dd>`).join('')}
+    </dl>
+    <div class="thumbs">${(r.photos && r.photos.length ? r.photos : Array(Math.min(r.foto, 6)).fill('')).map(p => `<span class="th sm">${p ? `<img src="${p}" alt="">` : `<span class="ph">${ic('watch')}</span>`}</span>`).join('')}</div>
+    <span class="faint" style="font-size:12px">${r.foto} foto scattate all'accettazione</span>
+    ${r.noteCliente ? `<div><div class="label" style="margin-bottom:4px">Note per il cliente</div>${esc(r.noteCliente)}</div>` : ''}
+    ${bo ? `<label class="field"><span>Note interne di laboratorio · non escono sui documenti del cliente</span><textarea class="ta" data-rb="noteInterne" data-id="${r.id}">${esc(r.noteInterne || '')}</textarea></label>` : ''}
+    </div>
+  </section>`;
+}
+
+/* ---- vista amministrazione / backoffice ---- */
+function boPanel(r){
+  if (r.closed) return `<section class="vcard"><div class="empty">${ic('check')} Pratica chiusa${r.esito === 'rifiutato' ? ' dopo il rifiuto del cliente' : ''}${r.ritiroD ? ` · ritirata il ${fmtD(r.ritiroD)}` : ''}.</div></section>`;
+  const [n, , who] = stato(r), nx = nextStato(r), w = wf(r);
+  const head = `<div class="card-h">${ic('list')}<h2>${r.si + 1}/${w.stati.length} · ${esc(r.reso ? 'Restituzione al cliente' : n)}</h2><span class="sp"></span><span class="tag ${who === 'b' && !r.reso ? 'brand' : who === 'c' ? 'amber' : 'blue'}">${r.reso || who === 'v' ? 'Tocca al venditore' : who === 'c' ? 'Tocca al cliente' : 'Tocca al backoffice'}</span></div>`;
+  const next = (label = nx ? 'Passa a: ' + nx[0] : 'Chiudi la pratica') => `<div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><button class="vbtn vbtn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}${esc(label)}</button></div>`;
+  let body;
+  if (inRic(r) || who === 'v') body = `<p class="muted" style="margin:0">${r.tipo === 'Cambio pila' && !inRic(r) ? 'Il cambio pila lo esegue il venditore in boutique.' : 'Ora la busta è in boutique: il venditore invia l\'avviso di ritiro con lo scontrino e registra la riconsegna.'}</p>`;
+  else if (who === 'c') body = `<div class="banner info">${ic('link')}<div class="grow"><p>${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} con link privato <b class="mono">${esc(r.prev.link || '')}</b>. Il cliente sceglie le voci online, oppure accede con email e password.</p></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="vbtn" data-go="prev" data-id="${r.id}">${ic('arrow')}Apri la vista del cliente (demo)</button><button class="vbtn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button><span class="sp" style="flex:1"></span><button class="vbtn vbtn-ghost" data-act="pv-refuse" data-id="${r.id}">Il cliente ha rifiutato</button></div>`;
+  else if (n === 'Valutazione tecnica') body = `<label class="field"><span>Tecnico che valuta</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
+      <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap">${['Riparazione','Garanzia'].includes(r.tipo) && !r.esterna ? `<button class="vbtn" data-act="rb-esterna" data-id="${r.id}">${ic('truck')}Affida a laboratorio esterno o casa madre</button>` : ''}<button class="vbtn vbtn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Passa a: ${esc(nx[0])}</button></div>`;
+  else if (['Redazione preventivo','Redazione offerta','Comunicazione quotazione'].includes(n)) body = prevEditor(r);
+  else if (n === 'Preventivo accettato') body = `<p class="muted" style="margin:0">Il cliente ha accettato ${eur(prevTot(r, true))}. Assegna la lavorazione al tecnico.</p>
+      <label class="field"><span>Tecnico</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>${next('Assegna e avvia la lavorazione')}`;
+  else if (/Lavorazione|Revisione/.test(n)) body = `<div class="label">Documenti di scarico componenti e lavorazioni · più file per pratica</div>
       <div class="att">${(r.att || []).map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('') || '<span class="faint">Nessun file allegato</span>'}<label class="vbtn vbtn-sm">${ic('clip')}Allega file<input type="file" class="rb-att" data-id="${r.id}" multiple hidden></label></div>
-      <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b> (via eCube).</p>
-    </div>`;
-  }
-  if (name === 'Riconsegna') {
-    const tot = r.esito === 'rifiutato' ? (r.costoPrev || 0) : r.prev?.stato === 'accettato' ? prevTot(r, true) : 0;
-    return `<div class="card-b stack" style="gap:12px;border-top:1px solid var(--line)">
-      ${r.esito === 'rifiutato' ? `<div class="banner">${ic('info')}<div class="grow"><p>Preventivo rifiutato: si restituisce l'orologio. Costo del solo preventivo: <b>${eur(r.costoPrev || 0)}</b>.</p></div></div>` : ''}
-      <div class="fgrid"><label class="field"><span>Numero scontrino</span><input class="in mono" id="rb-sn" value="${esc(r.scontrino?.n || '')}" placeholder="Es. 0042-0815"></label><label class="field"><span>Totale scontrino</span><input class="in num" id="rb-st" value="${tot}" inputmode="decimal"></label></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end"><button class="vbtn" data-act="rb-avviso" data-id="${r.id}">${ic('mail')}Invia avviso di ritiro con scontrino</button><button class="vbtn vbtn-primary" data-act="rb-ritiro" data-id="${r.id}">${ic('check')}Registra il ritiro</button></div>
-    </div>`;
-  }
-  return '';
+      <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b>: i documenti restano collegati alla pratica (via eCube).</p>${next(n === 'Lavorazione' ? 'Chiudi la riparazione' : undefined)}`;
+  else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Quando l'orologio rientra in boutique, passa la busta al venditore.</p>${next('Orologio in boutique: passa all\'avviso di ritiro')}`;
+  else if (n === 'Vendita finale') body = `<p class="muted" style="margin:0">Registra il valore di vendita e l'acquirente finale nella scheda economica, poi chiudi la pratica.</p>${next('Vendita registrata: chiudi la pratica')}`;
+  else body = next();
+  return `<section class="vcard">${head}<div class="card-b stack" style="gap:12px">${body}</div></section>`;
+}
+function prevEditor(r){
+  const v = r.prev.voci, lbl = r.tipo === 'CPO' ? 'offerta' : r.tipo === 'Quotazione' ? 'quotazione' : 'preventivo';
+  return `<div class="label">Voci ${lbl === 'offerta' ? 'dell\'offerta' : lbl === 'quotazione' ? 'della quotazione' : 'del preventivo'}${lbl === 'preventivo' ? ' · dal listino della casa madre o lavorazioni interne' : ''}</div>
+    ${v.length ? `<div class="vcard">${v.map((x, i) => `<div class="voce"><span class="grow">${esc(x.d)}</span><b class="num">${eur(x.p)}</b><button class="vbtn vbtn-ghost vbtn-sm" data-act="pv-rm" data-id="${r.id}" data-i="${i}" aria-label="Rimuovi voce">${ic('trash')}</button></div>`).join('')}<div class="voce" style="background:var(--surface-2)"><span class="grow label">Totale</span><b class="num" style="font-size:16px">${eur(prevTot(r))}</b></div></div>` : '<p class="faint" style="margin:0">Nessuna voce. Aggiungi le lavorazioni indicate dal tecnico.</p>'}
+    <div class="voce-add"><input class="in" id="pv-d" placeholder="${lbl === 'offerta' ? 'Es. offerta di acquisto' : lbl === 'quotazione' ? 'Es. valore di mercato' : 'Es. revisione completa movimento'}"><input class="in num" id="pv-p" inputmode="decimal" placeholder="€"><button class="vbtn" data-act="pv-add" data-id="${r.id}">${ic('plus')}Aggiungi</button></div>
+    ${lbl === 'preventivo' ? `<label class="field" style="max-width:240px"><span>Costo del preventivo se rifiutato</span><input class="in num" data-rb="costoPrev" data-id="${r.id}" value="${esc(r.costoPrev ?? '')}" inputmode="decimal" placeholder="€"></label>` : ''}
+    <div style="display:flex;justify-content:flex-end"><button class="vbtn vbtn-primary" data-act="pv-send" data-id="${r.id}" ${v.length ? '' : 'disabled'}>${ic('send')}${lbl === 'quotazione' ? 'Comunica la quotazione al cliente' : `Invia ${lbl === 'offerta' ? 'l\'offerta' : 'il preventivo'} al cliente`}</button></div>`;
+}
+function gestioneCard(r){
+  return `<section class="vcard">
+    <div class="card-h">${ic('pin')}<h2>Gestione</h2></div>
+    <div class="card-b stack" style="gap:12px">
+      <label class="field"><span>Responsabile della pratica</span><select class="sel" data-rb="resp" data-id="${r.id}">${opts(BACKOFFICE, r.resp, 'Da assegnare')}</select></label>
+      <label class="field"><span>Tecnico assegnato</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
+      <label class="field"><span>Posizione fisica</span><select class="sel" data-rb="ubic" data-id="${r.id}">${opts(UBICAZIONI, r.ubic)}</select></label>
+      <label class="field"><span>Data prevista di consegna</span><input class="in" type="date" data-rb="presunta" data-id="${r.id}" value="${esc(r.presunta || '')}"></label>
+      ${r.presunta && !r.closed ? `<p class="faint" style="margin:0;font-size:12.5px">${dday(r.presunta) < 0 ? `<b style="color:var(--red)">In ritardo di ${-dday(r.presunta)} giorni</b>` : `Mancano <b>${dday(r.presunta)} giorni</b>`}</p>` : ''}
+    </div>
+  </section>`;
+}
+function dateCard(r){
+  return `<section class="vcard">
+    <div class="card-h">${ic('calendar')}<h2>Date operative</h2></div>
+    <div class="card-b"><dl class="kv">
+      ${wf(r).stati.map(([n], i) => `<dt>${esc(n)}</dt><dd class="num">${r.dates?.[i] ? `${fmtDT(r.dates[i].date)} <span class="faint">· ${esc(r.dates[i].by)}</span>` : '—'}</dd>`).join('')}
+      ${r.rifiuto ? `<dt>Rifiuto del cliente</dt><dd class="num">${fmtD(r.rifiuto)}</dd>` : ''}
+      <dt>Ritiro effettivo</dt><dd class="num">${fmtD(r.ritiroD)}</dd>
+    </dl></div>
+  </section>`;
+}
+function docCard(r){
+  const n = r.busta.slice(-4), st = (ok, t) => `<span class="tag ${ok ? 'ok' : ''}" style="height:22px">${t}</span>`;
+  const rows = [
+    ['Ricevuta di presa in carico', 'Portale', st(r.ric, r.ric ? 'Firmata' : 'Da firmare')],
+    ['Etichette busta e orologio', 'Portale', st(r.et, r.et ? 'Stampate' : 'Da stampare')],
+    ['Documentazione fotografica', 'Portale', st(r.foto, `${r.foto} foto`)],
+    [`Documento di presa in carico · PIC ${n}`, 'Gestionale', st(true, 'Inviato via eCube')],
+    ...(r.prev?.voci?.length ? [[r.tipo === 'CPO' ? 'Offerta' : r.tipo === 'Quotazione' ? 'Quotazione' : 'Preventivo', 'Portale', st(['accettato','inviato'].includes(r.prev.stato), ({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || '—')]] : []),
+    ...(r.att || []).map(a => [`Scarico componenti · ${a}`, 'Gestionale', st(true, 'Collegato')]),
+    ['Documento di chiusura lavorazione', 'Gestionale', st(r.chiusura, r.chiusura ? 'Inviato ' + fmtD(r.chiusura) : 'Alla chiusura')],
+    ['Avviso di ritiro', 'Portale', st(r.avviso, r.avviso ? 'Inviato' : 'Alla riconsegna')],
+  ];
+  return `<section class="vcard">
+    <div class="card-h">${ic('clip')}<h2>Documenti</h2></div>
+    <div class="list">${rows.map(([t, s, b]) => `<div class="vrow"><div class="grow"><div class="t">${esc(t)}</div><div class="s">${s}</div></div>${b}</div>`).join('')}</div>
+    <p class="faint" style="margin:0;padding:12px 20px 16px;font-size:12px">Ogni documento porta numero pratica e busta, articolo generico RIPARAZIONE, descrizione, quantità, matricola, numero di etichette ed eventuale costo del preventivo.</p>
+  </section>`;
+}
+function ecoCard(r){
+  if (!r.eco) return '';
+  const cpo = r.tipo === 'CPO', inp = (k, l, ph = '€') => `<label class="field"><span>${l}</span><input class="in" data-rb="eco.${k}" data-id="${r.id}" value="${esc(r.eco[k] || '')}" placeholder="${ph}"></label>`;
+  return `<section class="vcard">
+    <div class="card-h">${ic('bag')}<h2>Scheda economica</h2><span class="sp"></span><span class="faint" style="font-size:12px">${cpo ? 'CPO' : 'Verga Vintage · dati separati'}</span></div>
+    <div class="card-b stack" style="gap:12px">
+      <div class="fgrid">${inp('acquisto', cpo ? 'Valore di acquisto' : 'Valore del conto vendita')}${inp('revisione', 'Costi di revisione')}${cpo ? inp('certificazione', 'Costi di certificazione') : ''}${inp('vendita', 'Valore di vendita')}</div>
+      ${inp('documenti', 'Documentazione disponibile', 'Es. scatola, garanzia')}
+      ${inp('acquirente', 'Acquirente finale', 'Nome del cliente che compra')}
+    </div>
+  </section>`;
 }
 function prevCard(r){
-  if (!r.prev?.voci?.length || ['bozza'].includes(r.prev.stato) && r.step === 1) return '';
-  const st = {inviato:['Inviato, in attesa','amber'],accettato:['Accettato','ok'],rifiutato:['Rifiutato','red'],bozza:['In bozza','']}[r.prev.stato] || ['',''];
+  if (!r.prev?.voci?.length || r.prev.stato === 'bozza' || r.tipo === 'Quotazione') return '';
+  const st = {inviato:['Inviato, in attesa','amber'],accettato:['Accettato','ok'],rifiutato:['Rifiutato','red']}[r.prev.stato] || ['',''];
   return `<section class="vcard"><div class="card-h">${ic('bag')}<h2>${r.tipo === 'CPO' ? 'Offerta' : 'Preventivo'}</h2><span class="tag ${st[1]}">${st[0]}</span><span class="sp"></span>${r.prev.stato === 'accettato' ? `<span class="muted num">Accettato ${eur(prevTot(r, true))} su ${eur(prevTot(r))}</span>` : `<span class="muted num">${eur(prevTot(r))}</span>`}</div>
     ${r.prev.voci.map(v => `<div class="voce"><span style="color:var(--${r.prev.stato === 'inviato' ? 'faint' : v.ok ? 'ok' : 'red'})">${ic(r.prev.stato === 'inviato' ? 'clock' : v.ok ? 'check' : 'x')}</span><span class="grow" style="${r.prev.stato !== 'inviato' && !v.ok ? 'text-decoration:line-through;color:var(--muted)' : ''}">${esc(v.d)}</span><b class="num">${eur(v.p)}</b></div>`).join('')}</section>`;
 }
 function logCard(r){
-  return `<section class="vcard"><div class="card-h">${ic('clock')}<h2>Storico della busta</h2></div><div class="timeline">${[...r.log].sort((a,b) => dt(b.date) - dt(a.date)).map(l => `<div class="tl"><span class="dot">${ic(l.by === 'Cliente' ? 'users' : 'check')}</span><div><b>${esc(l.t)}</b><div class="muted" style="font-size:12.5px">${fmtDT(l.date)} · ${esc(l.by)}</div></div></div>`).join('')}</div></section>`;
+  const ls = r.log.filter(l => S.ripBO || !l.i);
+  return `<section class="vcard"><div class="card-h">${ic('clock')}<h2>Storico della busta</h2>${S.ripBO ? '<span class="sp"></span><span class="faint" style="font-size:12px">Le voci interne non le vede il venditore</span>' : ''}</div><div class="timeline">${[...ls].sort((a,b) => dt(b.date) - dt(a.date)).map(l => `<div class="tl"><span class="dot">${ic(l.by === 'Cliente' ? 'users' : 'check')}</span><div><b>${esc(l.t)}</b>${l.i ? ' <span class="tag" style="height:20px">Interna</span>' : ''}<div class="muted" style="font-size:12.5px">${fmtDT(l.date)} · ${esc(l.by)}</div></div></div>`).join('')}</div></section>`;
 }
-function ripLog(r, t, by = S.operator){ r.log.push({date:nowISO(), by, t}); }
-/* avanza quando tutte le attività dello step sono eseguite, saltando gli step non previsti */
-function ripAdvance(r){
-  const st = rSteps(r);
-  while (r.step < st.length && (st[r.step].skip || st[r.step].t.every((_, ti) => r.done[tk(r.step, ti)]))) {
-    if (r.step === st.length - 1) { r.closed = true; r.ubic = r.tipo === 'CPO' || r.tipo === 'Conto vendita' ? r.ubic : 'Riconsegnato al cliente'; ripLog(r, r.tipo === 'CPO' || r.tipo === 'Conto vendita' ? 'Orologio in vendita: busta chiusa' : 'Busta chiusa'); return true; }
-    r.step++;
-    if (!st[r.step].skip) { toast(`Passata allo step ${r.step + 1}: ${st[r.step].n}`); return true; }
-  }
-  return false;
+function ripLog(r, t, by = S.ripBO ? (r.resp || BACKOFFICE[0]) : S.operator, i = S.ripBO){ r.log.push({date:nowISO(), by, t, ...(i ? {i:1} : {})}); }
+/* porta la busta allo stato i e ne salva data e utente; oltre l'ultimo stato la pratica si chiude */
+function advanceTo(r, i, by){
+  const w = wf(r), who = by || (S.ripBO ? (r.resp || BACKOFFICE[0]) : S.operator);
+  if (i >= w.stati.length) { r.closed = true; ripLog(r, 'Pratica chiusa', who); return; }
+  r.si = i; r.dates = r.dates || {}; r.dates[i] = {date:nowISO(), by:who};
+  const n = w.stati[i][0];
+  if (n === 'Lavorazione') r.ass = TODAY;
+  if (n === 'Chiusura riparazione') r.chiusura = TODAY;
+  if (n === 'Rientro oggetto') r.ubic = AREA_OF[r.boutique] + ' · banco';
+  if (inRic(r)) r.ubic = 'Pronto in boutique per il ritiro';
+  ripLog(r, `Stato: ${n}`, who);
 }
-function ripTick(r, si, ti, on = true){ const k = tk(si, ti); if (on) r.done[k] = {date:nowISO(), by:S.operator}; else delete r.done[k]; }
 function ripPlaceholderCliente(c){
   const rs = clientRepairs(c.id);
   return `<section class="vcard"><div class="card-h">${ic('wrench')}<h2>Riparazioni</h2><span class="sp"></span><button class="vbtn vbtn-sm vbtn-primary" data-act="rip-for" data-id="${c.id}">${ic('plus')}Nuova riparazione</button></div>
@@ -1223,8 +1412,11 @@ function vPrev(){
   `;
 }
 function ripRefuse(r, by, t){
-  r.prev.stato = 'rifiutato'; r.prev.voci.forEach(x => x.ok = false); r.esito = 'rifiutato'; r.rifiuto = TODAY; r.costoPrev = r.costoPrev || 0;
-  ripTick(r, 2, 0); r.skipped = {3:'Saltato: preventivo rifiutato'}; ripLog(r, t, by); r.step = 4; toast('Preventivo rifiutato: si passa alla riconsegna dell\'orologio');
+  r.prev.stato = 'rifiutato'; r.prev.voci.forEach(x => x.ok = false); r.esito = 'rifiutato'; r.rifiuto = TODAY;
+  ripLog(r, t, by, false);
+  if (r.tipo === 'CPO') { r.si++; r.dates[r.si] = {date:nowISO(), by}; r.reso = true; r.ubic = 'Pronto in boutique per il ritiro'; }
+  else advanceTo(r, wf(r).stati.length - 1, by);
+  toast(r.tipo === 'CPO' ? 'Offerta rifiutata: l\'orologio torna al cliente' : 'Preventivo rifiutato: si passa alla riconsegna dell\'orologio');
 }
 const keepY = fn => { const y = window.scrollY; fn(); window.scrollTo(0, y); };
 
@@ -1306,10 +1498,15 @@ function renderModal(){
       ${M.brand ? `<div class="field"><span>Modello</span><div class="chips">${(MODELS[M.brand] || []).map(v => `<button class="chip ${M.modello === v ? 'on' : ''}" data-act="m-model" data-v="${v}">${v}</button>`).join('')}</div></div>` : ''}
       <div class="fgrid">
         <label class="field"><span>Referenza (se il cliente la sa)</span><input class="in mono" id="m-ref" placeholder="Es. 126500LN"></label>
+        <label class="field" style="grid-column:1/-1"><span>Nome modello</span><input class="in" id="m-nome" placeholder="Si compila dalla referenza, es. EXPLORER 36MM ACCIAIO OYSTERSTEEL"></label>
         <label class="field"><span>Quadrante</span><input class="in" id="m-quad" placeholder="Es. bianco"></label>
         <label class="field"><span>Bracciale</span><input class="in" id="m-brac" placeholder="Es. Oyster, Jubilee"></label>
       </div>
-      <label class="field"><span>Note</span><textarea class="ta" id="m-pnote" placeholder="Es. accetta anche quadrante nero, occasione: anniversario a dicembre"></textarea></label>
+      <div class="fgrid">
+        <label class="field"><span>Evento particolare legato all'acquisto</span><input class="in" id="m-evento" placeholder="Es. anniversario a dicembre"></label>
+        <label class="field"><span>Venditore incaricato</span><select class="sel" id="m-incar">${opts(OPERATORS.map(o => o.name), S.operator)}</select></label>
+      </div>
+      <label class="field"><span>Note</span><textarea class="ta" id="m-pnote" placeholder="Es. accetta anche quadrante nero"></textarea></label>
       <div class="field"><span>Stato iniziale</span><div class="chips">${[['aperta','Manifestazione','Il cliente è interessato, nessun ordine'],['preordine','Preordine','Merce ordinata su richiesta del cliente']].map(([k,l,d]) => `<button class="chip ${(M.stato || 'aperta') === k ? 'on' : ''}" data-act="m-pstato" data-v="${k}" title="${d}">${l}</button>`).join('')}</div></div>
       <div class="banner info">${ic('info')}<div class="grow"><p>Viene creata una PDA con prodotto generico <b>senza prezzo</b>, visibile in tutte le boutique. Al cliente parte la mail di presa in carico. Quando arriva un pezzo compatibile, il direttore vendite o il titolare lo associa e tu ricevi una notifica.</p></div></div>`;
     f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary" data-act="m-save-pda" ${c && M.brand && M.modello ? '' : 'disabled'}>${ic('check')}Registra manifestazione</button>`;
@@ -1322,11 +1519,33 @@ function renderModal(){
       ${others(p).length ? `<div class="banner">${ic('users')}<div class="grow"><p>Anche <b>${others(p).map(x => esc(fullName(C(x.clientId)))).join(', ')}</b> aspetta questo modello. Chi non riceve il pezzo resta in attesa.</p></div></div>` : ''}`;
     f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary" data-act="m-save-assign" ${M.productId ? '' : 'disabled'}>${ic('check')}Associa prodotto</button>`;
   }
+  if (M.kind === 'disponibili') {
+    if (!M.ref) {
+      const groups = refGroups(products.filter(p => ['disponibile','in_arrivo'].includes(p.stato) && !p.reservedFor)).map(g => ({g, n:pdasFor(g[0].ref).length})).sort((a, b) => b.n - a.n);
+      h = 'Prodotti disponibili';
+      b = `<p class="muted" style="margin:0">Pezzi liberi in boutique e in magazzino. Apri un prodotto per vedere chi lo aspetta.</p>
+        <div class="picklist" style="max-height:none">${groups.map(({g, n}) => { const p = g[0], k = g.filter(x => x.stato === 'disponibile').length; return `<div class="vrow" data-act="m-disp-ref" data-v="${esc(p.ref)}">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}<div class="grow"><div class="t">${esc(p.brand)} ${esc(p.modello)} · <span class="mono">${esc(p.ref)}</span></div><div class="s">${k} disponibil${k === 1 ? 'e' : 'i'}${g.length > k ? ` · ${g.length - k} in arrivo` : ''}</div></div>${n ? `<span class="tag amber">${n} ${n === 1 ? 'interessato' : 'interessati'}</span>` : ''}${ic('arrow')}</div>`; }).join('')}</div>`;
+    } else {
+      const g = pieces(M.ref).filter(x => !x.reservedFor), p = g[0], pd = pdasFor(M.ref);
+      h = `${p.brand} ${p.modello}`;
+      b = `<button class="link" data-act="m-disp-ref" data-v="" style="display:inline-flex;gap:6px;align-items:center;align-self:flex-start">${ic('back')}Tutti i prodotti</button>
+        <p style="margin:0"><span class="mono">${esc(p.ref)}</span> · ${esc(p.det)} · ${g.map(x => `${esc(x.boutique)}${x.stato === 'in_arrivo' ? ' (in arrivo)' : ''}`).join(', ')}</p>
+        <div class="label">Manifestazioni associate</div>
+        <div class="picklist" style="max-height:none">${pd.map(x => { const c = C(x.clientId); return `<div class="vrow" data-act="m-go-pda" data-id="${x.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${esc(c.boutique)} · registrata da ${esc(x.operator)} · in attesa da ${rel(x.date).replace(' fa','')}</div></div>${canAssign() ? `<button class="vbtn vbtn-sm vbtn-primary" data-act="assegna-pr" data-id="${x.id}" data-v="${compatible(x).find(y => y.ref === M.ref).id}">Associa</button>` : ''}</div>`; }).join('') || '<div class="empty">Nessuno aspetta questa referenza.</div>'}</div>`;
+    }
+    f = `${M.ref ? `<button class="vbtn" data-act="m-go-prod" data-v="${esc(M.ref)}">Apri scheda prodotto</button>` : ''}<button class="vbtn" data-act="m-close">Chiudi</button>`;
+  }
+  if (M.kind === 'pda-del') {
+    const p = pdas.find(x => x.id === M.pdaId);
+    h = 'Elimina manifestazione';
+    b = `<p style="margin:0">Eliminare la manifestazione di <b>${esc(fullName(C(p.clientId)))}</b> per ${esc(p.brand)} ${esc(p.modello)}?${p.productId ? ' Il prodotto associato torna disponibile.' : ''}</p><p class="faint" style="margin:0;font-size:12px">Non si può annullare.</p>`;
+    f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary vbtn-danger" data-act="m-save-del">${ic('trash')}Elimina</button>`;
+  }
   if (M.kind === 'dissocia') {
     const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId);
     h = 'Dissocia prodotto';
     b = `<p style="margin:0">Il ${esc(pr.brand)} ${esc(pr.modello)} (seriale <span class="mono">${esc(pr.seriale)}</span>) torna disponibile. In che stato mettere la PDA di <b>${esc(fullName(C(p.clientId)))}</b>?</p>
-      <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['annullata','Annullata']].map(([k,l]) => `<button class="chip ${M.to === k ? 'on' : ''}" data-act="m-dto" data-v="${k}">${l}</button>`).join('')}</div>
+      <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['annullata','Annullata · il cliente rinuncia']].map(([k,l]) => `<button class="chip ${M.to === k ? 'on' : ''}" data-act="m-dto" data-v="${k}">${l}</button>`).join('')}</div>
       <p class="faint" style="margin:0;font-size:12px">Solo direttore vendite e titolare possono dissociare.</p>`;
     f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary" data-act="m-save-dis">${ic('check')}Dissocia</button>`;
   }
@@ -1342,43 +1561,44 @@ function renderModal(){
       </div>
       <div style="max-height:110px;overflow:auto;padding:12px 14px;border:1px solid var(--line);border-radius:10px;font-size:12.5px;color:var(--muted)">Informativa ai sensi dell'art. 13 del Regolamento UE 2016/679. Verga Luigi S.r.l. tratta i suoi dati per gestire acquisti, riparazioni e richieste. <i>Testo definitivo da ricevere da Verga.</i></div>
       <label class="check"><input type="checkbox" checked disabled> Ho letto l'informativa (obbligatorio)</label>
-      <label class="check"><input type="checkbox" checked> Acconsento a ricevere newsletter e inviti (MailUp)</label>
+      <label class="check"><input type="checkbox" checked> Acconsento a ricevere newsletter e inviti</label>
       <label class="check"><input type="checkbox"> Acconsento alla profilazione in base ai miei acquisti</label>
       <div class="field"><span>Firma qui</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>`;
     f = `<button class="vbtn" data-act="m-close">Annulla</button><button class="vbtn vbtn-primary vbtn-lg" data-act="m-save-sig" data-id="${c.id}">${ic('check')}Firma e conferma</button>`;
   }
   if (M.kind === 'venduto') {
     h = 'Vendita conclusa';
-    b = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:12px 0"><span class="av lg" style="background:var(--ok-bg);color:var(--ok)">${ic('check')}</span><b style="font-size:18px">${eur(M.total)} · ${esc(M.pay)}</b><p class="muted" style="margin:0;max-width:46ch">Ordine <b class="mono">ORD-2026-0412</b> di <b>${esc(M.name)}</b> inviato al gestionale. ${M.promoted ? `<br><b>${esc(M.name)}</b> è passato da Prospect a Cliente.` : ''}</p></div>
+    b = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:12px 0"><span class="av lg" style="background:var(--ok-bg);color:var(--ok)">${ic('check')}</span><b style="font-size:18px">${eur(M.total)} · ${esc(M.pay)}</b>${M.acc !== null ? `<span class="tag amber">Acconto ${eur(M.acc)} · da saldare ${eur(M.total - M.acc)}</span>` : ''}<p class="muted" style="margin:0;max-width:46ch">Ordine <b class="mono">ORD-2026-0412</b> di <b>${esc(M.name)}</b> inviato al gestionale. ${M.promoted ? `<br><b>${esc(M.name)}</b> è passato da Prospect a Cliente.` : ''}</p></div>
       <div class="vcard">
-        <div class="vrow">${ic('bag')}<div class="grow"><div class="t">${M.inv === 'societa' ? `Fattura a ${esc(M.rs)}` : 'Documento a nome del cliente'}</div><div class="s">${M.invState === 'done' ? 'Fattura FT 2026/01873 pronta' : M.invState === 'wait' ? 'Il gestionale sta emettendo il documento…' : 'Emessa dal gestionale e restituita qui in PDF'}</div></div>
-          ${M.invState === 'done' ? `<button class="vbtn vbtn-sm vbtn-primary" data-act="soon-print">${ic('check')}Stampa PDF</button>` : `<button class="vbtn vbtn-sm vbtn-primary" data-act="m-invoice" ${M.invState === 'wait' ? 'disabled' : ''}>${M.invState === 'wait' ? 'Attendere…' : 'Emetti fattura'}</button>`}</div>
-        <div class="vrow"><span class="faint">${ic('info')}</span><div class="grow"><div class="t">Scontrino di cortesia</div><div class="s">Soluzione in definizione (es. Scontrini in Cloud)</div></div></div>
+        <div class="vrow">${ic('bag')}<div class="grow"><div class="t">${M.inv === 'societa' ? `Fattura a ${esc(M.rs)}` : 'Documento commerciale a nome del cliente'}</div><div class="s">${M.invState === 'done' ? (M.inv === 'societa' ? 'Fattura FT 2026/01873 pronta' : 'Documento DC 2026/04412 pronto') : M.invState === 'wait' ? 'Il gestionale sta emettendo il documento…' : 'Emesso dal gestionale e restituito qui in PDF'}</div></div>
+          ${M.invState === 'done' ? `<button class="vbtn vbtn-sm vbtn-primary" data-act="soon-print">${ic('check')}Stampa PDF</button>` : `<button class="vbtn vbtn-sm vbtn-primary" data-act="m-invoice" ${M.invState === 'wait' ? 'disabled' : ''}>${M.invState === 'wait' ? 'Attendere…' : M.inv === 'societa' ? 'Emetti fattura' : 'Emetti documento'}</button>`}</div>
+        <div class="vrow"><span class="faint">${ic('info')}</span><div class="grow"><div class="t">Scontrino fiscale</div><div class="s">Si emette sul registratore telematico come oggi</div></div></div>
       </div>
       <p class="faint" style="margin:0;font-size:12px;text-align:center">Al cliente parte la mail di acquisto personalizzata con brand e referenza.</p>`;
     f = `<button class="vbtn" data-act="m-close">Nuova vendita</button><button class="vbtn vbtn-primary" data-act="m-open-client" data-id="${M.clientId}">Apri scheda cliente</button>`;
   }
   if (M.kind === 'ricevuta') {
     const r = R(M.rid), c = RC(r.clientId), a = c.addresses?.[0];
-    h = 'Ricevuta di consegna';
+    h = 'Ricevuta di presa in carico';
     b = `<div class="paper" id="print-area">
         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span class="logo" style="height:56px;--logo-a:#004d43;--logo-b:#007565">${LOGO_MARK}</span><div style="text-align:right"><b>Ricevuta n. <span class="mono">${esc(r.busta)}</span></b><br>${fmtDT(r.acc)} · ${esc(r.boutique)}</div></div>
         <h4>Cliente</h4><p>${esc(fullName(c))}${a ? ` · ${esc(a.via)}${a.citta ? ', ' + esc(a.cap) + ' ' + esc(a.citta) : ''}` : ''}<br>CF ${esc(c.cf || '—')} · Tel. ${esc(c.tel || '—')} · ${esc(c.email || '—')}${c.pec ? ` · PEC ${esc(c.pec)}` : ''}</p>
         <h4>Oggetto</h4><p>${esc(r.obj.tipo)} ${esc(objName(r))} · ref. ${esc(r.obj.ref || '—')}${r.obj.nc ? ` · Nc ${esc(r.obj.nc)}` : ''}${r.obj.cal ? ` · cal. ${esc(r.obj.cal)}` : ''}<br>${[r.obj.materiale, r.obj.quadrante && 'quadrante ' + r.obj.quadrante, r.obj.bracciale].filter(Boolean).map(esc).join(' · ')}<br><b>${r.foto}</b> foto scattate alla presenza del cliente</p>
         <h4>Intervento richiesto</h4><p>${esc(r.motivo)}${r.garanzia ? ' · in garanzia' : ''} · valore dichiarato ${r.valore ? eur(+r.valore) : '—'}${r.noteCliente ? `<br>Note: ${esc(r.noteCliente)}` : ''}</p>
         <h4>Clausole</h4><p class="faint">L'oggetto è custodito gratuitamente fino al termine ultimo di ritiro. <i>Testo definitivo delle clausole da ricevere da Verga.</i></p>
+        ${r.firma ? `<h4>Firma del cliente</h4>${sigImg(r.firma, 70)}<p class="faint">Firmata sul tablet il ${fmtDT(r.firmaAt)}</p>` : ''}
       </div>
-      <div class="field"><span>Firma del cliente</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>`;
-    f = `<button class="vbtn" data-act="ric-print">${ic('print')}Stampa</button><button class="vbtn" data-act="m-close">Più tardi</button><button class="vbtn vbtn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
+      ${r.firma ? '' : r.ric ? '<p class="faint" style="margin:0;font-size:12px">Ricevuta già firmata dal cliente (firma su carta, prima del portale).</p>' : '<div class="field"><span>Firma del cliente</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>'}`;
+    f = r.ric ? `<button class="vbtn" data-act="ric-print">${ic('print')}Stampa</button><button class="vbtn vbtn-primary" data-act="m-close">Chiudi</button>` : `<button class="vbtn" data-act="ric-print">${ic('print')}Stampa</button><button class="vbtn" data-act="m-close">Più tardi</button><button class="vbtn vbtn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
   }
   if (M.kind === 'etichette') {
     const r = R(M.rid), c = RC(r.clientId);
-    h = 'Etichette per la busta';
+    h = 'Etichette busta e orologio';
     b = `<div class="labels" id="print-area">
-        <div class="label-prev"><div class="lbl-k">Etichetta 1 · cliente</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(fullName(c))}</div><div>${esc(c.tel || '')}</div><div>${esc(objName(r))} · ${esc(r.obj.ref)}</div><div class="bars" aria-hidden="true"></div></div>
-        <div class="label-prev"><div class="lbl-k">Etichetta 2 · contenuto da definire</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(r.tipo)} · ${esc(r.motivo)}</div><div>${esc(AREA_OF[r.boutique] || '')} · ${fmtD(r.acc)}</div><div class="bars" aria-hidden="true"></div></div>
+        <div class="label-prev"><div class="lbl-k">Etichetta busta</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(fullName(c))}${c.tel ? ' · ' + esc(c.tel) : ''}</div><div>${esc(objName(r))} · ${esc(r.obj.ref)}</div><div>${esc(r.tipo)} · accettata ${fmtD(r.acc)}</div><div class="bars" aria-hidden="true"></div></div>
+        <div class="label-prev"><div class="lbl-k">Etichetta orologio</div><b class="mono" style="font-size:16px">${esc(r.busta)}</b><div>${esc(objName(r))} · ${esc(r.obj.ref)}</div><div>Matricola ${esc(r.obj.nc || '—')}</div><div>${esc(r.tipo)} · ${fmtD(r.acc)}</div><div class="bars" aria-hidden="true"></div></div>
       </div>
-      <p class="faint" style="margin:0;font-size:12px">Il contenuto della seconda etichetta va concordato con Verga.</p>`;
+      <p class="faint" style="margin:0;font-size:12px">Dati presi dalla pratica, senza ricopiarli. Il formato definitivo si fa sui modelli di etichetta che Verga usa oggi.</p>`;
     f = `<button class="vbtn" data-act="m-close">Più tardi</button><button class="vbtn vbtn-primary" data-act="m-save-et">${ic('print')}Stampa etichette</button>`;
   }
   setTimeout(initSig, 0);
@@ -1395,13 +1615,21 @@ function initSig(){
   cv.addEventListener('pointermove', e => { if (!on) return; g.lineTo(...pt(e)); g.stroke(); cv.dataset.signed = '1'; });
   ['pointerup','pointercancel'].forEach(t => cv.addEventListener(t, () => on = false));
 }
+/* firma salvata come immagine: tratto scuro su fondo bianco, leggibile anche se il portale è in tema scuro */
+function sigData(){
+  const cv = document.getElementById('sig'), t = document.createElement('canvas'); t.width = cv.width; t.height = cv.height;
+  const g = t.getContext('2d'); g.drawImage(cv, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#1a1a1a'; g.fillRect(0, 0, t.width, t.height);
+  g.globalCompositeOperation = 'destination-over'; g.fillStyle = '#fff'; g.fillRect(0, 0, t.width, t.height);
+  return t.toDataURL('image/png');
+}
+const sigImg = (src, h = 90) => `<img src="${src}" alt="Firma del cliente" style="height:${h}px;max-width:100%;border:1px solid var(--line);border-radius:10px;background:#fff;display:block">`;
 const others = p => pdas.filter(x => x.id !== p.id && ['aperta','preordine'].includes(x.stato) && x.brand === p.brand && x.modello === p.modello);
 /* ---------------- DRAWER NOTE ---------------- */
 function renderDrawer(){
   const r = document.getElementById('drawer-root');
   if (!S.notes) { r.innerHTML = ''; return; }
   const n = NOTES[S.view] || NOTES.dashboard;
-  const titles = {login:'Login',dashboard:'Home',clienti:'Clienti e filtri',cliente:'Scheda cliente',nuovo:'Nuovo cliente',prodotti:'Catalogo',cassa:'Cassa',passaggi:'Passaggi',pda:'Manifestazioni di interesse',riparazioni:'Riparazioni','rip-new':'Nuova accettazione',busta:'Scheda busta',prev:'Preventivo online',auto:'Autoregistrazione'};
+  const titles = {login:'Login',dashboard:'Home',clienti:'Clienti e filtri',cliente:'Scheda cliente',nuovo:'Nuovo cliente',prodotti:'Magazzino',prodotto:'Scheda prodotto',cassa:'Cassa',passaggi:'Passaggi',pda:'Manifestazioni di interesse',manifestazione:'Dettaglio manifestazione',riparazioni:'Riparazioni','rip-new':'Nuova accettazione',busta:'Scheda busta',prev:'Preventivo online',auto:'Autoregistrazione'};
   r.innerHTML = `<aside class="drawer" aria-label="Note di progetto"><div class="modal-h"><h2 style="font-size:20px">${titles[S.view] || ''}</h2><button class="vbtn vbtn-ghost vbtn-sm" data-act="notes" aria-label="Chiudi">${ic('x')}</button></div>
     <div class="drawer-b"><p class="muted" style="margin:8px 0 0;font-size:13px">Da dove arriva questa schermata: appunti della call del 24/09/2026 con Dario e Vanessa.</p>
     <h4>Cosa abbiamo raccolto</h4><ul>${n.from.map(x => `<li>${esc(x)}</li>`).join('')}</ul>
@@ -1448,34 +1676,39 @@ function actInner(el, ev){
       const n = S.rn, cv = n.tipo === 'Conto vendita';
       if (!cv && !n.clientId) { toast('Seleziona il cliente'); break; }
       if (!n.obj.marca || !n.obj.modello.trim()) { toast('Indica marca e modello dell\'oggetto'); break; }
-      const pre = n.tipo === 'CPO' ? 'CPO' : cv ? 'CV' : 'B', num = String(++ripSeq).padStart(4, '0');
-      const r = {id:'r' + ripSeq, busta:`${pre}-2026-${num}`, tipo:n.tipo, clientId:cv ? 'vv' : n.clientId, boutique:S.boutique, by:S.operator, acc:nowISO(), obj:{...n.obj}, motivo:n.motivo, valore:cv ? n.cv.valore : n.valore, ritiro:n.ritiro, garanzia:n.garanzia || n.tipo === 'Garanzia', foto:n.photos.length, photos:[...n.photos], att:[...n.att], noteCliente:n.noteCliente, noteInterne:n.noteInterne, step:0, done:{}, tecnico:'', ubic:'Cassaforte boutique', presunta:'', owner:'cliente', prev:{stato:'bozza', voci:[]}, log:[], cv:cv ? {...n.cv} : null};
-      const t0 = rSteps(r)[0].t; ripTick(r, 0, 0); const fi = t0.findIndex(x => x.startsWith('Foto')); if (fi >= 0 && n.photos.length) ripTick(r, 0, fi);
-      ripLog(r, `Busta ${r.tipo === 'Riparazione' ? '' : r.tipo + ' '}aperta in ${S.boutique}${n.photos.length ? ` con ${n.photos.length} foto` : ''}`);
-      if (n.prom) ripLog(r, `Promemoria${n.promD ? ' per il ' + fmtD(n.promD) : ''}: ${n.prom}`);
-      repairs.push(r); S.rn = blankRn(); go('busta', r.id); toast('Busta aperta');
+      const pre = n.tipo === 'CPO' ? 'CPO' : cv ? 'VV' : 'B', num = String(++ripSeq).padStart(4, '0');
+      const r = {id:'r' + ripSeq, busta:`${pre}-${NOW.getFullYear()}-${num}`, tipo:n.tipo, clientId:cv ? 'vv' : n.clientId, boutique:S.boutique, by:S.operator, acc:nowISO(), obj:{...n.obj}, motivo:n.motivo, valore:cv ? n.cv.valore : n.valore, ritiro:n.ritiro, garanzia:n.garanzia || n.tipo === 'Garanzia', foto:n.photos.length, photos:[...n.photos], att:[...n.att], noteCliente:n.noteCliente, noteInterne:n.noteInterne, si:1, dates:{0:{date:nowISO(), by:S.operator}, 1:{date:nowISO(), by:S.operator}}, ric:false, et:false, resp:'', tecnico:'', ubic:'Cassaforte boutique', presunta:'', owner:'cliente', prev:{stato:'bozza', voci:[]}, log:[], cv:cv ? {...n.cv} : null, eco:['CPO','Conto vendita'].includes(n.tipo) ? {acquisto:cv ? n.cv.valore : '', revisione:'', certificazione:'', documenti:'', vendita:'', acquirente:''} : null};
+      ripLog(r, `Busta ${r.tipo === 'Riparazione' ? '' : r.tipo + ' '}aperta in ${S.boutique}${n.photos.length ? ` con ${n.photos.length} foto` : ''}`, S.operator, false);
+      if (n.prom) ripLog(r, `Promemoria${n.promD ? ' per il ' + fmtD(n.promD) : ''}: ${n.prom}`, S.operator, false);
+      repairs.push(r); S.rn = blankRn(); go('busta', r.id); toast('Busta aperta · documento di presa in carico inviato al gestionale');
       openModalAfterNav({kind:'ricevuta', rid:r.id}); break; }
-    case 'rb-task': { const r = R(id), [si, ti] = el.dataset.k.split('-').map(Number); ripTick(r, si, ti, el.checked); if (el.checked) ripLog(r, rSteps(r)[si].t[ti]); ripAdvance(r); keepY(render); break; }
+    case 'rip-bo': S.ripBO = !S.ripBO; try { sessionStorage.setItem('vp_rip_bo', S.ripBO ? '1' : ''); } catch (_) {} S.rf.chip = 'aperte'; render(); toast(S.ripBO ? 'Vista amministrazione e backoffice' : 'Vista venditore'); break;
+    case 'rb-next': { const r = R(id); if (stato(r)[0] === 'Preventivo accettato' && !r.tecnico) { toast('Scegli prima il tecnico'); break; } advanceTo(r, r.si + 1); keepY(render); toast(r.closed ? 'Pratica chiusa' : `Stato: ${stato(r)[0]}`); break; }
+    case 'rb-esterna': { const r = R(id); r.esterna = true; r.tecnico = 'Casa madre (esterno)'; r.est = TODAY; Object.keys(r.dates).forEach(k => { if (+k > 1) delete r.dates[k]; }); advanceTo(r, 2); r.ubic = 'Casa madre (riparazione esterna)'; ripLog(r, 'Affidato a laboratorio esterno o casa madre'); keepY(render); break; }
+    case 'rb-pila': { const r = R(id); ripLog(r, 'Pila sostituita in boutique'); advanceTo(r, r.si + 1); keepY(render); toast('Intervento eseguito: ora riconsegna l\'orologio'); break; }
     case 'rb-ricevuta': openModal({kind:'ricevuta', rid:id}); break;
     case 'rb-etichette': openModal({kind:'etichette', rid:id}); break;
     case 'pv-add': { const r = R(id), d = document.getElementById('pv-d').value.trim(), pr = parseFloat(document.getElementById('pv-p').value.replace(',', '.')); if (!d || isNaN(pr)) { toast('Scrivi la voce e il prezzo'); break; } r.prev.voci.push({d, p:pr, ok:true}); keepY(render); break; }
     case 'pv-rm': R(id).prev.voci.splice(+el.dataset.i, 1); keepY(render); break;
-    case 'pv-send': { const r = R(id); r.prev.stato = 'inviato'; r.prev.link = `verga1947.it/p/${r.busta.slice(-4)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`; rSteps(r)[r.step].t.forEach((_, ti) => { if (!r.done[tk(r.step, ti)]) ripTick(r, r.step, ti); });
-      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} al cliente: ${r.prev.voci.length} ${r.prev.voci.length === 1 ? 'voce' : 'voci'}, ${eur(prevTot(r))}`); ripAdvance(r); render(); toast('Mail con il link privato inviata al cliente'); break; }
-    case 'pv-resend': toast('Sollecito inviato al cliente con lo stesso link'); ripLog(R(id), 'Sollecito inviato al cliente'); render(); break;
-    case 'pv-refuse': ripRefuse(R(id), S.operator, 'Rifiuto registrato dal venditore (risposta scritta del cliente)'); render(); break;
+    case 'pv-send': { const r = R(id);
+      if (r.tipo === 'Quotazione') { ripLog(r, `Quotazione comunicata al cliente: ${eur(prevTot(r))}`, undefined, false); advanceTo(r, r.si + 1); render(); toast('Quotazione inviata al cliente'); break; }
+      r.prev.stato = 'inviato'; r.prev.link = `verga1947.it/p/${r.busta.slice(-4)}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
+      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} al cliente: ${r.prev.voci.length} ${r.prev.voci.length === 1 ? 'voce' : 'voci'}, ${eur(prevTot(r))}`, undefined, false); advanceTo(r, r.si + 1); render(); toast('Mail con il link privato inviata al cliente'); break; }
+    case 'pv-resend': toast('Sollecito inviato al cliente con lo stesso link'); ripLog(R(id), 'Sollecito inviato al cliente', undefined, false); render(); break;
+    case 'pv-refuse': ripRefuse(R(id), R(id).resp || BACKOFFICE[0], 'Rifiuto registrato dal backoffice (risposta scritta del cliente)'); render(); break;
     case 'pv-sel': { const r = R(S.id); S.pv = S.pv || r.prev.voci.map(() => true); S.pv[+el.dataset.i] = el.checked; render(); break; }
     case 'pv-print': window.print(); break;
-    case 'pv-c-ok': { const r = R(S.id), sel = S.pv || r.prev.voci.map(() => true); r.prev.voci.forEach((x, i) => x.ok = !!sel[i]); r.prev.stato = 'accettato'; r.esito = 'accettato'; ripTick(r, 2, 0);
-      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta accettata' : 'Preventivo accettato'} online: ${sel.filter(Boolean).length} ${sel.filter(Boolean).length === 1 ? 'voce' : 'voci'} su ${r.prev.voci.length} (${eur(prevTot(r, true))})`, 'Cliente');
-      if (r.tipo === 'CPO') { r.owner = 'verga'; ripLog(r, 'La busta passa a Verga: cambio intestatario', 'Sistema'); }
-      ripAdvance(r); S.pv = null; render(); window.scrollTo(0, 0); break; }
+    case 'pv-c-ok': { const r = R(S.id), sel = S.pv || r.prev.voci.map(() => true); r.prev.voci.forEach((x, i) => x.ok = !!sel[i]); r.prev.stato = 'accettato'; r.esito = 'accettato';
+      ripLog(r, `${r.tipo === 'CPO' ? 'Offerta accettata' : 'Preventivo accettato'} online: ${sel.filter(Boolean).length} ${sel.filter(Boolean).length === 1 ? 'voce' : 'voci'} su ${r.prev.voci.length} (${eur(prevTot(r, true))})`, 'Cliente', false);
+      advanceTo(r, r.si + 1, 'Cliente');
+      if (r.tipo === 'CPO') { r.owner = 'verga'; ripLog(r, 'La busta passa a Verga: cambio intestatario', 'Sistema', false); advanceTo(r, r.si + 1, 'Sistema'); }
+      S.pv = null; render(); window.scrollTo(0, 0); break; }
     case 'pv-c-refuse': ripRefuse(R(S.id), 'Cliente', 'Preventivo rifiutato online'); S.pv = null; render(); window.scrollTo(0, 0); break;
-    case 'rb-avviso': { const r = R(id), n = document.getElementById('rb-sn').value.trim(), t = parseFloat(document.getElementById('rb-st').value.replace(',', '.')) || 0; if (!n) { toast('Inserisci il numero dello scontrino'); break; } r.scontrino = {n, tot:t}; ripTick(r, 4, 0); r.ubic = 'Pronto in boutique per il ritiro'; ripLog(r, `Avviso di ritiro inviato con scontrino ${n} (${eur(t)})`); render(); toast('Mail di avviso ritiro inviata al cliente'); break; }
-    case 'rb-ritiro': { const r = R(id); if (!r.done[tk(4, 0)]) { toast('Prima invia l\'avviso di ritiro con lo scontrino'); break; } ripTick(r, 4, 1); r.ritiroD = TODAY; ripLog(r, 'Orologio ritirato dal cliente'); ripAdvance(r); render(); toast('Ritiro registrato · busta chiusa'); break; }
+    case 'rb-avviso': { const r = R(id), n = document.getElementById('rb-sn').value.trim(), t = parseFloat(document.getElementById('rb-st').value.replace(',', '.')) || 0; if (!n) { toast('Inserisci il numero dello scontrino'); break; } r.scontrino = {n, tot:t}; r.avviso = true; r.ubic = 'Pronto in boutique per il ritiro'; ripLog(r, `Avviso di ritiro inviato con scontrino ${n} (${eur(t)})`, S.operator, false); render(); toast('Mail di avviso ritiro inviata al cliente'); break; }
+    case 'rb-ritiro': { const r = R(id); if (!r.avviso) { toast('Prima invia l\'avviso di ritiro con lo scontrino'); break; } r.ritiroD = TODAY; r.closed = true; r.ubic = 'Riconsegnato al cliente'; ripLog(r, 'Orologio ritirato dal cliente: pratica chiusa', S.operator, false); render(); toast('Ritiro registrato · busta chiusa'); break; }
     case 'ric-print': window.print(); break;
-    case 'm-save-ric': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } const r = R(M.rid), i = rSteps(r)[0].t.indexOf('Ricevuta firmata dal cliente'); if (i >= 0) ripTick(r, 0, i); ripLog(r, 'Ricevuta firmata dal cliente'); ripAdvance(r); closeModal(); render(); openModal({kind:'etichette', rid:r.id}); break; }
-    case 'm-save-et': { const r = R(M.rid), i = rSteps(r)[0].t.indexOf('Etichette stampate sulla busta'); if (i >= 0 && !r.done[tk(0, i)]) { ripTick(r, 0, i); ripLog(r, 'Etichette stampate sulla busta'); } ripAdvance(r); closeModal(); render(); toast('Etichette inviate alla stampante (demo)'); break; }
+    case 'm-save-ric': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } const r = R(M.rid); r.ric = true; r.firma = sigData(); r.firmaAt = nowISO(); ripLog(r, 'Ricevuta firmata dal cliente', S.operator, false); closeModal(); render(); if (!r.et) openModal({kind:'etichette', rid:r.id}); break; }
+    case 'm-save-et': { const r = R(M.rid); if (!r.et) ripLog(r, 'Etichette busta e orologio stampate', S.operator, false); r.et = true; closeModal(); render(); toast('Etichette inviate alla stampante (demo)'); break; }
     case 'pick-b': S.boutique = v; S.operator = OPERATORS.find(o => o.b === v).name; render(); break;
     case 'pick-op': S.operator = v; render(); break;
     case 'pin':
@@ -1495,7 +1728,6 @@ function actInner(el, ev){
     case 'fu-done': { const x = events.find(z => z.id === id); x.done = true; render(); toast('Follow-up segnato come fatto'); break; }
     case 'clr-f': S.f[el.dataset.k] = ''; render(); break;
     case 'clr-all': Object.keys(S.f).forEach(x => S.f[x] = ''); render(); break;
-    case 'export': toast(`${filteredClients().length} clienti pronti per l'invio a MailUp (demo)`); break;
     case 'evf': S.evf[el.dataset.k] = v; render(); break;
     case 'pdaf': S.pdaf = v; render(); break;
     case 'soon': toast('Le voci degli elenchi si gestiscono dalle impostazioni (demo)'); break;
@@ -1515,6 +1747,9 @@ function actInner(el, ev){
     case 'add-task': { const t = document.getElementById('task-text').value.trim(); if (!t) { toast('Scrivi il messaggio per il collega'); break; } const rec = document.getElementById('task-rec').value; C(id).tasks.push({to:document.getElementById('task-to').value, by:S.operator, text:t, due:document.getElementById('task-due').value, rec: rec === 'Una volta' ? '' : rec, done:false}); render(); toast('Messaggio inviato al collega'); break; }
     case 'task-done': { const t = C(id).tasks[+el.dataset.i]; t.done = !t.done; render(); break; }
     case 'pda-cancel': { const p = pdas.find(x => x.id === id); p.stato = 'annullata'; render(); toast('Manifestazione annullata'); break; }
+    case 'pda-del': openModal({kind:'pda-del', pdaId:id}); break;
+    case 'pda-disp': openModal({kind:'disponibili', ref:null}); break;
+    case 'assegna-pr': openModal({kind:'assegna', pdaId:id, productId:v}); break;
     case 'dissocia': openModal({kind:'dissocia', pdaId:id, to:'aperta'}); break;
     case 'firma': openModal({kind:'firma', clientId:id}); break;
     case 'bell': S.bell = !S.bell; render(); break;
@@ -1545,6 +1780,7 @@ function actInner(el, ev){
     case 'rm-cart': S.cart.items = S.cart.items.filter(x => x !== id); render(); break;
     case 'scan-add': { const q = document.getElementById('scan').value.trim().toLowerCase(); const p = products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && ([x.ref, x.code, x.ean, x.seriale].some(v => v && String(v).toLowerCase() === q))) || products.find(x => ['disponibile','riservato'].includes(x.stato) && !S.cart.items.includes(x.id) && q && `${x.ref} ${x.seriale}`.toLowerCase().includes(q)); if (p) { S.cart.items.push(p.id); render(); toast(`${p.brand} ${p.modello} aggiunto`); } else toast('Nessun prodotto disponibile con questa referenza'); break; }
     case 'pay': S.cart.pay = v; render(); break;
+    case 'paytype': S.cart.acc = v === 'acconto' ? (S.cart.acc || '0') : ''; render(); break;
     case 'inv': S.cart.inv = v; render(); break;
     case 'checkout': tscCheckout(); break;
     /* autoregistrazione */
@@ -1559,7 +1795,7 @@ function actInner(el, ev){
       if (!/^\S+@\S+\.\S+$/.test(S.auto.email)) { err.hidden = false; err.textContent = 'Controlla l\'indirizzo email: sembra incompleto.'; break; }
       if (!document.getElementById('a-priv').checked) { err.hidden = false; err.textContent = 'Per registrarti serve il consenso all\'informativa privacy.'; break; }
       postToVerga('autoreg', {nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, telefono:S.auto.tel, brand:S.auto.brands.join(', '), boutique:S.boutique});
-      const nc = {...blankExtra(), local:true, id:'L' + Date.now().toString(36), nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, tel:S.auto.tel, indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[...S.auto.brands], modelli:[], interests:[], boutique:S.boutique, source:'Autoregistrazione', incomplete:true, newsletter:true, since:TODAY, note:''};
+      const nc = {...blankExtra(), local:true, id:'L' + Date.now().toString(36), nome:S.auto.nome, cognome:S.auto.cognome, email:S.auto.email, tel:S.auto.tel, indirizzo:'', prof:'', azienda:'', celeb:'', birth:{}, brands:[...S.auto.brands], modelli:[], interests:[], boutique:S.boutique, source:'Autoregistrazione', incomplete:true, newsletter:true, privacy:{at:nowISO(), by:'cliente'}, since:TODAY, note:''};
       clients.push(nc); S.auto.createdId = nc.id; S.auto.step = 2; render(); window.scrollTo(0,0); break; }
     case 'a-done': { const c = C(S.auto.createdId); if (c) c.interests = [...S.auto.interests]; S.auto.step = 3; render(); window.scrollTo(0,0); break; }
     case 'a-reset': S.auto = {step:1, brands:[], interests:[], noYear:false, decade:''}; render(); break;
@@ -1581,11 +1817,17 @@ function actInner(el, ev){
     case 'm-pstato': M.stato = v; renderModal(); break;
     case 'm-save-pda': {
       const val = x => document.getElementById(x).value.trim();
-      pdas.push({id:'p' + (++pdaSeq), clientId:M.clientId, brand:M.brand, modello:M.modello, ref:val('m-ref'), quadrante:val('m-quad'), bracciale:val('m-brac'), note:val('m-pnote'), date:TODAY, operator:S.operator, stato:M.stato || 'aperta'});
+      pdas.push({id:'p' + (++pdaSeq), clientId:M.clientId, brand:M.brand, modello:M.modello, ref:val('m-ref'), nome:val('m-nome'), quadrante:val('m-quad'), bracciale:val('m-brac'), note:val('m-pnote'), evento:val('m-evento'), incaricato:val('m-incar'), date:TODAY, operator:S.operator, stato:M.stato || 'aperta'});
       const cid = M.clientId; closeModal();
       if (S.view === 'cliente' && S.id === cid) render(); else go('cliente', cid);
       toast('Manifestazione registrata · mail di presa in carico inviata al cliente'); break; }
     case 'm-pickprod': M.productId = id; renderModal(); break;
+    case 'm-disp-ref': M.ref = v || null; renderModal(); break;
+    case 'm-go-pda': closeModal(); go('manifestazione', id); break;
+    case 'm-go-prod': closeModal(); go('prodotto', v); break;
+    case 'm-save-del': { const i = pdas.findIndex(x => x.id === M.pdaId), p = pdas[i], pr = p.productId ? P(p.productId) : null;
+      if (pr && pr.stato !== 'venduto') { pr.reservedFor = null; if (pr.stato === 'riservato') pr.stato = 'disponibile'; }
+      pdas.splice(i, 1); closeModal(); if (S.view === 'manifestazione') go('pda'); else render(); toast('Manifestazione eliminata'); break; }
     case 'm-save-assign': {
       const p = pdas.find(x => x.id === M.pdaId), pr = P(M.productId);
       p.stato = 'assegnata'; p.productId = pr.id; pr.reservedFor = p.clientId; if (pr.stato === 'disponibile') pr.stato = 'riservato';
@@ -1597,7 +1839,7 @@ function actInner(el, ev){
     case 'm-dto': M.to = v; renderModal(); break;
     case 'm-save-dis': { const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId); pr.reservedFor = null; if (pr.stato === 'riservato') pr.stato = 'disponibile'; p.productId = null; p.stato = M.to; closeModal(); render(); toast('Prodotto dissociato'); break; }
     case 'sig-clear': { const cv = document.getElementById('sig'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv.dataset.signed = ''; break; }
-    case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = TODAY; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
+    case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = {at:nowISO(), by:'cliente', firma:sigData()}; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
   }
 }
 function toggle(arr, v){ const i = arr.indexOf(v); if (i >= 0) arr.splice(i,1); else arr.push(v); }
@@ -1620,7 +1862,9 @@ function saveClient(id){
   const addresses = S.nc.addr.filter(a => a.via || a.citta).map(a => ({...a}));
   const data = {tipo:v('f-tipo'), nome:v('f-nome'), cognome:v('f-cognome'), sesso:v('f-sesso'), prof:v('f-prof'), azienda:v('f-azienda'), email:v('f-email').toLowerCase(), email2:v('f-email2').toLowerCase(), tel:v('f-tel'), cf:v('f-cf').toUpperCase(), pec:v('f-pec').toLowerCase(), lingua:v('f-lingua'), addresses, indirizzo:addresses[0] ? `${addresses[0].via}, ${addresses[0].citta}` : '', boutique:v('f-boutique'), birth,
     billing:{rs:v('f-rs'), ind:v('f-bind'), piva:v('f-piva'), sdi:v('f-sdi').toUpperCase()}, misure:{polso:v('f-polso'), dxMedio:v('f-dxm'), dxAnulare:v('f-dxa'), sxMedio:v('f-sxm'), sxAnulare:v('f-sxa')}, rating:S.nc.rating,
-    brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : '', newsletter:document.getElementById('f-nl').checked};
+    brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : ''};
+  const priv = document.getElementById('f-priv').checked, old = id ? C(id).privacy : null;
+  data.privacy = priv ? old || {at:nowISO(), by:'venditore', operator:S.operator} : null;
   if (id) { const c = C(id); Object.assign(c, data); if (c.email && c.tel) c.incomplete = false; S.tab = 'panoramica'; render(); toast('Anagrafica aggiornata'); }
   else { postToVerga('new_customer', {...data, brands:data.brands.join(', '), interests:data.interests.join(', '), venditore:S.operator, boutique_venditore:S.boutique, addresses:JSON.stringify(data.addresses), billing:JSON.stringify(data.billing), misure:JSON.stringify(data.misure), birth:JSON.stringify(data.birth)}); const c = {...blankExtra(), local:true, id:'L' + Date.now().toString(36), source:'Negozio', since:TODAY, ...data, notes: v('f-note') ? [{by:S.operator, date:nowISO(), text:v('f-note')}] : []}; clients.push(c); const pend = S.nc.pending; pend.forEach(l => links.push({from:c.id, ...l})); go('cliente', c.id); toast(pend.length ? `Cliente registrato con ${pend.length} ${pend.length === 1 ? 'legame' : 'legami'}` : 'Cliente registrato'); }
 }
@@ -1631,8 +1875,9 @@ function checkout(){
     pdas.filter(x => x.productId === id).forEach(x => x.stato = 'venduta'); });
   const promoted = c.tipo === 'Prospect'; if (promoted) c.tipo = 'Cliente';
   const inv = S.cart.inv === 'societa' && c.billing?.rs ? 'societa' : 'persona';
-  const m = {kind:'venduto', total, pay:S.cart.pay, name:fullName(c), clientId:c.id, promoted, inv, rs:c.billing?.rs, invState:''};
-  S.cart = {clientId:null, items:[], pay:'Carta', inv:'persona'}; render(); openModal(m);
+  const acc = S.cart.acc === '' ? null : Math.min(total, parseFloat(String(S.cart.acc).replace(',', '.')) || 0);
+  const m = {kind:'venduto', total, acc, pay:S.cart.pay, name:fullName(c), clientId:c.id, promoted, inv, rs:c.billing?.rs, invState:''};
+  S.cart = {clientId:null, items:[], pay:'Carta', inv:'persona', acc:''}; render(); openModal(m);
 }
 /* quando si apre una scheda in modifica, carico gli elenchi del cliente nello stato del form */
 /* stato iniziale della vista, ricavato dall'URL della pagina TSC */
@@ -1651,9 +1896,12 @@ document.addEventListener('input', e => {
   const t = e.target;
   if (t.dataset.f !== undefined) { S.f[t.dataset.f] = t.value; renderResults(); return; }
   if (t.id === 'gs') return gsearch(t.value);
+  if (t.id === 'cart-acc') { S.cart.acc = t.value; return; }
   if (t.id === 'm-cs') { document.getElementById('m-cs-list').innerHTML = clientPick(t.value, 'm-pick'); return; }
   if (t.id === 'cart-cs') { document.getElementById('cart-cs-list').innerHTML = clientPick(t.value, 'cart-client'); return; }
+  if (t.id === 'm-ref') { const n = NOMI[t.value.trim().toUpperCase()]; if (n) document.getElementById('m-nome').value = n; return; }
   if (t.id === 'scan') { document.getElementById('scan-list').innerHTML = scanList(t.value); return; }
+  if (t.dataset.pdf !== undefined && t.tagName === 'INPUT') { S.pdf[t.dataset.pdf] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('pdf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'INPUT') { S.pf[t.dataset.pf] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('pf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
   if (t.id === 'lk-q') { S.nc.lk.q = t.value; document.getElementById('lk-list').innerHTML = lkPick(t.value, S.view === 'cliente' ? S.id : null); return; }
   if (t.id === 'lk-type') { S.nc.lk.type = t.value; if (!S.nc.lk.backEdited) { S.nc.lk.back = LINK_TYPES[t.value.trim()] || ''; document.getElementById('lk-back').value = S.nc.lk.back; } document.querySelector('[data-act="lk-add"]').disabled = !(S.nc.lk.otherId && t.value.trim()); return; }
@@ -1669,14 +1917,18 @@ document.addEventListener('change', e => {
   const t = e.target;
   if (t.id === 'boutique-sel') { S.boutique = t.value; try { sessionStorage.setItem('vp_boutique', t.value); } catch (_) {} render(); toast(`Boutique attiva: ${t.value}`); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'SELECT') { S.pf[t.dataset.pf] = t.value; render(); return; }
+  if (t.dataset.pdf !== undefined && t.tagName === 'SELECT') { S.pdf[t.dataset.pdf] = t.value; render(); return; }
   if (t.dataset.evf !== undefined) { S.evf[t.dataset.evf] = t.value; render(); return; }
   if (t.dataset.rf !== undefined) { S.rf[t.dataset.rf] = t.value; render(); return; }
   if (t.id === 'rn-cam' || t.id === 'rn-att') { [...t.files].forEach(f => t.id === 'rn-cam' ? S.rn.photos.push(URL.createObjectURL(f)) : S.rn.att.push(f.name)); keepY(render); return; }
-  if (t.classList.contains('rb-att')) { const r = R(t.dataset.id); r.att = r.att || []; [...t.files].forEach(f => r.att.push(f.name)); ripLog(r, `Allegati: ${[...t.files].map(f => f.name).join(', ')}`); const i = rSteps(r)[r.step].t?.findIndex(x => /scarico|certificazione con documento/i.test(x)); if (i >= 0) ripTick(r, r.step, i); ripAdvance(r); keepY(render); return; }
-  if (t.dataset.rb !== undefined) { const r = R(t.dataset.id), k = t.dataset.rb; r[k] = t.value;
-    if (k === 'tecnico' && t.value) { const st = rSteps(r)[r.step]; const i = st.t ? st.t.findIndex(x => /Presa in carico|assegnata|Prima valutazione/.test(x)) : -1; if (i >= 0 && !r.done[tk(r.step, i)]) ripTick(r, r.step, i); if (r.step === 3) r.ass = TODAY; if (t.value.startsWith('Casa madre')) { r.est = TODAY; r.ubic = 'Casa madre (riparazione esterna)'; } ripLog(r, `In mano a ${t.value}`); ripAdvance(r); }
+  if (t.classList.contains('rb-att')) { const r = R(t.dataset.id); r.att = r.att || []; [...t.files].forEach(f => r.att.push(f.name)); ripLog(r, `Documenti allegati: ${[...t.files].map(f => f.name).join(', ')}`); keepY(render); return; }
+  if (t.dataset.rb !== undefined) { const r = R(t.dataset.id), k = t.dataset.rb;
+    if (k.startsWith('eco.')) { r.eco[k.slice(4)] = t.value; return; }
+    r[k] = t.value; if (['noteInterne','costoPrev'].includes(k)) return;
+    if (k === 'tecnico') ripLog(r, `Tecnico: ${t.value || 'nessuno'}`);
+    if (k === 'resp') ripLog(r, `Responsabile: ${t.value || 'da assegnare'}`);
     if (k === 'ubic') ripLog(r, `Spostato: ${t.value}`);
-    if (k === 'presunta') ripLog(r, `Presunta consegna: ${fmtD(t.value)}`);
+    if (k === 'presunta') ripLog(r, `Data prevista di consegna: ${fmtD(t.value)}`);
     keepY(render); return; }
 });
 document.addEventListener('keydown', e => {
@@ -1688,11 +1940,10 @@ function gsearch(q){
   const d = document.getElementById('gs-drop'); q = q.trim().toLowerCase();
   if (!q) { d.innerHTML = ''; return; }
   const cs = clients.filter(c => `${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(q)).slice(0,5);
-  const ps = products.filter(p => `${p.ref} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q)).slice(0,5);
+  const ps = refGroups(products.filter(p => p.stato !== 'venduto' && `${p.ref} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q))).map(g => g[0]).slice(0,5);
   d.innerHTML = `<div class="gs-drop">${cs.length ? '<div class="label">Clienti</div>' + cs.map(c => `<button class="gs-item" data-go="cliente" data-id="${c.id}">${avatar(c)}<span><b>${esc(fullName(c))}</b><br><small class="muted">${esc(c.email || 'Scheda da completare')}</small></span></button>`).join('') : ''}
-    ${ps.length ? '<div class="label">Prodotti</div>' + ps.map(p => `<button class="gs-item" data-go="prodotti" data-act-pf="${esc(p.ref)}">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}<span><b>${esc(p.brand)} ${esc(p.modello)}</b><br><small class="muted mono">${esc(p.ref)} · ${esc(p.seriale)}</small></span><span style="margin-left:auto">${prodState(p)}</span></button>`).join('') : ''}
+    ${ps.length ? '<div class="label">Prodotti</div>' + ps.map(p => `<button class="gs-item" data-go="prodotto" data-id="${esc(p.ref)}">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}<span><b>${esc(p.brand)} ${esc(p.modello)}</b><br><small class="muted mono">${esc(p.ref)} · ${esc(p.seriale)}</small></span><span style="margin-left:auto">${prodState(p)}</span></button>`).join('') : ''}
     ${!cs.length && !ps.length ? '<div class="empty">Nessun risultato. <button class="link" data-go="nuovo">Crea nuovo cliente</button></div>' : ''}</div>`;
-  d.querySelectorAll('[data-act-pf]').forEach(b => b.addEventListener('click', () => { S.pf.q = b.dataset.actPf; }, true));
 }
 function dupCheck(){
   const val = x => (document.getElementById(x)?.value || '').trim().toLowerCase();
@@ -1720,6 +1971,7 @@ function dupCheck(){
   if (S.view === 'cassa' && !S.cart.clientId && SEL_ID) S.cart.clientId = SEL_ID;
   if (products.length) S.cart.items = S.cart.items.filter(id => products.some(p => p.id === id));
   if (q.q) S.pf.q = q.q;
+  try { S.ripBO = sessionStorage.getItem('vp_rip_bo') === '1'; } catch (_) {}
   if (S.view === 'rip-new') S.rn = blankRn(q.cliente || null);
   initView(S.view, S.id);
   render();

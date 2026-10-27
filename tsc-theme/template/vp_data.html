@@ -9,7 +9,7 @@
 {% endif %}
 {% set vp_products = [] %}
 {% set vp_brands = [] %}
-{% if is_agent and vp_route in ['dashboard', 'catalogo', 'cassa'] %}
+{% if is_agent and vp_route in ['dashboard', 'magazzino', 'catalogo', 'prodotto', 'cassa', 'manifestazioni', 'manifestazione', 'cliente'] %}
     {% set vp_products = getItemsByFilter(null, null, {}, {'title': 1}, 0, 500) %}
     {% set vp_brands = getBrands() %}
 {% endif %}

@@ -1,6 +1,8 @@
-# Portale venditori su TSC · versione 1
+# Portale venditori su TSC · versione 2
 
-Il tema TSC si trova in `tsc-theme/`. È il backup 1791293589 con il portale aggiunto sopra. Il mockup (`mockup/index.html`) resta il riferimento grafico. Il JS del portale è stato generato dal mockup e poi adattato a TSC.
+Il tema TSC si trova in `tsc-theme/`. È il backup 1791293589 con il portale aggiunto sopra. Il backup del 27/10/2026 (1793095862, tema `verga`) ha gli stessi file, quindi la base è invariata.
+
+**Versione 2 (27/10/2026):** il portale è allineato al mockup del 26/10. Lo zip da caricare sul tema `verga` è `~/Downloads/ThemeBackup_verga_portale.zip`: è il backup del 27/10 più i file della tabella qui sotto. Il mockup (`mockup/index.html`) resta il riferimento grafico. Il JS del portale è stato generato dal mockup e poi adattato a TSC.
 
 ## File da caricare su TSC
 
@@ -31,7 +33,9 @@ Nei file `vp_app.html` e `vp_css.html` non vanno mai scritte le sequenze `{{`, `
 | Nuovo cliente | `/profile/nuovo-cliente` |
 | Passaggi | `/profile/passaggi` |
 | Manifestazioni | `/profile/manifestazioni` |
-| Catalogo | `/profile/catalogo` |
+| Dettaglio manifestazione | `/profile/manifestazione/<id>` |
+| Magazzino | `/profile/magazzino` (il vecchio `/profile/catalogo` funziona ancora) |
+| Scheda prodotto | `/profile/prodotto/<id prodotto TSC>` |
 | Cassa | `/profile/cassa` |
 | Riparazioni | `/profile/riparazioni` |
 | Nuova accettazione | `/profile/accettazione` |
@@ -52,7 +56,7 @@ Nei file `vp_app.html` e `vp_css.html` non vanno mai scritte le sequenze `{{`, `
 | Dati completi del cliente aperto | middleware `customer_get.php` |
 | Ordini del cliente aperto (tab Acquisti, con link al dettaglio) | middleware `order_frontend.php` |
 | Proposte del cliente aperto (tab Manifestazioni → "Proposte su TSC") | middleware `proposal_frontend.php` |
-| Catalogo (primi 500 prodotti) e marchi | `getItemsByFilter`, `getBrands` |
+| Magazzino (primi 500 prodotti) e marchi | `getItemsByFilter`, `getBrands` |
 | Carrello e checkout | TSC |
 | Passaggi, note firmate, task ai colleghi, legami, valutazione, interessi, misure, manifestazioni CRM, riparazioni, notifiche | **solo nel browser** (localStorage, chiave `vp_store_v1`). In alto c'è il banner "Versione di prova". |
 
@@ -62,14 +66,25 @@ Nei file `vp_app.html` e `vp_css.html` non vanno mai scritte le sequenze `{{`, `
 2. Entra con un utente **agente**. Deve aprirsi la Home del portale. Se compare la pagina "Benvenuto in Verga", l'utente non ha `role = agent`.
 3. Vai su Clienti: devono comparire i clienti dell'agente. Se la lista è vuota, controlla il campo `associations` dell'agente oppure i codici del middleware.
 4. Apri un cliente. Nel tab Acquisti devono esserci i suoi ordini. Clicca un ordine: si apre il dettaglio TSC dentro la cornice.
-5. Catalogo: devono comparire i prodotti, con marca e referenza.
+5. Magazzino: devono comparire i prodotti, con marca e referenza. Cliccando una riga si apre la scheda prodotto.
 6. Cassa: scegli il cliente, aggiungi un pezzo e premi "Crea ordine". Deve aprirsi `/cart` con il pezzo dentro.
-7. Riparazioni: la sidebar diventa grafite.
+7. Riparazioni: la sidebar diventa grafite. Il pulsante "Vista amministrazione" mostra il workflow completo del backoffice e resta attivo cambiando pagina.
 8. Manda gli screenshot e, se qualcosa non va, la **console del browser** (tasto destro → Ispeziona → Console).
 
 Se qualcosa si rompe in modo grave, metti `vp_enabled = false` in `skeleton.html` e ricarica: torna il tema originale.
 
+## Novità della versione 2
+
+- **Magazzino** al posto di Catalogo: una riga per pezzo con Matricola e Locazione, filtri per Famiglia, Sottofamiglia · collezione e Locazione, scheda prodotto. Non si vedono i prodotti esauriti.
+- **Manifestazioni**: pagina di dettaglio, data di inserimento, tag "Prodotto associato", campi evento e venditore incaricato. Il nome completo del modello si ricava dalla referenza dei prodotti TSC.
+- **Riparazioni** rifatte come nel documento di analisi: il venditore vede 5 fasi semplificate e fa accettazione e riconsegna. La vista amministrazione gestisce stati per tipo di pratica, laboratorio esterno, CPO, Verga Vintage (numerazione VV-) e cambio pila. Le buste salvate con la versione 1 ripartono da "Accettazione".
+- **Privacy** al posto della newsletter: data, ora e chi ha dato il consenso. La firma fatta sul tablet viene salvata ed è mostrata in anagrafica e sulla ricevuta di presa in carico. Nessun riferimento a MailUp.
+- **Cassa**: acconto con importo da saldare, documento commerciale o fattura. "Crea ordine" manda comunque i pezzi nel carrello TSC: l'acconto non arriva ancora a TSC.
+- Le date sono quelle di oggi (il mockup usa date fisse). Il numero della busta prende l'anno corrente.
+
 ## Cosa manca (da fare insieme)
+
+0. **Codici del middleware**: nel backup del 27/10 i `codes` di `shop_rules.html` sono ancora vuoti. Senza codici non arrivano i dati completi del cliente, gli ordini e le proposte. Vanno chiesti a Dario.
 
 1. **Salvataggio sul server dei dati CRM.** Servono endpoint nuovi sul middleware `pda2_shared` (Ducky), con la stessa autenticazione `verifycode`/`hash` degli altri. Proposta:
    - `crm_get.php?customer_id=…` → campi CRM del cliente (valutazione, brand/modelli di interesse, interessi, misure, lingua, sesso, data di nascita o decade, professione, azienda, celebrità, privacy firmata, legami). In alternativa li salviamo come **Customer Custom Fields** di TSC tramite l'API Connect (`PUT /clients/custom_fields.json`), chiamata dal middleware.
@@ -85,5 +100,7 @@ Se qualcosa si rompe in modo grave, metti `vp_enabled = false` in `skeleton.html
 5. **Preventivo online per il cliente**: serve una pagina pubblica con link privato (ad es. una pagina CMS `/page/preventivo?t=…`) che legga e salvi la risposta sul middleware. Oggi c'è solo l'anteprima per il venditore.
 6. **Fattura e scontrino**: emissione dal gestionale (TSE via eCube) e PDF restituito al portale.
 7. **Colleghi e boutique**: la lista dei colleghi per i task è ancora d'esempio. Va letta dagli agenti TSC. La boutique del venditore può diventare un campo custom `boutique` dell'agente: il portale lo legge già, se c'è.
-8. **Catalogo**: oltre i 500 prodotti serve una paginazione o una ricerca lato server. Seriale e stato "in arrivo" dipendono da come arrivano da TSE.
+8. **Magazzino**: oltre i 500 prodotti serve una paginazione o una ricerca lato server. TSC ha un prodotto per referenza con una giacenza, non un prodotto per pezzo. Per avere **una riga per pezzo con matricola e locazione** bisogna decidere con Dario e Vicsam come arrivano da TSE via eCube: un prodotto TSC per matricola, varianti, oppure un campo o endpoint con le matricole e la boutique di ciascun pezzo. Oggi le colonne Matricola e Locazione restano vuote. Anche lo stato "in arrivo" dipende da TSE.
+10. **Utenti del backoffice riparazioni**: responsabili e tecnici sono ancora nomi d'esempio. Va deciso chi sono (agenti TSC con un ruolo dedicato?) e se vedono la vista amministrazione al posto del pulsante d'anteprima.
+11. **Firme**: oggi la firma (immagine PNG) resta nel browser insieme agli altri dati CRM. Con gli endpoint del punto 1 va salvata sul server insieme al consenso privacy e alla ricevuta.
 9. **Foto e allegati delle riparazioni**: oggi restano nel browser. Serve un upload sul middleware (o lo storage di TSC, se disponibile).
