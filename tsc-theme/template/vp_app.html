@@ -633,7 +633,7 @@ function notesCard(c){
       <textarea class="ta" id="new-note" placeholder="Scrivi una nota su ${esc(c.nome)}…" style="min-height:64px"></textarea>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap"><span class="faint" style="font-size:12px">Firmata da ${esc(S.operator)} · oggi ${fmtT(NOW.toISOString())}</span><button class="vbtn vbtn-sm vbtn-primary" data-act="add-note" data-id="${c.id}">${ic('plus')}Aggiungi nota</button></div>
     </div>
-    <div>${c.notes.length ? [...c.notes].sort((a,b) => dt(b.date) - dt(a.date)).map(n => `<div class="note"><div class="by"><span class="av">${opInitials(n.by)}</span><b style="color:var(--ink)">${esc(n.by)}</b> · ${fmtDT(n.date)}<span style="margin-left:auto">${n.by === S.operator ? `<button class="link" style="font-size:12px" data-act="soon-edit">Modifica</button>` : `<span title="Solo l'autore può modificarla">🔒</span>`}</span></div><div>${esc(n.text)}</div></div>`).join('') : '<div class="empty">Nessuna nota.</div>'}</div>
+    <div>${c.notes.length ? [...c.notes].sort((a,b) => dt(b.date) - dt(a.date)).map(n => `<div class="note"><div class="by"><span class="av">${opInitials(n.by)}</span><b style="color:var(--ink)">${esc(n.by)}</b> · ${fmtDT(n.date)}<span style="margin-left:auto">${n.by === S.operator ? `<button class="link" style="font-size:12px" data-act="soon-edit">Modifica</button>` : `<span class="faint" title="Solo l'autore può modificarla">Solo lettura</span>`}</span></div><div>${esc(n.text)}</div></div>`).join('') : '<div class="empty">Nessuna nota.</div>'}</div>
   </section>`;
 }
 function tasksCard(c){
