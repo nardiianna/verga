@@ -722,7 +722,7 @@ const S = {
   view:'login', id:null, tab:'panoramica', navOpen:false, notes:false,
   boutique:'Bottega Storica', operator:'Marco Verdi', pin:'',
   f:{q:'',tipo:'',tier:'',rating:'',brand:'',modello:'',ref:'',seller:'',pref:'',interest:'',ibrand:'',lingua:'',prof:'',last:'',visit:'',boutique:'',celeb:''},
-  pf:{q:'',brand:'',tipo:'',sub:'',stato:'',loc:''},
+  pf:{q:'',brand:'',tipo:'',sub:'',stato:'',loc:'Bottega Storica'},
   pdf:{q:'',brand:'',boutique:'',operator:''},
   evf:{type:'',boutique:'',op:'',per:'',q:''},
   pdaf:'',
@@ -801,7 +801,7 @@ const NOTES = {
   pda:{from:['Stati della PDA: Manifestazione, Preordine, Associata, Ordine, Annullata (configurabili).','Associare e dissociare un prodotto: solo direttore vendite e titolare. Trasformare in ordine: qualsiasi venditore.','Notifica a chi ha creato la PDA quando il prodotto viene associato.','PDA visibili in tutte le boutique: un interesse nato in multimarca può essere soddisfatto dalla boutique Rolex.','Alla creazione parte la mail di presa in carico.','Prodotti disponibili: per ogni pezzo libero si vede chi lo aspetta e si associa da lì.','Per ogni manifestazione: evento particolare legato all\'acquisto e venditore incaricato.','Se il cliente rinuncia la PDA resta nello storico come Annullata e il pezzo torna disponibile.'],open:['Verga manda gli screen delle manifestazioni attuali per allineare la pagina di dettaglio.','Il ramo Preordine va validato con Verga.','Quali campi della PDA passano al gestionale quando diventa ordine?','Circa 1.000 manifestazioni attive da migrare.']},
   riparazioni:{from:['Documento di analisi (bozza 02): i venditori aprono le pratiche, ne seguono lo stato e riconsegnano l\'orologio; avanzamento del workflow, assegnazioni e aggiornamento degli stati sono del backoffice.','Il venditore vede 5 fasi semplificate: Accettazione, Valutazione, Attesa cliente, Lavorazione, Riconsegna (variano per tipo: es. CPO finisce "In vendita").','Il bottone "Vista amministrazione" mostra cosa vedrà il backoffice: workflow completo, responsabile, tecnico, posizione, filtri dedicati.','Monitoraggio al posto dell\'Excel "DB RIP": ricerca per busta, cliente, marca, referenza, matricola.','Stesso portale: entrando in Riparazioni il colore passa dal verde al grafite.'],open:['Come entra il backoffice: stesso portale con un ruolo diverso o una licenza TSC dedicata?','Numerazione delle buste: la genera il portale o sono prestampate?','Posizioni a magazzino: elenco reale (stanze, cassetti, banchi).','Migrazione dello storico da "DB RIP" e da Arca.','Cambio pila: lo chiude il venditore in boutique (come nel mockup) o passa comunque dal backoffice?']},
   'rip-new':{from:['Tipi di pratica: Riparazione, Garanzia, Cambio pila, CPO, Quotazione.','3 foto per busta, un pulsante per ciascuna (richiesta del cliente, 09/11).','Dati dell\'orologio: marca, modello, referenza, matricola e altri identificativi; motivo, note e valore dichiarato a fini assicurativi.','Foto scattate direttamente dalla fotocamera del tablet, senza salvataggi intermedi; più allegati per pratica.','Note per il cliente (vanno sui documenti) separate dalle note interne di laboratorio.','All\'apertura: ricevuta di presa in carico, etichette busta e orologio, e documento di presa in carico inviato al gestionale.'],open:['Significato esatto di Nc, Nm e Cal.','Testo delle clausole della ricevuta.','Modelli attuali delle etichette (contenuto e formato).']},
-  busta:{from:['Vista venditore: fase attuale, settimane mancanti (tempistica indicata dall\'amministrazione), data di invio del preventivo per sollecitare, riconsegna (avviso di ritiro con scontrino, poi ritiro).','Vista amministrazione: stati completi del documento di analisi con data e utente per ognuno; Accettazione e Avviso ritiro restano al venditore.','Workflow per tipo: Riparazione (8 stati), Garanzia senza preventivo, Cambio pila, Riparazione esterna (invio, attesa, rientro, controllo), CPO in due fasi, Quotazione.','Preventivo online: il cliente sceglie le voci; se rifiuta la pratica salta alla riconsegna con il costo del solo preventivo.','Documenti collegati a numero pratica e busta: presa in carico, preventivo, scarichi componenti (più di uno), chiusura, avviso di ritiro.','CPO: scheda economica con costi di revisione e certificazione, valore di acquisto e vendita, acquirente finale.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni stato (via eCube).']},
+  busta:{from:['Vista venditore: fase attuale, settimane mancanti (tempistica indicata dall\'amministrazione), data di invio del preventivo per sollecitare, riconsegna (avviso di ritiro con scontrino, poi ritiro).','Vista amministrazione: stati completi del documento di analisi con data e utente per ognuno; Accettazione e Avviso ritiro restano al venditore.','Workflow per tipo: Riparazione (10 stati, con Attesa lavorazione dopo il preventivo accettato e Controllo prodotto prima dell\'avviso di ritiro), Garanzia senza preventivo, Cambio pila, Riparazione esterna (invio, preventivo della casa madre a Verga, preventivo al cliente, attesa lavorazione, rientro, controllo prodotto), CPO in due fasi, Quotazione.','Preventivo online: il cliente sceglie le voci; se rifiuta la pratica salta alla riconsegna con il costo del solo preventivo.','Documenti collegati a numero pratica e busta: presa in carico, preventivo, scarichi componenti (più di uno), chiusura, avviso di ritiro.','CPO: scheda economica con costi di revisione e certificazione, valore di acquisto e vendita, acquirente finale.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni stato (via eCube).']},
   prev:{from:['Preventivo online al posto del PDF: una casella per ogni voce e il totale.','Il cliente sceglie le voci e conferma; paga al ritiro. Può anche stampare.','Accesso con link privato oppure con email e password: Verga li vuole entrambi.','La risposta torna sulla busta e va registrata nel gestionale.'],open:['Serve una firma o basta la conferma online?','Come torna il preventivo accettato nel gestionale.']},
   auto:{from:['Form a due step. Step 1 obbligatorio e breve: nome, cognome, email (obbligatoria), telefono, brand di interesse facoltativi.','Step 2 facoltativo: dati utili per la comunicazione. Se non li compila, li chiede il venditore in negozio.','Ogni nuovo contatto nasce come Prospect.','Dopo il go-live Verga vuole mandare ai clienti una mail con un breve questionario (es. misura del polso).'],open:['Dove viene pubblicato il form (sito, QR in boutique, tablet)?','Consenso privacy: firma su iPad in negozio, online con checkbox?']},
 };
@@ -1500,14 +1500,17 @@ const MOTIVI_RIP = ['Preventivo riparazione','Revisione completa','Cambio pila',
 /* stati del workflow (documento di analisi): [nome, fase che vede il venditore, chi lo gestisce: v venditore, b backoffice, c cliente] */
 const FASI_STD = ['Accettazione','Valutazione','Attesa cliente','Lavorazione','Riconsegna'];
 const RIP_TIPI = {
-  'Riparazione':{d:'Preventivo, risposta del cliente e lavorazione', fasi:FASI_STD, stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Redazione preventivo',1,'b'],['Invio preventivo',2,'c'],['Preventivo accettato',3,'b'],['Lavorazione',3,'b'],['Chiusura riparazione',3,'b'],['Avviso ritiro',4,'v']]},
+  'Riparazione':{d:'Preventivo, risposta del cliente e lavorazione', fasi:FASI_STD, stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Redazione preventivo',1,'b'],['Invio preventivo',2,'c'],['Preventivo accettato',3,'b'],['Attesa lavorazione',3,'b'],['Lavorazione',3,'b'],['Chiusura riparazione',3,'b'],['Controllo prodotto',3,'b'],['Avviso ritiro',4,'v']]},
   'Garanzia':{d:'Come la riparazione, senza preventivo', fasi:['Accettazione','Valutazione','Lavorazione','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Lavorazione',2,'b'],['Chiusura riparazione',2,'b'],['Avviso ritiro',3,'v']]},
   'Cambio pila':{d:'Intervento rapido fatto in boutique', fasi:['Accettazione','Intervento','Riconsegna'], stati:[['Accettazione',0,'v'],['Esecuzione intervento',1,'v'],['Chiusura pratica',2,'v']]},
   'CPO':{d:'Rolex Certified Pre-Owned: offerta, poi preparazione alla vendita', fasi:['Accettazione','Valutazione','Attesa cliente','Preparazione','In vendita'], stati:[['Accettazione CPO',0,'v'],['Valutazione tecnica',1,'b'],['Redazione offerta',1,'b'],['Comunicazione offerta',2,'c'],['Accettazione o rifiuto del cliente',2,'c'],['Revisione interna o esterna',3,'b'],['Certificazione Rolex',3,'b'],['Rientro certificazione',3,'b'],['Pubblicazione',4,'b'],['Pronto alla vendita',4,'b'],['Vendita finale',4,'b']]},
   'Quotazione':{d:'Valutazione economica, senza vendita', fasi:['Accettazione','Valutazione','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Comunicazione quotazione',1,'b'],['Chiusura pratica',2,'v']]},
 };
 /* riparazione affidata a un laboratorio esterno o alla casa madre: la decide il backoffice dopo la valutazione */
-const ESTERNA = {fasi:['Accettazione','Valutazione','Lavorazione esterna','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Invio laboratorio esterno',2,'b'],['Attesa lavorazione',2,'b'],['Rientro oggetto',2,'b'],['Lavorazione/controllo',2,'b'],['Chiusura pratica',3,'v']]};
+/* con preventivo: la casa madre preventiva a Verga, poi l'amministrazione fa il preventivo per il cliente */
+const ESTERNA = {fasi:['Accettazione','Valutazione','Attesa cliente','Lavorazione esterna','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Invio laboratorio esterno',1,'b'],['Preventivo casa madre',1,'b'],['Redazione preventivo',1,'b'],['Invio preventivo',2,'c'],['Preventivo accettato',3,'b'],['Attesa lavorazione',3,'b'],['Rientro oggetto',3,'b'],['Controllo prodotto',3,'b'],['Chiusura riparazione',3,'b'],['Avviso ritiro',4,'v']]};
+/* garanzia esterna: senza preventivo */
+const ESTERNA_GAR = {fasi:['Accettazione','Valutazione','Lavorazione esterna','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Invio laboratorio esterno',2,'b'],['Attesa lavorazione',2,'b'],['Rientro oggetto',2,'b'],['Controllo prodotto',2,'b'],['Chiusura riparazione',2,'b'],['Avviso ritiro',3,'v']]};
 const VERGA_VINTAGE = {id:'vv', nome:'Verga', cognome:'Vintage', email:'vintage@verga1947.it', tel:'', incomplete:false};
 const RC = id => id === 'vv' ? VERGA_VINTAGE : C(id);
 /* date di ingresso negli stati: D(['2026-09-10T11:20','Marco Verdi'], …) → {0:{date,by}, 1:…} */
@@ -1518,7 +1521,7 @@ const repairs = [
    obj:{tipo:'Orologio', marca:'Rolex', modello:'Submariner', ref:'124060', materiale:'Acciaio', nc:'9X41K2', nm:'', cal:'3230', quadrante:'Nero', meccanismo:'Automatico', bracciale:'Oyster'},
    motivo:'Revisione completa', valore:9000, ritiro:'2026-10-20', garanzia:false, foto:3, ric:true, et:true,
    noteCliente:'Ritarda di circa 20 secondi al giorno.', noteInterne:'Graffio sulla lunetta già presente all\'accettazione.',
-   si:5, dates:D(['2026-09-10T11:20','Marco Verdi'],['2026-09-11T09:30','Andrea Galli'],['2026-09-13T15:00','Elena Bassi'],['2026-09-14T16:05','Elena Bassi'],['2026-09-16T09:12','Cliente'],['2026-09-22T10:00','Elena Bassi']),
+   si:6, dates:D(['2026-09-10T11:20','Marco Verdi'],['2026-09-11T09:30','Andrea Galli'],['2026-09-13T15:00','Elena Bassi'],['2026-09-14T16:05','Elena Bassi'],['2026-09-16T09:12','Cliente'],['2026-09-18T10:00','Elena Bassi'],['2026-09-22T10:00','Elena Bassi']),
    resp:'Elena Bassi', tecnico:'Andrea Galli', ubic:'Laboratorio Mazzini · banco', tempi:{sett:2, dal:'2026-09-22', fase:'Lavorazione'}, ass:'2026-09-22',
    prev:{stato:'accettato', voci:[{d:'Revisione completa movimento cal. 3230', p:780, ok:true},{d:'Sostituzione guarnizioni e test impermeabilità', p:120, ok:true},{d:'Lucidatura cassa e bracciale', p:220, ok:false}]},
    log:[{date:'2026-09-10T11:20', by:'Marco Verdi', t:'Busta aperta in Bottega Storica'},{date:'2026-09-11T09:30', by:'Andrea Galli', t:'Valutazione tecnica: movimento da revisionare', i:1},{date:'2026-09-14T16:05', by:'Elena Bassi', t:'Preventivo inviato al cliente: 3 voci, € 1.120'},{date:'2026-09-16T09:12', by:'Cliente', t:'Preventivo accettato online: 2 voci su 3 (€ 900)'},{date:'2026-09-22T10:00', by:'Elena Bassi', t:'Riparazione assegnata ad Andrea Galli', i:1}]},
@@ -1537,14 +1540,15 @@ const repairs = [
   {id:'r4', busta:'B-2026-0409', tipo:'Riparazione', esterna:true, clientId:'c10', boutique:'Boutique Portofino', by:'Giorgia Costa', acc:'2026-08-28T17:00',
    obj:{tipo:'Orologio', marca:'Rolex', modello:'Yacht-Master 42', ref:'226659', materiale:'Oro bianco', nc:'', nm:'', cal:'3235', quadrante:'Nero', meccanismo:'Automatico', bracciale:'Oysterflex'},
    motivo:'Revisione completa', valore:12400, ritiro:'2026-09-30', garanzia:false, foto:3, ric:true, et:true, noteCliente:'', noteInterne:'Inviato alla casa madre per la revisione.',
-   si:3, dates:D(['2026-08-28T17:00','Giorgia Costa'],['2026-08-29T10:00','Andrea Galli'],['2026-09-02T11:00','Elena Bassi'],['2026-09-02T11:00','Elena Bassi']),
+   si:7, dates:D(['2026-08-28T17:00','Giorgia Costa'],['2026-08-29T10:00','Andrea Galli'],['2026-08-30T11:00','Elena Bassi'],['2026-08-31T09:00','Elena Bassi'],['2026-08-31T10:00','Elena Bassi'],['2026-08-31T10:30','Elena Bassi'],['2026-09-01T18:20','Cliente'],['2026-09-02T11:00','Elena Bassi']),
    resp:'Elena Bassi', tecnico:'Casa madre (esterno)', ubic:'Casa madre (riparazione esterna)', tempi:{sett:3, dal:'2026-09-02', fase:'Lavorazione esterna'}, est:'2026-09-02',
-   prev:{stato:'', voci:[]},
-   log:[{date:'2026-08-28T17:00', by:'Giorgia Costa', t:'Busta aperta in Boutique Portofino'},{date:'2026-09-02T11:00', by:'Elena Bassi', t:'Inviato alla casa madre, rientro previsto il 23/09', i:1}]},
+   prevCM:{voci:[{d:'Revisione completa movimento cal. 3235', p:900},{d:'Sostituzione guarnizioni e test impermeabilità', p:90}], file:'Preventivo_casa_madre_B-0409.pdf'},
+   prev:{stato:'accettato', voci:[{d:'Revisione completa movimento cal. 3235 (casa madre)', p:1150, ok:true},{d:'Sostituzione guarnizioni e test impermeabilità', p:120, ok:true}]},
+   log:[{date:'2026-08-28T17:00', by:'Giorgia Costa', t:'Busta aperta in Boutique Portofino'},{date:'2026-08-30T11:00', by:'Elena Bassi', t:'Orologio spedito alla casa madre', i:1},{date:'2026-08-31T09:00', by:'Elena Bassi', t:'Preventivo della casa madre registrato: 2 voci, € 990', i:1},{date:'2026-08-31T10:30', by:'Elena Bassi', t:'Preventivo inviato al cliente: 2 voci, € 1.270'},{date:'2026-09-01T18:20', by:'Cliente', t:'Preventivo accettato online: 2 voci su 2 (€ 1.270)'},{date:'2026-09-02T11:00', by:'Elena Bassi', t:'Lavorazione confermata alla casa madre', i:1}]},
   {id:'r5', busta:'B-2026-0402', tipo:'Riparazione', clientId:'c7', boutique:'Boutique Patek Philippe', by:'Luca Ferrari', acc:'2026-08-20T12:10',
    obj:{tipo:'Orologio', marca:'Patek Philippe', modello:'Aquanaut', ref:'5168G', materiale:'Oro bianco', nc:'', nm:'', cal:'324 S C', quadrante:'Kaki', meccanismo:'Automatico', bracciale:'Composite'},
    motivo:'Regolazione bracciale', valore:52000, ritiro:'2026-09-26', garanzia:false, foto:3, ric:true, et:true, noteCliente:'', noteInterne:'',
-   si:7, dates:D(['2026-08-20T12:10','Luca Ferrari'],['2026-08-21T09:00','Davide Sala'],['2026-08-22T10:00','Elena Bassi'],['2026-08-22T10:30','Elena Bassi'],['2026-08-24T18:40','Cliente'],['2026-08-26T09:00','Elena Bassi'],['2026-09-23T17:30','Elena Bassi'],['2026-09-23T17:45','Elena Bassi']),
+   si:9, dates:D(['2026-08-20T12:10','Luca Ferrari'],['2026-08-21T09:00','Davide Sala'],['2026-08-22T10:00','Elena Bassi'],['2026-08-22T10:30','Elena Bassi'],['2026-08-24T18:40','Cliente'],['2026-08-25T10:00','Elena Bassi'],['2026-08-26T09:00','Elena Bassi'],['2026-09-23T17:30','Elena Bassi'],['2026-09-23T17:40','Elena Bassi'],['2026-09-23T17:45','Elena Bassi']),
    resp:'Elena Bassi', tecnico:'Davide Sala', ubic:'Pronto in boutique per il ritiro', tempi:{sett:4, dal:'2026-08-26', fase:'Lavorazione'}, ass:'2026-08-26', chiusura:'2026-09-23',
    prev:{stato:'accettato', voci:[{d:'Sostituzione cinturino composite e regolazione', p:640, ok:true}]}, att:['Scarico_B-2026-0402.pdf'],
    log:[{date:'2026-08-20T12:10', by:'Luca Ferrari', t:'Busta aperta in Boutique Patek Philippe'},{date:'2026-09-23T17:30', by:'Elena Bassi', t:'Riparazione chiusa, documento di chiusura inviato al gestionale', i:1},{date:'2026-09-23T17:45', by:'Elena Bassi', t:'Orologio rientrato in boutique: pronto per l\'avviso di ritiro'}]},
@@ -1562,7 +1566,7 @@ const repairs = [
   {id:'r8', busta:'B-2026-0398', tipo:'Riparazione', clientId:'c9', boutique:'Boutique Multibrand', by:'Sara Colombo', acc:'2026-08-05T16:00',
    obj:{tipo:'Orologio', marca:'Cartier', modello:'Panthère', ref:'WSPN0007', materiale:'Acciaio', nc:'', nm:'', cal:'', quadrante:'Argenté', meccanismo:'Quarzo', bracciale:'Acciaio'},
    motivo:'Preventivo riparazione', valore:4500, ritiro:'', garanzia:false, foto:3, ric:true, et:true, noteCliente:'', noteInterne:'',
-   si:7, dates:D(['2026-08-05T16:00','Sara Colombo'],['2026-08-06T10:00','Paolo Riva'],['2026-08-08T12:00','Chiara Rinaldi'],['2026-08-08T12:10','Chiara Rinaldi'],null,null,null,['2026-08-14T10:00','Cliente']),
+   si:9, dates:D(['2026-08-05T16:00','Sara Colombo'],['2026-08-06T10:00','Paolo Riva'],['2026-08-08T12:00','Chiara Rinaldi'],['2026-08-08T12:10','Chiara Rinaldi'],null,null,null,null,null,['2026-08-14T10:00','Cliente']),
    closed:true, esito:'rifiutato', resp:'Chiara Rinaldi', tecnico:'Paolo Riva', ubic:'Riconsegnato al cliente', rifiuto:'2026-08-14', ritiroD:'2026-08-20', costoPrev:50, avviso:true, scontrino:{n:'0042-0790', tot:50},
    prev:{stato:'rifiutato', voci:[{d:'Sostituzione modulo al quarzo', p:390, ok:false}]},
    log:[{date:'2026-08-05T16:00', by:'Sara Colombo', t:'Busta aperta'},{date:'2026-08-14T10:00', by:'Cliente', t:'Preventivo rifiutato online'},{date:'2026-08-20T12:00', by:'Sara Colombo', t:'Orologio riconsegnato, costo del preventivo € 50'}]},
@@ -1575,7 +1579,7 @@ const repairs = [
    log:[{date:'2026-09-18T12:00', by:'Sara Colombo', t:'Busta aperta in Boutique Multibrand'},{date:'2026-09-20T10:00', by:'Chiara Rinaldi', t:'Preventivo inviato al cliente: 2 voci, € 530'},{date:'2026-09-23T19:10', by:'Cliente', t:'Preventivo accettato online: 2 voci su 2 (€ 530)'}]},
 ];
 const R = id => repairs.find(r => r.id === id);
-const wf = r => r.esterna ? ESTERNA : RIP_TIPI[r.tipo];
+const wf = r => r.esterna ? (r.tipo === 'Garanzia' ? ESTERNA_GAR : ESTERNA) : RIP_TIPI[r.tipo];
 const stato = r => wf(r).stati[r.si];
 const nextStato = r => wf(r).stati[r.si + 1];
 const faseN = r => r.reso ? 'Riconsegna' : wf(r).fasi[stato(r)[1]];
@@ -1845,20 +1849,34 @@ function boPanel(r){
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="prev" data-id="${r.id}">${ic('arrow')}Apri la vista del cliente (demo)</button><button class="btn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button><span class="sp" style="flex:1"></span><button class="btn btn-ghost" data-act="pv-refuse" data-id="${r.id}">Il cliente ha rifiutato</button></div>`;
   else if (n === 'Valutazione tecnica') body = `<label class="field"><span>Tecnico che valuta</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
       <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap">${['Riparazione','Garanzia'].includes(r.tipo) && !r.esterna ? `<button class="btn" data-act="rb-esterna" data-id="${r.id}">${ic('truck')}Affida a laboratorio esterno o casa madre</button>` : ''}<button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Passa a: ${esc(nx[0])}</button></div>`;
-  else if (['Redazione preventivo','Redazione offerta','Comunicazione quotazione'].includes(n)) body = prevEditor(r);
+  else if (n === 'Invio laboratorio esterno') body = `<p class="muted" style="margin:0">Spedisci l'orologio alla casa madre o al laboratorio esterno. Al passo successivo registri il preventivo che ti mandano.</p>${next()}`;
+  else if (n === 'Preventivo casa madre') body = cmEditor(r);
+  else if (['Redazione preventivo','Redazione offerta','Comunicazione quotazione'].includes(n)) body = (r.esterna && r.prevCM?.voci?.length ? `<div class="banner info" style="margin:0">${ic('info')}<div class="grow"><p>Preventivo della casa madre: <b>${eur(cmTot(r))}</b> (costo interno${r.prevCM.file ? ', ' + esc(r.prevCM.file) : ''}). Le voci sono già copiate qui sotto: aggiorna descrizioni e prezzi per il cliente.${r.prev.voci.length ? ` Margine attuale: <b>${eur(prevTot(r) - cmTot(r))}</b>.` : ''}</p></div></div>` : '') + prevEditor(r);
+  else if (n === 'Controllo prodotto') body = `<p class="muted" style="margin:0">Controllo finale prima di avvisare il cliente: funzionamento e precisione, impermeabilità, estetica di cassa e bracciale.</p>${next('Controllo superato: passa all\'avviso di ritiro')}`;
+  else if (n === 'Preventivo accettato' && r.esterna) body = `<p class="muted" style="margin:0">Il cliente ha accettato ${eur(prevTot(r, true))}. Conferma la lavorazione alla casa madre.</p>${next('Confermato alla casa madre: attesa lavorazione')}`;
+  else if (n === 'Attesa lavorazione') body = `<p class="muted" style="margin:0">${r.esterna ? 'L\'orologio è alla casa madre in attesa della lavorazione.' : `Lavorazione assegnata a ${esc(r.tecnico || 'nessun tecnico')}, in coda al laboratorio.`}</p>${next()}`;
   else if (n === 'Preventivo accettato') body = `<p class="muted" style="margin:0">Il cliente ha accettato ${eur(prevTot(r, true))}. Assegna la lavorazione al tecnico.</p>
-      <label class="field"><span>Tecnico</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>${next('Assegna e avvia la lavorazione')}`;
+      <label class="field"><span>Tecnico</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>${next('Assegna: passa in attesa lavorazione')}`;
   else if (/Lavorazione|Revisione/.test(n)) body = `<div class="label">Documenti di scarico componenti e lavorazioni · più file per pratica</div>
       <div class="att">${(r.att || []).map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('') || '<span class="faint">Nessun file allegato</span>'}<label class="btn btn-sm">${ic('clip')}Allega file<input type="file" class="rb-att" data-id="${r.id}" multiple hidden></label></div>
       <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b>: i documenti restano collegati alla pratica (via eCube).</p>${next(n === 'Lavorazione' ? 'Chiudi la riparazione' : undefined)}`;
-  else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Quando l'orologio rientra in boutique, passa la busta al venditore.</p>${next('Orologio in boutique: passa all\'avviso di ritiro')}`;
+  else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Poi il controllo del prodotto.</p>${next(nx && nx[0] === 'Controllo prodotto' ? 'Passa a: Controllo prodotto' : 'Orologio in boutique: passa all\'avviso di ritiro')}`;
   else if (n === 'Vendita finale') body = `<p class="muted" style="margin:0">Registra il valore di vendita e l'acquirente finale nella scheda economica, poi chiudi la pratica.</p>${next('Vendita registrata: chiudi la pratica')}`;
   else body = next();
   if (TEMPI_ST.includes(n) && !r.reso && !inRic(r)) body = tempiField(r) + body;
   return `<section class="card">${head}<div class="card-b stack" style="gap:12px">${body}</div></section>`;
 }
+const cmTot = r => (r.prevCM?.voci || []).reduce((t, v) => t + v.p, 0);
+function cmEditor(r){
+  const cm = r.prevCM = r.prevCM || {voci:[], file:''};
+  return `<p class="muted" style="margin:0">La casa madre (o il laboratorio esterno) valuta l'orologio e manda il suo preventivo a Verga. Registralo qui: è un <b>costo interno</b>, il cliente e il venditore non lo vedono.</p>
+    ${cm.voci.length ? `<div class="card">${cm.voci.map((x, i) => `<div class="voce"><span class="grow">${esc(x.d)}</span><b class="num">${eur(x.p)}</b><button class="btn btn-ghost btn-sm" data-act="cm-rm" data-id="${r.id}" data-i="${i}" aria-label="Rimuovi voce">${ic('trash')}</button></div>`).join('')}<div class="voce" style="background:var(--surface-2)"><span class="grow label">Totale casa madre</span><b class="num" style="font-size:16px">${eur(cmTot(r))}</b></div></div>` : ''}
+    <div class="voce-add"><input class="in" id="cm-d" placeholder="Voce del preventivo della casa madre"><input class="in num" id="cm-p" inputmode="decimal" placeholder="€"><button class="btn" data-act="cm-add" data-id="${r.id}">${ic('plus')}Aggiungi</button></div>
+    <div class="att">${cm.file ? `<span class="tag">${ic('clip')}${esc(cm.file)}</span>` : ''}<label class="btn btn-sm">${ic('clip')}${cm.file ? 'Sostituisci PDF' : 'Allega il PDF della casa madre'}<input type="file" class="rb-cm" data-id="${r.id}" accept="application/pdf,image/*" hidden></label></div>
+    <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" data-act="rb-next" data-id="${r.id}" ${cm.voci.length ? '' : 'disabled'}>${ic('arrow')}Passa a: preventivo per il cliente</button></div>`;
+}
 /* stati in cui l'amministrazione indica quante settimane servono (lavorazione interna o esterna) */
-const TEMPI_ST = ['Preventivo accettato','Invio laboratorio esterno','Attesa lavorazione','Lavorazione','Lavorazione/controllo','Revisione interna o esterna','Eventuale lavorazione interna o esterna'];
+const TEMPI_ST = ['Preventivo accettato','Invio laboratorio esterno','Attesa lavorazione','Lavorazione','Revisione interna o esterna','Eventuale lavorazione interna o esterna'];
 const tempiField = r => `<div class="banner" style="margin:0;align-items:center">${ic('clock')}<div class="grow stack" style="gap:6px">
     <label class="field" style="max-width:260px"><span><b>Tempistica: quante settimane servono?</b></span><input class="in num" type="number" min="0" max="52" data-rb="sett" data-id="${r.id}" value="${esc(r.tempi?.sett || '')}" placeholder="Es. 4"></label>
     <p style="margin:0;font-size:12.5px">${scad(r) ? `${nSett(r.tempi.sett)} dal ${fmtD(r.tempi.dal)} · scadenza ${fmtD(scad(r))} · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>` : 'Il venditore vedrà quante settimane mancano e se la busta è in ritardo.'}</p></div></div>`;
@@ -1899,6 +1917,7 @@ function docCard(r){
     ['Etichette busta e orologio', 'Portale', st(r.et, r.et ? 'Stampate' : 'Da stampare')],
     ['Documentazione fotografica', 'Portale', st(r.foto, `${r.foto} foto`)],
     [`Documento di presa in carico · PIC ${n}`, 'Gestionale', st(true, 'Inviato via eCube')],
+    ...(r.prevCM?.voci?.length ? [['Preventivo casa madre' + (r.prevCM.file ? ' · ' + r.prevCM.file : ''), 'Interno, non lo vede il cliente', st(true, eur(cmTot(r)))]] : []),
     ...(r.prev?.voci?.length ? [[r.tipo === 'CPO' ? 'Offerta' : r.tipo === 'Quotazione' ? 'Quotazione' : 'Preventivo', 'Portale', st(['accettato','inviato'].includes(r.prev.stato), ({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || '—')]] : []),
     ...(r.att || []).map(a => [`Scarico componenti · ${a}`, 'Gestionale', st(true, 'Collegato')]),
     ['Documento di chiusura lavorazione', 'Gestionale', st(r.chiusura, r.chiusura ? 'Inviato ' + fmtD(r.chiusura) : 'Alla chiusura')],
@@ -1942,6 +1961,7 @@ function advanceTo(r, i, by){
   if (n === 'Lavorazione') r.ass = '2026-09-24';
   if (n === 'Chiusura riparazione') r.chiusura = '2026-09-24';
   if (n === 'Rientro oggetto') r.ubic = AREA_OF[r.boutique] + ' · banco';
+  if (n === 'Redazione preventivo' && r.prevCM?.voci?.length && !r.prev.voci.length) { r.prev = {stato:'bozza', voci:r.prevCM.voci.map(v => ({d:v.d, p:v.p, ok:true}))}; }
   if (inRic(r)) r.ubic = 'Pronto in boutique per il ritiro';
   ripLog(r, `Stato: ${n}`, who);
 }
@@ -1977,6 +1997,7 @@ function ripRefuse(r, by, t){
   r.prev.stato = 'rifiutato'; r.prev.voci.forEach(x => x.ok = false); r.esito = 'rifiutato'; r.rifiuto = '2026-09-24';
   ripLog(r, t, by, false);
   if (r.tipo === 'CPO') { r.si++; r.dates[r.si] = {date:nowISO(), by}; r.reso = true; r.ubic = 'Pronto in boutique per il ritiro'; }
+  else if (r.esterna) advanceTo(r, wf(r).stati.findIndex(x => x[0] === 'Rientro oggetto'), by);
   else advanceTo(r, wf(r).stati.length - 1, by);
   toast(r.tipo === 'CPO' ? 'Offerta rifiutata: l\'orologio torna al cliente' : 'Preventivo rifiutato: si passa alla riconsegna dell\'orologio');
 }
@@ -2219,7 +2240,7 @@ function act(el, ev){
       const em = document.getElementById('l-email').value.trim().toLowerCase();
       /* demo: si entra anche a campi vuoti; con l'email di un venditore si entra come lui */
       const o = OPERATORS.find(x => x.email === em) || OPERATORS[0];
-      Object.assign(S, {operator:o.name, boutique:o.b, loginEmail:em, showPw:false}); go('dashboard'); toast(`Accesso come ${o.name} · ${o.b}`); break; }
+      Object.assign(S, {operator:o.name, boutique:o.b, loginEmail:em, showPw:false}); S.pf.loc = o.b; go('dashboard'); toast(`Accesso come ${o.name} · ${o.b}`); break; }
     case 'pw-toggle': { const em = document.getElementById('l-email').value, pw = document.getElementById('l-pw').value; S.loginEmail = em; S.showPw = !S.showPw; render(); document.getElementById('l-pw').value = pw; break; }
     case 'pw-forgot': toast('Nel portale reale parte la mail per reimpostare la password (demo)'); break;
     /* riparazioni */
@@ -2243,12 +2264,15 @@ function act(el, ev){
       repairs.push(r); S.rn = blankRn(); go('busta', r.id); toast('Busta aperta · documento di presa in carico inviato al gestionale');
       openModal({kind:'ricevuta', rid:r.id}); break; }
     case 'rip-bo': S.ripBO = !S.ripBO; S.rf.chip = 'aperte'; render(); toast(S.ripBO ? 'Vista amministrazione e backoffice' : 'Vista venditore'); break;
-    case 'rb-next': { const r = R(id); if (stato(r)[0] === 'Preventivo accettato' && !r.tecnico) { toast('Scegli prima il tecnico'); break; } advanceTo(r, r.si + 1); keepY(render); toast(r.closed ? 'Pratica chiusa' : `Stato: ${stato(r)[0]}`); break; }
+    case 'rb-next': { const r = R(id); if (stato(r)[0] === 'Preventivo accettato' && !r.tecnico) { toast('Scegli prima il tecnico'); break; }
+      if (stato(r)[0] === 'Preventivo casa madre') ripLog(r, `Preventivo della casa madre registrato: ${r.prevCM.voci.length} ${r.prevCM.voci.length === 1 ? 'voce' : 'voci'}, ${eur(cmTot(r))}`); advanceTo(r, r.si + 1); keepY(render); toast(r.closed ? 'Pratica chiusa' : `Stato: ${stato(r)[0]}`); break; }
     case 'rb-esterna': { const r = R(id); r.esterna = true; r.tecnico = 'Casa madre (esterno)'; r.est = '2026-09-24'; Object.keys(r.dates).forEach(k => { if (+k > 1) delete r.dates[k]; }); advanceTo(r, 2); r.ubic = 'Casa madre (riparazione esterna)'; ripLog(r, 'Affidato a laboratorio esterno o casa madre'); keepY(render); break; }
     case 'rb-pila': { const r = R(id); ripLog(r, 'Pila sostituita in boutique'); advanceTo(r, r.si + 1); keepY(render); toast('Intervento eseguito: ora riconsegna l\'orologio'); break; }
     case 'rb-ricevuta': openModal({kind:'ricevuta', rid:id}); break;
     case 'rb-etichette': openModal({kind:'etichette', rid:id}); break;
     case 'pv-add': { const r = R(id), d = document.getElementById('pv-d').value.trim(), pr = parseFloat(document.getElementById('pv-p').value.replace(',', '.')); if (!d || isNaN(pr)) { toast('Scrivi la voce e il prezzo'); break; } r.prev.voci.push({d, p:pr, ok:true}); keepY(render); break; }
+    case 'cm-add': { const r = R(id), d = document.getElementById('cm-d').value.trim(), pr = parseFloat(document.getElementById('cm-p').value.replace(',', '.')); if (!d || isNaN(pr)) { toast('Scrivi la voce e il prezzo della casa madre'); break; } r.prevCM.voci.push({d, p:pr}); keepY(render); break; }
+    case 'cm-rm': R(id).prevCM.voci.splice(+el.dataset.i, 1); keepY(render); break;
     case 'pv-rm': R(id).prev.voci.splice(+el.dataset.i, 1); keepY(render); break;
     case 'pv-send': { const r = R(id);
       if (r.tipo === 'Quotazione') { ripLog(r, `Quotazione comunicata al cliente: ${eur(prevTot(r))}`, undefined, false); advanceTo(r, r.si + 1); render(); toast('Quotazione inviata al cliente'); break; }
@@ -2270,7 +2294,7 @@ function act(el, ev){
     case 'ric-mail': { const r = R(M.rid), c = RC(r.clientId); ripLog(r, `Ricevuta inviata via email a ${c.email}`, S.operator, false); toast(`Ricevuta inviata a ${c.email}`); break; }
     case 'm-save-ric': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } const r = R(M.rid); r.ric = true; r.firma = sigData(); r.firmaAt = nowISO(); ripLog(r, 'Ricevuta firmata dal cliente', S.operator, false); closeModal(); render(); if (!r.et) openModal({kind:'etichette', rid:r.id}); break; }
     case 'm-save-et': { const r = R(M.rid); if (!r.et) ripLog(r, 'Etichette busta e orologio stampate', S.operator, false); r.et = true; closeModal(); render(); toast('Etichette inviate alla stampante (demo)'); break; }
-    case 'pick-b': S.boutique = v; S.operator = OPERATORS.find(o => o.b === v).name; render(); break;
+    case 'pick-b': S.boutique = v; S.pf.loc = v; S.operator = OPERATORS.find(o => o.b === v).name; render(); break;
     case 'pick-op': S.operator = v; render(); break;
     case 'pin':
       if (v === '⌫') S.pin = S.pin.slice(0,-1); else if (S.pin.length < 4) S.pin += v;
@@ -2482,13 +2506,14 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
-  if (t.id === 'boutique-sel') { S.boutique = t.value; render(); toast(`Boutique attiva: ${t.value}`); return; }
+  if (t.id === 'boutique-sel') { S.boutique = t.value; S.pf.loc = t.value; render(); toast(`Boutique attiva: ${t.value}`); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'SELECT') { S.pf[t.dataset.pf] = t.value; render(); return; }
   if (t.dataset.pdf !== undefined && t.tagName === 'SELECT') { S.pdf[t.dataset.pdf] = t.value; render(); return; }
   if (t.dataset.evf !== undefined) { S.evf[t.dataset.evf] = t.value; render(); return; }
   if (t.dataset.rf !== undefined) { S.rf[t.dataset.rf] = t.value; render(); return; }
   if (t.classList.contains('rn-cam')) { const f = t.files[0]; if (f) S.rn.photos[+t.dataset.i] = URL.createObjectURL(f); keepY(render); return; }
   if (t.id === 'rn-att') { [...t.files].forEach(f => S.rn.att.push(f.name)); keepY(render); return; }
+  if (t.classList.contains('rb-cm')) { const r = R(t.dataset.id), f = t.files[0]; if (f) { r.prevCM.file = f.name; ripLog(r, `Preventivo della casa madre allegato: ${f.name}`); } keepY(render); return; }
   if (t.classList.contains('rb-att')) { const r = R(t.dataset.id); r.att = r.att || []; [...t.files].forEach(f => r.att.push(f.name)); ripLog(r, `Documenti allegati: ${[...t.files].map(f => f.name).join(', ')}`); keepY(render); return; }
   if (t.dataset.rb !== undefined) { const r = R(t.dataset.id), k = t.dataset.rb;
     if (k.startsWith('eco.')) { r.eco[k.slice(4)] = t.value; return; }
