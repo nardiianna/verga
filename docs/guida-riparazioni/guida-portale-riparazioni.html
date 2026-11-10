@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Guida al portale Riparazioni · Verga 1947</title>
+<style>
+  @page { size: A4; margin: 20mm 18mm 18mm; }
+  :root { --green:#0d4b40; --green-soft:#e4efeb; --line:#dcdcdc; --muted:#666; --ink:#1d1d1d; }
+  * { box-sizing: border-box; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { margin: 0; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; font-size: 10pt; line-height: 1.55; color: var(--ink); background: #fff; }
+  h1, h2, h3 { font-family: Georgia, "Times New Roman", serif; font-weight: 400; color: var(--green); }
+  h2 { font-size: 20pt; margin: 0 0 14px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  h3 { font-size: 14pt; margin: 16px 0 8px; }
+  p { margin: 0 0 9px; }
+  b, strong { font-weight: 700; }
+  section { break-before: page; }
+  .cover { break-before: auto; height: 255mm; display: flex; flex-direction: column; border-top: 3px solid var(--green); padding-top: 24px; }
+  .kicker { font-size: 7.5pt; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); }
+  .cover h1 { font-size: 30pt; line-height: 1.15; margin: 18px 0 12px; }
+  .cover .lead { font-size: 12pt; color: var(--muted); max-width: 120mm; }
+  .toc { margin-top: 30px; max-width: 120mm; }
+  .toc div { display: flex; gap: 20px; padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 10pt; }
+  .toc span:first-child { width: 14px; color: var(--green); }
+  .cover .foot { margin-top: auto; padding-top: 12px; border-top: 1px solid var(--line); font-size: 8.5pt; color: var(--muted); max-width: 120mm; }
+  table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 9.5pt; break-inside: auto; }
+  th { background: var(--green); color: #fff; text-align: left; font-weight: 700; padding: 8px 10px; font-size: 8.5pt; letter-spacing: .02em; }
+  td { padding: 7px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  tr { break-inside: avoid; }
+  td:first-child { font-weight: 700; width: 24%; }
+  table.plain td:first-child { font-weight: 400; }
+  .flow b { font-weight: 700; }
+  .flow { color: #444; }
+  .note { font-size: 8.5pt; color: var(--muted); }
+  .callout { background: var(--green-soft); border-radius: 10px; padding: 14px 18px; margin: 14px 0; break-inside: avoid; }
+  .callout p:last-child { margin: 0; }
+  ul, ol { margin: 6px 0 12px; padding-left: 20px; }
+  li { margin-bottom: 5px; }
+  figure { margin: 14px 0 16px; text-align: center; break-inside: avoid; }
+  figure img { max-width: 92%; max-height: 112mm; width: auto; border: 1px solid #d6d6d6; border-radius: 8px; }
+  figure.tall img { max-height: 175mm; }
+  figcaption { font-size: 8.5pt; color: var(--muted); margin-top: 6px; }
+  .part { break-before: page; height: 250mm; display: flex; flex-direction: column; justify-content: center; }
+  .part .kicker { margin-bottom: 14px; }
+  .part h1 { font-size: 26pt; margin: 0 0 14px; }
+  .part p { color: #444; max-width: 110mm; }
+  .pill { display: inline-block; font-size: 8pt; font-weight: 700; padding: 1px 8px; border-radius: 999px; margin: 1px 2px; }
+  .p-grey { background: #eceae7; color: #555; } .p-amber { background: #fbeed5; color: #9a6400; } .p-green { background: #ddefe6; color: #1c6b46; }
+  .p-blue { background: #dfeaf7; color: #2d5c93; } .p-red { background: #f8dedb; color: #b23a2f; }
+  .keep { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="kicker">Verga 1947 · Portale venditori</div>
+  <h1>Guida al portale<br>Riparazioni</h1>
+  <p class="lead">Come si apre, si segue e si chiude una pratica di riparazione: cosa fa il venditore in boutique e cosa fa l'amministrazione.</p>
+  <div class="toc">
+    <div><span>1</span><span>Come funziona in breve</span></div>
+    <div><span>2</span><span>I tipi di pratica</span></div>
+    <div><span>A</span><span>Il venditore: elenco, accettazione, stato, riconsegna</span></div>
+    <div><span>B</span><span>Amministrazione e backoffice: workflow completo</span></div>
+    <div><span>3</span><span>Documenti e collegamento con il gestionale</span></div>
+    <div><span>4</span><span>Punti ancora da confermare</span></div>
+  </div>
+  <div class="foot">Le schermate sono del mockup: nomi, buste e importi sono di esempio.</div>
+</div>
+
+<section>
+  <h2>1. Come funziona in breve</h2>
+  <p>Le riparazioni sono una sezione dello stesso portale dei venditori. Quando si entra in <b>Riparazioni</b> il colore del portale passa dal verde al grafite, così è sempre chiaro in che area ci si trova.</p>
+  <p>Ogni orologio consegnato in boutique diventa una <b>pratica</b> (la "busta"), con un numero univoco che la accompagna fino alla riconsegna. Sulla pratica si raccolgono dati dell'orologio, foto, preventivo, documenti e storico.</p>
+
+  <h3>Chi fa cosa</h3>
+  <table>
+    <tr><th>Chi</th><th>Cosa fa</th></tr>
+    <tr><td>Venditore</td><td>Apre la pratica in boutique, fa firmare la ricevuta (stampata o inviata via email) e stampa le etichette. Segue lo stato con 5 fasi semplificate, vede quante settimane mancano e da quanti giorni il cliente non risponde al preventivo. Alla fine invia l'avviso di ritiro e registra la riconsegna. Esegue direttamente i cambi pila.</td></tr>
+    <tr><td>Amministrazione e backoffice</td><td>Gestisce tutto il workflow: valutazione tecnica, preventivo, assegnazione al tecnico, lavorazione interna o esterna, controllo del prodotto, chiusura e documenti verso il gestionale. Aggiorna responsabile, tecnico, posizione dell'orologio e la tempistica in settimane.</td></tr>
+    <tr><td>Cliente</td><td>Riceve il preventivo con un link privato, sceglie le voci da accettare e conferma online (oppure rifiuta).</td></tr>
+  </table>
+
+  <div class="callout"><p><b>Il bottone "Vista amministrazione".</b> Il portale è pensato per i venditori. In alto a destra, sia nell'elenco sia dentro ogni busta, c'è il bottone <b>Vista amministrazione</b>: mostra in anteprima cosa vedrà il backoffice, con tutti gli stati e le informazioni in più. Con <b>Torna alla vista venditore</b> si torna indietro.</p></div>
+
+  <h3>Le 5 fasi che vede il venditore</h3>
+  <table class="plain">
+    <tr><th>Fase</th><th>Cosa significa per il cliente</th></tr>
+    <tr><td>1 · Accettazione</td><td>L'orologio è stato consegnato in boutique e la busta è aperta.</td></tr>
+    <tr><td>2 · Valutazione</td><td>Il laboratorio (o la casa madre) sta valutando l'orologio e preparando il preventivo.</td></tr>
+    <tr><td>3 · Attesa cliente</td><td>Il preventivo è stato inviato: si aspetta la risposta del cliente.</td></tr>
+    <tr><td>4 · Lavorazione</td><td>Il preventivo è accettato. Il venditore vede anche il dettaglio: <b>in attesa di lavorazione</b>, <b>in lavorazione</b> o <b>in controllo</b>.</td></tr>
+    <tr><td>5 · Riconsegna</td><td>L'orologio è pronto in boutique: avviso di ritiro e consegna al cliente.</td></tr>
+  </table>
+  <p class="note">Alcuni tipi di pratica hanno meno fasi (per esempio la garanzia non ha l'attesa del cliente) e il CPO finisce con "In vendita" invece della riconsegna.</p>
+
+</section>
+
+<section>
+  <h2>2. I tipi di pratica</h2>
+  <p>Il tipo si sceglie all'apertura e decide quali stati attraversa la pratica.</p>
+  <table>
+    <tr><th style="width:18%">Tipo</th><th style="width:26%">Quando si usa</th><th>Stati (vista amministrazione)</th></tr>
+    <tr><td>Riparazione</td><td style="font-weight:400">Riparazioni e revisioni con preventivo.</td><td class="flow"><b>Accettazione</b> → Valutazione tecnica → Redazione preventivo → Invio preventivo → Preventivo accettato → Attesa lavorazione → Lavorazione → Controllo prodotto → Chiusura riparazione → <b>Avviso ritiro</b></td></tr>
+    <tr><td>Garanzia</td><td style="font-weight:400">Interventi in garanzia: nessun preventivo.</td><td class="flow"><b>Accettazione</b> → Valutazione tecnica → Lavorazione → Chiusura riparazione → <b>Avviso ritiro</b></td></tr>
+    <tr><td>Riparazione esterna</td><td style="font-weight:400">Quando il backoffice affida l'orologio alla casa madre o a un laboratorio esterno.</td><td class="flow"><b>Accettazione</b> → Valutazione tecnica → Invio laboratorio esterno → Preventivo casa madre → Redazione preventivo → Invio preventivo → Preventivo accettato → Attesa lavorazione → Rientro oggetto → Controllo prodotto → Chiusura riparazione → <b>Avviso ritiro</b></td></tr>
+    <tr><td>Garanzia esterna</td><td style="font-weight:400">Garanzia affidata alla casa madre: nessun preventivo.</td><td class="flow"><b>Accettazione</b> → Valutazione tecnica → Invio laboratorio esterno → Attesa lavorazione → Rientro oggetto → Controllo prodotto → Chiusura riparazione → <b>Avviso ritiro</b></td></tr>
+    <tr><td>Cambio pila</td><td style="font-weight:400">Intervento rapido fatto in boutique.</td><td class="flow"><b>Accettazione</b> → <b>Esecuzione intervento</b> → <b>Chiusura pratica</b></td></tr>
+    <tr><td>CPO</td><td style="font-weight:400">Valutazione e acquisto di orologi per il programma Rolex Certified Pre-Owned.</td><td class="flow"><b>Accettazione CPO</b> → Valutazione tecnica → Redazione offerta → Comunicazione offerta → Accettazione o rifiuto del cliente → Revisione → Certificazione Rolex → Rientro certificazione → Pubblicazione → Pronto alla vendita → Vendita finale</td></tr>
+    <tr><td>Quotazione</td><td style="font-weight:400">Valutazione economica senza vendita.</td><td class="flow"><b>Accettazione</b> → Valutazione tecnica → Comunicazione quotazione → <b>Chiusura pratica</b></td></tr>
+  </table>
+  <p class="note">In grassetto gli stati gestiti dal venditore; gli altri sono del backoffice o del cliente.</p>
+
+  <h3 style="margin-top:26px">Tempistiche, non date di consegna</h3>
+  <p>Il portale non indica una data presunta di consegna. L'amministrazione inserisce il <b>numero di settimane</b> di lavorazione, che si contano dall'accettazione del preventivo (nelle riparazioni esterne dalla conferma alla casa madre). Il portale calcola quanto manca e segnala in rosso le pratiche in ritardo. Per ogni pratica si vede anche <b>da quanti giorni</b> è nello stato attuale.</p>
+</section>
+
+<div class="part">
+  <div class="kicker">Parte A</div>
+  <h1>Il venditore</h1>
+  <p>Apertura della pratica, ricevuta ed etichette, consultazione dello stato e riconsegna dell'orologio.</p>
+</div>
+
+<section>
+  <h2>A1. L'elenco delle riparazioni</h2>
+  <p>Dal menu a sinistra si apre <b>Riparazioni</b>. In alto ci sono i numeri principali: pratiche aperte, in attesa del cliente, da fare in boutique e in ritardo sulla tempistica.</p>
+  <figure><img src="img/a1-elenco.png" alt=""><figcaption>Elenco delle riparazioni nella vista venditore.</figcaption></figure>
+  <ul>
+    <li><b>Filtri rapidi</b> (le "pillole" sopra la tabella): Aperte, In valutazione, Attesa cliente, In lavorazione, Da fare in boutique, In ritardo, Chiuse, Tutte.</li>
+    <li><b>Ricerca</b> per numero di busta, cliente, marca, referenza o matricola, più i filtri per tipo e boutique.</li>
+    <li>La colonna <b>Stato</b> usa un colore: <span class="pill p-grey">In valutazione</span> <span class="pill p-amber">Attesa cliente / In attesa di lavorazione</span> <span class="pill p-green">In lavorazione</span> <span class="pill p-blue">In controllo / Pronto al ritiro</span> <span class="pill p-red">In ritardo / Da fare in boutique</span>.</li>
+    <li>La colonna <b>Fase</b> mostra la fase attuale, una barra con l'avanzamento e da quanti giorni la pratica è in quello stato.</li>
+    <li>La colonna <b>Tempistica</b> mostra le settimane indicate dall'amministrazione e quanto manca (es. "Mancano 1 sett. e 5 gg") oppure il ritardo in rosso.</li>
+    <li>La colonna <b>Preventivo</b> mostra l'importo, lo stato e, se è in attesa, la data di invio e da quanti giorni.</li>
+    <li>Cliccando una riga si apre la busta.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>A2. Aprire una pratica (accettazione)</h2>
+  <p>Dall'elenco si preme <b>Nuova accettazione</b>, oppure dalla scheda del cliente, scheda Riparazioni, <b>Nuova riparazione</b> (il cliente è già scelto).</p>
+  <ol>
+    <li><b>Tipo di pratica</b>: Riparazione, Garanzia, Cambio pila, CPO o Quotazione.</li>
+    <li><b>Cliente</b>: si cerca per nome, email o telefono. Se manca, si crea da qui. Per la ricevuta servono indirizzo e codice fiscale: se mancano il portale lo segnala.</li>
+    <li><b>Oggetto</b>: marca e modello (obbligatori), referenza, matricola (Nc), numero movimento, calibro, quadrante, meccanismo, bracciale.</li>
+    <li><b>Intervento</b>: motivo, valore dichiarato per l'assicurazione, garanzia.</li>
+    <li><b>Foto</b>: tre pulsanti, <b>Foto 1</b>, <b>Foto 2</b> e <b>Foto 3</b>. Ognuno apre direttamente la fotocamera del tablet, senza salvare file a parte. Si possono allegare anche garanzie e documenti del cliente.</li>
+    <li><b>Note</b>: le <b>note principali</b> finiscono sulla ricevuta e le vede il cliente; le <b>note interne</b> restano al laboratorio. Si può aggiungere un promemoria.</li>
+    <li>Si preme <b>Apri busta e stampa ricevuta</b>.</li>
+  </ol>
+  <figure class="tall"><img src="img/a2-accettazione.png" alt=""><figcaption>Modulo di nuova accettazione.</figcaption></figure>
+</section>
+
+<section>
+  <h2>A3. Ricevuta ed etichette</h2>
+  <p>Appena aperta la busta, il portale mostra la <b>ricevuta di presa in carico</b> con i dati del cliente, dell'orologio e dell'intervento. Il cliente firma sul tablet e si preme <b>Firma e salva</b>. La ricevuta si può <b>stampare</b> oppure <b>inviare via email</b> all'indirizzo del cliente.</p>
+  <figure><img src="img/a3-ricevuta.png" alt=""><figcaption>Ricevuta di presa in carico, con Stampa e Invia email.</figcaption></figure>
+  <p>Subito dopo si stampano le <b>etichette</b>: una per la busta (numero, cliente, orologio, tipo e data) e una per l'orologio (numero, modello, referenza, matricola). I dati arrivano dalla pratica, senza ricopiarli.</p>
+  <figure><img src="img/a3-etichette.png" alt=""><figcaption>Anteprima delle etichette busta e orologio.</figcaption></figure>
+  <div class="callout"><p>Se la ricevuta o le etichette vengono rimandate ("Più tardi"), la busta lo ricorda nel riquadro <b>Da completare all'accettazione</b>. Si possono sempre ristampare dai bottoni <b>Stampe</b> in alto a destra nella busta.</p></div>
+</section>
+
+<section>
+  <h2>A4. Seguire la pratica</h2>
+  <p>Dentro la busta il venditore trova tutto quello che serve per rispondere al cliente, senza informazioni interne del laboratorio.</p>
+  <figure><img src="img/a4-busta.png" alt=""><figcaption>Busta nella vista venditore: le 5 fasi, a che punto è, tempistica, preventivo, storico e dati dell'orologio.</figcaption></figure>
+  <ul>
+    <li><b>Le 5 fasi</b> in alto: in verde quelle concluse con la data, bordata quella in corso.</li>
+    <li><b>A che punto è</b>: una frase semplice da riferire al cliente. In lavorazione distingue se l'orologio è <b>in attesa di lavorazione</b>, <b>in lavorazione</b> o <b>in controllo</b>, e dice da quanti giorni è in quello stato.</li>
+    <li><b>Tempistica</b>: le settimane indicate dall'amministrazione, da quando partono e quanto manca, oppure il ritardo in rosso. Al cliente si comunicano le settimane, non una data precisa.</li>
+    <li><b>Preventivo</b>: le voci, con quelle accettate e rifiutate dal cliente.</li>
+    <li><b>Storico della busta</b>: i passaggi principali con data e persona.</li>
+    <li><b>Date</b> e <b>Oggetto</b>: accettazione, tempistica, invio del preventivo e ritiro; dati dell'orologio, foto e note per il cliente.</li>
+  </ul>
+  <p>Lo stato lo aggiorna l'amministrazione: il venditore non deve spuntare nulla durante la lavorazione.</p>
+</section>
+
+<section>
+  <h2>A5. Il preventivo e la risposta del cliente</h2>
+  <p>Quando il backoffice invia il preventivo, la busta passa in <span class="pill p-amber">Attesa cliente</span>. Il venditore vede <b>quando è stato inviato</b> e <b>da quanti giorni il cliente non risponde</b>; dopo qualche giorno il portale suggerisce di sollecitare. Può vedere la proposta come la vede il cliente e mandare un <b>sollecito</b> con lo stesso link: la data dell'ultimo sollecito resta sulla busta.</p>
+  <figure><img src="img/a5-attesa.png" alt=""><figcaption>Busta in attesa della risposta del cliente, con data di invio e giorni senza risposta.</figcaption></figure>
+  <p>Il cliente riceve un link privato (oppure accede con email e password). Sceglie le voci da accettare con una casella per ognuna, vede il totale e conferma; può anche stampare o rifiutare. Il pagamento avviene al ritiro.</p>
+  <figure><img src="img/a5-preventivo-cliente.png" alt=""><figcaption>Il preventivo online come lo vede il cliente.</figcaption></figure>
+  <div class="callout"><p><b>Se accetta</b>: la busta passa in attesa di lavorazione e il backoffice assegna il tecnico.<br><b>Se rifiuta</b>: la busta passa alla riconsegna, con l'eventuale costo del solo preventivo. Nelle riparazioni esterne l'orologio prima rientra dalla casa madre.</p></div>
+</section>
+
+<section>
+  <h2>A6. La riconsegna</h2>
+  <p>Quando l'orologio rientra in boutique, la busta passa in <span class="pill p-blue">Pronto al ritiro</span> e compare il riquadro <b>Riconsegna al cliente</b>.</p>
+  <ol>
+    <li>Si inserisce numero e totale dello scontrino (il totale è già proposto con le voci accettate).</li>
+    <li>Si preme <b>Invia avviso di ritiro con scontrino</b>: il cliente riceve la mail.</li>
+    <li>Quando il cliente ritira, si preme <b>Registra il ritiro</b>: la pratica si chiude.</li>
+  </ol>
+  <figure><img src="img/a6-riconsegna.png" alt=""><figcaption>Riconsegna: avviso di ritiro con scontrino e registrazione del ritiro.</figcaption></figure>
+
+  <h2 style="margin-top:28px">A7. Il cambio pila</h2>
+  <p>Il cambio pila si fa in boutique, senza passare dal laboratorio. Dopo l'accettazione la busta mostra il bottone <b>Pila sostituita</b>; premuto quello si passa subito alla riconsegna come al punto A6.</p>
+  <figure><img src="img/a7-cambio-pila.png" alt=""><figcaption>Cambio pila: l'intervento lo chiude il venditore.</figcaption></figure>
+</section>
+
+<div class="part">
+  <div class="kicker">Parte B</div>
+  <h1>Amministrazione e backoffice</h1>
+  <p>Si attiva con il bottone <b>Vista amministrazione</b>. Qui si gestisce tutto il workflow della pratica, stato per stato.</p>
+</div>
+
+<section>
+  <h2>B1. L'elenco per il backoffice</h2>
+  <p>In alto compare il riquadro tratteggiato <b>Vista amministrazione e backoffice</b>. I numeri e i filtri sono pensati per chi gestisce il laboratorio.</p>
+  <figure><img src="img/b1-elenco.png" alt=""><figcaption>Elenco nella vista amministrazione.</figcaption></figure>
+  <ul>
+    <li><b>Filtri rapidi</b>: Aperte, Da gestire, Preventivo accettato non assegnato, Attesa cliente, Laboratori esterni, CPO, In ritardo, Chiuse, Tutte.</li>
+    <li>Filtri anche per <b>responsabile</b> e <b>tecnico</b>.</li>
+    <li>La colonna <b>Workflow</b> mostra lo stato preciso (es. "5/10 · Preventivo accettato") e da quanti giorni la pratica è in quello stato.</li>
+    <li>Per ogni pratica si vedono responsabile, tecnico e dove si trova l'orologio, più la tempistica in settimane.</li>
+    <li>Lo stato dice chi deve muoversi: <span class="pill p-red">Da gestire</span> <span class="pill p-red">Da assegnare</span> <span class="pill p-green">In corso</span> <span class="pill p-amber">Attesa cliente</span> <span class="pill p-blue">Al venditore</span>.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>B2. La busta: valutazione tecnica</h2>
+  <p>Nella busta il backoffice vede tutti gli stati della pratica, con chi li gestisce (venditore, backoffice, cliente) e la data. Sotto c'è il riquadro dello stato attuale con le azioni da fare e da quanti giorni la pratica è lì.</p>
+  <figure><img src="img/b2-valutazione.png" alt=""><figcaption>Busta in valutazione tecnica nella vista amministrazione.</figcaption></figure>
+  <ul>
+    <li>Si sceglie il tecnico che valuta e si passa allo stato successivo.</li>
+    <li>Se serve la casa madre o un laboratorio esterno: <b>Affida a laboratorio esterno o casa madre</b> (vedi B6).</li>
+    <li>A destra, <b>Gestione</b>: responsabile della pratica, tecnico, posizione fisica e tempistica in settimane. Ogni modifica finisce nello storico.</li>
+    <li><b>Date operative</b>: data, ora e persona di ogni stato, più il ritiro effettivo.</li>
+    <li><b>Note interne di laboratorio</b>: modificabili, non escono sui documenti del cliente.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>B3. Redazione e invio del preventivo</h2>
+  <p>Si inseriscono le voci del preventivo (dal listino della casa madre o lavorazioni interne) con il prezzo, e il costo del preventivo da addebitare se il cliente rifiuta. Poi <b>Invia il preventivo al cliente</b>: parte la mail con il link privato e la busta passa in attesa del cliente.</p>
+  <figure><img src="img/b3-preventivo.png" alt=""><figcaption>Redazione del preventivo.</figcaption></figure>
+  <div class="callout"><p>Mentre si aspetta il cliente si vede la data di invio e da quanti giorni non risponde. Si può aprire la sua vista, mandare un sollecito o registrare un rifiuto arrivato per iscritto (<b>Il cliente ha rifiutato</b>).</p></div>
+</section>
+
+<section>
+  <h2>B4. Assegnazione e tempistica</h2>
+  <p>Quando il cliente accetta, la busta è <span class="pill p-red">Da assegnare</span>. Nel riquadro dello stato si inseriscono:</p>
+  <ul>
+    <li><b>Tempistica</b>: quante settimane servono per la lavorazione. Il conteggio parte dalla data di accettazione del preventivo; il portale calcola la scadenza e mostra quanto manca, a venditore e backoffice.</li>
+    <li><b>Tecnico</b>: a chi va la lavorazione.</li>
+  </ul>
+  <p>Con <b>Assegna: passa in attesa lavorazione</b> la busta entra in <b>Attesa lavorazione</b>: è in coda al laboratorio e il tecnico non ha ancora iniziato. Quando il tecnico la prende in mano si passa a <b>Lavorazione</b>.</p>
+  <figure><img src="img/b4-assegnazione.png" alt=""><figcaption>Preventivo accettato: tempistica in settimane e assegnazione al tecnico.</figcaption></figure>
+</section>
+
+<section>
+  <h2>B5. Lavorazione, controllo e chiusura</h2>
+  <ol>
+    <li><b>Lavorazione</b>: si allegano i documenti di scarico componenti e delle lavorazioni (anche più di uno). Lo scarico si fa sul gestionale con il numero di busta, così resta collegato alla pratica. Finito il lavoro: <b>Lavoro finito: passa al controllo</b>.</li>
+    <li><b>Controllo prodotto</b>: l'orologio resta in controllo circa 5 giorni (funzionamento e precisione, impermeabilità, estetica). Se emergono problemi, <b>Problemi riscontrati: torna in lavorazione</b> riporta la busta in lavorazione. Se va tutto bene, <b>Controllo superato: chiudi la riparazione</b>.</li>
+    <li><b>Chiusura riparazione</b>: parte il documento di chiusura verso il gestionale.</li>
+    <li>Quando l'orologio è di nuovo in boutique: <b>Passa all'avviso di ritiro</b>. Da qui la busta torna al venditore per la riconsegna.</li>
+  </ol>
+  <figure><img src="img/b5-controllo.png" alt=""><figcaption>Controllo prodotto: si chiude la riparazione oppure si torna in lavorazione.</figcaption></figure>
+  <p>Il riquadro <b>Documenti</b> mostra tutti i documenti della pratica e il loro stato (vedi capitolo 3). Lo storico mostra anche le voci interne, segnate come "Interna", che il venditore non vede.</p>
+</section>
+
+<section>
+  <h2>B6. Riparazione esterna (casa madre)</h2>
+  <p>Se in valutazione si sceglie <b>Affida a laboratorio esterno o casa madre</b>, la pratica cambia percorso. Il tecnico diventa "Casa madre (esterno)" e la posizione si aggiorna.</p>
+  <ol>
+    <li><b>Invio laboratorio esterno</b>: si spedisce l'orologio e si scrive il <b>riferimento del documento di uscita</b> (il DDT emesso dal gestionale), così si sa sempre dove cercarlo.</li>
+    <li><b>Preventivo casa madre</b>: la casa madre analizza l'orologio e manda il suo preventivo a Verga. Si registrano voci e importi e si allega il PDF. È un <b>costo interno</b>: il cliente e il venditore non lo vedono.</li>
+    <li><b>Redazione preventivo</b> per il cliente: le voci della casa madre sono già copiate, si aggiornano descrizioni e prezzi. Il portale mostra il margine rispetto al costo della casa madre. Poi si invia al cliente come al punto B3.</li>
+    <li><b>Preventivo accettato</b>: si conferma la lavorazione alla casa madre. Da qui partono le <b>settimane</b> di attesa.</li>
+    <li><b>Attesa lavorazione</b> e <b>Rientro oggetto</b>: quando l'orologio torna, passa in laboratorio.</li>
+    <li><b>Controllo prodotto</b>, <b>Chiusura riparazione</b> e <b>Avviso ritiro</b> come nella riparazione interna. Se il controllo non va, la busta torna in attesa alla casa madre.</li>
+  </ol>
+  <figure><img src="img/b6-casa-madre.png" alt=""><figcaption>Registrazione del preventivo della casa madre (costo interno).</figcaption></figure>
+  <figure><img src="img/b6-esterna.png" alt=""><figcaption>Riparazione presso la casa madre, in ritardo rispetto alle settimane indicate.</figcaption></figure>
+  <div class="callout"><p>Se il cliente <b>rifiuta</b> il preventivo, la busta passa a <b>Rientro oggetto</b>: la casa madre restituisce l'orologio, che poi torna al cliente. La <b>garanzia esterna</b> segue lo stesso percorso ma senza preventivo. Il venditore vede la fase "Lavorazione esterna".</p></div>
+</section>
+
+<section>
+  <h2>B7. CPO</h2>
+  <p>Il CPO ha due fasi. Nella prima si valuta l'orologio e si fa un'offerta al cliente; se il cliente accetta, l'orologio diventa di Verga (la busta passa da "Intestata a cliente" a "Intestata a Verga") e inizia la preparazione alla vendita: revisione, certificazione Rolex, pubblicazione, vendita finale. Se rifiuta, l'orologio torna al cliente con la riconsegna in boutique.</p>
+  <p>Il CPO ha la <b>Scheda economica</b>: valore di acquisto, costi di revisione e di certificazione, valore di vendita, documentazione disponibile e acquirente finale.</p>
+  <figure><img src="img/b7-cpo.png" alt=""><figcaption>Pratica CPO in redazione dell'offerta.</figcaption></figure>
+</section>
+
+<section>
+  <h2>3. Documenti e collegamento con il gestionale</h2>
+  <p>Tutti i documenti sono collegati al numero di pratica e di busta, così si ricostruisce sempre la storia della lavorazione. Il collegamento con il gestionale (TeamSystem Enterprise) passa da eCube.</p>
+  <table>
+    <tr><th style="width:36%">Documento</th><th style="width:18%">Dove nasce</th><th>Quando</th></tr>
+    <tr><td>Ricevuta di presa in carico</td><td style="font-weight:400">Portale</td><td>All'apertura, firmata dal cliente sul tablet; si stampa o si invia via email.</td></tr>
+    <tr><td>Etichette busta e orologio</td><td style="font-weight:400">Portale</td><td>All'apertura.</td></tr>
+    <tr><td>Documentazione fotografica</td><td style="font-weight:400">Portale</td><td>All'apertura: 3 foto dalla fotocamera del tablet.</td></tr>
+    <tr><td>Documento di presa in carico</td><td style="font-weight:400">Gestionale</td><td>All'apertura, in automatico con i dati della pratica.</td></tr>
+    <tr><td>Documento di uscita verso la casa madre</td><td style="font-weight:400">Gestionale</td><td>Riparazioni esterne: sul portale si scrive il riferimento del DDT.</td></tr>
+    <tr><td>Preventivo casa madre</td><td style="font-weight:400">Portale (interno)</td><td>Riparazioni esterne: voci, importi e PDF della casa madre. Non lo vede il cliente.</td></tr>
+    <tr><td>Preventivo / offerta / quotazione</td><td style="font-weight:400">Portale</td><td>Quando il backoffice lo invia al cliente.</td></tr>
+    <tr><td>Scarichi componenti</td><td style="font-weight:400">Gestionale</td><td>Durante la lavorazione; più di uno per pratica.</td></tr>
+    <tr><td>Documento di chiusura lavorazione</td><td style="font-weight:400">Gestionale</td><td>Alla chiusura della riparazione, dopo il controllo.</td></tr>
+    <tr><td>Avviso di ritiro</td><td style="font-weight:400">Portale</td><td>Alla riconsegna, con lo scontrino.</td></tr>
+  </table>
+  <p>Ogni documento riporta: numero pratica e busta, articolo generico RIPARAZIONE, descrizione, quantità, matricola, numero di etichette ed eventuale costo del preventivo.</p>
+
+</section>
+
+<section>
+  <h2>4. Punti ancora da confermare</h2>
+  <ul>
+    <li>Come accede il backoffice: stesso portale con un ruolo diverso o una licenza dedicata.</li>
+    <li>Cambio pila: lo chiude il venditore in boutique (come nel mockup) o passa comunque dal backoffice.</li>
+    <li>Garanzia interna: serve anche qui il controllo prodotto prima della chiusura?</li>
+    <li>Numerazione delle buste: generata dal portale o prestampata.</li>
+    <li>Elenco reale delle posizioni (cassaforte, banchi, laboratori) e dei tecnici.</li>
+    <li>Modelli della ricevuta con le clausole (riparazioni, Patek Philippe, CPO) e formato definitivo delle etichette.</li>
+    <li>Costo del preventivo rifiutato: fisso o per brand.</li>
+    <li>CPO: avviso automatico alla scadenza dei 10 giorni per l'offerta.</li>
+    <li>Quali dati passano al gestionale a ogni stato.</li>
+    <li>In una fase successiva: documenti di trasporto emessi dal portale, statistiche ed esportazione delle riparazioni (buste per anno, interne/esterne, preventivi rifiutati).</li>
+    <li>Migrazione dello storico da Arca Evolution e dall'Excel "DB RIP".</li>
+  </ul>
+</section>
+
+</body>
+</html>
