@@ -801,7 +801,7 @@ const NOTES = {
   pda:{from:['Stati della PDA: Manifestazione, Preordine, Associata, Ordine, Annullata (configurabili).','Associare e dissociare un prodotto: solo direttore vendite e titolare. Trasformare in ordine: qualsiasi venditore.','Notifica a chi ha creato la PDA quando il prodotto viene associato.','PDA visibili in tutte le boutique: un interesse nato in multimarca può essere soddisfatto dalla boutique Rolex.','Alla creazione parte la mail di presa in carico.','Prodotti disponibili: per ogni pezzo libero si vede chi lo aspetta e si associa da lì.','Per ogni manifestazione: evento particolare legato all\'acquisto e venditore incaricato.','Se il cliente rinuncia la PDA resta nello storico come Annullata e il pezzo torna disponibile.'],open:['Verga manda gli screen delle manifestazioni attuali per allineare la pagina di dettaglio.','Il ramo Preordine va validato con Verga.','Quali campi della PDA passano al gestionale quando diventa ordine?','Circa 1.000 manifestazioni attive da migrare.']},
   riparazioni:{from:['Documento di analisi (bozza 02): i venditori aprono le pratiche, ne seguono lo stato e riconsegnano l\'orologio; avanzamento del workflow, assegnazioni e aggiornamento degli stati sono del backoffice.','Il venditore vede 5 fasi semplificate: Accettazione, Valutazione, Attesa cliente, Lavorazione, Riconsegna (variano per tipo: es. CPO finisce "In vendita").','Il bottone "Vista amministrazione" mostra cosa vedrà il backoffice: workflow completo, responsabile, tecnico, posizione, filtri dedicati.','Monitoraggio al posto dell\'Excel "DB RIP": ricerca per busta, cliente, marca, referenza, matricola.','Stesso portale: entrando in Riparazioni il colore passa dal verde al grafite.'],open:['Come entra il backoffice: stesso portale con un ruolo diverso o una licenza TSC dedicata?','Numerazione delle buste: la genera il portale o sono prestampate?','Posizioni a magazzino: elenco reale (stanze, cassetti, banchi).','Migrazione dello storico da "DB RIP" e da Arca.','Cambio pila: lo chiude il venditore in boutique (come nel mockup) o passa comunque dal backoffice?']},
   'rip-new':{from:['Tipi di pratica: Riparazione, Garanzia, Cambio pila, CPO, Quotazione.','3 foto per busta, un pulsante per ciascuna (richiesta del cliente, 09/11).','Dati dell\'orologio: marca, modello, referenza, matricola e altri identificativi; motivo, note e valore dichiarato a fini assicurativi.','Foto scattate direttamente dalla fotocamera del tablet, senza salvataggi intermedi; più allegati per pratica.','Note per il cliente (vanno sui documenti) separate dalle note interne di laboratorio.','All\'apertura: ricevuta di presa in carico, etichette busta e orologio, e documento di presa in carico inviato al gestionale.'],open:['Significato esatto di Nc, Nm e Cal.','Testo delle clausole della ricevuta.','Modelli attuali delle etichette (contenuto e formato).']},
-  busta:{from:['Vista venditore: fase attuale, settimane mancanti (tempistica indicata dall\'amministrazione), data di invio del preventivo per sollecitare, riconsegna (avviso di ritiro con scontrino, poi ritiro).','Vista amministrazione: stati completi del documento di analisi con data e utente per ognuno; Accettazione e Avviso ritiro restano al venditore.','Workflow per tipo: Riparazione (10 stati, con Attesa lavorazione dopo il preventivo accettato e Controllo prodotto prima dell\'avviso di ritiro), Garanzia senza preventivo, Cambio pila, Riparazione esterna (invio, preventivo della casa madre a Verga, preventivo al cliente, attesa lavorazione, rientro, controllo prodotto), CPO in due fasi, Quotazione.','Preventivo online: il cliente sceglie le voci; se rifiuta la pratica salta alla riconsegna con il costo del solo preventivo.','Documenti collegati a numero pratica e busta: presa in carico, preventivo, scarichi componenti (più di uno), chiusura, avviso di ritiro.','CPO: scheda economica con costi di revisione e certificazione, valore di acquisto e vendita, acquirente finale.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni stato (via eCube).']},
+  busta:{from:['Vista venditore: fase attuale, settimane mancanti (tempistica indicata dall\'amministrazione), data di invio del preventivo per sollecitare, riconsegna (avviso di ritiro con scontrino, poi ritiro).','Vista amministrazione: stati completi del documento di analisi con data e utente per ognuno; Accettazione e Avviso ritiro restano al venditore.','Workflow per tipo: Riparazione (10 stati, con Attesa lavorazione dopo il preventivo accettato e Controllo prodotto di circa 5 giorni prima della chiusura: se emergono problemi torna in lavorazione), Garanzia senza preventivo, Cambio pila, Riparazione esterna (invio, preventivo della casa madre a Verga, preventivo al cliente, attesa lavorazione, rientro, controllo prodotto), CPO in due fasi, Quotazione.','Preventivo online: il cliente sceglie le voci; se rifiuta la pratica salta alla riconsegna con il costo del solo preventivo.','Documenti collegati a numero pratica e busta: presa in carico, preventivo, scarichi componenti (più di uno), chiusura, avviso di ritiro.','CPO: scheda economica con costi di revisione e certificazione, valore di acquisto e vendita, acquirente finale.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni stato (via eCube).']},
   prev:{from:['Preventivo online al posto del PDF: una casella per ogni voce e il totale.','Il cliente sceglie le voci e conferma; paga al ritiro. Può anche stampare.','Accesso con link privato oppure con email e password: Verga li vuole entrambi.','La risposta torna sulla busta e va registrata nel gestionale.'],open:['Serve una firma o basta la conferma online?','Come torna il preventivo accettato nel gestionale.']},
   auto:{from:['Form a due step. Step 1 obbligatorio e breve: nome, cognome, email (obbligatoria), telefono, brand di interesse facoltativi.','Step 2 facoltativo: dati utili per la comunicazione. Se non li compila, li chiede il venditore in negozio.','Ogni nuovo contatto nasce come Prospect.','Dopo il go-live Verga vuole mandare ai clienti una mail con un breve questionario (es. misura del polso).'],open:['Dove viene pubblicato il form (sito, QR in boutique, tablet)?','Consenso privacy: firma su iPad in negozio, online con checkbox?']},
 };
@@ -1500,7 +1500,7 @@ const MOTIVI_RIP = ['Preventivo riparazione','Revisione completa','Cambio pila',
 /* stati del workflow (documento di analisi): [nome, fase che vede il venditore, chi lo gestisce: v venditore, b backoffice, c cliente] */
 const FASI_STD = ['Accettazione','Valutazione','Attesa cliente','Lavorazione','Riconsegna'];
 const RIP_TIPI = {
-  'Riparazione':{d:'Preventivo, risposta del cliente e lavorazione', fasi:FASI_STD, stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Redazione preventivo',1,'b'],['Invio preventivo',2,'c'],['Preventivo accettato',3,'b'],['Attesa lavorazione',3,'b'],['Lavorazione',3,'b'],['Chiusura riparazione',3,'b'],['Controllo prodotto',3,'b'],['Avviso ritiro',4,'v']]},
+  'Riparazione':{d:'Preventivo, risposta del cliente e lavorazione', fasi:FASI_STD, stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Redazione preventivo',1,'b'],['Invio preventivo',2,'c'],['Preventivo accettato',3,'b'],['Attesa lavorazione',3,'b'],['Lavorazione',3,'b'],['Controllo prodotto',3,'b'],['Chiusura riparazione',3,'b'],['Avviso ritiro',4,'v']]},
   'Garanzia':{d:'Come la riparazione, senza preventivo', fasi:['Accettazione','Valutazione','Lavorazione','Riconsegna'], stati:[['Accettazione',0,'v'],['Valutazione tecnica',1,'b'],['Lavorazione',2,'b'],['Chiusura riparazione',2,'b'],['Avviso ritiro',3,'v']]},
   'Cambio pila':{d:'Intervento rapido fatto in boutique', fasi:['Accettazione','Intervento','Riconsegna'], stati:[['Accettazione',0,'v'],['Esecuzione intervento',1,'v'],['Chiusura pratica',2,'v']]},
   'CPO':{d:'Rolex Certified Pre-Owned: offerta, poi preparazione alla vendita', fasi:['Accettazione','Valutazione','Attesa cliente','Preparazione','In vendita'], stati:[['Accettazione CPO',0,'v'],['Valutazione tecnica',1,'b'],['Redazione offerta',1,'b'],['Comunicazione offerta',2,'c'],['Accettazione o rifiuto del cliente',2,'c'],['Revisione interna o esterna',3,'b'],['Certificazione Rolex',3,'b'],['Rientro certificazione',3,'b'],['Pubblicazione',4,'b'],['Pronto alla vendita',4,'b'],['Vendita finale',4,'b']]},
@@ -1542,13 +1542,13 @@ const repairs = [
    motivo:'Revisione completa', valore:12400, ritiro:'2026-09-30', garanzia:false, foto:3, ric:true, et:true, noteCliente:'', noteInterne:'Inviato alla casa madre per la revisione.',
    si:7, dates:D(['2026-08-28T17:00','Giorgia Costa'],['2026-08-29T10:00','Andrea Galli'],['2026-08-30T11:00','Elena Bassi'],['2026-08-31T09:00','Elena Bassi'],['2026-08-31T10:00','Elena Bassi'],['2026-08-31T10:30','Elena Bassi'],['2026-09-01T18:20','Cliente'],['2026-09-02T11:00','Elena Bassi']),
    resp:'Elena Bassi', tecnico:'Casa madre (esterno)', ubic:'Casa madre (riparazione esterna)', tempi:{sett:3, dal:'2026-09-02', fase:'Lavorazione esterna'}, est:'2026-09-02',
-   prevCM:{voci:[{d:'Revisione completa movimento cal. 3235', p:900},{d:'Sostituzione guarnizioni e test impermeabilità', p:90}], file:'Preventivo_casa_madre_B-0409.pdf'},
+   ddt:'DDT 2026/0187', prevCM:{voci:[{d:'Revisione completa movimento cal. 3235', p:900},{d:'Sostituzione guarnizioni e test impermeabilità', p:90}], file:'Preventivo_casa_madre_B-0409.pdf'},
    prev:{stato:'accettato', voci:[{d:'Revisione completa movimento cal. 3235 (casa madre)', p:1150, ok:true},{d:'Sostituzione guarnizioni e test impermeabilità', p:120, ok:true}]},
    log:[{date:'2026-08-28T17:00', by:'Giorgia Costa', t:'Busta aperta in Boutique Portofino'},{date:'2026-08-30T11:00', by:'Elena Bassi', t:'Orologio spedito alla casa madre', i:1},{date:'2026-08-31T09:00', by:'Elena Bassi', t:'Preventivo della casa madre registrato: 2 voci, € 990', i:1},{date:'2026-08-31T10:30', by:'Elena Bassi', t:'Preventivo inviato al cliente: 2 voci, € 1.270'},{date:'2026-09-01T18:20', by:'Cliente', t:'Preventivo accettato online: 2 voci su 2 (€ 1.270)'},{date:'2026-09-02T11:00', by:'Elena Bassi', t:'Lavorazione confermata alla casa madre', i:1}]},
   {id:'r5', busta:'B-2026-0402', tipo:'Riparazione', clientId:'c7', boutique:'Boutique Patek Philippe', by:'Luca Ferrari', acc:'2026-08-20T12:10',
    obj:{tipo:'Orologio', marca:'Patek Philippe', modello:'Aquanaut', ref:'5168G', materiale:'Oro bianco', nc:'', nm:'', cal:'324 S C', quadrante:'Kaki', meccanismo:'Automatico', bracciale:'Composite'},
    motivo:'Regolazione bracciale', valore:52000, ritiro:'2026-09-26', garanzia:false, foto:3, ric:true, et:true, noteCliente:'', noteInterne:'',
-   si:9, dates:D(['2026-08-20T12:10','Luca Ferrari'],['2026-08-21T09:00','Davide Sala'],['2026-08-22T10:00','Elena Bassi'],['2026-08-22T10:30','Elena Bassi'],['2026-08-24T18:40','Cliente'],['2026-08-25T10:00','Elena Bassi'],['2026-08-26T09:00','Elena Bassi'],['2026-09-23T17:30','Elena Bassi'],['2026-09-23T17:40','Elena Bassi'],['2026-09-23T17:45','Elena Bassi']),
+   si:9, dates:D(['2026-08-20T12:10','Luca Ferrari'],['2026-08-21T09:00','Davide Sala'],['2026-08-22T10:00','Elena Bassi'],['2026-08-22T10:30','Elena Bassi'],['2026-08-24T18:40','Cliente'],['2026-08-25T10:00','Elena Bassi'],['2026-08-26T09:00','Elena Bassi'],['2026-09-18T17:30','Andrea Galli'],['2026-09-23T17:30','Elena Bassi'],['2026-09-23T17:45','Elena Bassi']),
    resp:'Elena Bassi', tecnico:'Davide Sala', ubic:'Pronto in boutique per il ritiro', tempi:{sett:4, dal:'2026-08-26', fase:'Lavorazione'}, ass:'2026-08-26', chiusura:'2026-09-23',
    prev:{stato:'accettato', voci:[{d:'Sostituzione cinturino composite e regolazione', p:640, ok:true}]}, att:['Scarico_B-2026-0402.pdf'],
    log:[{date:'2026-08-20T12:10', by:'Luca Ferrari', t:'Busta aperta in Boutique Patek Philippe'},{date:'2026-09-23T17:30', by:'Elena Bassi', t:'Riparazione chiusa, documento di chiusura inviato al gestionale', i:1},{date:'2026-09-23T17:45', by:'Elena Bassi', t:'Orologio rientrato in boutique: pronto per l\'avviso di ritiro'}]},
@@ -1590,11 +1590,17 @@ const clientRepairs = id => repairs.filter(r => r.clientId === id).sort((a,b) =>
 const objName = r => `${r.obj.marca} ${r.obj.modello}`;
 /* tempistica: l'amministrazione indica le settimane, la scadenza si calcola dalla data in cui le ha inserite */
 const addDays = (s, n) => { const d = dt(s); d.setDate(d.getDate() + n); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
-const scad = r => r.tempi?.sett ? addDays(r.tempi.dal, r.tempi.sett * 7) : '';
+/* le settimane partono dall'accettazione del preventivo; nelle esterne dalla conferma alla casa madre (attesa lavorazione) */
+const tStart = r => { const i = wf(r).stati.findIndex(x => x[0] === (r.esterna ? 'Attesa lavorazione' : 'Preventivo accettato')); return i >= 0 && r.dates?.[i] ? r.dates[i].date.slice(0, 10) : ''; };
+const tStartLbl = r => tStart(r) ? (r.esterna ? 'conferma alla casa madre' : 'preventivo accettato') : 'inserimento';
+const tDal = r => tStart(r) || r.tempi?.dal || '';
+const scad = r => r.tempi?.sett ? addDays(tDal(r), r.tempi.sett * 7) : '';
 const late = r => !r.closed && !inRic(r) && !!scad(r) && dday(scad(r)) < 0;
 const nSett = n => `${n} ${n === 1 ? 'settimana' : 'settimane'}`, nGg = n => `${n} ${n === 1 ? 'giorno' : 'giorni'}`;
 const mancaTxt = r => { const n = dday(scad(r)); if (n < 0) return `In ritardo di ${nGg(-n)}`; if (n === 0) return 'Scade oggi'; const w = Math.floor(n / 7), d = n % 7; return 'Mancano ' + [w && nSett(w), d && nGg(d)].filter(Boolean).join(' e '); };
 const mancaShort = r => { const n = dday(scad(r)); if (n < 0) return `Ritardo ${-n} gg`; if (n === 0) return 'Scade oggi'; const w = Math.floor(n / 7), d = n % 7; return 'Mancano ' + [w && w + ' sett.', d && d + ' gg'].filter(Boolean).join(' e '); };
+const inStato = r => !r.closed && !!r.dates?.[r.si];
+const inStatoTxt = r => { const n = Math.max(0, daysAgo(r.dates[r.si].date)); return n === 0 ? 'oggi' : nGg(n); };
 const tempiCol = r => r.closed || inRic(r) ? 'var(--muted)' : late(r) ? 'var(--red)' : dday(scad(r)) <= 3 ? 'var(--amber)' : 'var(--ok)';
 /* data di invio del preventivo / offerta: per sollecitare il cliente se non risponde */
 const prevSent = r => { const i = wf(r).stati.findIndex(s => ['Invio preventivo','Comunicazione offerta'].includes(s[0])); return i >= 0 ? r.dates?.[i]?.date || '' : ''; };
@@ -1608,6 +1614,8 @@ function ripLight(r){
   if (late(r)) return {k:'late', c:'red', l:'In ritardo'};
   const f = faseN(r);
   if (f === 'Attesa cliente') return {k:'wait', c:'amber', l:'Attesa cliente'};
+  if (stato(r)[0] === 'Attesa lavorazione') return {k:'work', c:'amber', l:r.esterna ? 'In attesa alla casa madre' : 'In attesa di lavorazione'};
+  if (stato(r)[0] === 'Controllo prodotto') return {k:'work', c:'blue', l:'In controllo'};
   if (LAV.includes(f)) return {k:'work', c:'ok', l:f === 'Lavorazione esterna' ? 'Laboratorio esterno' : f === 'Preparazione' ? 'In preparazione' : 'In lavorazione'};
   if (f === 'In vendita') return {k:'sale', c:'blue', l:'In vendita'};
   return {k:'val', c:'', l:'In valutazione'};
@@ -1640,7 +1648,7 @@ function vRip(){
   const kpis = bo ? [['Da gestire', cnt(ch('todo')), 'stati in mano al backoffice', true],['Accettati non assegnati', cnt(ch('nass')), 'da passare al tecnico'],['Laboratori esterni', cnt(ch('est')), 'fuori sede'],['In ritardo', cnt(late), 'oltre la tempistica indicata']]
     : [['Aperte', cnt(ch('aperte')), 'in tutte le boutique'],['Attesa cliente', cnt(ch('wait')), 'preventivi da confermare'],['Da fare in boutique', cnt(ch('ready')), 'riconsegne e cambi pila', true],['In ritardo', cnt(late), 'oltre la tempistica indicata']];
   const prevCell = r => `<td class="num" style="text-align:right">${r.prev?.voci?.length ? `${eur(r.prev.stato === 'accettato' ? prevTot(r, true) : prevTot(r))}<div class="faint" style="font-size:12px">${({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || ''}${r.prev.stato === 'inviato' && prevSent(r) ? ` il ${fmtD(prevSent(r)).slice(0, 5)}` : ''}</div>${r.prev.stato === 'inviato' && prevSent(r) ? `<div style="font-size:12px;font-weight:600;color:${daysAgo(prevSent(r)) >= 3 ? 'var(--amber)' : 'var(--muted)'}">${daysAgo(prevSent(r)) <= 0 ? 'oggi' : nGg(daysAgo(prevSent(r))) + ' fa'}</div>` : ''}` : '<span class="faint">—</span>'}</td>`;
-  const consegna = r => `<td class="num" style="white-space:nowrap">${scad(r) ? `${r.tempi.sett} sett. <span class="faint" style="font-size:12px">dal ${fmtD(r.tempi.dal).slice(0, 5)}</span>${r.closed || inRic(r) ? '' : `<div style="font-size:12px;font-weight:600;color:${tempiCol(r)}">${mancaShort(r)}</div>`}` : '<span class="faint">—</span>'}</td>`;
+  const consegna = r => `<td class="num" style="white-space:nowrap">${scad(r) ? `${r.tempi.sett} sett. <span class="faint" style="font-size:12px">dal ${fmtD(tDal(r)).slice(0, 5)}</span>${r.closed || inRic(r) ? '' : `<div style="font-size:12px;font-weight:600;color:${tempiCol(r)}">${mancaShort(r)}</div>`}` : '<span class="faint">—</span>'}</td>`;
   return `
   <div class="page-h"><div><div class="label">${bo ? 'Amministrazione e backoffice' : 'Assistenza · tutte le boutique'}</div><h1>Riparazioni</h1></div><span class="sp"></span>${boBtn()}<button class="btn btn-primary" data-go="rip-new">${ic('plus')}Nuova accettazione</button></div>
   ${boBanner()}
@@ -1662,7 +1670,7 @@ function vRip(){
       <td style="min-width:170px"><b>${esc(objName(r))}</b><div class="faint mono" style="font-size:12px">${esc(r.obj.ref)}</div><div class="faint" style="font-size:12px">${esc(r.motivo)}</div></td>
       <td style="min-width:150px">${r.closed ? '<span class="faint">Chiusa</span>' : bo
         ? `<div style="font-weight:600;font-size:13px">${r.si + 1}/${w.stati.length} · ${esc(stato(r)[0])}</div>${miniSteps(w.stati.length, r.si)}`
-        : `<div style="font-weight:600;font-size:13px">${esc(faseN(r))}</div>${miniSteps(w.fasi.length, r.reso ? w.fasi.length - 1 : stato(r)[1])}`}</td>
+        : `<div style="font-weight:600;font-size:13px">${esc(faseN(r))}</div>${STATO_MSG[stato(r)[0]] && stato(r)[0] !== faseN(r) ? `<div class="faint" style="font-size:12px">${esc(stato(r)[0])}</div>` : ''}${miniSteps(w.fasi.length, r.reso ? w.fasi.length - 1 : stato(r)[1])}`}${inStato(r) ? `<div class="faint" style="font-size:12px;margin-top:4px">da ${inStatoTxt(r)}</div>` : ''}</td>
       ${bo ? `<td style="min-width:150px">${esc(r.resp || 'Da assegnare')}<div class="faint" style="font-size:12px">${esc(r.tecnico || 'Nessun tecnico')}</div><div class="faint" style="font-size:12px">${esc(r.ubic)}</div></td>` : ''}
       ${consegna(r)}${prevCell(r)}
     </tr>`; }).join('') || `<tr><td colspan="${bo ? 8 : 7}"><div class="empty">Nessuna busta in questo stato.</div></td></tr>`}</tbody>
@@ -1709,7 +1717,6 @@ function vRipNew(){
       <div class="field"><span>Motivo</span><div class="chips">${MOTIVI_RIP.map(v => `<button type="button" class="chip ${n.motivo === v ? 'on' : ''}" data-act="rn-motivo" data-v="${v}">${v}</button>`).join('')}</div></div>
       <div class="fgrid">
         <label class="field"><span>Valore dichiarato (assicurazione)</span><input class="in num" inputmode="decimal" data-rn="valore" value="${esc(n.valore)}" placeholder="€"></label>
-        <label class="field"><span>Ritiro previsto</span><input class="in" type="date" data-rn="ritiro" value="${esc(n.ritiro)}"></label>
       </div>
       <label class="check"><input type="checkbox" data-act="rn-garanzia" ${n.garanzia || n.tipo === 'Garanzia' ? 'checked' : ''}> In garanzia</label>
     </div>
@@ -1780,6 +1787,13 @@ function boSteps(r){
     return `<div class="st ${cls}"><span class="n">${i + 1} · ${who === 'v' ? 'VENDITORE' : who === 'c' ? 'CLIENTE' : 'BACKOFFICE'}</span><b>${esc(n)}</b><small>${d ? fmtD(d.date) : sk ? 'Saltato' : cls === 'cur' ? 'In corso' : '—'}</small></div>`; }).join('')}</div>`;
 }
 const FASE_MSG = {'Accettazione':'Busta aperta in boutique.','Valutazione':'Il laboratorio sta valutando l\'orologio.','Attesa cliente':'Abbiamo inviato la proposta al cliente: aspettiamo la sua risposta.','Lavorazione':'L\'orologio è in lavorazione.','Lavorazione esterna':'L\'orologio è presso un laboratorio esterno o la casa madre.','Preparazione':'L\'orologio è in revisione e certificazione per la vendita.','In vendita':'L\'orologio è in vendita.','Intervento':'Intervento da fare in boutique.'};
+/* stati di lavorazione che il venditore deve distinguere */
+const STATO_MSG = {
+  'Attesa lavorazione': r => r.esterna ? 'Il cliente ha accettato e la casa madre ha l\'ok: l\'orologio è in coda, la lavorazione non è ancora iniziata.' : 'Preventivo accettato: l\'orologio è in coda al laboratorio, il tecnico non ha ancora iniziato.',
+  'Lavorazione': () => 'Il tecnico sta lavorando sull\'orologio.',
+  'Rientro oggetto': () => 'La casa madre ha finito: l\'orologio sta rientrando.',
+  'Controllo prodotto': () => 'Lavorazione finita: l\'orologio è in controllo per circa 5 giorni prima della riconsegna.',
+};
 function sellerPanel(r){
   if (r.closed) return `<section class="card"><div class="empty">${ic('check')} Busta chiusa${r.esito === 'rifiutato' ? `: ${r.tipo === 'CPO' ? 'offerta' : 'preventivo'} rifiutato, orologio restituito` : ''}${r.ritiroD ? ` · ritirata il ${fmtD(r.ritiroD)}` : ''}.</div></section>`;
   const acc = !r.ric || !r.et ? `<div class="card-b stack" style="gap:8px;border-top:1px solid var(--line)"><div class="label">Da completare all'accettazione</div>
@@ -1791,8 +1805,9 @@ function sellerPanel(r){
   return `<section class="card">
     <div class="card-h">${ic('list')}<h2>A che punto è</h2></div>
     <div class="card-b stack" style="gap:12px">
-      <p style="margin:0;font-size:15px"><b>${esc(f)}.</b> ${FASE_MSG[f] || ''}</p>
-      ${scad(r) ? `<div class="banner" style="margin:0">${ic('clock')}<div class="grow"><p><b style="color:${tempiCol(r)}">${mancaTxt(r)}</b> · tempistica di ${nSett(r.tempi.sett)} per ${esc((r.tempi.fase || '').toLowerCase())}, indicata il ${fmtD(r.tempi.dal)} (scadenza ${fmtD(scad(r))})</p></div></div>` : '<p class="faint" style="margin:0">Tempistica non ancora indicata dall\'amministrazione.</p>'}
+      <p style="margin:0;font-size:15px"><b>${esc(f)}${STATO_MSG[stato(r)[0]] && stato(r)[0] !== f ? ' · ' + esc(stato(r)[0].toLowerCase()) : ''}.</b> ${STATO_MSG[stato(r)[0]]?.(r) || FASE_MSG[f] || ''}</p>
+      ${inStato(r) ? `<p class="muted" style="margin:0">${ic('clock')} In questo stato da <b>${inStatoTxt(r)}</b> (dal ${fmtD(r.dates[r.si].date)}).</p>` : ''}
+      ${scad(r) ? `<div class="banner" style="margin:0">${ic('clock')}<div class="grow"><p><b style="color:${tempiCol(r)}">${mancaTxt(r)}</b> · tempistica di ${nSett(r.tempi.sett)} a partire dal ${fmtD(tDal(r))} (${tStartLbl(r)}) (scadenza ${fmtD(scad(r))})</p></div></div>` : '<p class="faint" style="margin:0">Tempistica non ancora indicata dall\'amministrazione.</p>'}
       ${wait && prevSent(r) ? `<p class="muted" style="margin:0">${r.tipo === 'CPO' ? 'Offerta' : 'Preventivo'}: ${sentLine(r)}.${daysAgo(prevSent(r)) >= 3 ? ' <b style="color:var(--amber)">Conviene sollecitare il cliente.</b>' : ''}</p>` : ''}
       ${wait ? `<div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="prev" data-id="${r.id}">${ic('arrow')}Vedi la proposta come il cliente</button><button class="btn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button></div>` : ''}
       <p class="faint" style="margin:0;font-size:12px">Lo stato lo aggiorna l'amministrazione. Quando l'orologio torna in boutique ti arriva una notifica per l'avviso di ritiro.</p>
@@ -1816,7 +1831,6 @@ function consegnaCard(r){
       <dt>Accettazione</dt><dd class="num">${fmtDT(r.acc)}</dd>
       <dt>Tempistica</dt><dd class="num">${scad(r) ? `${nSett(r.tempi.sett)} · scade ${fmtD(scad(r))}` : '—'}</dd>
       ${prevSent(r) ? `<dt>${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'}</dt><dd class="num">${fmtD(prevSent(r))}</dd>` : ''}
-      <dt>Ritiro previsto</dt><dd class="num">${fmtD(r.ritiro)}</dd>
       <dt>Ritiro</dt><dd class="num">${fmtD(r.ritiroD)}</dd>
       ${r.scontrino ? `<dt>Scontrino</dt><dd class="num">${esc(r.scontrino.n)} · ${eur(r.scontrino.tot)}</dd>` : ''}
     </dl></div>
@@ -1841,7 +1855,7 @@ function oggettoCard(r){
 function boPanel(r){
   if (r.closed) return `<section class="card"><div class="empty">${ic('check')} Pratica chiusa${r.esito === 'rifiutato' ? ' dopo il rifiuto del cliente' : ''}${r.ritiroD ? ` · ritirata il ${fmtD(r.ritiroD)}` : ''}.</div></section>`;
   const [n, , who] = stato(r), nx = nextStato(r), w = wf(r);
-  const head = `<div class="card-h">${ic('list')}<h2>${r.si + 1}/${w.stati.length} · ${esc(r.reso ? 'Restituzione al cliente' : n)}</h2><span class="sp"></span><span class="tag ${who === 'b' && !r.reso ? 'brand' : who === 'c' ? 'amber' : 'blue'}">${r.reso || who === 'v' ? 'Tocca al venditore' : who === 'c' ? 'Tocca al cliente' : 'Tocca al backoffice'}</span></div>`;
+  const head = `<div class="card-h">${ic('list')}<h2>${r.si + 1}/${w.stati.length} · ${esc(r.reso ? 'Restituzione al cliente' : n)}</h2><span class="sp"></span>${inStato(r) ? `<span class="faint" style="font-size:12px">da ${inStatoTxt(r)}</span>` : ''}<span class="tag ${who === 'b' && !r.reso ? 'brand' : who === 'c' ? 'amber' : 'blue'}">${r.reso || who === 'v' ? 'Tocca al venditore' : who === 'c' ? 'Tocca al cliente' : 'Tocca al backoffice'}</span></div>`;
   const next = (label = nx ? 'Passa a: ' + nx[0] : 'Chiudi la pratica') => `<div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}${esc(label)}</button></div>`;
   let body;
   if (inRic(r) || who === 'v') body = `<p class="muted" style="margin:0">${r.tipo === 'Cambio pila' && !inRic(r) ? 'Il cambio pila lo esegue il venditore in boutique.' : 'Ora la busta è in boutique: il venditore invia l\'avviso di ritiro con lo scontrino e registra la riconsegna.'}</p>`;
@@ -1849,18 +1863,20 @@ function boPanel(r){
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="prev" data-id="${r.id}">${ic('arrow')}Apri la vista del cliente (demo)</button><button class="btn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button><span class="sp" style="flex:1"></span><button class="btn btn-ghost" data-act="pv-refuse" data-id="${r.id}">Il cliente ha rifiutato</button></div>`;
   else if (n === 'Valutazione tecnica') body = `<label class="field"><span>Tecnico che valuta</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
       <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap">${['Riparazione','Garanzia'].includes(r.tipo) && !r.esterna ? `<button class="btn" data-act="rb-esterna" data-id="${r.id}">${ic('truck')}Affida a laboratorio esterno o casa madre</button>` : ''}<button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Passa a: ${esc(nx[0])}</button></div>`;
-  else if (n === 'Invio laboratorio esterno') body = `<p class="muted" style="margin:0">Spedisci l'orologio alla casa madre o al laboratorio esterno. Al passo successivo registri il preventivo che ti mandano.</p>${next()}`;
+  else if (n === 'Invio laboratorio esterno') body = `<p class="muted" style="margin:0">Spedisci l'orologio alla casa madre o al laboratorio esterno. Al passo successivo registri il preventivo che ti mandano.</p>
+      <label class="field" style="max-width:320px"><span>Riferimento del documento di uscita (DDT emesso dal gestionale)</span><input class="in mono" data-rb="ddt" data-id="${r.id}" value="${esc(r.ddt || '')}" placeholder="Es. DDT 2026/0187"></label>${next()}`;
   else if (n === 'Preventivo casa madre') body = cmEditor(r);
   else if (['Redazione preventivo','Redazione offerta','Comunicazione quotazione'].includes(n)) body = (r.esterna && r.prevCM?.voci?.length ? `<div class="banner info" style="margin:0">${ic('info')}<div class="grow"><p>Preventivo della casa madre: <b>${eur(cmTot(r))}</b> (costo interno${r.prevCM.file ? ', ' + esc(r.prevCM.file) : ''}). Le voci sono già copiate qui sotto: aggiorna descrizioni e prezzi per il cliente.${r.prev.voci.length ? ` Margine attuale: <b>${eur(prevTot(r) - cmTot(r))}</b>.` : ''}</p></div></div>` : '') + prevEditor(r);
-  else if (n === 'Controllo prodotto') body = `<p class="muted" style="margin:0">Controllo finale prima di avvisare il cliente: funzionamento e precisione, impermeabilità, estetica di cassa e bracciale.</p>${next('Controllo superato: passa all\'avviso di ritiro')}`;
+  else if (n === 'Controllo prodotto') body = `<p class="muted" style="margin:0">L'orologio resta in controllo circa 5 giorni: funzionamento e precisione, impermeabilità, estetica di cassa e bracciale. ${r.dates?.[r.si] ? `In controllo dal <b>${fmtD(r.dates[r.si].date)}</b> (${inStatoTxt(r) === 'oggi' ? 'da oggi' : 'da ' + inStatoTxt(r)}).` : ''}</p>
+      <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><button class="btn" data-act="rb-redo" data-id="${r.id}">${ic('wrench')}Problemi riscontrati: torna in lavorazione</button><button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Controllo superato: ${nx && nx[0] === 'Chiusura riparazione' ? 'chiudi la riparazione' : esc(nx ? nx[0].toLowerCase() : 'chiudi')}</button></div>`;
   else if (n === 'Preventivo accettato' && r.esterna) body = `<p class="muted" style="margin:0">Il cliente ha accettato ${eur(prevTot(r, true))}. Conferma la lavorazione alla casa madre.</p>${next('Confermato alla casa madre: attesa lavorazione')}`;
   else if (n === 'Attesa lavorazione') body = `<p class="muted" style="margin:0">${r.esterna ? 'L\'orologio è alla casa madre in attesa della lavorazione.' : `Lavorazione assegnata a ${esc(r.tecnico || 'nessun tecnico')}, in coda al laboratorio.`}</p>${next()}`;
   else if (n === 'Preventivo accettato') body = `<p class="muted" style="margin:0">Il cliente ha accettato ${eur(prevTot(r, true))}. Assegna la lavorazione al tecnico.</p>
       <label class="field"><span>Tecnico</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>${next('Assegna: passa in attesa lavorazione')}`;
   else if (/Lavorazione|Revisione/.test(n)) body = `<div class="label">Documenti di scarico componenti e lavorazioni · più file per pratica</div>
       <div class="att">${(r.att || []).map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('') || '<span class="faint">Nessun file allegato</span>'}<label class="btn btn-sm">${ic('clip')}Allega file<input type="file" class="rb-att" data-id="${r.id}" multiple hidden></label></div>
-      <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b>: i documenti restano collegati alla pratica (via eCube).</p>${next(n === 'Lavorazione' ? 'Chiudi la riparazione' : undefined)}`;
-  else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Poi il controllo del prodotto.</p>${next(nx && nx[0] === 'Controllo prodotto' ? 'Passa a: Controllo prodotto' : 'Orologio in boutique: passa all\'avviso di ritiro')}`;
+      <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b>: i documenti restano collegati alla pratica (via eCube).</p>${next(n === 'Lavorazione' ? 'Lavoro finito: passa al controllo' : undefined)}`;
+  else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Quando l'orologio è in boutique, passa la busta al venditore.</p>${next('Orologio in boutique: passa all\'avviso di ritiro')}`;
   else if (n === 'Vendita finale') body = `<p class="muted" style="margin:0">Registra il valore di vendita e l'acquirente finale nella scheda economica, poi chiudi la pratica.</p>${next('Vendita registrata: chiudi la pratica')}`;
   else body = next();
   if (TEMPI_ST.includes(n) && !r.reso && !inRic(r)) body = tempiField(r) + body;
@@ -1876,10 +1892,10 @@ function cmEditor(r){
     <div style="display:flex;justify-content:flex-end"><button class="btn btn-primary" data-act="rb-next" data-id="${r.id}" ${cm.voci.length ? '' : 'disabled'}>${ic('arrow')}Passa a: preventivo per il cliente</button></div>`;
 }
 /* stati in cui l'amministrazione indica quante settimane servono (lavorazione interna o esterna) */
-const TEMPI_ST = ['Preventivo accettato','Invio laboratorio esterno','Attesa lavorazione','Lavorazione','Revisione interna o esterna','Eventuale lavorazione interna o esterna'];
+const TEMPI_ST = ['Preventivo accettato','Attesa lavorazione','Lavorazione','Revisione interna o esterna','Eventuale lavorazione interna o esterna'];
 const tempiField = r => `<div class="banner" style="margin:0;align-items:center">${ic('clock')}<div class="grow stack" style="gap:6px">
     <label class="field" style="max-width:260px"><span><b>Tempistica: quante settimane servono?</b></span><input class="in num" type="number" min="0" max="52" data-rb="sett" data-id="${r.id}" value="${esc(r.tempi?.sett || '')}" placeholder="Es. 4"></label>
-    <p style="margin:0;font-size:12.5px">${scad(r) ? `${nSett(r.tempi.sett)} dal ${fmtD(r.tempi.dal)} · scadenza ${fmtD(scad(r))} · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>` : 'Il venditore vedrà quante settimane mancano e se la busta è in ritardo.'}</p></div></div>`;
+    <p style="margin:0;font-size:12.5px">${scad(r) ? `${nSett(r.tempi.sett)} dal ${fmtD(tDal(r))} (${tStartLbl(r)}) · scadenza ${fmtD(scad(r))} · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>` : `Le settimane partono ${r.esterna ? 'dalla conferma alla casa madre' : 'dall\'accettazione del preventivo'}. Il venditore vedrà quante ne mancano e se la busta è in ritardo.`}</p></div></div>`;
 function prevEditor(r){
   const v = r.prev.voci, lbl = r.tipo === 'CPO' ? 'offerta' : r.tipo === 'Quotazione' ? 'quotazione' : 'preventivo';
   return `<div class="label">Voci ${lbl === 'offerta' ? 'dell\'offerta' : lbl === 'quotazione' ? 'della quotazione' : 'del preventivo'}${lbl === 'preventivo' ? ' · dal listino della casa madre o lavorazioni interne' : ''}</div>
@@ -1896,7 +1912,7 @@ function gestioneCard(r){
       <label class="field"><span>Tecnico assegnato</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
       <label class="field"><span>Posizione fisica</span><select class="sel" data-rb="ubic" data-id="${r.id}">${opts(UBICAZIONI, r.ubic)}</select></label>
       <label class="field"><span>Tempistica · settimane per ${esc(faseN(r).toLowerCase())}</span><input class="in num" type="number" min="0" max="52" data-rb="sett" data-id="${r.id}" value="${esc(r.tempi?.sett || '')}" placeholder="Es. 4"></label>
-      ${scad(r) ? `<p class="faint" style="margin:0;font-size:12.5px">${nSett(r.tempi.sett)} dal ${fmtD(r.tempi.dal)} (${esc(r.tempi.fase || '')}) · scadenza ${fmtD(scad(r))}${r.closed ? '' : ` · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>`}</p>` : '<p class="faint" style="margin:0;font-size:12.5px">Inserisci le settimane quando la busta entra in lavorazione (anche esterna): il venditore vede quanto manca e se è in ritardo.</p>'}
+      ${scad(r) ? `<p class="faint" style="margin:0;font-size:12.5px">${nSett(r.tempi.sett)} dal ${fmtD(tDal(r))} (${tStartLbl(r)}) · scadenza ${fmtD(scad(r))}${r.closed ? '' : ` · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>`}</p>` : '<p class="faint" style="margin:0;font-size:12.5px">Inserisci le settimane quando la busta entra in lavorazione (anche esterna): il venditore vede quanto manca e se è in ritardo.</p>'}
     </div>
   </section>`;
 }
@@ -1917,6 +1933,7 @@ function docCard(r){
     ['Etichette busta e orologio', 'Portale', st(r.et, r.et ? 'Stampate' : 'Da stampare')],
     ['Documentazione fotografica', 'Portale', st(r.foto, `${r.foto} foto`)],
     [`Documento di presa in carico · PIC ${n}`, 'Gestionale', st(true, 'Inviato via eCube')],
+    ...(r.esterna ? [[`Documento di uscita verso la casa madre${r.ddt ? ' · ' + r.ddt : ''}`, 'Gestionale · riferimento inserito a mano', st(!!r.ddt, r.ddt ? 'Indicato' : 'Da indicare')]] : []),
     ...(r.prevCM?.voci?.length ? [['Preventivo casa madre' + (r.prevCM.file ? ' · ' + r.prevCM.file : ''), 'Interno, non lo vede il cliente', st(true, eur(cmTot(r)))]] : []),
     ...(r.prev?.voci?.length ? [[r.tipo === 'CPO' ? 'Offerta' : r.tipo === 'Quotazione' ? 'Quotazione' : 'Preventivo', 'Portale', st(['accettato','inviato'].includes(r.prev.stato), ({bozza:'In bozza',inviato:'Inviato',accettato:'Accettato',rifiutato:'Rifiutato'})[r.prev.stato] || '—')]] : []),
     ...(r.att || []).map(a => [`Scarico componenti · ${a}`, 'Gestionale', st(true, 'Collegato')]),
@@ -2021,6 +2038,8 @@ function vAuto(){
     <div class="field"><span>Brand che ti interessano <span class="faint" style="font-weight:500">(facoltativo)</span></span>
       <div class="chips">${BRANDS.map(v => `<button type="button" class="chip ${a.brands.includes(v) ? 'on' : ''}" data-act="a-brand" data-v="${v}">${a.brands.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div></div>
     <label class="check"><input type="checkbox" id="a-priv"> Ho letto l'informativa privacy e acconsento al trattamento dei dati. <em style="color:var(--red);font-style:normal">*</em></label>
+    <label class="check"><input type="checkbox" id="a-nl"> Desidero ricevere la newsletter e gli inviti agli eventi Verga <span class="faint">(facoltativo)</span></label>
+    <label class="check"><input type="checkbox" id="a-prof"> Acconsento alla profilazione in base ai miei interessi e acquisti <span class="faint">(facoltativo)</span></label>
     <p id="a-err" class="tag red" hidden style="align-self:flex-start"></p>
     <button class="btn btn-primary btn-lg" data-act="a-next">Continua ${ic('arrow')}</button>`;
   else if (a.step === 2) body = `
@@ -2041,7 +2060,6 @@ function vAuto(){
     </div>
     <div class="field"><span>Le tue passioni</span>
       <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${a.interests.includes(v) ? 'on' : ''}" data-act="a-int" data-v="${v}">${a.interests.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div></div>
-    <label class="check"><input type="checkbox" checked> Desidero ricevere la newsletter e gli inviti agli eventi Verga.</label>
     <div style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap"><button class="btn btn-ghost btn-lg" data-act="a-done">Salta per ora</button><button class="btn btn-primary btn-lg" data-act="a-done">Salva e completa</button></div>`;
   else body = `
     <h1>Benvenuto in Verga</h1>
@@ -2266,6 +2284,7 @@ function act(el, ev){
     case 'rip-bo': S.ripBO = !S.ripBO; S.rf.chip = 'aperte'; render(); toast(S.ripBO ? 'Vista amministrazione e backoffice' : 'Vista venditore'); break;
     case 'rb-next': { const r = R(id); if (stato(r)[0] === 'Preventivo accettato' && !r.tecnico) { toast('Scegli prima il tecnico'); break; }
       if (stato(r)[0] === 'Preventivo casa madre') ripLog(r, `Preventivo della casa madre registrato: ${r.prevCM.voci.length} ${r.prevCM.voci.length === 1 ? 'voce' : 'voci'}, ${eur(cmTot(r))}`); advanceTo(r, r.si + 1); keepY(render); toast(r.closed ? 'Pratica chiusa' : `Stato: ${stato(r)[0]}`); break; }
+    case 'rb-redo': { const r = R(id), w = wf(r), i = w.stati.findIndex(x => x[0] === (r.esterna ? 'Attesa lavorazione' : 'Lavorazione')); Object.keys(r.dates).forEach(k => { if (+k >= i) delete r.dates[k]; }); ripLog(r, `Controllo non superato: ${r.esterna ? 'torna alla casa madre' : 'torna in lavorazione'}`); advanceTo(r, i); keepY(render); toast('La busta torna in lavorazione'); break; }
     case 'rb-esterna': { const r = R(id); r.esterna = true; r.tecnico = 'Casa madre (esterno)'; r.est = '2026-09-24'; Object.keys(r.dates).forEach(k => { if (+k > 1) delete r.dates[k]; }); advanceTo(r, 2); r.ubic = 'Casa madre (riparazione esterna)'; ripLog(r, 'Affidato a laboratorio esterno o casa madre'); keepY(render); break; }
     case 'rb-pila': { const r = R(id); ripLog(r, 'Pila sostituita in boutique'); advanceTo(r, r.si + 1); keepY(render); toast('Intervento eseguito: ora riconsegna l\'orologio'); break; }
     case 'rb-ricevuta': openModal({kind:'ricevuta', rid:id}); break;
@@ -2438,7 +2457,8 @@ function keepForm(fn){
 }
 function keepAuto(){
   const ids = ['a-nome','a-cognome','a-email','a-tel'], vals = {}; ids.forEach(i => { const el = document.getElementById(i); if (el) vals[i] = el.value; });
-  const pv = document.getElementById('a-priv')?.checked; const y = window.scrollY; render();
+  const pv = document.getElementById('a-priv')?.checked, nl = document.getElementById('a-nl')?.checked, pf = document.getElementById('a-prof')?.checked; const y = window.scrollY; render();
+  [['a-nl', nl], ['a-prof', pf]].forEach(([i, v]) => { const el = document.getElementById(i); if (el && v) el.checked = true; });
   ids.forEach(i => { const el = document.getElementById(i); if (el && vals[i] !== undefined) el.value = vals[i]; }); const p = document.getElementById('a-priv'); if (p && pv) p.checked = true; window.scrollTo(0, y);
 }
 function saveClient(id){
@@ -2518,6 +2538,7 @@ document.addEventListener('change', e => {
   if (t.dataset.rb !== undefined) { const r = R(t.dataset.id), k = t.dataset.rb;
     if (k.startsWith('eco.')) { r.eco[k.slice(4)] = t.value; return; }
     r[k] = t.value; if (['noteInterne','costoPrev'].includes(k)) return;
+    if (k === 'ddt') ripLog(r, `Documento di uscita verso la casa madre: ${t.value || '—'}`);
     if (k === 'tecnico') ripLog(r, `Tecnico: ${t.value || 'nessuno'}`);
     if (k === 'resp') ripLog(r, `Responsabile: ${t.value || 'da assegnare'}`);
     if (k === 'ubic') ripLog(r, `Spostato: ${t.value}`);
