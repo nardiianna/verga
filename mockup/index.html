@@ -1854,8 +1854,14 @@ function boPanel(r){
   else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Quando l'orologio rientra in boutique, passa la busta al venditore.</p>${next('Orologio in boutique: passa all\'avviso di ritiro')}`;
   else if (n === 'Vendita finale') body = `<p class="muted" style="margin:0">Registra il valore di vendita e l'acquirente finale nella scheda economica, poi chiudi la pratica.</p>${next('Vendita registrata: chiudi la pratica')}`;
   else body = next();
+  if (TEMPI_ST.includes(n) && !r.reso && !inRic(r)) body = tempiField(r) + body;
   return `<section class="card">${head}<div class="card-b stack" style="gap:12px">${body}</div></section>`;
 }
+/* stati in cui l'amministrazione indica quante settimane servono (lavorazione interna o esterna) */
+const TEMPI_ST = ['Preventivo accettato','Invio laboratorio esterno','Attesa lavorazione','Lavorazione','Lavorazione/controllo','Revisione interna o esterna','Eventuale lavorazione interna o esterna'];
+const tempiField = r => `<div class="banner" style="margin:0;align-items:center">${ic('clock')}<div class="grow stack" style="gap:6px">
+    <label class="field" style="max-width:260px"><span><b>Tempistica: quante settimane servono?</b></span><input class="in num" type="number" min="0" max="52" data-rb="sett" data-id="${r.id}" value="${esc(r.tempi?.sett || '')}" placeholder="Es. 4"></label>
+    <p style="margin:0;font-size:12.5px">${scad(r) ? `${nSett(r.tempi.sett)} dal ${fmtD(r.tempi.dal)} · scadenza ${fmtD(scad(r))} · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>` : 'Il venditore vedrà quante settimane mancano e se la busta è in ritardo.'}</p></div></div>`;
 function prevEditor(r){
   const v = r.prev.voci, lbl = r.tipo === 'CPO' ? 'offerta' : r.tipo === 'Quotazione' ? 'quotazione' : 'preventivo';
   return `<div class="label">Voci ${lbl === 'offerta' ? 'dell\'offerta' : lbl === 'quotazione' ? 'della quotazione' : 'del preventivo'}${lbl === 'preventivo' ? ' · dal listino della casa madre o lavorazioni interne' : ''}</div>
