@@ -291,7 +291,7 @@ table.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
 .active-f .tag button{all:unset;cursor:pointer;display:grid;place-items:center}
 
 /* cassa */
-.pos{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,1fr);gap:24px;align-items:start}
+.pos{display:grid;grid-template-columns:minmax(0,.85fr) minmax(460px,1.15fr);gap:24px;align-items:start}
 .scan{display:flex;gap:10px}
 .scan .in{height:56px;font-size:16px;padding-left:48px}
 .scan-wrap{position:relative;flex:1}
@@ -301,8 +301,14 @@ table.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
 .ritem .grow{flex:1;min-width:0}
 .ritem .p{font-weight:600;white-space:nowrap;text-align:right}
 .ritem .p s{display:block;font-weight:500;color:var(--faint);font-size:12px}
-.sc-row{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;color:var(--muted);white-space:nowrap;flex-wrap:wrap}
-.sc-row .in{width:110px;height:34px;padding:0 10px}
+.rip-flt{display:flex;flex-wrap:wrap;gap:12px}
+.rip-flt>.field{flex:1 1 140px}
+.rip-flt>.field:first-child{flex:2 1 300px}
+.sc-col{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;width:118px;flex:none}
+.sc-col .in{width:100%;height:36px;padding:0 10px}
+.sc-col .tag{align-self:flex-start}
+.ritem .p{min-width:92px}
+.iva-sel{height:32px;width:auto;padding:0 30px 0 10px;font-size:13px;border-radius:8px}
 .az{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--line);border-radius:10px}
 .az-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .th.add.slot{gap:2px;text-align:center}
@@ -717,6 +723,8 @@ const purchases = [
   {clientId:'c10',date:'2024-07-30',brand:'Rolex',modello:'Yacht-Master 42',ref:'226659',price:12400,listino:12900,sconto:500,boutique:'Boutique Portofino',seller:'Giorgia Costa'},
 ];
 
+/* ogni acquisto appartiene a un ordine della cassa: qui i dati demo degli ordini già fatti */
+purchases.forEach((p, i) => Object.assign(p, {ord:p.ord || `ORD-${p.date.slice(0, 4)}-${String(380 - i * 23).padStart(4, '0')}`, pay:p.pay || ['Carta','Bonifico','Carta','Finanziamento','Contanti'][i % 5], doc:p.doc || (i % 4 === 2 ? 'Fattura' : 'Documento commerciale'), acc:p.acc ?? (i === 5 ? 1500 : null), naz:p.naz || (i === 6 ? 'Svizzera' : 'Italia')}));
 /* ---------------- stato UI ---------------- */
 const S = {
   view:'login', id:null, tab:'panoramica', navOpen:false, notes:false,
@@ -726,8 +734,9 @@ const S = {
   pdf:{q:'',brand:'',boutique:'',operator:''},
   evf:{type:'',boutique:'',op:'',per:'',q:''},
   pdaf:'',
+  of:{q:'', boutique:'', seller:'', brand:'', pay:'', doc:'', stato:'', per:'', sc:''},
   rf:{chip:'aperte', q:'', tipo:'', boutique:'', tecnico:'', resp:''}, rn:null, pv:null, ripBO:false,
-  cart:{clientId:null, items:[], pay:'Carta', inv:'persona', acc:'', sc:{}},
+  cart:{clientId:null, items:[], pay:'Carta', inv:'persona', acc:'', sc:{}, naz:'Italia'},
   auto:{step:1, brands:[], interests:[], noYear:false, decade:''},
   nc:{brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk:{type:'', back:'', q:'', otherId:null, quick:false}, pending:[], addr:[], az:[], rating:0},
 };
@@ -796,12 +805,13 @@ const NOTES = {
   cliente:{from:['Tre sezioni separate: acquisti e riparazioni letti dal gestionale, manifestazioni registrate sul CRM.','Registrazione passaggio con un clic: visita, chiamata ricevuta, chiamata fatta, mail. Motivo: nuova manifestazione, aggiornamento manifestazione, acquisto, riparazione.','Tipologia Prospect / Cliente / Commerciante: il Prospect diventa Cliente al primo ordine (relazione tecnica).','Valutazione del venditore 1-5, separata dalla fascia calcolata sugli acquisti.','Note multiple firmate con utente, data e ora; non si modificano le note degli altri.','Chat interna: messaggi e task ai colleghi legati alla scheda, anche periodici.','Privacy firmata dal cliente su iPad (fondamentale per Verga).'],open:['Relazioni: bastano quelle standard di TSC?','"Acquisti" in scheda: fatture o ordini di vendita?','La relazione tecnica segnala che TSC non consente modifiche di interfaccia: quanto di questo layout è realizzabile?']},
   nuovo:{from:['Due email (principale e secondaria), sempre in minuscolo.','Più indirizzi per la stessa anagrafica (via, CAP, città, provincia, nazione).','Data di nascita GG-MM-AAAA, sesso, professione (menu), azienda (libero), lingua (IT, EN, ES, AR, ZH).','Dati di fatturazione: ragione sociale, indirizzo, P.IVA, SDI (l\'SDI resta su TSC e non va al gestionale).','Misure: polso e anello, medio e anulare, mano destra e sinistra.','Brand e interessi: liste chiuse, il venditore non può aggiungere voci.'],open:['Elenco definitivo degli interessi "legati al settore".','Misure: campo del cliente o variante di prodotto?','Celebrità: campo a parte o voce VIP nella professione? La lista di Verga ha VIP tra le professioni.','Elenco completo delle professioni.']},
   prodotti:{from:['Catalogo con ricerca per referenza (MPN), modello, seriale.','I venditori cercano per referenza: stessa referenza, matricole diverse. La disponibilità somma i pezzi del magazzino e delle boutique; tra boutique i pezzi si spediscono.','Cliccando un prodotto si apre la scheda con la disponibilità per sede e le manifestazioni compatibili.','Ogni pezzo venduto è un prodotto unico (seriale).','Gioielli Pomellato/Messika registrati come brand + collezione + referenza.','Ricerca per marca, modello, referenza, famiglia e sottofamiglia (documento di analisi).'],open:['Elenco definitivo di famiglie e sottofamiglie da TSE e regole di visibilità (es. ricambi nascosti).','Il magazzino centrale è una sede a sé su TSE? Nome da usare nel portale.','Articoli a taglia (anelli): oggi la misura viene usata come matricola, ma il gestionale non accetta matricole duplicate. Serve un\'altra codifica.']},
-  cassa:{from:['La cassa crea un Ordine su TSC, che parte verso il gestionale (TSE) tramite eCube senza conferma di ritorno.','La fattura si chiede da qui: il gestionale la emette e restituisce subito il PDF da stampare. L\'operatore non apre mai il gestionale.','Intestazione: alla persona (scontrino) o a una delle sue aziende (fattura); la prima azienda in anagrafica è la principale.','Sconto per ogni prodotto, a valore lordo (IVA inclusa): la percentuale si calcola da sola, finisce sulla riga del documento e nello storico acquisti del cliente.','Il primo ordine trasforma il Prospect in Cliente.','Pagamento a saldo o con acconto; documento commerciale (scontrino non fiscale) o fattura emessi dal gestionale e restituiti in PDF.','Lo scontrino fiscale resta sul registratore telematico: Cassa in Cloud non serve (documento di analisi).'],open:['Regole aziendali per acconti e saldi (importo minimo, metodi ammessi).','Cosa fa l\'operatore se la fattura non arriva in tempo (timeout)?','Mostrare lo stato "inviato / confermato" dell\'ordine?']},
+  ordini:{from:['Tutti gli ordini creati dalla cassa, di tutte le boutique, con numero d\'ordine, cliente o azienda intestataria, prodotti, sconto, pagamento e documento emesso.','Filtri: periodo, boutique, venditore, brand, pagamento, documento (documento commerciale o fattura), ordini con acconto da saldare, con o senza sconto.','Un clic sulla riga apre gli acquisti del cliente.'],open:['Gli ordini si leggono da TSC o dal gestionale (TSE)?','Chi vede gli ordini delle altre boutique: tutti i venditori o solo i responsabili?']},
+  cassa:{from:['La cassa crea un Ordine su TSC, che parte verso il gestionale (TSE) tramite eCube senza conferma di ritorno.','La fattura si chiede da qui: il gestionale la emette e restituisce subito il PDF da stampare. L\'operatore non apre mai il gestionale.','Intestazione: alla persona (scontrino) o a una delle sue aziende (fattura); la prima azienda in anagrafica è la principale.','Sconto per ogni prodotto, a valore lordo (IVA inclusa): la percentuale si calcola da sola, finisce sulla riga del documento e nello storico acquisti del cliente.','IVA: di default 22% (Italia), si cambia dal menu a tendina in base alla nazione del cliente.','Il primo ordine trasforma il Prospect in Cliente.','Pagamento a saldo o con acconto; documento commerciale (scontrino non fiscale) o fattura emessi dal gestionale e restituiti in PDF.','Lo scontrino fiscale resta sul registratore telematico: Cassa in Cloud non serve (documento di analisi).'],open:['Regole aziendali per acconti e saldi (importo minimo, metodi ammessi).','Cosa fa l\'operatore se la fattura non arriva in tempo (timeout)?','Mostrare lo stato "inviato / confermato" dell\'ordine?']},
   passaggi:{from:['Registro di visite, chiamate e mail, con motivo.','Ogni evento salva operatore, cliente, tipo e data: da qui si ricavano ultima visita e clienti dormienti.','Il follow-up dopo la visita può far partire una mail automatica.'],open:['Eventi del brand (serate, mostre) vanno gestiti qui o a parte?']},
   pda:{from:['Stati della PDA: Manifestazione, Preordine, Associata, Ordine, Annullata (configurabili).','Associare e dissociare un prodotto: solo direttore vendite e titolare. Trasformare in ordine: qualsiasi venditore.','Notifica a chi ha creato la PDA quando il prodotto viene associato.','PDA visibili in tutte le boutique: un interesse nato in multimarca può essere soddisfatto dalla boutique Rolex.','Alla creazione parte la mail di presa in carico.','Prodotti disponibili: per ogni pezzo libero si vede chi lo aspetta e si associa da lì.','Per ogni manifestazione: evento particolare legato all\'acquisto e venditore incaricato.','Se il cliente rinuncia la PDA resta nello storico come Annullata e il pezzo torna disponibile.'],open:['Verga manda gli screen delle manifestazioni attuali per allineare la pagina di dettaglio.','Il ramo Preordine va validato con Verga.','Quali campi della PDA passano al gestionale quando diventa ordine?','Circa 1.000 manifestazioni attive da migrare.']},
   riparazioni:{from:['Documento di analisi (bozza 02): i venditori aprono le pratiche, ne seguono lo stato e riconsegnano l\'orologio; avanzamento del workflow, assegnazioni e aggiornamento degli stati sono del backoffice.','Il venditore vede 5 fasi semplificate: Accettazione, Valutazione, Attesa cliente, Lavorazione, Riconsegna (variano per tipo: es. CPO finisce "In vendita").','Il bottone "Vista amministrazione" mostra cosa vedrà il backoffice: workflow completo, responsabile, tecnico, posizione, filtri dedicati.','Monitoraggio al posto dell\'Excel "DB RIP": ricerca per busta, cliente, marca, referenza, matricola.','Stesso portale: entrando in Riparazioni il colore passa dal verde al grafite.'],open:['Come entra il backoffice: stesso portale con un ruolo diverso o una licenza TSC dedicata?','Numerazione delle buste: la genera il portale o sono prestampate?','Posizioni a magazzino: elenco reale (stanze, cassetti, banchi).','Migrazione dello storico da "DB RIP" e da Arca.','Cambio pila: lo chiude il venditore in boutique (come nel mockup) o passa comunque dal backoffice?']},
   'rip-new':{from:['Tipi di pratica: Riparazione, Garanzia, Cambio pila, CPO, Quotazione.','3 foto per busta, un pulsante per ciascuna (richiesta del cliente, 09/11).','Dati dell\'orologio: marca, modello, referenza, matricola e altri identificativi; motivo, note e valore dichiarato a fini assicurativi.','Foto scattate direttamente dalla fotocamera del tablet, senza salvataggi intermedi; più allegati per pratica.','Note per il cliente (vanno sui documenti) separate dalle note interne di laboratorio.','All\'apertura: ricevuta di presa in carico, etichette busta e orologio, e documento di presa in carico inviato al gestionale.'],open:['Significato esatto di Nc, Nm e Cal.','Testo delle clausole della ricevuta.','Modelli attuali delle etichette (contenuto e formato).']},
-  busta:{from:['Vista venditore: fase attuale, settimane mancanti (tempistica indicata dall\'amministrazione), data di invio del preventivo per sollecitare, riconsegna (avviso di ritiro con scontrino, poi ritiro).','Vista amministrazione: stati completi del documento di analisi con data e utente per ognuno; Accettazione e Avviso ritiro restano al venditore.','Workflow per tipo: Riparazione (10 stati, con Attesa lavorazione dopo il preventivo accettato e Controllo prodotto di circa 5 giorni prima della chiusura: se emergono problemi torna in lavorazione), Garanzia senza preventivo, Cambio pila, Riparazione esterna (invio, preventivo della casa madre a Verga, preventivo al cliente, attesa lavorazione, rientro, controllo prodotto), CPO in due fasi, Quotazione.','Preventivo online: il cliente sceglie le voci; se rifiuta la pratica salta alla riconsegna con il costo del solo preventivo.','Documenti collegati a numero pratica e busta: presa in carico, preventivo, scarichi componenti (più di uno), chiusura, avviso di ritiro.','CPO: scheda economica con costi di revisione e certificazione, valore di acquisto e vendita, acquirente finale.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni stato (via eCube).']},
+  busta:{from:['Vista venditore: fase attuale, settimane mancanti (tempistica indicata dall\'amministrazione), data di invio del preventivo per sollecitare, riconsegna (avviso di ritiro con scontrino, poi ritiro).','In valutazione tecnica si sceglie chi valuta: con un tecnico interno si passa alla redazione del preventivo, con la casa madre si affida al laboratorio esterno.','Le settimane si inseriscono una volta sola, in Preventivo accettato: negli stati successivi restano in sola lettura.','Vista amministrazione: stati completi del documento di analisi con data e utente per ognuno; Accettazione e Avviso ritiro restano al venditore.','Workflow per tipo: Riparazione (10 stati, con Attesa lavorazione dopo il preventivo accettato e Controllo prodotto di circa 5 giorni prima della chiusura: se emergono problemi torna in lavorazione), Garanzia senza preventivo, Cambio pila, Riparazione esterna (invio, preventivo della casa madre a Verga, preventivo al cliente, attesa lavorazione, rientro, controllo prodotto), CPO in due fasi, Quotazione.','Preventivo online: il cliente sceglie le voci; se rifiuta la pratica salta alla riconsegna con il costo del solo preventivo.','Documenti collegati a numero pratica e busta: presa in carico, preventivo, scarichi componenti (più di uno), chiusura, avviso di ritiro.','CPO: scheda economica con costi di revisione e certificazione, valore di acquisto e vendita, acquirente finale.'],open:['Listini della casa madre: formato e se importarli per scegliere le voci.','Costo del preventivo rifiutato: fisso o per brand?','CPO: 10 giorni per l\'offerta, serve un avviso automatico alla scadenza?','Quali dati passano al gestionale a ogni stato (via eCube).']},
   prev:{from:['Preventivo online al posto del PDF: una casella per ogni voce e il totale.','Il cliente sceglie le voci e conferma; paga al ritiro. Può anche stampare.','Accesso con link privato oppure con email e password: Verga li vuole entrambi.','La risposta torna sulla busta e va registrata nel gestionale.'],open:['Serve una firma o basta la conferma online?','Come torna il preventivo accettato nel gestionale.']},
   auto:{from:['Form a due step. Step 1 obbligatorio e breve: nome, cognome, email (obbligatoria), telefono, brand di interesse facoltativi.','Step 2 facoltativo: dati utili per la comunicazione. Se non li compila, li chiede il venditore in negozio.','Ogni nuovo contatto nasce come Prospect.','Dopo il go-live Verga vuole mandare ai clienti una mail con un breve questionario (es. misura del polso).'],open:['Dove viene pubblicato il form (sito, QR in boutique, tablet)?','Consenso privacy: firma su iPad in negozio, online con checkbox?']},
 };
@@ -817,7 +827,7 @@ function render(){
   if (S.view === 'login') app.innerHTML = vLogin();
   else if (S.view === 'auto') app.innerHTML = vAuto();
   else if (S.view === 'prev') app.innerHTML = vPrev();
-  else app.innerHTML = shell(({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,prodotto:vProdotto,cassa:vCassa,passaggi:vPassaggi,pda:vPda,manifestazione:vManif,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
+  else app.innerHTML = shell(({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,prodotto:vProdotto,cassa:vCassa,ordini:vOrdini,passaggi:vPassaggi,pda:vPda,manifestazione:vManif,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
   const key = S.view + ':' + S.id;
   if (key !== render.key) { render.key = key; (app.querySelector('.content') || app.firstElementChild)?.classList.add('vfade'); }
   renderDrawer();
@@ -836,6 +846,7 @@ function shell(content){
       ${n('passaggi','clock','Passaggi')}
       ${n('pda','heart','Manifestazioni', compat || '')}
       <div class="grp">Vendita</div>
+      ${n('ordini','list','Storico ordini')}
       ${n('cassa','cart','Cassa', S.cart.items.length || '')}
       ${n('prodotti','box','Magazzino')}
       ${n('riparazioni','wrench','Riparazioni')}
@@ -1330,7 +1341,7 @@ function vProdotti(){
       <td><div class="cell-person"><span class="av" style="border-radius:12px;background:var(--bg);color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div><b>${esc(p.brand)} ${esc(p.modello)}</b><small>${p.tipo === 'gioiello' ? 'Collezione ' + esc(p.modello) + ' · ' : ''}${esc(p.det)}</small></div></div></td>
       <td class="mono">${esc(p.ref)}</td>
       <td class="mono">${esc(p.seriale)}</td>
-      <td><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><b>${esc(p.boutique === 'Magazzino' ? 'Magazzino centrale' : p.boutique)}</b>${prodState(p)}</div></td>
+      <td><b>${esc(p.boutique === 'Magazzino' ? 'Magazzino centrale' : p.boutique)}</b></td>
       <td class="num" style="text-align:right">${eur(p.price)}</td>
       <td style="text-align:right"><button class="btn btn-sm" data-go="prodotto" data-id="${p.id}">Dettaglio</button></td>
     </tr>`).join('') || '<tr><td colspan="6"><div class="empty">Nessun prodotto trovato.</div></td></tr>'}</tbody>
@@ -1357,9 +1368,13 @@ function vProdotto(){
 /* sconto per riga, a valore lordo (IVA inclusa) */
 const scOf = id => Math.min(P(id).price, Math.max(0, parseFloat(String(S.cart.sc[id] || '').replace(',', '.')) || 0));
 const pctTxt = (sc, list) => (sc / list * 100).toLocaleString('it-IT', {maximumFractionDigits:1}) + '%';
+/* aliquota IVA ordinaria per nazione: di default Italia 22%, si cambia per i clienti esteri */
+const IVA = [['Italia',22],['Austria',20],['Belgio',21],['Francia',20],['Germania',19],['Grecia',24],['Irlanda',23],['Lussemburgo',17],['Paesi Bassi',21],['Portogallo',23],['Spagna',21],['Svizzera',8.1]];
+const ivaOf = n => (IVA.find(x => x[0] === n) || IVA[0])[1];
 const eur2 = n => n.toLocaleString('it-IT', {style:'currency', currency:'EUR', minimumFractionDigits:0, maximumFractionDigits:2});
 function vCassa(){
   const cart = S.cart, c = cart.clientId ? C(cart.clientId) : null;
+  const iva = ivaOf(cart.naz);
   const lordo = cart.items.reduce((s, id) => s + P(id).price, 0), sconti = cart.items.reduce((s, id) => s + scOf(id), 0), tot = lordo - sconti;
   const azs = c?.aziende || [];
   const pre = c ? clientPdas(c.id).filter(p => p.stato === 'assegnata' && !cart.items.includes(p.productId)) : [];
@@ -1376,15 +1391,15 @@ function vCassa(){
       <section class="card">
         <div class="card-h">${ic('scan')}<h2>Aggiungi prodotto</h2></div>
         <div class="card-b stack" style="gap:12px">
-          <div class="scan"><div class="scan-wrap">${ic('scan')}<input class="in mono" id="scan" placeholder="Scansiona o digita referenza / seriale" autocomplete="off"></div><button class="btn btn-primary btn-lg" data-act="scan-add">Aggiungi</button></div>
+          <div class="scan"><div class="scan-wrap">${ic('scan')}<input class="in mono" id="scan" placeholder="Referenza o seriale" autocomplete="off"></div><button class="btn btn-primary btn-lg" data-act="scan-add">Aggiungi</button></div>
           <div id="scan-list" class="picklist">${scanList('')}</div>
         </div>
       </section>
     </div>
     <section class="card receipt">
       <div class="card-h">${ic('bag')}<h2>Ordine</h2><span class="sp"></span><span class="muted num">${cart.items.length} ${cart.items.length === 1 ? 'articolo' : 'articoli'}</span></div>
-      ${cart.items.length ? cart.items.map(id => { const p = P(id); return `<div class="ritem"><span class="wm" style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><b>${esc(p.brand)} ${esc(p.modello)}</b><div class="muted" style="font-size:12.5px"><span class="mono">${esc(p.ref)}</span> · seriale <span class="mono">${esc(p.seriale)}</span></div>${p.reservedFor && p.reservedFor !== cart.clientId ? `<div class="tag red" style="margin-top:6px">Riservato a ${esc(fullName(C(p.reservedFor)))}</div>` : ''}<label class="sc-row">Sconto lordo <input class="in num" data-sc="${id}" value="${esc(cart.sc[id] || '')}" inputmode="decimal" placeholder="€ 0" aria-label="Sconto lordo in euro">${scOf(id) ? `<span class="tag ok" style="height:22px">−${pctTxt(scOf(id), p.price)}</span>` : ''}</label></div><span class="p num">${scOf(id) ? `<s>${eur(p.price)}</s>${eur2(p.price - scOf(id))}` : eur(p.price)}</span><button class="btn btn-ghost btn-sm" data-act="rm-cart" data-id="${id}" aria-label="Rimuovi">${ic('trash')}</button></div>`; }).join('') : '<div class="empty">Scansiona una referenza o aggiungi un pre-acquisto del cliente.</div>'}
-      <div class="tot">${sconti ? `<div class="muted"><span>Totale di listino</span><span class="num">${eur(lordo)}</span></div><div style="color:var(--ok)"><span>Sconti (lordi, IVA inclusa)</span><span class="num">−${eur2(sconti)} · ${pctTxt(sconti, lordo)}</span></div>` : ''}<div class="muted"><span>Imponibile</span><span class="num">${eur(tot / 1.22)}</span></div><div class="muted"><span>IVA 22%</span><span class="num">${eur(tot - tot / 1.22)}</span></div><div><span class="label" style="align-self:center">Totale</span><span class="big num">${eur2(tot)}</span></div></div>
+      ${cart.items.length ? cart.items.map(id => { const p = P(id); return `<div class="ritem"><span class="wm" style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><b>${esc(p.brand)} ${esc(p.modello)}</b><div class="muted" style="font-size:12.5px"><span class="mono">${esc(p.ref)}</span> · seriale <span class="mono">${esc(p.seriale)}</span></div>${p.reservedFor && p.reservedFor !== cart.clientId ? `<div class="tag red" style="margin-top:6px">Riservato a ${esc(fullName(C(p.reservedFor)))}</div>` : ''}</div><label class="sc-col">Sconto lordo<input class="in num" data-sc="${id}" value="${esc(cart.sc[id] || '')}" inputmode="decimal" placeholder="€ 0" aria-label="Sconto lordo in euro">${scOf(id) ? `<span class="tag ok" style="height:22px">−${pctTxt(scOf(id), p.price)}</span>` : ''}</label><span class="p num">${scOf(id) ? `<s>${eur(p.price)}</s>${eur2(p.price - scOf(id))}` : eur(p.price)}</span><button class="btn btn-ghost btn-sm" data-act="rm-cart" data-id="${id}" aria-label="Rimuovi">${ic('trash')}</button></div>`; }).join('') : '<div class="empty">Scansiona una referenza o aggiungi un pre-acquisto del cliente.</div>'}
+      <div class="tot">${sconti ? `<div class="muted"><span>Totale di listino</span><span class="num">${eur(lordo)}</span></div><div style="color:var(--ok)"><span>Sconti (lordi, IVA inclusa)</span><span class="num">−${eur2(sconti)} · ${pctTxt(sconti, lordo)}</span></div>` : ''}<div class="muted"><span>Imponibile</span><span class="num">${eur(tot / (1 + iva / 100))}</span></div><div class="muted" style="align-items:center"><span style="display:flex;align-items:center;gap:8px">IVA <select class="sel iva-sel" id="cart-iva" aria-label="Aliquota IVA per nazione">${IVA.map(([n, a]) => `<option value="${n}" ${cart.naz === n ? 'selected' : ''}>${n} · ${String(a).replace('.', ',')}%</option>`).join('')}</select></span><span class="num">${eur(tot - tot / (1 + iva / 100))}</span></div><div><span class="label" style="align-self:center">Totale</span><span class="big num">${eur2(tot)}</span></div></div>
       ${c ? `<div style="padding:0 20px 12px;display:flex;flex-direction:column;gap:8px"><span class="label">Intestazione</span><div class="pay" style="padding:0;flex-wrap:wrap"><button class="${!azs[+cart.inv] ? 'on' : ''}" data-act="inv" data-v="persona">${esc(fullName(c))}</button>${azs.length ? azs.map((a, i) => `<button class="${cart.inv === String(i) ? 'on' : ''}" data-act="inv" data-v="${i}">${esc(a.rs)}${i === 0 && azs.length > 1 ? ' <small class="faint">· principale</small>' : ''}</button>`).join('') : '<button disabled title="Nessun dato di fatturazione in anagrafica">Società (non inserita)</button>'}</div></div>` : ''}
       <div class="pay">${['Carta','Bonifico','Contanti','Finanziamento'].map(m => `<button class="${cart.pay === m ? 'on' : ''}" data-act="pay" data-v="${m}">${m}</button>`).join('')}</div>
       <div style="padding:0 20px 12px;display:flex;flex-direction:column;gap:8px"><span class="label">Pagamento</span><div class="pay" style="padding:0"><button class="${cart.acc === '' ? 'on' : ''}" data-act="paytype" data-v="saldo">Saldo completo</button><button class="${cart.acc !== '' ? 'on' : ''}" data-act="paytype" data-v="acconto">Acconto</button></div>
@@ -1394,10 +1409,55 @@ function vCassa(){
     </section>
   </div>`;
 }
+/* ---------------- STORICO ORDINI ---------------- */
+function vOrdini(){
+  const f = S.of, q = f.q.trim().toLowerCase();
+  const groups = {}; purchases.forEach(p => (groups[p.ord] = groups[p.ord] || []).push(p));
+  const all = Object.entries(groups).map(([ord, rows]) => { const p0 = rows[0], tot = rows.reduce((a, x) => a + x.price, 0), sc = rows.reduce((a, x) => a + (x.sconto || 0), 0), lis = rows.reduce((a, x) => a + (x.listino || x.price), 0);
+    return {ord, rows, date:p0.date, clientId:p0.clientId, boutique:p0.boutique, seller:p0.seller, pay:p0.pay, doc:p0.doc, rs:p0.rs, acc:p0.acc, naz:p0.naz, tot, sc, lis}; });
+  const list = all.filter(o => (!f.boutique || o.boutique === f.boutique) && (!f.seller || o.seller === f.seller) && (!f.brand || o.rows.some(x => x.brand === f.brand)) && (!f.pay || o.pay === f.pay) && (!f.doc || o.doc === f.doc)
+    && (!f.stato || (f.stato === 'acconto' ? o.acc !== null && o.acc < o.tot : o.acc === null || o.acc >= o.tot)) && (!f.sc || (f.sc === 'si' ? o.sc > 0 : !o.sc))
+    && (!f.per || dday(o.date) >= -f.per) && (!q || `${o.ord} ${fullName(C(o.clientId))} ${o.rs || ''} ${o.rows.map(x => `${x.brand} ${x.modello} ${x.ref}`).join(' ')}`.toLowerCase().includes(q))).sort((a, b) => dt(b.date) - dt(a.date));
+  const tot = list.reduce((a, o) => a + o.tot, 0), sc = list.reduce((a, o) => a + o.sc, 0), lis = list.reduce((a, o) => a + o.lis, 0);
+  const sel = (k, l, o) => `<label class="field"><span>${l}</span><select class="sel" data-of="${k}">${o.map(([v, t]) => `<option value="${v}" ${f[k] === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>`;
+  const brands = [...new Set(purchases.map(p => p.brand))].sort();
+  return `
+  <div class="page-h"><div><div class="label">Vendita</div><h1>Storico ordini</h1></div><span class="sp"></span><span class="muted">Ordini creati dalla cassa in tutte le boutique · documenti letti dal gestionale</span></div>
+  <div class="kpis">
+    <div class="kpi"><span class="label">Ordini</span><b class="num">${list.length}</b><span class="muted">con i filtri attuali</span></div>
+    <div class="kpi"><span class="label">Venduto</span><b class="num">${eur(tot)}</b><span class="muted">IVA inclusa</span></div>
+    <div class="kpi"><span class="label">Sconti</span><b class="num">${eur(sc)}</b><span class="muted">${sc ? 'medio ' + pctTxt(sc, lis) : 'nessuno sconto'}</span></div>
+    <div class="kpi ${list.some(o => o.acc !== null && o.acc < o.tot) ? 'alert' : ''}"><span class="label">Da saldare</span><b class="num">${list.filter(o => o.acc !== null && o.acc < o.tot).length}</b><span class="muted">ordini con acconto</span></div>
+  </div>
+  <div class="card card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px">
+    <label class="field" style="grid-column:span 2"><span>Ordine, cliente, azienda, marca o referenza</span><input class="in" id="of-q" value="${esc(f.q)}" placeholder="Es. ORD-2026-0412 o Rossi"></label>
+    ${sel('per', 'Periodo', [['','Sempre'],['7','Ultimi 7 giorni'],['30','Ultimi 30 giorni'],['90','Ultimi 3 mesi'],['365','Ultimo anno']])}
+    ${sel('boutique', 'Boutique', [['', 'Tutte'], ...BOUTIQUES.map(b => [b.name, b.name])])}
+    ${sel('seller', 'Venditore', [['', 'Tutti'], ...OPERATORS.map(o => [o.name, o.name])])}
+    ${sel('brand', 'Brand', [['', 'Tutti'], ...brands.map(b => [b, b])])}
+    ${sel('pay', 'Pagamento', [['', 'Tutti'], ...['Carta','Bonifico','Contanti','Finanziamento'].map(x => [x, x])])}
+    ${sel('doc', 'Documento', [['', 'Tutti'], ['Documento commerciale', 'Documento commerciale'], ['Fattura', 'Fattura']])}
+    ${sel('stato', 'Stato pagamento', [['', 'Tutti'], ['saldato', 'Saldato'], ['acconto', 'Acconto da saldare']])}
+    ${sel('sc', 'Sconto', [['', 'Tutti'], ['si', 'Con sconto'], ['no', 'Senza sconto']])}
+  </div>
+  <div class="card tbl-wrap"><table class="tbl">
+    <thead><tr><th>Data</th><th>Ordine</th><th>Cliente · intestazione</th><th>Prodotti</th><th>Boutique · venditore</th><th>Pagamento · documento</th><th>Sconto</th><th style="text-align:right">Totale</th></tr></thead>
+    <tbody>${list.map(o => `<tr class="click" data-go="cliente" data-id="${o.clientId}" data-tab="acquisti">
+      <td class="num" style="white-space:nowrap">${fmtD(o.date)}</td>
+      <td class="mono" style="white-space:nowrap">${esc(o.ord)}</td>
+      <td><b>${esc(fullName(C(o.clientId)))}</b>${o.rs ? `<div class="faint" style="font-size:12px">${esc(o.rs)}</div>` : ''}</td>
+      <td>${o.rows.map(x => `<div><b>${esc(x.brand)}</b> ${esc(x.modello)} <span class="mono faint" style="font-size:12px">${esc(x.ref)}</span></div>`).join('')}</td>
+      <td>${esc(o.boutique)}<div class="faint" style="font-size:12px">${esc(o.seller || '')}</div></td>
+      <td>${esc(o.pay)}<div class="faint" style="font-size:12px">${esc(o.doc)}${o.naz && o.naz !== 'Italia' ? ` · IVA ${esc(o.naz)}` : ''}</div></td>
+      <td class="num">${o.sc ? `<span class="tag ok" style="height:22px">−${pctTxt(o.sc, o.lis)}</span><div class="faint" style="font-size:12px">${eur(o.sc)}</div>` : '<span class="faint">—</span>'}</td>
+      <td class="num" style="text-align:right;white-space:nowrap"><b>${eur2(o.tot)}</b>${o.acc !== null && o.acc < o.tot ? `<div><span class="tag amber" style="height:22px">Acconto ${eur(o.acc)}</span></div>` : ''}</td>
+    </tr>`).join('') || '<tr><td colspan="8"><div class="empty">Nessun ordine con questi filtri.</div></td></tr>'}</tbody>
+  </table></div>`;
+}
 function scanList(q){
   q = q.trim().toLowerCase();
   const list = products.filter(p => ['disponibile','riservato'].includes(p.stato) && !S.cart.items.includes(p.id) && (!q || `${p.ref} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q))).slice(0,5);
-  return list.map(p => `<div class="row" data-act="add-cart" data-id="${p.id}"><span style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><div class="t">${esc(p.brand)} ${esc(p.modello)}</div><div class="s"><span class="mono">${esc(p.ref)}</span> · <span class="mono">${esc(p.seriale)}</span> · ${esc(p.boutique)}</div></div>${prodState(p)}<span class="num" style="font-weight:600">${eur(p.price)}</span></div>`).join('') || '<div class="empty">Nessun prodotto disponibile con questa referenza.</div>';
+  return list.map(p => `<div class="row" data-act="add-cart" data-id="${p.id}"><span style="color:var(--muted)">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}</span><div class="grow"><div class="t">${esc(p.brand)} ${esc(p.modello)}</div><div class="s"><span class="mono">${esc(p.ref)}</span> · <span class="mono">${esc(p.seriale)}</span> · ${esc(p.boutique)}</div>${p.stato === 'riservato' ? `<div style="margin-top:4px">${prodState(p)}</div>` : ''}</div><span class="num" style="font-weight:600">${eur(p.price)}</span></div>`).join('') || '<div class="empty">Nessun prodotto disponibile con questa referenza.</div>';
 }
 function clientPick(q, act, sel){
   q = q.trim().toLowerCase();
@@ -1492,7 +1552,8 @@ function vManif(){
 /* Il portale è dei venditori: aprono la busta, seguono 5 fasi semplificate e riconsegnano l'orologio.
    Il workflow completo (valutazione, preventivo, assegnazione, lavorazione, chiusura, documenti) è dell'amministrazione/backoffice:
    il bottone "Vista amministrazione" (S.ripBO) mostra in anteprima cosa vedranno loro. */
-const TECNICI = ['Andrea Galli','Paolo Riva','Davide Sala','Casa madre (esterno)'];
+const CASA_MADRE = 'Casa madre (esterno)';
+const TECNICI = ['Andrea Galli','Paolo Riva','Davide Sala',CASA_MADRE];
 const BACKOFFICE = ['Elena Bassi','Chiara Rinaldi'];
 const UBICAZIONI = ['Cassaforte boutique','Laboratorio Mazzini · banco','Laboratorio Capelli · banco','Laboratorio Patek · banco','Casa madre (riparazione esterna)','Pronto in boutique per il ritiro','Riconsegnato al cliente'];
 const AREA_OF = {'Bottega Storica':'Laboratorio Mazzini','Boutique Multibrand':'Laboratorio Capelli','Boutique Patek Philippe':'Laboratorio Patek','Boutique Portofino':'Laboratorio Mazzini'};
@@ -1654,8 +1715,8 @@ function vRip(){
   ${boBanner()}
   <div class="kpis">${kpis.map(([l, n, s, a]) => `<div class="kpi ${a ? 'alert' : ''}"><span class="label">${l}</span><b class="num">${n}</b><span class="muted">${s}</span></div>`).join('')}</div>
   <div class="chips">${chips.map(([k, l, fn]) => `<button class="chip ${f.chip === k ? 'on' : ''}" data-act="rf-chip" data-v="${k}">${l} <span class="num" style="opacity:.7">${cnt(fn)}</span></button>`).join('')}</div>
-  <div class="card card-b" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
-    <label class="field"><span>Busta, cliente, marca, referenza o matricola</span><input class="in" id="rf-q" value="${esc(f.q)}" placeholder="Es. B-2026-0418"></label>
+  <div class="card card-b rip-flt">
+    <label class="field"><span style="white-space:nowrap">Busta, cliente, marca, referenza o matricola</span><input class="in" id="rf-q" value="${esc(f.q)}" placeholder="Es. B-2026-0418"></label>
     <label class="field"><span>Tipo</span><select class="sel" data-rf="tipo">${opts(Object.keys(RIP_TIPI), f.tipo, 'Tutti')}</select></label>
     <label class="field"><span>Boutique</span><select class="sel" data-rf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
     ${bo ? `<label class="field"><span>Responsabile</span><select class="sel" data-rf="resp">${opts(BACKOFFICE, f.resp, 'Tutti')}</select></label>
@@ -1861,14 +1922,15 @@ function boPanel(r){
   if (inRic(r) || who === 'v') body = `<p class="muted" style="margin:0">${r.tipo === 'Cambio pila' && !inRic(r) ? 'Il cambio pila lo esegue il venditore in boutique.' : 'Ora la busta è in boutique: il venditore invia l\'avviso di ritiro con lo scontrino e registra la riconsegna.'}</p>`;
   else if (who === 'c') body = `<div class="banner info">${ic('link')}<div class="grow"><p>${r.tipo === 'CPO' ? 'Offerta inviata' : 'Preventivo inviato'} con link privato <b class="mono">${esc(r.prev.link || '')}</b>. Il cliente sceglie le voci online, oppure accede con email e password.<br>${sentLine(r)}.</p></div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-go="prev" data-id="${r.id}">${ic('arrow')}Apri la vista del cliente (demo)</button><button class="btn" data-act="pv-resend" data-id="${r.id}">${ic('mail')}Invia un sollecito</button><span class="sp" style="flex:1"></span><button class="btn btn-ghost" data-act="pv-refuse" data-id="${r.id}">Il cliente ha rifiutato</button></div>`;
-  else if (n === 'Valutazione tecnica') body = `<label class="field"><span>Tecnico che valuta</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
-      <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap">${['Riparazione','Garanzia'].includes(r.tipo) && !r.esterna ? `<button class="btn" data-act="rb-esterna" data-id="${r.id}">${ic('truck')}Affida a laboratorio esterno o casa madre</button>` : ''}<button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Passa a: ${esc(nx[0])}</button></div>`;
+  else if (n === 'Valutazione tecnica') { const canEst = ['Riparazione','Garanzia'].includes(r.tipo) && !r.esterna, isCM = r.tecnico === CASA_MADRE;
+    body = `<label class="field"><span>${canEst ? 'Chi valuta: un tecnico interno o la casa madre' : 'Tecnico che valuta'}</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(canEst ? TECNICI : TECNICI.filter(t => t !== CASA_MADRE), r.tecnico, canEst ? 'Scegli il tecnico o la casa madre' : 'Nessun tecnico')}</select></label>
+      <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap">${!r.tecnico ? '<span class="faint" style="font-size:12.5px;align-self:center">Scegli chi valuta l\'orologio per andare avanti.</span>' : isCM && canEst ? `<button class="btn btn-primary" data-act="rb-esterna" data-id="${r.id}">${ic('truck')}Affida a laboratorio esterno o casa madre</button>` : `<button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Passa a: ${esc(nx[0])}</button>`}</div>`; }
   else if (n === 'Invio laboratorio esterno') body = `<p class="muted" style="margin:0">Spedisci l'orologio alla casa madre o al laboratorio esterno. Al passo successivo registri il preventivo che ti mandano.</p>
       <label class="field" style="max-width:320px"><span>Riferimento del documento di uscita (DDT emesso dal gestionale)</span><input class="in mono" data-rb="ddt" data-id="${r.id}" value="${esc(r.ddt || '')}" placeholder="Es. DDT 2026/0187"></label>${next()}`;
   else if (n === 'Preventivo casa madre') body = cmEditor(r);
   else if (['Redazione preventivo','Redazione offerta','Comunicazione quotazione'].includes(n)) body = (r.esterna && r.prevCM?.voci?.length ? `<div class="banner info" style="margin:0">${ic('info')}<div class="grow"><p>Preventivo della casa madre: <b>${eur(cmTot(r))}</b> (costo interno${r.prevCM.file ? ', ' + esc(r.prevCM.file) : ''}). Le voci sono già copiate qui sotto: aggiorna descrizioni e prezzi per il cliente.${r.prev.voci.length ? ` Margine attuale: <b>${eur(prevTot(r) - cmTot(r))}</b>.` : ''}</p></div></div>` : '') + prevEditor(r);
   else if (n === 'Controllo prodotto') body = `<p class="muted" style="margin:0">L'orologio resta in controllo circa 5 giorni: funzionamento e precisione, impermeabilità, estetica di cassa e bracciale. ${r.dates?.[r.si] ? `In controllo dal <b>${fmtD(r.dates[r.si].date)}</b> (${inStatoTxt(r) === 'oggi' ? 'da oggi' : 'da ' + inStatoTxt(r)}).` : ''}</p>
-      <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><button class="btn" data-act="rb-redo" data-id="${r.id}">${ic('wrench')}Problemi riscontrati: torna in lavorazione</button><button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Controllo superato: ${nx && nx[0] === 'Chiusura riparazione' ? 'chiudi la riparazione' : esc(nx ? nx[0].toLowerCase() : 'chiudi')}</button></div>`;
+      <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap"><button class="btn" data-act="rb-redo" data-id="${r.id}">${ic('wrench')}Problemi riscontrati: torna in lavorazione</button><button class="btn btn-primary" data-act="rb-next" data-id="${r.id}">${ic('arrow')}Controllo superato</button></div>`;
   else if (n === 'Preventivo accettato' && r.esterna) body = `<p class="muted" style="margin:0">Il cliente ha accettato ${eur(prevTot(r, true))}. Conferma la lavorazione alla casa madre.</p>${next('Confermato alla casa madre: attesa lavorazione')}`;
   else if (n === 'Attesa lavorazione') body = `<p class="muted" style="margin:0">${r.esterna ? 'L\'orologio è alla casa madre in attesa della lavorazione.' : `Lavorazione assegnata a ${esc(r.tecnico || 'nessun tecnico')}, in coda al laboratorio.`}</p>${next()}`;
   else if (n === 'Preventivo accettato') body = `<p class="muted" style="margin:0">Il cliente ha accettato ${eur(prevTot(r, true))}. Assegna la lavorazione al tecnico.</p>
@@ -1876,7 +1938,7 @@ function boPanel(r){
   else if (/Lavorazione|Revisione/.test(n)) body = `<div class="label">Documenti di scarico componenti e lavorazioni · più file per pratica</div>
       <div class="att">${(r.att || []).map(a => `<span class="tag">${ic('clip')}${esc(a)}</span>`).join('') || '<span class="faint">Nessun file allegato</span>'}<label class="btn btn-sm">${ic('clip')}Allega file<input type="file" class="rb-att" data-id="${r.id}" multiple hidden></label></div>
       <p class="faint" style="margin:0;font-size:12px">Lo scarico dei componenti si fa sul gestionale con il numero di busta <b class="mono">${esc(r.busta)}</b>: i documenti restano collegati alla pratica (via eCube).</p>${next(n === 'Lavorazione' ? 'Lavoro finito: passa al controllo' : undefined)}`;
-  else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Quando l'orologio è in boutique, passa la busta al venditore.</p>${next('Orologio in boutique: passa all\'avviso di ritiro')}`;
+  else if (n === 'Chiusura riparazione') body = `<p class="muted" style="margin:0">Documento di chiusura inviato al gestionale con matricola, intervento eseguito, costo del preventivo e riferimenti ai documenti di scarico. Quando l'orologio è in boutique, passa la busta al venditore.</p>${next('Chiudi riparazione')}`;
   else if (n === 'Vendita finale') body = `<p class="muted" style="margin:0">Registra il valore di vendita e l'acquirente finale nella scheda economica, poi chiudi la pratica.</p>${next('Vendita registrata: chiudi la pratica')}`;
   else body = next();
   if (TEMPI_ST.includes(n) && !r.reso && !inRic(r)) body = tempiField(r) + body;
@@ -1893,7 +1955,11 @@ function cmEditor(r){
 }
 /* stati in cui l'amministrazione indica quante settimane servono (lavorazione interna o esterna) */
 const TEMPI_ST = ['Preventivo accettato','Attesa lavorazione','Lavorazione','Revisione interna o esterna','Eventuale lavorazione interna o esterna'];
-const tempiField = r => `<div class="banner" style="margin:0;align-items:center">${ic('clock')}<div class="grow stack" style="gap:6px">
+/* le settimane si inseriscono una volta sola, nel primo stato della lavorazione (Preventivo accettato); dopo restano in sola lettura */
+const tempiSt = r => wf(r).stati.map(x => x[0]).find(x => TEMPI_ST.includes(x));
+const tempiEdit = r => !r.closed && !r.reso && stato(r)[0] === tempiSt(r);
+const tempiInfo = r => scad(r) ? `${nSett(r.tempi.sett)} dal ${fmtD(tDal(r))} (${tStartLbl(r)}) · scadenza ${fmtD(scad(r))}${r.closed ? '' : ` · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>`}` : 'Settimane non inserite.';
+const tempiField = r => !tempiEdit(r) ? `<p class="faint" style="margin:0;font-size:12.5px;display:flex;gap:8px;align-items:center">${ic('clock')}<span>Tempistica: ${tempiInfo(r)}</span></p>` : `<div class="banner" style="margin:0;align-items:center">${ic('clock')}<div class="grow stack" style="gap:6px">
     <label class="field" style="max-width:260px"><span><b>Tempistica: quante settimane servono?</b></span><input class="in num" type="number" min="0" max="52" data-rb="sett" data-id="${r.id}" value="${esc(r.tempi?.sett || '')}" placeholder="Es. 4"></label>
     <p style="margin:0;font-size:12.5px">${scad(r) ? `${nSett(r.tempi.sett)} dal ${fmtD(tDal(r))} (${tStartLbl(r)}) · scadenza ${fmtD(scad(r))} · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>` : `Le settimane partono ${r.esterna ? 'dalla conferma alla casa madre' : 'dall\'accettazione del preventivo'}. Il venditore vedrà quante ne mancano e se la busta è in ritardo.`}</p></div></div>`;
 function prevEditor(r){
@@ -1911,8 +1977,8 @@ function gestioneCard(r){
       <label class="field"><span>Responsabile della pratica</span><select class="sel" data-rb="resp" data-id="${r.id}">${opts(BACKOFFICE, r.resp, 'Da assegnare')}</select></label>
       <label class="field"><span>Tecnico assegnato</span><select class="sel" data-rb="tecnico" data-id="${r.id}">${opts(TECNICI, r.tecnico, 'Nessun tecnico')}</select></label>
       <label class="field"><span>Posizione fisica</span><select class="sel" data-rb="ubic" data-id="${r.id}">${opts(UBICAZIONI, r.ubic)}</select></label>
-      <label class="field"><span>Tempistica · settimane per ${esc(faseN(r).toLowerCase())}</span><input class="in num" type="number" min="0" max="52" data-rb="sett" data-id="${r.id}" value="${esc(r.tempi?.sett || '')}" placeholder="Es. 4"></label>
-      ${scad(r) ? `<p class="faint" style="margin:0;font-size:12.5px">${nSett(r.tempi.sett)} dal ${fmtD(tDal(r))} (${tStartLbl(r)}) · scadenza ${fmtD(scad(r))}${r.closed ? '' : ` · <b style="color:${tempiCol(r)}">${mancaTxt(r)}</b>`}</p>` : '<p class="faint" style="margin:0;font-size:12.5px">Inserisci le settimane quando la busta entra in lavorazione (anche esterna): il venditore vede quanto manca e se è in ritardo.</p>'}
+      ${tempiEdit(r) ? `<label class="field"><span>Tempistica · settimane per ${esc(faseN(r).toLowerCase())}</span><input class="in num" type="number" min="0" max="52" data-rb="sett" data-id="${r.id}" value="${esc(r.tempi?.sett || '')}" placeholder="Es. 4"></label>` : '<div class="field"><span>Tempistica</span></div>'}
+      <p class="faint" style="margin:0;font-size:12.5px">${scad(r) || !tempiEdit(r) ? tempiInfo(r) + (tempiEdit(r) || scad(r) ? '' : ` Si inseriscono in “${esc(tempiSt(r) || '')}” e poi non si modificano più.`) : 'Inserisci le settimane adesso: dopo questo passo non si possono più cambiare. Il venditore vede quanto manca e se la busta è in ritardo.'}</p>
     </div>
   </section>`;
 }
@@ -2169,7 +2235,7 @@ function renderModal(){
   }
   if (M.kind === 'venduto') {
     h = 'Vendita conclusa';
-    b = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:12px 0"><span class="av lg" style="background:var(--ok-bg);color:var(--ok)">${ic('check')}</span><b style="font-size:18px">${eur2(M.total)} · ${esc(M.pay)}</b>${M.acc !== null ? `<span class="tag amber">Acconto ${eur2(M.acc)} · da saldare ${eur2(M.total - M.acc)}</span>` : ''}<p class="muted" style="margin:0;max-width:46ch">Ordine <b class="mono">ORD-2026-0412</b> di <b>${esc(M.name)}</b> inviato al gestionale. ${M.promoted ? `<br><b>${esc(M.name)}</b> è passato da Prospect a Cliente.` : ''}</p></div>
+    b = `<div style="display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;padding:12px 0"><span class="av lg" style="background:var(--ok-bg);color:var(--ok)">${ic('check')}</span><b style="font-size:18px">${eur2(M.total)} · ${esc(M.pay)}</b>${M.acc !== null ? `<span class="tag amber">Acconto ${eur2(M.acc)} · da saldare ${eur2(M.total - M.acc)}</span>` : ''}<p class="muted" style="margin:0;max-width:46ch">Ordine <b class="mono">${esc(M.ord || 'ORD-2026-0412')}</b> di <b>${esc(M.name)}</b> inviato al gestionale. ${M.promoted ? `<br><b>${esc(M.name)}</b> è passato da Prospect a Cliente.` : ''}</p></div>
       <div class="card">
         <div class="row">${ic('bag')}<div class="grow"><div class="t">${M.inv === 'societa' ? `Fattura a ${esc(M.rs)}` : 'Documento commerciale a nome del cliente'}</div><div class="s">${M.invState === 'done' ? (M.inv === 'societa' ? 'Fattura FT 2026/01873 pronta' : 'Documento DC 2026/04412 pronto') : M.invState === 'wait' ? 'Il gestionale sta emettendo il documento…' : 'Emesso dal gestionale e restituito qui in PDF'}</div></div>
           ${M.invState === 'done' ? `<button class="btn btn-sm btn-primary" data-act="soon-print">${ic('check')}Stampa PDF</button>` : `<button class="btn btn-sm btn-primary" data-act="m-invoice" ${M.invState === 'wait' ? 'disabled' : ''}>${M.invState === 'wait' ? 'Attendere…' : M.inv === 'societa' ? 'Emetti fattura' : 'Emetti documento'}</button>`}</div>
@@ -2192,7 +2258,7 @@ function renderModal(){
       </div>
       ${r.firma ? '' : r.ric ? '<p class="faint" style="margin:0;font-size:12px">Ricevuta già firmata dal cliente (firma su carta, prima del portale).</p>' : '<div class="field"><span>Firma del cliente</span><canvas class="sig" id="sig" aria-label="Area firma"></canvas><button class="link" data-act="sig-clear" style="align-self:flex-end;font-size:12px">Cancella firma</button></div>'}`;
     const mailBtn = `<button class="btn" data-act="ric-mail" ${c.email ? `title="Invia a ${esc(c.email)}"` : 'disabled title="Il cliente non ha un\'email in anagrafica"'}>${ic('mail')}Invia email</button>`;
-    f = r.ric ? `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button>${mailBtn}<button class="btn btn-primary" data-act="m-close">Chiudi</button>` : `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button>${mailBtn}<button class="btn" data-act="m-close">Più tardi</button><button class="btn btn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
+    f = r.ric ? `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button>${mailBtn}<button class="btn btn-primary" data-act="m-close">Chiudi</button>` : `<button class="btn" data-act="ric-print">${ic('print')}Stampa</button><span id="ric-mail-wrap" hidden>${mailBtn}</span><button class="btn" data-act="m-close">Più tardi</button><button class="btn btn-primary" data-act="m-save-ric">${ic('check')}Firma e salva</button>`;
   }
   if (M.kind === 'etichette') {
     const r = R(M.rid), c = RC(r.clientId);
@@ -2215,7 +2281,7 @@ function initSig(){
   let on = false;
   const pt = e => { const b = cv.getBoundingClientRect(); return [e.clientX - b.left, e.clientY - b.top]; };
   cv.addEventListener('pointerdown', e => { on = true; cv.setPointerCapture(e.pointerId); g.beginPath(); g.moveTo(...pt(e)); });
-  cv.addEventListener('pointermove', e => { if (!on) return; g.lineTo(...pt(e)); g.stroke(); cv.dataset.signed = '1'; });
+  cv.addEventListener('pointermove', e => { if (!on) return; g.lineTo(...pt(e)); g.stroke(); cv.dataset.signed = '1'; const mw = document.getElementById('ric-mail-wrap'); if (mw) mw.hidden = false; });
   ['pointerup','pointercancel'].forEach(t => cv.addEventListener(t, () => on = false));
 }
 /* firma salvata come immagine: tratto scuro su fondo bianco, leggibile anche se il portale è in tema scuro */
@@ -2244,7 +2310,7 @@ document.addEventListener('click', e => {
   const g = e.target.closest('[data-go]');
   const a = e.target.closest('[data-act]');
   if (a && (!g || a.contains(g) === false && g.contains(a))) return act(a, e);
-  if (g) return go(g.dataset.go, g.dataset.id || null);
+  if (g) return go(g.dataset.go, g.dataset.id || null, g.dataset.tab ? {tab:g.dataset.tab} : {});
   if (a) return act(a, e);
   if (!e.target.closest('.gsearch')) { const d = document.getElementById('gs-drop'); if (d) d.innerHTML = ''; }
 });
@@ -2444,7 +2510,7 @@ function act(el, ev){
     case 'soon-print': toast('Nel portale reale si apre il PDF da stampare (demo)'); break;
     case 'm-dto': M.to = v; renderModal(); break;
     case 'm-save-dis': { const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId); pr.reservedFor = null; if (pr.stato === 'riservato') pr.stato = 'disponibile'; p.productId = null; p.stato = M.to; closeModal(); render(); toast('Prodotto dissociato'); break; }
-    case 'sig-clear': { const cv = document.getElementById('sig'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv.dataset.signed = ''; break; }
+    case 'sig-clear': { const cv = document.getElementById('sig'); cv.getContext('2d').clearRect(0, 0, cv.width, cv.height); cv.dataset.signed = ''; const mw = document.getElementById('ric-mail-wrap'); if (mw) mw.hidden = true; break; }
     case 'm-save-sig': { if (!document.getElementById('sig').dataset.signed) { toast('Serve la firma del cliente'); break; } C(id).privacy = {at:nowISO(), by:'cliente', firma:sigData()}; closeModal(); render(); toast('Privacy firmata e salvata'); break; }
   }
 }
@@ -2485,8 +2551,10 @@ function checkout(){
   const promoted = c.tipo === 'Prospect'; if (promoted) c.tipo = 'Cliente';
   const az = (c.aziende || [])[+S.cart.inv], inv = S.cart.inv !== 'persona' && az ? 'societa' : 'persona';
   const acc = S.cart.acc === '' ? null : Math.min(total, parseFloat(String(S.cart.acc).replace(',', '.')) || 0);
-  const m = {kind:'venduto', total, acc, pay:S.cart.pay, name:fullName(c), clientId:c.id, promoted, inv, rs:az?.rs, righe, invState:''};
-  S.cart = {clientId:null, items:[], pay:'Carta', inv:'persona', acc:'', sc:{}}; render(); openModal(m);
+  const ord = 'ORD-2026-' + String(412 + purchases.filter(p => (p.ord || '').startsWith('ORD-2026-04')).length).padStart(4, '0');
+  purchases.filter(p => !p.ord).forEach(p => Object.assign(p, {ord, pay:S.cart.pay, doc:inv === 'societa' ? 'Fattura' : 'Documento commerciale', rs:az?.rs, acc, naz:S.cart.naz}));
+  const m = {kind:'venduto', ord, total, acc, pay:S.cart.pay, name:fullName(c), clientId:c.id, promoted, inv, rs:az?.rs, righe, invState:''};
+  S.cart = {clientId:null, items:[], pay:'Carta', inv:'persona', acc:'', sc:{}, naz:'Italia'}; render(); openModal(m);
 }
 const blankAz = () => ({rs:'', ind:'', piva:'', sdi:''});
 /* quando si apre una scheda in modifica, carico gli elenchi del cliente nello stato del form */
@@ -2521,6 +2589,7 @@ document.addEventListener('input', e => {
   if (t.dataset.addr !== undefined) { const [i, k] = t.dataset.addr.split(':'); S.nc.addr[+i][k] = t.value; return; }
   if (t.dataset.rn !== undefined) { const [a, b] = t.dataset.rn.split('.'); if (b) S.rn[a][b] = t.value; else S.rn[a] = t.value; return; }
   if (t.id === 'rn-cs') { S.rn.q = t.value; document.getElementById('rn-cs-list').innerHTML = clientPick(t.value, 'rn-pick'); return; }
+  if (t.id === 'of-q') { S.of.q = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('of-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
   if (t.id === 'rf-q') { S.rf.q = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('rf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
   if (t.dataset.dup !== undefined) return dupCheck();
 });
@@ -2531,6 +2600,8 @@ document.addEventListener('change', e => {
   if (t.dataset.pdf !== undefined && t.tagName === 'SELECT') { S.pdf[t.dataset.pdf] = t.value; render(); return; }
   if (t.dataset.evf !== undefined) { S.evf[t.dataset.evf] = t.value; render(); return; }
   if (t.dataset.rf !== undefined) { S.rf[t.dataset.rf] = t.value; render(); return; }
+  if (t.id === 'cart-iva') { S.cart.naz = t.value; keepY(render); return; }
+  if (t.dataset.of !== undefined) { S.of[t.dataset.of] = t.value; render(); return; }
   if (t.classList.contains('rn-cam')) { const f = t.files[0]; if (f) S.rn.photos[+t.dataset.i] = URL.createObjectURL(f); keepY(render); return; }
   if (t.id === 'rn-att') { [...t.files].forEach(f => S.rn.att.push(f.name)); keepY(render); return; }
   if (t.classList.contains('rb-cm')) { const r = R(t.dataset.id), f = t.files[0]; if (f) { r.prevCM.file = f.name; ripLog(r, `Preventivo della casa madre allegato: ${f.name}`); } keepY(render); return; }
