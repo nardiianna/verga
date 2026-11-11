@@ -111,7 +111,7 @@
   <p class="note">In grassetto gli stati gestiti dal venditore; gli altri sono del backoffice o del cliente.</p>
 
   <h3 style="margin-top:26px">Tempistiche, non date di consegna</h3>
-  <p>Il portale non indica una data presunta di consegna. L'amministrazione inserisce il <b>numero di settimane</b> di lavorazione, che si contano dall'accettazione del preventivo (nelle riparazioni esterne dalla conferma alla casa madre). Il portale calcola quanto manca e segnala in rosso le pratiche in ritardo. Per ogni pratica si vede anche <b>da quanti giorni</b> è nello stato attuale.</p>
+  <p>Il portale non indica una data presunta di consegna. L'amministrazione inserisce il <b>numero di settimane</b> di lavorazione, che si contano dall'accettazione del preventivo (nelle riparazioni esterne dalla conferma alla casa madre). Le settimane si inseriscono una sola volta, quando il preventivo viene accettato, e poi non si modificano più. Il portale calcola quanto manca e segnala in rosso le pratiche in ritardo. Per ogni pratica si vede anche <b>da quanti giorni</b> è nello stato attuale.</p>
 </section>
 
 <div class="part">
@@ -152,7 +152,7 @@
 
 <section>
   <h2>A3. Ricevuta ed etichette</h2>
-  <p>Appena aperta la busta, il portale mostra la <b>ricevuta di presa in carico</b> con i dati del cliente, dell'orologio e dell'intervento. Il cliente firma sul tablet e si preme <b>Firma e salva</b>. La ricevuta si può <b>stampare</b> oppure <b>inviare via email</b> all'indirizzo del cliente.</p>
+  <p>Appena aperta la busta, il portale mostra la <b>ricevuta di presa in carico</b> con i dati del cliente, dell'orologio e dell'intervento. Il cliente firma sul tablet e si preme <b>Firma e salva</b>. La ricevuta si può <b>stampare</b>; il bottone <b>Invia email</b>, per mandarla all'indirizzo del cliente, compare solo dopo che il cliente ha firmato.</p>
   <figure><img src="img/a3-ricevuta.png" alt=""><figcaption>Ricevuta di presa in carico, con Stampa e Invia email.</figcaption></figure>
   <p>Subito dopo si stampano le <b>etichette</b>: una per la busta (numero, cliente, orologio, tipo e data) e una per l'orologio (numero, modello, referenza, matricola). I dati arrivano dalla pratica, senza ricopiarli.</p>
   <figure><img src="img/a3-etichette.png" alt=""><figcaption>Anteprima delle etichette busta e orologio.</figcaption></figure>
@@ -222,9 +222,9 @@
   <p>Nella busta il backoffice vede tutti gli stati della pratica, con chi li gestisce (venditore, backoffice, cliente) e la data. Sotto c'è il riquadro dello stato attuale con le azioni da fare e da quanti giorni la pratica è lì.</p>
   <figure><img src="img/b2-valutazione.png" alt=""><figcaption>Busta in valutazione tecnica nella vista amministrazione.</figcaption></figure>
   <ul>
-    <li>Si sceglie il tecnico che valuta e si passa allo stato successivo.</li>
-    <li>Se serve la casa madre o un laboratorio esterno: <b>Affida a laboratorio esterno o casa madre</b> (vedi B6).</li>
-    <li>A destra, <b>Gestione</b>: responsabile della pratica, tecnico, posizione fisica e tempistica in settimane. Ogni modifica finisce nello storico.</li>
+    <li>Si sceglie chi valuta l'orologio. Se si sceglie un <b>tecnico interno</b> compare solo <b>Passa a: Redazione preventivo</b>.</li>
+    <li>Se si sceglie <b>Casa madre (esterno)</b> compare solo <b>Affida a laboratorio esterno o casa madre</b> (vedi B6).</li>
+    <li>A destra, <b>Gestione</b>: responsabile della pratica, tecnico, posizione fisica e tempistica in settimane (modificabile solo in Preventivo accettato). Ogni modifica finisce nello storico.</li>
     <li><b>Date operative</b>: data, ora e persona di ogni stato, più il ritiro effettivo.</li>
     <li><b>Note interne di laboratorio</b>: modificabili, non escono sui documenti del cliente.</li>
   </ul>
@@ -241,7 +241,7 @@
   <h2>B4. Assegnazione e tempistica</h2>
   <p>Quando il cliente accetta, la busta è <span class="pill p-red">Da assegnare</span>. Nel riquadro dello stato si inseriscono:</p>
   <ul>
-    <li><b>Tempistica</b>: quante settimane servono per la lavorazione. Il conteggio parte dalla data di accettazione del preventivo; il portale calcola la scadenza e mostra quanto manca, a venditore e backoffice.</li>
+    <li><b>Tempistica</b>: quante settimane servono per la lavorazione. Il conteggio parte dalla data di accettazione del preventivo; il portale calcola la scadenza e mostra quanto manca, a venditore e backoffice. Si inseriscono solo in questo passaggio: negli stati successivi il dato resta visibile ma non si può più cambiare.</li>
     <li><b>Tecnico</b>: a chi va la lavorazione.</li>
   </ul>
   <p>Con <b>Assegna: passa in attesa lavorazione</b> la busta entra in <b>Attesa lavorazione</b>: è in coda al laboratorio e il tecnico non ha ancora iniziato. Quando il tecnico la prende in mano si passa a <b>Lavorazione</b>.</p>
@@ -252,9 +252,8 @@
   <h2>B5. Lavorazione, controllo e chiusura</h2>
   <ol>
     <li><b>Lavorazione</b>: si allegano i documenti di scarico componenti e delle lavorazioni (anche più di uno). Lo scarico si fa sul gestionale con il numero di busta, così resta collegato alla pratica. Finito il lavoro: <b>Lavoro finito: passa al controllo</b>.</li>
-    <li><b>Controllo prodotto</b>: l'orologio resta in controllo circa 5 giorni (funzionamento e precisione, impermeabilità, estetica). Se emergono problemi, <b>Problemi riscontrati: torna in lavorazione</b> riporta la busta in lavorazione. Se va tutto bene, <b>Controllo superato: chiudi la riparazione</b>.</li>
-    <li><b>Chiusura riparazione</b>: parte il documento di chiusura verso il gestionale.</li>
-    <li>Quando l'orologio è di nuovo in boutique: <b>Passa all'avviso di ritiro</b>. Da qui la busta torna al venditore per la riconsegna.</li>
+    <li><b>Controllo prodotto</b>: l'orologio resta in controllo circa 5 giorni (funzionamento e precisione, impermeabilità, estetica). Se emergono problemi, <b>Problemi riscontrati: torna in lavorazione</b> riporta la busta in lavorazione. Se va tutto bene, <b>Controllo superato</b>.</li>
+    <li><b>Chiusura riparazione</b>: parte il documento di chiusura verso il gestionale. Quando l'orologio è di nuovo in boutique si preme <b>Chiudi riparazione</b> e la busta torna al venditore per l'avviso di ritiro e la riconsegna.</li>
   </ol>
   <figure><img src="img/b5-controllo.png" alt=""><figcaption>Controllo prodotto: si chiude la riparazione oppure si torna in lavorazione.</figcaption></figure>
   <p>Il riquadro <b>Documenti</b> mostra tutti i documenti della pratica e il loro stato (vedi capitolo 3). Lo storico mostra anche le voci interne, segnate come "Interna", che il venditore non vede.</p>
@@ -267,7 +266,7 @@
     <li><b>Invio laboratorio esterno</b>: si spedisce l'orologio e si scrive il <b>riferimento del documento di uscita</b> (il DDT emesso dal gestionale), così si sa sempre dove cercarlo.</li>
     <li><b>Preventivo casa madre</b>: la casa madre analizza l'orologio e manda il suo preventivo a Verga. Si registrano voci e importi e si allega il PDF. È un <b>costo interno</b>: il cliente e il venditore non lo vedono.</li>
     <li><b>Redazione preventivo</b> per il cliente: le voci della casa madre sono già copiate, si aggiornano descrizioni e prezzi. Il portale mostra il margine rispetto al costo della casa madre. Poi si invia al cliente come al punto B3.</li>
-    <li><b>Preventivo accettato</b>: si conferma la lavorazione alla casa madre. Da qui partono le <b>settimane</b> di attesa.</li>
+    <li><b>Preventivo accettato</b>: si inseriscono le <b>settimane</b> (anche qui una sola volta) e si conferma la lavorazione alla casa madre: il conteggio parte da quella conferma.</li>
     <li><b>Attesa lavorazione</b> e <b>Rientro oggetto</b>: quando l'orologio torna, passa in laboratorio.</li>
     <li><b>Controllo prodotto</b>, <b>Chiusura riparazione</b> e <b>Avviso ritiro</b> come nella riparazione interna. Se il controllo non va, la busta torna in attesa alla casa madre.</li>
   </ol>

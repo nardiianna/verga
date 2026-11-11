@@ -38,7 +38,7 @@ const OUT = '/Users/anna.nardi/verga/docs/guida-riparazioni/img';
   // B1 elenco backoffice
   await ev(() => { S.ripBO = true; go('riparazioni'); }); await shot('b1-elenco', 1400);
   // B2 valutazione tecnica (r6 garanzia? usiamo r3)
-  await ev(() => go('busta', 'r3')); await shot('b2-valutazione', 1530);
+  await ev(() => { R('r3').tecnico = 'Andrea Galli'; go('busta', 'r3'); }); await shot('b2-valutazione', 1530);
   // B3 redazione preventivo: r3 avanzata
   await ev(() => { const r = R('r3'); r.tecnico = 'Andrea Galli'; advanceTo(r, 2); r.prev.voci = [{d:'Sostituzione vetro zaffiro', p:280, ok:true},{d:'Test impermeabilità', p:60, ok:true}]; r.costoPrev = 40; render(); }); await shot('b3-preventivo', 1230);
   // B4 preventivo accettato r9 con settimane
