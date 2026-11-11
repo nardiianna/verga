@@ -870,8 +870,7 @@ function shell(content){
     </header>
     <main class="content">${content}</main>
   </div>
-</div>
-<button class="notes-fab" data-act="notes">${ic('info')}Note di progetto</button>`;
+</div>`;
 }
 
 /* ---------------- LOGIN ---------------- */
@@ -894,8 +893,7 @@ function vLogin(){
     <button class="link" data-act="pw-forgot" style="align-self:center;font-size:13px">Password dimenticata?</button>
     <p class="faint" style="margin:0;font-size:12px;text-align:center;overflow-wrap:anywhere">Demo: premi <b>Accedi</b> anche senza compilare i campi. Per entrare come un altro venditore usa la sua email (es. sara.colombo@verga1947.it).</p>
   </section>
-</div>
-<button class="notes-fab" data-act="notes">${ic('info')}Note di progetto</button>`;
+</div>`;
 }
 
 /* ---------------- DASHBOARD ---------------- */
@@ -2072,8 +2070,7 @@ function vPrev(){
       <div class="no-print" style="display:flex;gap:10px;justify-content:space-between;flex-wrap:wrap"><button class="btn btn-ghost btn-lg" data-act="pv-c-refuse">Rifiuto il preventivo</button><span style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-lg" data-act="pv-print">${ic('print')}Stampa</button><button class="btn btn-primary btn-lg" data-act="pv-c-ok" ${tot ? '' : 'disabled'}>${ic('check')}Confermo le voci selezionate</button></span></div>`}
       <p class="faint no-print" style="margin:0;font-size:12px;text-align:center">Ha un account Verga? Può ritrovare i suoi preventivi anche accedendo con email e password.</p>
     </div>
-  </div>
-  <button class="notes-fab" data-act="notes">${ic('info')}Note di progetto</button>`;
+  </div>`;
 }
 function ripRefuse(r, by, t){
   r.prev.stato = 'rifiutato'; r.prev.voci.forEach(x => x.ok = false); r.esito = 'rifiutato'; r.rifiuto = '2026-09-24';
@@ -2134,8 +2131,7 @@ function vAuto(){
   return `<div class="auto">
     <div class="auto-top"><span class="demo-tag">Vista cliente · demo</span><button class="link" data-go="${S.operator ? 'dashboard' : 'login'}">${ic('back')} Torna al portale</button></div>
     <div class="auto-card"><span class="logo">${LOGO_FULL}</span>${body}</div>
-  </div>
-  <button class="notes-fab" data-act="notes">${ic('info')}Note di progetto</button>`;
+  </div>`;
 }
 
 /* ---------------- MODALI ---------------- */
