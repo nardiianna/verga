@@ -1174,7 +1174,7 @@ function pdaCard(p){
 }
 /* documento dell'ordine (fattura o documento commerciale): il PDF lo restituisce il gestionale */
 const docNo = p => p.docNo || `${p.doc === 'Fattura' ? 'FT' : 'DC'} ${p.ord.slice(4, 8)}/${p.ord.slice(-4)}`;
-const docBtn = p => p.doc ? `<button class="btn btn-sm" data-act="doc-dl" data-v="${esc(docNo(p))}" title="${esc(p.doc)} ${esc(docNo(p))}" style="white-space:nowrap">${ic('download')}${p.doc === 'Fattura' ? 'Scarica fattura' : 'Scarica documento'}</button>` : '';
+const docBtn = p => p.doc ? `<button class="btn btn-sm" data-act="doc-dl" data-v="${esc(docNo(p))}" title="${esc(p.doc)} ${esc(docNo(p))}" style="white-space:nowrap">${ic('download')}Scarica fattura</button>` : '';
 function purchTable(ps){
   return `<table class="tbl"><thead><tr><th>Data</th><th>Prodotto</th><th>Referenza</th><th>Boutique · Venditore</th><th>Sconto</th><th style="text-align:right">Importo</th><th>Documento</th></tr></thead><tbody>
     ${ps.map(p => `<tr><td class="num">${fmtD(p.date)}</td><td><b>${esc(p.brand)}</b> ${esc(p.modello)}</td><td class="mono">${esc(p.ref)}</td><td>${esc(p.boutique)}<div class="faint" style="font-size:12px">${esc(p.seller || '')}</div></td><td class="num">${p.sconto ? `<span class="tag ok" style="height:22px">−${pctTxt(p.sconto, p.listino)}</span><div class="faint" style="font-size:12px">${eur(p.sconto)} su ${eur(p.listino)}</div>` : '<span class="faint">—</span>'}</td><td class="num" style="text-align:right">${eur(p.price)}</td><td>${docBtn(p)}<div class="faint mono" style="font-size:11.5px;margin-top:4px">${p.doc ? esc(docNo(p)) : ''}</div></td></tr>`).join('')}
