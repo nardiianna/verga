@@ -302,6 +302,20 @@ table.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
 .ritem .p{font-weight:600;white-space:nowrap;text-align:right}
 .ritem .p s{display:block;font-weight:500;color:var(--faint);font-size:12px}
 .rip-flt{display:flex;flex-wrap:wrap;gap:12px}
+.cform input.in:not([type=email]):not([type=number]):not(#lk-q),.cform textarea.ta{text-transform:uppercase}
+.cform input.in::placeholder,.cform textarea::placeholder{text-transform:none}
+.naz-f{position:relative}
+.naz-drop{position:absolute;left:0;right:0;top:100%;z-index:30;display:flex;flex-direction:column;background:var(--surface);border-radius:10px;box-shadow:0 10px 28px rgba(0,0,0,.14);overflow:hidden;margin-top:4px}
+.naz-drop:empty{display:none}
+.naz-drop button{border:0;background:none;text-align:left;padding:10px 14px;font-size:13px;font-weight:500;color:var(--ink)}
+.naz-drop button:hover{background:var(--brand-soft)}
+.ev-tools{display:flex;gap:2px;flex:none;align-self:flex-start;white-space:nowrap}
+.tl:has(.ev-tools){grid-template-columns:44px 1fr auto}
+.rate-f{display:flex;flex-direction:column;gap:6px}
+.rate-f .chip{height:32px;justify-content:flex-start;color:var(--amber);letter-spacing:2px}
+.rate-f .chip .off{color:var(--line-strong)}
+.rate-f .chip.on{background:var(--brand-soft);border-color:var(--accent)}
+.az-addr{margin-top:12px;grid-template-columns:2fr 90px 1fr 70px 1fr;border:0;padding:0}
 .rip-flt>.field{flex:1 1 140px}
 .rip-flt>.field:first-child{flex:2 1 300px}
 .sc-col{display:flex;flex-direction:column;gap:4px;font-size:11.5px;font-weight:600;color:var(--muted);white-space:nowrap;width:118px;flex:none}
@@ -591,21 +605,26 @@ const OPERATORS = [
 const role = () => OPERATORS.find(o => o.name === S.operator)?.role || '';
 const canAssign = () => ['Direttore vendite','Titolare'].includes(role());
 /* lista chiusa fornita da Verga (LISTA PER NUOVO CRM 2027) */
-const BRANDS = ['Angelus','Cartier','Gerald Charles','Girard-Perregaux','Grand Seiko','Hublot','Messika','Nomos','Norqain','Patek Philippe','Rolex','Rolex CPO','Tudor','TAG Heuer','Pomellato','Verga Pre-Owned'];
+const BRANDS = ['Angelus','Breitling','Cartier','Gerald Charles','Girard-Perregaux','Grand Seiko','Hublot','Messika','Nomos','Norqain','Patek Philippe','Rolex','Rolex CPO','Tudor','TAG Heuer','Pomellato','Verga Pre-Owned'];
 const JEWEL = ['Pomellato','Messika'];
 const LANGS = ['Italiano','Inglese','Spagnolo','Arabo','Cinese'];
-const TIPI = ['Prospect','Cliente','Commerciante'];
+const TIPI = ['Prospect','Cliente','Commerciante','Dipendente Verga'];
 const TIERS = [{n:'Platino',min:60000,c:'#6d7f8c'},{n:'Oro',min:30000,c:'#a8811f'},{n:'Argento',min:10000,c:'#8a9298'},{n:'Bronzo',min:1,c:'#9a6437'}];
 const MOTIVI = ['Nuova manifestazione d\'interesse','Aggiornamento manifestazione','Acquisto','Riparazione','Altro'];
-const MODELS = {Angelus:['U10','U23','La Magia'],'Gerald Charles':['Maestro'],'Girard-Perregaux':['Laureato','1966','Free Bridge'],'Grand Seiko':['Heritage','Evolution 9','Elegance'],Hublot:['Big Bang','Classic Fusion','Spirit of Big Bang'],Nomos:['Tangente','Club','Orion'],Norqain:['Freedom','Adventure','Wild ONE'],'Rolex CPO':['Submariner','Cosmograph Daytona','GMT-Master II','Datejust'],'TAG Heuer':['Carrera','Monaco','Aquaracer'],'Verga Pre-Owned':['Vintage','Contemporaneo'],Rolex:['Cosmograph Daytona','Submariner','GMT-Master II','Datejust 36','Datejust 41','Oyster Perpetual','Yacht-Master','Day-Date'],'Patek Philippe':['Nautilus','Aquanaut','Calatrava','Grand Complications'],Cartier:['Santos','Tank','Panthère','Ballon Bleu'],Tudor:['Black Bay 58','Pelagos','Ranger','Royal'],Pomellato:['Nudo','Iconica','Sabbia'],Messika:['Move Uno','Move Romane','Joy']};
-const INTERESTS = ['Golf','Tennis e padel','Vela','Equitazione','Teatro','Ciclismo','Fashion e beauty','Beverage','Arte','Motori'];
-const PROFESSIONS = ['Impiegato','Manager','CEO','Imprenditore','Libero professionista','Avvocato','Medico','VIP','Pensionato','Studente'];
+const MODELS = {Angelus:['U10','U23','La Magia'],Breitling:['Navitimer','Chronomat','Superocean','Premier','Avenger'],'Gerald Charles':['Maestro'],'Girard-Perregaux':['Laureato','1966','Free Bridge'],'Grand Seiko':['Heritage','Evolution 9','Elegance'],Hublot:['Big Bang','Classic Fusion','Spirit of Big Bang'],Nomos:['Tangente','Club','Orion'],Norqain:['Freedom','Adventure','Wild ONE'],'Rolex CPO':['Submariner','Cosmograph Daytona','GMT-Master II','Datejust'],'TAG Heuer':['Carrera','Monaco','Aquaracer'],'Verga Pre-Owned':['Vintage','Contemporaneo'],Rolex:['Cosmograph Daytona','Submariner','GMT-Master II','Datejust 36','Datejust 41','Oyster Perpetual','Yacht-Master','Day-Date'],'Patek Philippe':['Nautilus','Aquanaut','Calatrava','Grand Complications'],Cartier:['Santos','Tank','Panthère','Ballon Bleu'],Tudor:['Black Bay 58','Pelagos','Ranger','Royal'],Pomellato:['Nudo','Iconica','Sabbia'],Messika:['Move Uno','Move Romane','Joy']};
+const INTERESTS = ['Arte','Automotive','BORGO12','Ciclismo','Equitazione','Fashion e beauty','Golf','Padel','Portofino','Teatro','Tennis','Vela'];
+const INT_OLD = {'Tennis e padel':['Tennis','Padel'], Beverage:['BORGO12'], Motori:['Automotive']};
+const PROFESSIONS = ['Avvocato','CEO','Fornitore Verga','Giornalista','Imprenditore','Impiegato','Libero professionista','Manager','Medico','Pensionato','Studente','VIP'];
 const CELEB = ['Cantante','Attore/Attrice','Sportivo','Influencer','Volto TV'];
 const DECADES = ["Anni '40","Anni '50","Anni '60","Anni '70","Anni '80","Anni '90",'Anni 2000','Anni 2010'];
 const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 const LINK_TYPES = {'Coniuge di':'Coniuge di','Collega di':'Collega di','Moglie di':'Marito di','Marito di':'Moglie di','Compagno/a di':'Compagno/a di','Figlio/a di':'Genitore di','Padre di':'Figlio/a di','Madre di':'Figlio/a di','Genitore di':'Figlio/a di','Fratello/Sorella di':'Fratello/Sorella di','Nipote di':'Zio/a di','Parente di':'Parente di','Amico/a di':'Amico/a di','Dipendente di':'Datore di lavoro di','Datore di lavoro di':'Dipendente di','Socio/a di':'Socio/a di','Assistente di':'Assistito/a da'};
-const LINK_CHIPS = ['Coniuge di','Moglie di','Marito di','Figlio/a di','Padre di','Madre di','Fratello/Sorella di','Amico/a di','Collega di'];
+/* legami: per ora Verga tiene solo il coniuge */
+const LINK_CHIPS = ['Coniuge di'];
 const backOf = t => LINK_TYPES[t] || 'Collegato/a a';
+/* tutte le nazioni (nomi ISO 3166 in italiano), per il menu a tendina con ricerca */
+const NAZIONI = (() => { try { const dn = new Intl.DisplayNames(['it'], {type:'region'}), out = []; for (let a = 65; a <= 90; a++) for (let b = 65; b <= 90; b++) { const k = String.fromCharCode(a, b); if (['EU','EZ','UN','QO','XA','XB','ZZ','AA','QM','QN','QP','QQ','QR','QS','QT','QU','QV','QW','QX','QY','QZ','XK','AC','CP','DG','EA','IC','TA','CQ'].includes(k)) continue; const n = dn.of(k); if (n && n !== k) out.push(n.toUpperCase()); } return [...new Set(out)].sort((x, y) => x.localeCompare(y, 'it')); } catch (_) { return ['ITALIA','FRANCIA','GERMANIA','REGNO UNITO','SPAGNA','SVIZZERA','STATI UNITI']; } })();
+const nazMatch = q => { q = (q || '').trim().toUpperCase(); return q ? NAZIONI.filter(n => n.startsWith(q) || n.split(/[\s-]+/).some(w => w.startsWith(q) && q.length > 2)).slice(0, 8) : []; };
 const EV = {
   visita:{label:'Passato in negozio', short:'Visita', icon:'store', cls:''},
   chiamata_in:{label:'Ci ha chiamato', short:'Chiamata ricevuta', icon:'phoneIn', cls:'in'},
@@ -626,10 +645,7 @@ const clients = [
   {id:'c10',nome:'Stefano',cognome:'Ferri',email:'stefano.ferri@example.com',tel:'+39 333 000 0010',indirizzo:'',prof:'Libero professionista',azienda:'',celeb:'Cantante',birth:{d:14,m:6,decade:"Anni '70"},brands:['Rolex','Patek Philippe'],modelli:['Submariner','Yacht-Master'],interests:['Vela','Motori'],boutique:'Boutique Portofino',source:'Negozio',newsletter:false,since:'2019-08-08',note:''},
 ];
 const links = [
-  {from:'c2',to:'c1',type:'Moglie di',back:'Marito di'},
-  {from:'c6',to:'c1',type:'Dipendente di'},
-  {from:'c10',to:'c1',type:'Amico/a di'},
-  {from:'c5',to:'c6',type:'Parente di'},
+  {from:'c2',to:'c1',type:'Coniuge di',back:'Coniuge di'},
 ];
 /* campi aggiuntivi richiesti da Verga (misure, fatturazione, valutazione, lingua…) */
 const EXTRA = {
@@ -651,10 +667,13 @@ const EXTRA = {
 };
 const blankExtra = () => ({cf:'',pec:'',sesso:'',lingua:'',tipo:'Prospect',rating:0,email2:'',addresses:[],billing:{},aziende:[],misure:{},notes:[],tasks:[],privacy:null});
 clients.forEach(c => { Object.assign(c, blankExtra(), EXTRA[c.id] || {}); if (!c.addresses.length && c.indirizzo) c.addresses = [{label:'Casa',via:c.indirizzo,cap:'',citta:'',prov:'',naz:'Italia'}]; });
+clients.forEach(c => { c.interests = [...new Set(c.interests.flatMap(i => INT_OLD[i] || [i]))].sort(); c.addresses.forEach(a => { a.label = /^casa/i.test(a.label) ? 'Casa' : /^uff/i.test(a.label) ? 'Ufficio' : ''; }); c.modelli = []; c.celeb = ''; });
 clients.find(c => c.id === 'c1').privacy = {at:'2014-05-10T11:20', by:'cliente'};
 /* più aziende per cliente: la prima è la principale */
 clients.forEach(c => { if (c.billing?.rs) c.aziende = [{...c.billing}]; });
+const splitInd = a => { if (a.via !== undefined) return a; const m = (a.ind || '').match(/^(.*?),\s*(\d{5})?\s*([^(]*?)\s*(?:\((\w+)\))?$/); return {...a, via:m ? m[1] : a.ind || '', cap:m?.[2] || '', citta:m?.[3] || '', prov:m?.[4] || '', naz:'Italia'}; };
 clients.find(c => c.id === 'c1').aziende.push({rs:'Rossi Immobiliare S.r.l.', ind:'Via Esempio 5, 20121 Milano (MI)', piva:'IT09876543210', sdi:'KRRH6B9'});
+clients.forEach(c => { c.aziende = c.aziende.map(splitInd); c.billing = c.aziende[0] || {}; });
 clients.find(c => c.id === 'c7').privacy = {at:'2018-10-01T16:45', by:'venditore', operator:'Luca Ferrari'};
 const privTxt = p => `${fmtDT(p.at)} · ${p.by === 'cliente' ? 'dato dal cliente' : 'segnato da ' + p.operator}`;
 const NOTIFS = [
@@ -668,7 +687,7 @@ const events = [
   {id:'e2',clientId:'c3',type:'chiamata_in',date:'2026-09-24T10:05',operator:'Sara Colombo',boutique:'Boutique Multibrand',note:'Chiede disponibilità Santos medium.',motivo:'Acquisto'},
   {id:'e3',clientId:'c7',type:'visita',date:'2026-09-24T09:40',operator:'Luca Ferrari',boutique:'Boutique Patek Philippe',note:'Passata per regolazione bracciale.'},
   {id:'e4',clientId:'c6',type:'visita',date:'2026-09-24T10:30',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Ritiro cinturino.'},
-  {id:'e5',clientId:'c5',type:'visita',date:'2026-09-24T11:10',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Prima visita dopo la registrazione online. Interessata a un Datejust 36.',followup:'2026-09-26'},
+  {id:'e5',clientId:'c5',type:'visita',date:'2026-09-24T11:10',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Prima visita dopo la registrazione online. Interessata a un Datejust 36.',followup:'2026-09-24'},
   {id:'e6',clientId:'c8',type:'chiamata_out',date:'2026-09-23T15:00',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Invitato all\'evento Rolex Oyster Story. Da richiamare per conferma.',followup:'2026-09-24'},
   {id:'e7',clientId:'c4',type:'visita',date:'2026-09-12T12:00',operator:'Giorgia Costa',boutique:'Boutique Portofino',note:''},
   {id:'e8',clientId:'c10',type:'chiamata_in',date:'2026-09-20T18:10',operator:'Giorgia Costa',boutique:'Boutique Portofino',note:'Chiede novità sul Submariner.',motivo:'Aggiornamento manifestazione'},
@@ -685,6 +704,7 @@ const pdas = [
   {id:'p4',clientId:'c10',brand:'Rolex',modello:'Submariner',ref:'126610LN',quadrante:'Nero',bracciale:'Oyster',note:'',date:'2026-06-10',operator:'Giorgia Costa',stato:'aperta'},
   {id:'p5',clientId:'c7',brand:'Patek Philippe',modello:'Nautilus',ref:'5811/1G',quadrante:'Blu',bracciale:'Oro bianco',note:'',date:'2024-11-20',operator:'Luca Ferrari',stato:'assegnata',productId:'pr4'},
   {id:'p6',clientId:'c4',brand:'Tudor',modello:'Pelagos',ref:'',quadrante:'Blu',bracciale:'Titanio',note:'Anche FXD va bene.',date:'2026-07-01',operator:'Giorgia Costa',stato:'aperta'},
+  {id:'p8',clientId:'c3',brand:'Altro',modello:'',ref:'',note:'Interessata a un Cartier Panthère medium in oro giallo, anche usato.',date:'2026-09-10',operator:'Sara Colombo',boutique:'Boutique Multibrand',stato:'aperta'},
   {id:'p7',clientId:'c9',brand:'Messika',modello:'Move Uno',ref:'',quadrante:'',bracciale:'Collana, oro bianco',note:'Ordinata al fornitore su richiesta della cliente.',date:'2026-09-21',operator:'Sara Colombo',stato:'preordine'},
 ];
 const products = [
@@ -730,7 +750,7 @@ purchases.forEach((p, i) => Object.assign(p, {ord:p.ord || `ORD-${p.date.slice(0
 const S = {
   view:'login', id:null, tab:'panoramica', navOpen:false, notes:false,
   boutique:'Bottega Storica', operator:'Marco Verdi', pin:'',
-  f:{q:'',tipo:'',tier:'',rating:'',brand:'',modello:'',ref:'',seller:'',pref:'',interest:'',ibrand:'',lingua:'',prof:'',last:'',visit:'',boutique:'',celeb:''},
+  f:{q:'',tipo:'',tier:'',rating:'',brand:'',modello:'',ref:'',seller:'',pref:'',interest:'',ibrand:'',lingua:'',prof:'',last:'',visit:''},
   pf:{q:'',brand:'',tipo:'',sub:'',stato:'',loc:'Bottega Storica'},
   pdf:{q:'',brand:'',boutique:'',operator:''},
   evf:{type:'',boutique:'',op:'',per:'',q:''},
@@ -775,13 +795,15 @@ const compatible = pda => !['aperta','preordine'].includes(pda.stato) ? [] : pro
 const clientLinks = id => links.map((l, i) => ({l, i})).filter(({l}) => l.from === id || l.to === id).map(({l, i}) => l.from === id ? {label:l.type, other:C(l.to), i} : {label:l.back || backOf(l.type), other:C(l.from), i});
 const birthText = b => { if (!b || (!b.d && !b.y && !b.decade)) return null; const dm = b.d ? `${b.d} ${MESI[b.m-1]}` : ''; if (b.y) return `${dm} ${b.y}`.trim(); if (b.decade) return `${dm}${dm ? ' · ' : ''}${b.decade}`; return dm; };
 const sourceTag = c => c.source === 'Autoregistrazione' ? `<span class="tag blue">${ic('send')}Autoregistrato online</span>` : c.source === 'Legame' ? `<span class="tag">${ic('link')}Creato da legame</span>` : '';
-const PDA_ST = {aperta:['Manifestazione','amber'],preordine:['Preordine','blue'],assegnata:['Associata','ok'],venduta:['Ordine',''],annullata:['Annullata','red']};
+const PDA_ST = {aperta:['Manifestazione','amber'],preordine:['Preordine','blue'],assegnata:['Associata','ok'],venduta:['Ordine',''],annullata:['Rifiutata','red']};
 const inStock = p => ['disponibile','riservato'].includes(p.stato);
 const refGroups = list => { const m = new Map(); list.forEach(p => { if (!m.has(p.ref)) m.set(p.ref, []); m.get(p.ref).push(p); }); return [...m.values()]; };
 const pieces = ref => products.filter(p => p.ref === ref && p.stato !== 'venduto');
 const pdasFor = ref => openPdas().filter(x => compatible(x).some(p => p.ref === ref));
 const watchesInStock = () => products.filter(p => p.tipo === 'orologio' && inStock(p));
 const recentPdas = () => pdas.map((p, i) => ({p, i})).sort((a, b) => dt(b.p.date) - dt(a.p.date) || b.i - a.i).map(x => x.p);
+const pdaB = p => p.boutique || OPERATORS.find(o => o.name === p.operator)?.b || '';
+const pdaTitle = p => p.brand === 'Altro' ? 'Altro prodotto' : `${p.brand} ${p.modello}`;
 const stateTag = p => `<span class="tag ${PDA_ST[p.stato][1]}">${PDA_ST[p.stato][0]}</span>`;
 const prodState = p => p.stato === 'disponibile' ? '<span class="tag ok">Disponibile</span>' : p.stato === 'in_arrivo' ? `<span class="tag blue">In arrivo ${fmtD(p.arrivo).slice(0,5)}</span>` : p.stato === 'riservato' ? `<span class="tag amber">Riservato a ${esc(fullName(C(p.reservedFor)))}</span>` : '<span class="tag">Venduto</span>';
 const avatar = (c, cls='') => c.incomplete && !c.email ? `<span class="av ghost ${cls}">${initials(c)}</span>` : `<span class="av ${cls}">${initials(c)}</span>`;
@@ -828,14 +850,14 @@ function render(){
   if (S.view === 'login') app.innerHTML = vLogin();
   else if (S.view === 'auto') app.innerHTML = vAuto();
   else if (S.view === 'prev') app.innerHTML = vPrev();
-  else app.innerHTML = shell(({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,prodotto:vProdotto,cassa:vCassa,ordini:vOrdini,passaggi:vPassaggi,pda:vPda,manifestazione:vManif,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
+  else app.innerHTML = shell(({dashboard:vDash,clienti:vClienti,cliente:vCliente,nuovo:vNuovo,prodotti:vProdotti,prodotto:vProdotto,cassa:vCassa,ordini:vOrdini,passaggi:vPassaggi,pda:vPda,manifestazione:vManif,'manif-new':vManifNew,riparazioni:vRip,'rip-new':vRipNew,busta:vBusta})[S.view]());
   const key = S.view + ':' + S.id;
   if (key !== render.key) { render.key = key; (app.querySelector('.content') || app.firstElementChild)?.classList.add('vfade'); }
   renderDrawer();
   if (S.view === 'clienti') renderResults();
 }
 function shell(content){
-  const n = (v, icon, label, badge='') => `<button class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'prodotti' && S.view === 'prodotto') || (v === 'pda' && S.view === 'manifestazione') || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="badge num">${badge}</span>` : ''}</button>`;
+  const n = (v, icon, label, badge='') => `<button class="${S.view === v || (v === 'clienti' && ['cliente','nuovo'].includes(S.view)) || (v === 'prodotti' && S.view === 'prodotto') || (v === 'pda' && ['manifestazione','manif-new'].includes(S.view)) || (v === 'riparazioni' && RIP_VIEWS.includes(S.view)) ? 'on' : ''}" data-go="${v}">${ic(icon)}${label}${badge ? `<span class="badge num">${badge}</span>` : ''}</button>`;
   const compat = openPdas().filter(p => compatible(p).length).length;
   return `<div class="shell">
   <aside class="side ${S.navOpen ? 'open' : ''}">
@@ -861,7 +883,7 @@ function shell(content){
   <div class="main">
     <header class="top">
       <button class="btn btn-ghost menu-btn" data-act="nav" aria-label="Menu">${ic('menu')}</button>
-      <div class="gsearch">${ic('search')}<input id="gs" class="gs" placeholder="Cerca cliente (nome, email, telefono) o prodotto (referenza, seriale)" autocomplete="off"><div id="gs-drop"></div></div>
+      <div class="gsearch">${ic('search')}<input id="gs" class="gs" placeholder="Cerca cliente (nome, email, telefono, note) o prodotto (referenza, seriale)" autocomplete="off"><div id="gs-drop"></div></div>
       <div class="top-sp hide-s"></div>
       <label class="pill-btn hide-s">${ic('store')}<select id="boutique-sel" aria-label="Boutique">${opts(BOUTIQUES.map(b => b.name), S.boutique)}</select></label>
       <button class="btn btn-primary" data-act="evento">${ic('plus')}<span class="hide-s">Registra passaggio</span></button>
@@ -903,6 +925,7 @@ function vDash(){
   const bdays = clients.filter(c => c.birth && c.birth.d && c.birth.m === 9 && c.birth.d >= 24 && c.birth.d <= 30);
   const recent = [...events].sort((a,b) => dt(b.date) - dt(a.date)).slice(0,6);
   const latest = recentPdas().filter(p => p.stato !== 'annullata').slice(0,6);
+  const fus = events.filter(e => e.followup && !e.done && e.operator === S.operator && dday(e.followup) <= 0).sort((a, b) => a.followup.localeCompare(b.followup));
   return `
   <div class="hello page-h"><div><div class="label">Giovedì 24 settembre 2026 · ${S.boutique}</div><h1>Buongiorno, ${S.operator.split(' ')[0]}</h1></div></div>
   <div class="qa">
@@ -924,13 +947,17 @@ function vDash(){
         <div class="list">${latest.map(p => { const c = C(p.clientId); return `
           <div class="row click" data-go="manifestazione" data-id="${p.id}">
             ${avatar(c)}
-            <div class="grow"><div class="t">${esc(fullName(c))} <span class="faint" style="font-weight:500">desidera</span> ${esc(p.brand)} ${esc(p.modello)}</div>
-            <div class="s">${sameDay(p.date) ? 'Oggi' : fmtD(p.date)} · ${esc(c.boutique)} · ${esc(p.operator)}</div></div>
+            <div class="grow"><div class="t">${esc(fullName(c))} <span class="faint" style="font-weight:500">desidera</span> ${esc(pdaTitle(p))}</div>
+            <div class="s">${sameDay(p.date) ? 'Oggi' : fmtD(p.date)} · ${esc(pdaB(p))} · ${esc(p.operator)}</div></div>
             ${p.stato !== 'aperta' ? stateTag(p) : ''}${ic('arrow')}
           </div>`; }).join('') || '<div class="empty">Nessuna manifestazione inserita.</div>'}</div>
       </section>
     </div>
     <div class="stack">
+      <section class="card">
+        <div class="card-h">${ic('calendar')}<h2>Follow-up del giorno</h2><span class="sp"></span>${fus.length ? `<span class="tag amber num">${fus.length}</span>` : ''}</div>
+        <div class="list">${fus.map(e => { const c = C(e.clientId), late = dday(e.followup) < 0; return `<div class="row click" data-go="cliente" data-id="${c.id}" data-tab="passaggi">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))} <span class="faint" style="font-weight:500">· ${EV[e.type].short.toLowerCase()} del ${fmtD(e.date).slice(0, 5)}</span></div><div class="s">${late ? `<b style="color:var(--red)">Scaduto il ${fmtD(e.followup).slice(0, 5)}</b> · ` : ''}${esc(e.note || 'Da ricontattare')}</div></div><button class="btn btn-sm" data-act="fu-done" data-id="${e.id}">${ic('check')}Fatto</button></div>`; }).join('') || '<div class="empty">Nessun follow-up per oggi.</div>'}</div>
+      </section>
       <section class="card">
         <div class="card-h">${ic('gift')}<h2>Compleanni della settimana</h2></div>
         <div class="list">${bdays.map(c => `<div class="row click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${c.birth.d} ${MESI[c.birth.m-1]} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div>`).join('') || '<div class="empty">Nessun compleanno questa settimana.</div>'}</div>
@@ -951,10 +978,15 @@ function evRow(e){
 }
 
 /* ---------------- CLIENTI ---------------- */
+const VISIT_F = [['','Qualsiasi'],['90','Negli ultimi 3 mesi'],['180','Negli ultimi 6 mesi'],['365+','Da più di un anno']];
+const LAST_F = [['','Qualsiasi'],['12','Negli ultimi 12 mesi'],['1-3','Tra 1 e 3 anni'],['3','Nessun acquisto da oltre 3 anni']];
+/* il venditore "interagisce" col cliente se gli ha venduto, ha registrato un passaggio o una manifestazione */
+const sellerOf = (c, op) => clientPurchases(c.id).some(p => p.seller === op) || clientEvents(c.id).some(e => e.operator === op) || clientPdas(c.id).some(p => p.operator === op);
 function vClienti(){
   const f = S.f;
   return `
   <div class="page-h"><div><div class="label">Anagrafiche</div><h1>Clienti</h1></div><span class="sp"></span>
+    <button class="btn" data-act="cl-export">${ic('download')}Esporta Excel</button>
     <button class="btn btn-primary" data-go="nuovo">${ic('userPlus')}Nuovo cliente</button></div>
   <div class="flt">
     <aside class="card flt-panel" aria-label="Filtri">
@@ -962,40 +994,47 @@ function vClienti(){
         <label class="field"><span>Cerca ovunque</span><input class="in" data-f="q" value="${esc(f.q)}" placeholder="Nome, email, cellulare, azienda, note…"></label>
         <label class="field"><span>Tipologia</span><select class="sel" data-f="tipo">${opts(TIPI, f.tipo, 'Tutte')}</select></label>
         <label class="field"><span>Fascia acquisti</span><select class="sel" data-f="tier">${opts(TIERS.map(t => t.n), f.tier, 'Tutte')}</select></label>
-        <label class="field"><span>Valutazione venditore</span><select class="sel" data-f="rating">${[['','Qualsiasi'],['5','★★★★★'],['4','★★★★ o più'],['3','★★★ o più']].map(([v,l]) => `<option value="${v}" ${f.rating === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <div class="field"><span>Valutazione venditore · anche più di una</span><div class="rate-f">${[5,4,3,2,1].map(n => `<button type="button" class="chip ${f.rating.split(',').includes(String(n)) ? 'on' : ''}" data-act="f-rate" data-v="${n}" aria-label="${n} stelle">${'★'.repeat(n)}<span class="off">${'★'.repeat(5 - n)}</span></button>`).join('')}</div></div>
       </div>
       <div class="fsec"><div class="label">Acquisti</div>
         <label class="field"><span>Brand acquistato</span><select class="sel" data-f="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
         <label class="field"><span>Modello</span><input class="in" data-f="modello" value="${esc(f.modello)}" placeholder="Es. Submariner"></label>
         <label class="field"><span>Referenza negli acquisti</span><input class="in mono" data-f="ref" value="${esc(f.ref)}" placeholder="Es. 124060"></label>
-        <label class="field"><span>Venduto da</span><select class="sel" data-f="seller">${opts(OPERATORS.map(o => o.name), f.seller, 'Tutti i venditori')}</select></label>
-        <label class="field"><span>Ultimo acquisto</span><select class="sel" data-f="last">${[['','Qualsiasi'],['12','Negli ultimi 12 mesi'],['1-5','Tra 1 e 5 anni fa'],['5','Nessun acquisto da oltre 5 anni'],['mai','Mai acquistato']].map(([v,l]) => `<option value="${v}" ${f.last === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       </div>
       <div class="fsec"><div class="label">Manifestazioni</div>
         <label class="field"><span>Referenza nelle manifestazioni</span><input class="in mono" data-f="pref" value="${esc(f.pref)}" placeholder="Es. 126500LN"></label>
       </div>
-      <div class="fsec"><div class="label">Relazione</div>
-        <label class="field"><span>Ultimo passaggio in negozio</span><select class="sel" data-f="visit">${[['','Qualsiasi'],['30','Negli ultimi 30 giorni'],['180','Non passa da oltre 6 mesi'],['sleep','Dormienti: nessun contatto da 6 mesi']].map(([v,l]) => `<option value="${v}" ${f.visit === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-        <label class="field"><span>Boutique di riferimento</span><select class="sel" data-f="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
+      <div class="fsec"><div class="label">Attività</div>
+        <label class="field"><span>Venditore</span><select class="sel" data-f="seller">${opts(OPERATORS.map(o => o.name), f.seller, 'Tutti i venditori')}</select></label>
+        <label class="field"><span>Ultima attività (passaggi, chiamate, mail)</span><select class="sel" data-f="visit">${VISIT_F.map(([v,l]) => `<option value="${v}" ${f.visit === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <label class="field"><span>Ultimo acquisto</span><select class="sel" data-f="last">${LAST_F.map(([v,l]) => `<option value="${v}" ${f.last === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       </div>
       <div class="fsec"><div class="label">Profilo</div>
         <label class="field"><span>Brand di interesse</span><select class="sel" data-f="ibrand">${opts(BRANDS, f.ibrand, 'Tutti')}</select></label>
         <label class="field"><span>Interessi</span><select class="sel" data-f="interest">${opts(INTERESTS, f.interest, 'Tutti')}</select></label>
         <label class="field"><span>Lingua</span><select class="sel" data-f="lingua">${opts(LANGS, f.lingua, 'Tutte')}</select></label>
         <label class="field"><span>Professione</span><select class="sel" data-f="prof">${opts(PROFESSIONS, f.prof, 'Tutte')}</select></label>
-        <label class="field"><span>Celebrità</span><select class="sel" data-f="celeb">${opts(CELEB, f.celeb, 'Tutti')}</select></label>
       </div>
     </aside>
     <section class="stack" style="gap:14px" id="results"></section>
   </div>`;
 }
+/* esportazione per il marketing: tutti i clienti che rispondono ai filtri attivi, in un file che si apre con Excel */
+function exportClients(){
+  const list = filteredClients(), q = x => `"${String(x ?? '').replace(/"/g, '""')}"`;
+  const head = ['Nome','Cognome','Email','Cellulare','Tipologia','Professione','Azienda','Valutazione','Fascia','Brand di interesse','Interessi','Lingua','Città','Nazione','Ultimo passaggio','Ultimo acquisto','Totale acquisti','Newsletter'];
+  const rows = list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id), a = c.addresses[0] || {}; return [c.nome, c.cognome, c.email, c.tel, c.tipo, c.prof, c.azienda, c.rating || '', tierOf(c.id)?.n || '', c.brands.join(', '), c.interests.join(', '), c.lingua, a.citta, a.naz, v ? fmtD(v.date) : '', lp ? `${fmtD(lp.date)} ${lp.brand} ${lp.modello}` : '', spent(c.id), c.newsletter ? 'Sì' : 'No']; });
+  const csv = '﻿' + [head, ...rows].map(r => r.map(q).join(';')).join('\r\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})); a.download = `clienti-verga-${list.length}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  toast(`Esportati ${list.length} clienti con i filtri attivi`);
+}
 function filteredClients(){
   const f = S.f, q = f.q.trim().toLowerCase();
   return clients.filter(c => {
-    if (q && !(`${c.nome} ${c.cognome} ${c.email} ${c.email2} ${c.tel} ${c.azienda} ${c.notes.map(n => n.text).join(' ')}`.toLowerCase().includes(q))) return false;
+    if (q && !(`${c.nome} ${c.cognome} ${c.email} ${c.email2} ${c.tel} ${c.azienda} ${c.notes.map(n => n.text).join(' ')} ${clientPdas(c.id).map(p => `${p.brand} ${p.note || ''}`).join(' ')}`.toLowerCase().includes(q))) return false;
     if (f.tipo && c.tipo !== f.tipo) return false;
     if (f.tier && tierOf(c.id)?.n !== f.tier) return false;
-    if (f.rating && (c.rating || 0) < +f.rating) return false;
+    if (f.rating && !f.rating.split(',').includes(String(c.rating || 0))) return false;
     if (f.lingua && c.lingua !== f.lingua) return false;
     if (f.ibrand && !c.brands.includes(f.ibrand)) return false;
     if (f.pref && !clientPdas(c.id).some(p => p.ref.toLowerCase().includes(f.pref.toLowerCase()))) return false;
@@ -1003,42 +1042,37 @@ function filteredClients(){
     if (f.brand && !ps.some(p => p.brand === f.brand)) return false;
     if (f.modello && !ps.some(p => p.modello.toLowerCase().includes(f.modello.toLowerCase()))) return false;
     if (f.ref && !ps.some(p => p.ref.toLowerCase().includes(f.ref.toLowerCase()))) return false;
-    if (f.seller && !ps.some(p => p.seller === f.seller && (!f.brand || p.brand === f.brand))) return false;
+    if (f.seller && !sellerOf(c, f.seller)) return false;
     if (f.last) { const lp = ps[0]; const d = lp ? daysAgo(lp.date) : null;
-      if (f.last === 'mai' && lp) return false;
       if (f.last === '12' && !(lp && d <= 365)) return false;
-      if (f.last === '1-5' && !(lp && d > 365 && d <= 1826)) return false;
-      if (f.last === '5' && !(lp && d > 1826)) return false; }
-    if (f.visit) { const v = lastVisit(c.id); if (f.visit === '30' && !(v && daysAgo(v.date) <= 30)) return false; if (f.visit === '180' && v && daysAgo(v.date) <= 180) return false; if (f.visit === 'sleep' && !sleeping(c.id)) return false; }
-    if (f.boutique && c.boutique !== f.boutique) return false;
+      if (f.last === '1-3' && !(lp && d > 365 && d <= 1096)) return false;
+      if (f.last === '3' && !(lp && d > 1096)) return false; }
+    if (f.visit) { const e = lastContact(c.id), d = e ? daysAgo(e.date) : Infinity; if (f.visit === '90' && !(d <= 91)) return false; if (f.visit === '180' && !(d <= 183)) return false; if (f.visit === '365+' && !(d > 365)) return false; }
     if (f.interest && !c.interests.includes(f.interest)) return false;
     if (f.prof && c.prof !== f.prof) return false;
-    if (f.celeb && c.celeb !== f.celeb) return false;
     return true;
   });
 }
 function renderResults(){
   const el = document.getElementById('results'); if (!el) return;
   const list = filteredClients();
-  const names = {q:'Ricerca',tipo:'Tipologia',tier:'Fascia',rating:'Valutazione ≥',brand:'Brand acquistato',modello:'Modello',ref:'Referenza acquisti',seller:'Venduto da',pref:'Referenza manifestazioni',ibrand:'Brand di interesse',lingua:'Lingua',last:'Ultimo acquisto',visit:'Passaggio',boutique:'Boutique',interest:'Interessi',prof:'Professione',celeb:'Celebrità'};
-  const lastL = {'12':'ultimi 12 mesi','1-5':'1–5 anni fa','5':'oltre 5 anni fa','mai':'mai'}, visitL = {'30':'ultimi 30 giorni','180':'oltre 6 mesi fa','sleep':'dormienti'};
+  const names = {q:'Ricerca',tipo:'Tipologia',tier:'Fascia',rating:'Valutazione',brand:'Brand acquistato',modello:'Modello',ref:'Referenza acquisti',seller:'Venditore',pref:'Referenza manifestazioni',ibrand:'Brand di interesse',lingua:'Lingua',last:'Ultimo acquisto',visit:'Ultima attività',interest:'Interessi',prof:'Professione'};
+  const lastL = Object.fromEntries(LAST_F), visitL = Object.fromEntries(VISIT_F);
   const act = Object.entries(S.f).filter(([k,v]) => v);
   el.innerHTML = `
     <div class="active-f"><b class="num">${list.length} clienti</b>
-      ${act.map(([k,v]) => `<span class="tag brand">${names[k]}: ${esc(k === 'last' ? lastL[v] : k === 'visit' ? visitL[v] : v)}<button data-act="clr-f" data-k="${k}" aria-label="Rimuovi filtro">${ic('x')}</button></span>`).join('')}
+      ${act.map(([k,v]) => `<span class="tag brand">${names[k]}: ${esc(k === 'last' ? lastL[v].toLowerCase() : k === 'visit' ? visitL[v].toLowerCase() : k === 'rating' ? v.split(',').map(n => n + '★').join(', ') : v)}<button data-act="clr-f" data-k="${k}" aria-label="Rimuovi filtro">${ic('x')}</button></span>`).join('')}
       ${act.length ? '<button class="link" data-act="clr-all">Azzera filtri</button>' : '<span class="muted">Nessun filtro attivo</span>'}
     </div>
     <div class="card tbl-wrap"><table class="tbl">
-      <thead><tr><th>Cliente</th><th>Professione</th><th>Brand di interesse</th><th>Ultimo passaggio</th><th>Ultimo acquisto</th><th>Manifestazioni</th></tr></thead>
-      <tbody>${list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id), op = clientPdas(c.id).filter(p => p.stato !== 'venduta').length; return `
+      <thead><tr><th>Cliente</th><th>Professione</th><th>Ultimo passaggio</th><th>Ultimo acquisto</th></tr></thead>
+      <tbody>${list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id); return `
         <tr class="click" data-go="cliente" data-id="${c.id}">
-          <td><div class="cell-person">${avatar(c)}<div><b>${esc(fullName(c))} </b>${c.rating ? stars(c.rating) : ''}<small>${esc(c.email || 'Scheda da completare')}</small><div class="tags" style="margin-top:4px"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : ''}" style="height:20px">${esc(c.tipo || 'Prospect')}</span>${c.source === 'Autoregistrazione' ? `<span class="tag blue" style="height:20px">${ic('send')}Autoregistrato</span>` : ''}${tierTag(c.id)}${sleeping(c.id) ? '<span class="tag red" style="height:20px">Dormiente</span>' : ''}</div></div></div></td>
-          <td>${esc(c.prof || '—')}${c.azienda ? `<div class="faint" style="font-size:12px">${esc(c.azienda)}</div>` : ''}${c.celeb ? `<div><span class="tag amber" style="margin-top:4px">${ic('star')}${esc(c.celeb)}</span></div>` : ''}</td>
-          <td><div class="tags">${c.brands.map(b => `<span class="tag">${esc(b)}</span>`).join('')}</div></td>
+          <td><div class="cell-person">${avatar(c)}<div><b>${esc(fullName(c))} </b>${c.rating ? stars(c.rating) : ''}<small>${esc(c.email || 'Scheda da completare')}</small><div class="tags" style="margin-top:4px"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : ''}" style="height:20px">${esc(c.tipo || 'Prospect')}</span>${c.source === 'Autoregistrazione' ? `<span class="tag blue" style="height:20px">${ic('send')}Autoregistrato</span>` : ''}${tierTag(c.id)}${c.fornitore ? '<span class="tag amber" style="height:20px">Fornitore</span>' : ''}${sleeping(c.id) ? '<span class="tag red" style="height:20px">Dormiente</span>' : ''}</div></div></div></td>
+          <td>${esc(c.prof || '—')}${c.azienda ? `<div class="faint" style="font-size:12px">${esc(c.azienda)}</div>` : ''}</td>
           <td class="num">${v ? `${fmtD(v.date)}<div class="faint" style="font-size:12px">${rel(v.date)}</div>` : '<span class="faint">—</span>'}</td>
           <td class="num">${lp ? `${fmtD(lp.date)}<div class="faint" style="font-size:12px">${esc(lp.brand)} ${esc(lp.modello)}</div>` : '<span class="faint">Nessuno</span>'}</td>
-          <td>${op ? `<span class="tag amber num">${op} aperte</span>` : '<span class="faint">—</span>'}</td>
-        </tr>`; }).join('') || `<tr><td colspan="6"><div class="empty">Nessun cliente corrisponde ai filtri.</div></td></tr>`}</tbody>
+        </tr>`; }).join('') || `<tr><td colspan="4"><div class="empty">Nessun cliente corrisponde ai filtri.</div></td></tr>`}</tbody>
     </table></div>`;
 }
 
@@ -1052,7 +1086,8 @@ function vCliente(){
   if (S.tab === 'panoramica') body = cPanoramica(c, cp, ps);
   if (S.tab === 'anagrafica') body = cAnagrafica(c);
   if (S.tab === 'pda') body = `<section class="card"><div class="card-h">${ic('heart')}<h2>Manifestazioni di interesse</h2><span class="faint" style="font-size:12px">Registrate sul CRM</span><span class="sp"></span><button class="btn btn-sm" data-act="pda-new" data-id="${c.id}">${ic('plus')}Nuova</button></div><div>${cp.length ? cp.map(pdaCard).join('') : '<div class="empty">Nessuna manifestazione di interesse.</div>'}</div></section>`;
-  if (S.tab === 'passaggi') body = `<section class="card"><div class="card-h"><h2>Storico passaggi e contatti</h2><span class="sp"></span><button class="btn btn-sm" data-act="evento" data-id="${c.id}">${ic('plus')}Aggiungi con nota</button></div><div class="timeline">${evs.length ? evs.map(tlRow).join('') : '<div class="empty">Nessun passaggio registrato.</div>'}</div></section>`;
+  if (S.tab === 'passaggi') { const fe = evs.filter(e => !S.cev || e.operator === S.cev); body = `<section class="card"><div class="card-h"><h2>Storico passaggi e contatti</h2><span class="sp"></span><select class="sel" style="width:auto;height:36px" data-cev aria-label="Filtra per venditore">${opts([...new Set(evs.map(e => e.operator))], S.cev, 'Tutti i venditori')}</select><button class="btn btn-sm" data-act="evento" data-id="${c.id}">${ic('plus')}Aggiungi con nota</button></div><div class="timeline">${fe.length ? fe.map(tlRow).join('') : '<div class="empty">Nessun passaggio registrato.</div>'}</div></section>`; }
+  if (S.tab === 'comunicazione') body = commCard(c);
   if (S.tab === 'acquisti') body = `<section class="card tbl-wrap"><div class="card-h">${ic('bag')}<h2>Acquisti</h2><span class="faint" style="font-size:12px">Documenti letti in tempo reale dal gestionale</span><span class="sp"></span>${ps.some(p => p.sconto) ? `<span class="muted num">Sconto medio ${pctTxt(ps.reduce((a, p) => a + (p.sconto || 0), 0), ps.reduce((a, p) => a + (p.listino || p.price), 0))} ·</span>` : ''}<span class="muted num">Totale ${eur(spent(c.id))}</span></div>${ps.length ? purchTable(ps) : '<div class="empty">Nessun acquisto registrato.</div>'}</section>`;
   if (S.tab === 'riparazioni') body = ripPlaceholderCliente(c);
   const sl = sleeping(c.id);
@@ -1064,11 +1099,11 @@ function vCliente(){
     <div class="chead">
       ${avatar(c, 'lg')}
       <div class="who">
-        <div class="tags"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : c.tipo === 'Commerciante' ? '' : 'brand'}">${esc(c.tipo)}</span>${tierTag(c.id)}${c.celeb ? `<span class="tag amber">${ic('star')}Celebrità · ${esc(c.celeb)}</span>` : ''}${sl ? `<span class="tag red" title="Nessun passaggio, chiamata o mail da oltre 6 mesi">${ic('clock')}Dormiente</span>` : ''}${sourceTag(c)}</div>
+        <div class="tags"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : c.tipo === 'Commerciante' ? '' : 'brand'}">${esc(c.tipo)}</span>${tierTag(c.id)}${c.fornitore ? `<span class="tag amber" title="Ha venduto un oggetto a Verga (CPO)">${ic('box')}Fornitore</span>` : ''}${sl ? `<span class="tag red" title="Nessun passaggio, chiamata o mail da oltre 6 mesi">${ic('clock')}Dormiente</span>` : ''}${sourceTag(c)}</div>
         <h1>${esc(fullName(c))}</h1>
         <div style="font-weight:600">${esc(c.prof || 'Professione non indicata')}${c.azienda ? ` <span class="muted" style="font-weight:500">· ${esc(c.azienda)}</span>` : ''}</div>
         <div class="meta">
-          <span>${ic('mail')}${esc(c.email || '—')}${c.email2 ? ` <span class="faint">+1</span>` : ''}</span><span>${ic('phone')}${esc(c.tel || '—')}</span><span>${ic('store')}${esc(c.boutique)}</span>${birthText(c.birth) ? `<span>${ic('gift')}${esc(birthText(c.birth))}</span>` : ''}${c.lingua && c.lingua !== 'Italiano' ? `<span>${ic('send')}${esc(c.lingua)}</span>` : ''}
+          <span>${ic('mail')}${esc(c.email || '—')}${c.email2 ? ` <span class="faint">+1</span>` : ''}</span><span>${ic('phone')}${esc(c.tel || '—')}</span>${birthText(c.birth) ? `<span>${ic('gift')}${esc(birthText(c.birth))}</span>` : ''}${c.lingua && c.lingua !== 'Italiano' ? `<span>${ic('send')}${esc(c.lingua)}</span>` : ''}
         </div>
         <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="label">Valutazione venditore</span>${stars(c.rating, 'rate')}</div>
       </div>
@@ -1093,40 +1128,65 @@ function vCliente(){
     </div>
   </section>
   <nav class="tabs" aria-label="Sezioni scheda">
-    ${tab('panoramica','Panoramica')}${tab('anagrafica','Anagrafica')}${tab('pda','Manifestazioni', cp.length)}${tab('acquisti','Acquisti', ps.length)}${tab('riparazioni','Riparazioni', clientRepairs(c.id).length)}${tab('passaggi','Passaggi', evs.length)}
+    ${tab('panoramica','Panoramica')}${tab('anagrafica','Anagrafica')}${tab('pda','Manifestazioni', cp.length)}${tab('acquisti','Acquisti', ps.length)}${tab('riparazioni','Riparazioni', clientRepairs(c.id).length)}${tab('passaggi','Passaggi', evs.length)}${tab('comunicazione','Comunicazione', mailsOf(c).length)}
   </nav>
   ${body}`;
 }
 function cPanoramica(c, cp, ps){
   const ls = clientLinks(c.id);
   const open = cp.filter(p => ['aperta','preordine','assegnata'].includes(p.stato));
+  const sc = ps.reduce((a, p) => a + (p.sconto || 0), 0), lis = ps.reduce((a, p) => a + (p.listino || p.price), 0);
+  const acq = `<section class="card tbl-wrap">
+        <div class="card-h">${ic('bag')}<h2>Ultimi acquisti</h2><span class="sp"></span>${ps.length ? `<span class="muted num" style="font-size:13px">Totale ${eur(spent(c.id))}${sc ? ` · sconto medio ${pctTxt(sc, lis)}` : ''}</span>` : ''}${ps.length > 3 ? `<button class="link" data-act="tab" data-v="acquisti">Tutti</button>` : ''}</div>
+        ${ps.length ? purchTable(ps.slice(0,3), true) : '<div class="empty">Nessun acquisto registrato.</div>'}
+      </section>`;
   return `<div class="grid2">
     <div class="stack">
+      ${acq}
       <section class="card">
         <div class="card-h">${ic('heart')}<h2>Manifestazioni in corso</h2><span class="sp"></span>${cp.length > open.length ? `<button class="link" data-act="tab" data-v="pda">Tutte (${cp.length})</button>` : ''}<button class="btn btn-sm" data-act="pda-new" data-id="${c.id}">${ic('plus')}Nuova</button></div>
         <div>${open.length ? open.map(pdaCard).join('') : '<div class="empty">Nessuna manifestazione in corso.<br><span class="faint">Registra il modello che il cliente desidera: diventerà una PDA senza prezzo.</span></div>'}</div>
       </section>
-      <section class="card tbl-wrap">
-        <div class="card-h">${ic('bag')}<h2>Ultimi acquisti</h2><span class="sp"></span>${ps.length > 3 ? `<button class="link" data-act="tab" data-v="acquisti">Tutti</button>` : ''}</div>
-        ${ps.length ? purchTable(ps.slice(0,3)) : '<div class="empty">Nessun acquisto registrato.</div>'}
-      </section>
       ${notesCard(c)}
     </div>
     <div class="stack">
-      <section class="card">
-        <div class="card-h">${ic('link')}<h2>Legami</h2><span class="sp"></span><button class="btn btn-sm" data-act="tab-legami">${ic('plus')}Aggiungi</button></div>
-        <div>${ls.length ? ls.map(l => `<div class="lk">${avatar(l.other)}<div class="grow"><div class="rel">${esc(c.nome)} è ${esc(l.label.toLowerCase())}</div><button class="link" data-go="cliente" data-id="${l.other.id}">${esc(fullName(l.other))}</button>${l.other.incomplete ? ' <span class="tag" style="height:20px">scheda vuota</span>' : ''}</div></div>`).join('') : '<div class="empty">Nessun legame.</div>'}</div>
-      </section>
+      ${sellersCard(c)}
       <section class="card">
         <div class="card-h">${ic('sparkle')}<h2>Interessi e misure</h2><span class="sp"></span><button class="link" data-act="tab" data-v="anagrafica">Modifica</button></div>
         <div class="card-b stack" style="gap:14px">
-          <div><div class="label" style="margin-bottom:6px">Brand e modelli</div><div class="tags">${c.brands.map(b => `<span class="tag brand">${esc(b)}</span>`).join('')}${c.modelli.map(m => `<span class="tag">${esc(m)}</span>`).join('')}${!c.brands.length ? '<span class="faint">—</span>' : ''}</div></div>
+          <div><div class="label" style="margin-bottom:6px">Brand di interesse</div><div class="tags">${c.brands.map(b => `<span class="tag brand">${esc(b)}</span>`).join('')}${!c.brands.length ? '<span class="faint">—</span>' : ''}</div></div>
           <div><div class="label" style="margin-bottom:6px">Interessi</div><div class="tags">${c.interests.map(b => `<span class="tag">${esc(b)}</span>`).join('') || '<span class="faint">Da chiedere al cliente</span>'}</div></div>
           <div><div class="label" style="margin-bottom:6px">Misure</div>${c.misure.polso || c.misure.dxAnulare ? `<dl class="kv"><dt>Polso</dt><dd class="num">${esc(c.misure.polso || '—')} cm</dd><dt>Anello mano dx</dt><dd class="num">medio ${esc(c.misure.dxMedio || '—')} · anulare ${esc(c.misure.dxAnulare || '—')}</dd><dt>Anello mano sx</dt><dd class="num">medio ${esc(c.misure.sxMedio || '—')} · anulare ${esc(c.misure.sxAnulare || '—')}</dd></dl>` : '<span class="faint">Da rilevare in negozio</span>'}</div>
         </div>
       </section>
+      <section class="card">
+        <div class="card-h">${ic('link')}<h2>Legami</h2><span class="sp"></span><button class="btn btn-sm" data-act="tab-legami">${ic('plus')}Aggiungi</button></div>
+        <div>${ls.length ? ls.map(l => `<div class="lk">${avatar(l.other)}<div class="grow"><div class="rel">${esc(c.nome)} è ${esc(l.label.toLowerCase())}</div><button class="link" data-go="cliente" data-id="${l.other.id}">${esc(fullName(l.other))}</button>${l.other.incomplete ? ' <span class="tag" style="height:20px">scheda vuota</span>' : ''}</div></div>`).join('') : '<div class="empty">Nessun legame.</div>'}</div>
+      </section>
     </div>
   </div>`;
+}
+/* venditori di riferimento: chi ha venduto al cliente e chi lo segue (primi 4) */
+function sellersCard(c){
+  const m = {};
+  const add = (op, k, n = 1) => { if (!op) return; m[op] = m[op] || {op, v:0, tot:0, a:0, last:''}; m[op][k] += n; };
+  clientPurchases(c.id).forEach(p => { add(p.seller, 'v'); add(p.seller, 'tot', p.price); if (p.seller && p.date > m[p.seller].last) m[p.seller].last = p.date; });
+  [...clientEvents(c.id), ...clientPdas(c.id)].forEach(e => { add(e.operator, 'a'); if (e.operator && e.date > m[e.operator].last) m[e.operator].last = e.date; });
+  const list = Object.values(m).sort((a, b) => b.v - a.v || b.tot - a.tot || b.a - a.a).slice(0, 4);
+  return `<section class="card">
+    <div class="card-h">${ic('users')}<h2>Venditori di riferimento</h2></div>
+    <div>${list.length ? list.map((x, i) => `<div class="row"><span class="av" style="${i ? '' : 'background:var(--brand);color:#fff'}">${opInitials(x.op)}</span><div class="grow"><div class="t">${esc(x.op)}${i === 0 ? ' <span class="tag brand" style="height:20px">principale</span>' : ''}</div><div class="s">${x.v ? `${x.v} ${x.v === 1 ? 'vendita' : 'vendite'} · ${eur(x.tot)}` : 'nessuna vendita'}${x.a ? ` · ${x.a} ${x.a === 1 ? 'contatto' : 'contatti'}` : ''}${x.last ? ` · ultimo ${fmtD(x.last)}` : ''}</div></div></div>`).join('') : '<div class="empty">Nessun venditore ha ancora seguito il cliente.</div>'}</div>
+  </section>`;
+}
+/* comunicazione: le newsletter e le mail inviate al cliente, lette da MailUp */
+const NL = [['2026-09-15','Rolex · le novità di settembre in Bottega Storica'],['2026-07-03','Estate a Portofino: orari e eventi in boutique'],['2026-05-20','Patek Philippe · serata dedicata alle Grand Complications'],['2026-03-10','Nuovi arrivi Tudor e Breitling'],['2025-12-01','Auguri di Natale da Verga 1947']];
+const mailsOf = c => !c.email || c.newsletter === false ? [] : NL.map(([d, t], i) => ({d, t, st:(c.id.length + i) % 3 === 0 ? 'cliccata' : (c.id.length + i) % 3 === 1 ? 'aperta' : 'consegnata'}));
+function commCard(c){
+  const ms = mailsOf(c), n = st => ms.filter(m => m.st === st || (st === 'aperta' && m.st === 'cliccata')).length;
+  return `<section class="card tbl-wrap">
+    <div class="card-h">${ic('mail')}<h2>Comunicazione</h2><span class="faint" style="font-size:12px">Newsletter e mail inviate · lette da MailUp</span><span class="sp"></span>${ms.length ? `<span class="muted num">${ms.length} inviate · ${n('aperta')} aperte · ${n('cliccata')} con clic</span>` : ''}</div>
+    ${!c.email ? '<div class="empty">Il cliente non ha un\'email: non riceve comunicazioni.</div>' : c.newsletter === false ? '<div class="empty">Il cliente non è iscritto alla newsletter.</div>' : `<table class="tbl"><thead><tr><th>Data</th><th>Oggetto</th><th>Lingua</th><th>Esito</th></tr></thead><tbody>${ms.map(m => `<tr><td class="num">${fmtD(m.d)}</td><td>${esc(m.t)}</td><td>${c.lingua && c.lingua !== 'Italiano' ? 'Inglese' : 'Italiano'}</td><td><span class="tag ${m.st === 'cliccata' ? 'ok' : m.st === 'aperta' ? 'blue' : ''}">${m.st === 'cliccata' ? 'Aperta e cliccata' : m.st === 'aperta' ? 'Aperta' : 'Consegnata'}</span></td></tr>`).join('')}</tbody></table>`}
+  </section>`;
 }
 function notesCard(c){
   return `<section class="card">
@@ -1159,15 +1219,16 @@ function pdaCard(p){
   return `<div class="pda">
     <span class="wm">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}</span>
     <div class="grow">
-      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ttl">${esc(p.brand)} ${esc(p.modello)}</span>${p.stato !== 'aperta' ? stateTag(p) : ''}</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="ttl">${esc(pdaTitle(p))}</span>${p.stato !== 'aperta' ? stateTag(p) : ''}</div>
       ${pdaNome(p) ? `<div class="faint" style="font-size:12px;letter-spacing:.02em;margin-top:-4px">${esc(pdaNome(p))}</div>` : ''}
-      <div class="spec">${p.ref ? `<span>Referenza <b class="mono">${esc(p.ref)}</b></span>` : '<span>Referenza <b>qualsiasi</b></span>'}<span>Quadrante <b>${esc(p.quadrante || '—')}</b></span><span>Bracciale <b>${esc(p.bracciale || '—')}</b></span></div>
+      ${p.brand === 'Altro' ? `<div class="spec"><span>${esc(p.note || '—')}</span></div>` : `<div class="spec">${p.ref ? `<span>Referenza <b class="mono">${esc(p.ref)}</b></span>` : '<span>Referenza <b>qualsiasi</b></span>'}${p.brand === 'Rolex' ? `<span>Quadrante <b>${esc(p.quadrante || '—')}</b></span><span>Bracciale <b>${esc(p.bracciale || '—')}</b></span>` : ''}</div>`}
       ${pr ? `<div class="match">${ic('check')}Prodotto associato: <span class="mono">${esc(pr.ref)}</span> · seriale <span class="mono">${esc(pr.seriale)}</span></div>` : ''}
-      <div class="match">${ic('calendar')}Inserita il ${fmtD(p.date)}</div>
+      <div class="faint" style="font-size:12.5px;margin-top:2px">Inserita il ${fmtD(p.date)} · ${esc(pdaB(p))} · <b style="color:var(--ink)">${esc(p.operator)}</b></div>
     </div>
     <div class="act ${pr ? 'col' : ''}">
       ${pr ? `<span class="tag ok">${ic('check')}Prodotto associato</span>` : ''}
       ${p.stato === 'assegnata' ? `<button class="btn btn-sm btn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>` : ''}
+      ${['aperta','preordine'].includes(p.stato) ? `<button class="btn btn-sm btn-ghost" data-act="pda-cancel" data-id="${p.id}">${ic('x')}Rifiuta</button>` : ''}
       <button class="btn btn-sm" data-go="manifestazione" data-id="${p.id}">Dettaglio</button>
     </div>
   </div>`;
@@ -1175,29 +1236,33 @@ function pdaCard(p){
 /* documento dell'ordine (fattura o documento commerciale): il PDF lo restituisce il gestionale */
 const docNo = p => p.docNo || `${p.doc === 'Fattura' ? 'FT' : 'DC'} ${p.ord.slice(4, 8)}/${p.ord.slice(-4)}`;
 const docBtn = p => p.doc ? `<button class="btn btn-sm" data-act="doc-dl" data-v="${esc(docNo(p))}" title="${esc(p.doc)} ${esc(docNo(p))}" style="white-space:nowrap">${ic('download')}Scarica fattura</button>` : '';
-function purchTable(ps){
+function purchTable(ps, compact){
+  if (compact) return `<table class="tbl"><thead><tr><th>Data</th><th>Prodotto</th><th>Venditore</th><th>Sconto</th><th style="text-align:right">Importo</th><th></th></tr></thead><tbody>
+    ${ps.map(p => `<tr><td class="num">${fmtD(p.date)}</td><td><b>${esc(p.brand)}</b> ${esc(p.modello)}<div class="faint mono" style="font-size:11.5px">${esc(p.ref)}</div></td><td>${esc(p.seller || '')}<div class="faint" style="font-size:12px">${esc(p.boutique)}</div></td><td class="num">${p.sconto ? `<span class="tag ok" style="height:22px">−${pctTxt(p.sconto, p.listino)}</span>` : '<span class="faint">—</span>'}</td><td class="num" style="text-align:right">${eur(p.price)}</td><td style="text-align:right">${p.doc ? `<button class="btn btn-ghost btn-sm" data-act="doc-dl" data-v="${esc(docNo(p))}" title="Scarica fattura ${esc(docNo(p))}" aria-label="Scarica fattura">${ic('download')}</button>` : ''}</td></tr>`).join('')}
+  </tbody></table>`;
   return `<table class="tbl"><thead><tr><th>Data</th><th>Prodotto</th><th>Referenza</th><th>Boutique · Venditore</th><th>Sconto</th><th style="text-align:right">Importo</th><th>Documento</th></tr></thead><tbody>
     ${ps.map(p => `<tr><td class="num">${fmtD(p.date)}</td><td><b>${esc(p.brand)}</b> ${esc(p.modello)}</td><td class="mono">${esc(p.ref)}</td><td>${esc(p.boutique)}<div class="faint" style="font-size:12px">${esc(p.seller || '')}</div></td><td class="num">${p.sconto ? `<span class="tag ok" style="height:22px">−${pctTxt(p.sconto, p.listino)}</span><div class="faint" style="font-size:12px">${eur(p.sconto)} su ${eur(p.listino)}</div>` : '<span class="faint">—</span>'}</td><td class="num" style="text-align:right">${eur(p.price)}</td><td>${docBtn(p)}<div class="faint mono" style="font-size:11.5px;margin-top:4px">${p.doc ? esc(docNo(p)) : ''}</div></td></tr>`).join('')}
   </tbody></table>`;
 }
+const evTools = e => `<span class="ev-tools"><button class="btn btn-ghost btn-sm" data-act="ev-edit" data-id="${e.id}" aria-label="Modifica" title="Modifica">${ic('edit')}</button><button class="btn btn-ghost btn-sm" data-act="ev-del" data-id="${e.id}" aria-label="Elimina" title="Elimina">${ic('trash')}</button></span>`;
 function tlRow(e){
   const t = EV[e.type];
-  return `<div class="tl"><span class="dot ${t.cls}">${ic(t.icon)}</span><div><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>${t.label}</b><span class="faint">${fmtDT(e.date)}</span>${e.motivo ? `<span class="tag">${esc(e.motivo)}</span>` : ''}${e.followup ? `<span class="tag ${e.done ? 'ok' : 'amber'}">${e.done ? 'Follow-up fatto' : 'Follow-up ' + fmtD(e.followup).slice(0,5)}</span>` : ''}</div>
-  <div class="muted" style="font-size:13px">${esc(e.boutique)} · ${esc(e.operator)}</div>${e.note ? `<div style="margin-top:4px">${esc(e.note)}</div>` : ''}</div></div>`;
+  return `<div class="tl"><span class="dot ${t.cls}">${ic(t.icon)}</span><div style="flex:1"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>${t.label}</b><span class="faint">${fmtDT(e.date)}</span>${e.motivo ? `<span class="tag">${esc(e.motivo)}</span>` : ''}${e.followup ? `<span class="tag ${e.done ? 'ok' : 'amber'}">${e.done ? 'Follow-up fatto' : 'Follow-up ' + fmtD(e.followup).slice(0,5)}</span>` : ''}</div>
+  <div class="muted" style="font-size:13px">${esc(e.boutique)} · <b style="color:var(--ink)">${esc(e.operator)}</b></div>${e.note ? `<div style="margin-top:4px">${esc(e.note)}</div>` : ''}</div>${evTools(e)}</div>`;
 }
 function cAnagrafica(c){ return `<section class="card">${clientForm(c)}<div class="modal-f" style="border-radius:0 0 25px 25px"><button class="btn" data-act="tab" data-v="panoramica">Annulla</button><button class="btn btn-primary" data-act="save-client" data-id="${c.id}">${ic('check')}Salva modifiche</button></div></section>`; }
 function clientForm(c){
   const n = S.nc; const b = c ? c.birth || {} : {};
   const brands = n.brands, ints = n.interests, bl = c?.billing || {}, ms = c?.misure || {};
   const inp = (id, label, val, extra = '') => `<label class="field"><span>${label}</span><input class="in" id="${id}" value="${esc(val)}" ${extra}></label>`;
-  return `
+  return `<div class="cform">
   <div class="fsec"><h3>${ic('users')}Dati anagrafici</h3>
     <div class="fgrid">
       <label class="field"><span>Tipologia</span><select class="sel" id="f-tipo">${opts(TIPI, c?.tipo || 'Prospect')}</select></label>
       ${inp('f-nome','Nome <em>*</em>',c?.nome,'data-dup')}
       ${inp('f-cognome','Cognome <em>*</em>',c?.cognome,'data-dup')}
-      <label class="field"><span>Sesso</span><select class="sel" id="f-sesso">${`<option value="">—</option>` + [['F','Donna'],['M','Uomo'],['X','Altro']].map(([v,l]) => `<option value="${v}" ${c?.sesso === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-      <label class="field"><span>Professione</span><select class="sel" id="f-prof">${opts(PROFESSIONS, c?.prof, 'Seleziona')}</select></label>
+      <label class="field"><span>Sesso</span><select class="sel" id="f-sesso">${`<option value="">—</option>` + [['F','Donna'],['M','Uomo']].map(([v,l]) => `<option value="${v}" ${c?.sesso === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      <label class="field"><span>Professione</span><select class="sel" id="f-prof">${opts(PROFESSIONS, c?.prof, '—')}</select></label>
       ${inp('f-azienda','Azienda',c?.azienda,'placeholder="Campo libero"')}
       ${inp('f-email','Email principale <em>*</em>',c?.email,'type="email" data-dup autocapitalize="none"')}
       ${inp('f-email2','Email secondaria',c?.email2,'type="email" autocapitalize="none"')}
@@ -1207,17 +1272,17 @@ function clientForm(c){
       <label class="field"><span>Lingua</span><select class="sel" id="f-lingua">${opts(LANGS, c?.lingua || 'Italiano')}</select></label>
       <label class="field"><span>Boutique di riferimento</span><select class="sel" id="f-boutique">${opts(BOUTIQUES.map(x => x.name), c?.boutique || S.boutique)}</select></label>
     </div>
-    <p class="faint" style="margin:0;font-size:12px">Per un Prospect bastano nome, cognome ed email. Le email vengono salvate sempre in minuscolo. La lingua decide la newsletter: italiano o vuoto → NL in italiano, altre lingue → NL in inglese.</p>
+    <p class="faint" style="margin:0;font-size:12px">Per un Prospect bastano nome, cognome ed email (obbligatoria: senza email l'anagrafica non si salva). I campi liberi si scrivono in maiuscolo, le email sempre in minuscolo. La lingua decide la newsletter: italiano o vuoto → NL in italiano, altre lingue → NL in inglese.</p>
     <div id="dup"></div>
   </div>
   <div class="fsec"><h3>${ic('home')}Indirizzi</h3>
     ${n.addr.map((a, i) => `<div class="addr">
-      <label class="field"><span>Etichetta</span><input class="in" data-addr="${i}:label" value="${esc(a.label)}" placeholder="Casa Milano"></label>
+      <label class="field"><span>Etichetta</span><select class="sel" data-addr="${i}:label">${[['','—'],['Casa','Casa'],['Ufficio','Ufficio']].map(([v, l]) => `<option value="${v}" ${a.label === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
       <label class="field"><span>Via e numero</span><input class="in" data-addr="${i}:via" value="${esc(a.via)}"></label>
       <label class="field"><span>CAP</span><input class="in" data-addr="${i}:cap" value="${esc(a.cap)}"></label>
       <label class="field"><span>Città</span><input class="in" data-addr="${i}:citta" value="${esc(a.citta)}"></label>
       <label class="field"><span>Prov.</span><input class="in" data-addr="${i}:prov" value="${esc(a.prov)}"></label>
-      <label class="field"><span>Nazione</span><input class="in" data-addr="${i}:naz" value="${esc(a.naz)}"></label>
+      ${nazField(`data-addr="${i}:naz"`, a.naz)}
       <button type="button" class="btn btn-ghost" data-act="addr-rm" data-i="${i}" aria-label="Rimuovi indirizzo">${ic('trash')}</button>
     </div>`).join('')}
     <button type="button" class="btn btn-sm" data-act="addr-add" style="align-self:flex-start">${ic('plus')}Aggiungi indirizzo</button>
@@ -1225,12 +1290,12 @@ function clientForm(c){
   <div class="fsec"><h3>${ic('bag')}Aziende e dati di fatturazione</h3>
     ${n.az.map((a, i) => { const ai = (k, l, x = '') => `<label class="field"><span>${l}</span><input class="in" data-az="${i}:${k}" value="${esc(a[k])}" ${x}></label>`; return `<div class="az">
       <div class="az-h"><b>${a.rs ? esc(a.rs) : 'Azienda ' + (i + 1)}</b>${i === 0 ? '<span class="tag brand" style="height:22px">Principale</span>' : `<button type="button" class="link" data-act="az-main" data-i="${i}">Rendi principale</button>`}<span class="sp" style="flex:1"></span><button type="button" class="btn btn-ghost btn-sm" data-act="az-rm" data-i="${i}" aria-label="Rimuovi azienda">${ic('trash')}</button></div>
-      <div class="fgrid">${ai('rs', 'Ragione sociale')}${ai('ind', 'Indirizzo di fatturazione')}${ai('piva', 'Partita IVA', 'class="in mono"')}${ai('sdi', 'Codice SDI', 'class="in mono" maxlength="7"')}</div>
+      <div class="fgrid">${ai('rs', 'Ragione sociale')}${ai('piva', 'Partita IVA', 'class="in mono"')}${ai('sdi', 'Codice SDI', 'class="in mono" maxlength="7"')}</div>
+      <div class="addr az-addr">${ai('via', 'Indirizzo di fatturazione')}${ai('cap', 'CAP')}${ai('citta', 'Città')}${ai('prov', 'Prov.')}${nazField(`data-az="${i}:naz"`, a.naz)}</div>
     </div>`; }).join('')}
     <button type="button" class="btn btn-sm" data-act="az-add" style="align-self:flex-start">${ic('plus')}Aggiungi azienda</button>
     <p class="faint" style="margin:0;font-size:12px">La prima azienda è la principale. In cassa si sceglie se intestare la vendita alla persona (scontrino) o a una delle sue aziende (fattura).</p>
   </div>
-  ${linkSection(c)}
   <div class="fsec"><h3>${ic('gift')}Data di nascita</h3>
     <div class="fgrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
       <label class="field"><span>Giorno</span><select class="sel" id="f-bd">${opts(Array.from({length:31},(_,i) => String(i+1)), b.d ? String(b.d) : '', '—')}</select></label>
@@ -1238,6 +1303,16 @@ function clientForm(c){
       ${n.noYear ? `<label class="field"><span>Decade</span><select class="sel" id="f-dec">${opts(DECADES, n.decade || b.decade, 'Seleziona')}</select></label>` : `<label class="field"><span>Anno</span><input class="in num" id="f-by" inputmode="numeric" maxlength="4" value="${esc(b.y)}" placeholder="aaaa"></label>`}
     </div>
     <label class="check"><input type="checkbox" id="f-noyear" data-act="noyear" ${n.noYear ? 'checked' : ''}> Il cliente preferisce non indicare l'anno: registra solo la decade</label>
+  </div>
+  <div class="fsec"><h3>${ic('star')}Valutazione del venditore</h3>
+    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">${stars(n.rating, 'nc-rate')}<span class="faint" style="font-size:12.5px;max-width:60ch">Giudizio personale da 1 (pessimo) a 5: potenziale, notorietà, fattori umani. È separato dalla fascia Bronzo · Argento · Oro · Platino, che si calcola da sola sugli acquisti.</span></div>
+  </div>
+  <div class="fsec"><h3>${ic('heart')}Brand di interesse</h3>
+    <div class="chips">${BRANDS.map(v => `<button type="button" class="chip ${brands.includes(v) ? 'on' : ''}" data-act="nc-brand" data-v="${v}">${brands.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
+  </div>
+  <div class="fsec"><h3>${ic('sparkle')}Interessi</h3>
+    <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${ints.includes(v) ? 'on' : ''}" data-act="nc-int" data-v="${v}">${ints.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
+    <p class="faint" style="margin:0;font-size:12px">Brand e interessi sono liste chiuse definite da Verga: il venditore può solo scegliere.</p>
   </div>
   <div class="fsec"><h3>${ic('watch')}Misure</h3>
     <div class="fgrid" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr))">
@@ -1248,40 +1323,27 @@ function clientForm(c){
       ${inp('f-sxa','Anello · anulare sx',ms.sxAnulare,'inputmode="numeric"')}
     </div>
   </div>
-  <div class="fsec"><h3>${ic('star')}Valutazione del venditore</h3>
-    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">${stars(n.rating, 'nc-rate')}<span class="faint" style="font-size:12.5px;max-width:60ch">Giudizio personale da 1 (pessimo) a 5: potenziale, notorietà, fattori umani. È separato dalla fascia Bronzo · Argento · Oro · Platino, che si calcola da sola sugli acquisti.</span></div>
-    <div class="field"><span>Celebrità</span><div class="chips">${['Nessuna',...CELEB].map(v => `<button type="button" class="chip ${((n.celeb || c?.celeb || 'Nessuna') === v) ? 'on' : ''}" data-act="celeb" data-v="${v}">${v}</button>`).join('')}</div></div>
-  </div>
-  <div class="fsec"><h3>${ic('heart')}Brand di interesse</h3>
-    <div class="chips">${BRANDS.map(v => `<button type="button" class="chip ${brands.includes(v) ? 'on' : ''}" data-act="nc-brand" data-v="${v}">${brands.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
-    ${brands.length ? `<label class="field"><span>Modelli di interesse</span><div class="chips">${brands.flatMap(bb => MODELS[bb] || []).map(m => `<button type="button" class="chip ${(n.modelli||[]).includes(m) ? 'on' : ''}" data-act="nc-model" data-v="${m}">${m}</button>`).join('')}</div></label>` : ''}
-  </div>
-  <div class="fsec"><h3>${ic('sparkle')}Interessi</h3>
-    <div class="chips">${INTERESTS.map(v => `<button type="button" class="chip ${ints.includes(v) ? 'on' : ''}" data-act="nc-int" data-v="${v}">${ints.includes(v) ? ic('check') : ''}${v}</button>`).join('')}</div>
-    <p class="faint" style="margin:0;font-size:12px">Brand e interessi sono liste chiuse definite da Verga: il venditore può solo scegliere.</p>
-  </div>
+  ${linkSection(c)}
   <div class="fsec"><h3>${ic('edit')}${c ? 'Privacy' : 'Prima nota e privacy'}</h3>
     ${c ? '<p class="faint" style="margin:0;font-size:12.5px">Le note interne si aggiungono dalla Panoramica: ogni nota è firmata con nome, data e ora.</p>' : `<label class="field"><span>Prima nota interna (verrà firmata con il tuo nome)</span><textarea class="ta" id="f-note"></textarea></label>`}
     <label class="check"><input type="checkbox" id="f-priv" ${c?.privacy ? 'checked' : ''}> Il cliente ha dato il consenso all'informativa privacy</label>
     <p class="faint" style="margin:0;font-size:12px">${c?.privacy ? `Consenso registrato: ${privTxt(c.privacy)}.` : 'Se spunti tu la casella, il consenso viene registrato con data, ora e il tuo nome. Se lo firma il cliente sul tablet, risulta dato dal cliente.'}</p>
     ${c?.privacy?.firma ? `<div class="field"><span>Firma del cliente</span>${sigImg(c.privacy.firma)}</div>` : ''}
-  </div>`;
+  </div></div>`;
 }
+/* nazione: si scrive e si sceglie dall'elenco (con "IT" esce solo ITALIA) */
+const nazField = (attr, val) => `<label class="field naz-f"><span>Nazione</span><input class="in" ${attr} value="${esc((val || '').toUpperCase())}" autocomplete="off" placeholder="Scrivi le prime lettere"><div class="naz-drop"></div></label>`;
 function linkSection(c){
   const L = S.nc.lk, me = c ? c.id : null;
   const existing = c ? clientLinks(c.id).map(x => ({...x, rm:`data-act="lk-rm" data-i="${x.i}"`})) : S.nc.pending.map((x, i) => ({label:x.type, other:C(x.to), rm:`data-act="lk-rm-p" data-i="${i}"`}));
   const o = L.otherId ? C(L.otherId) : null;
   const who = c ? esc(c.nome) : 'Il cliente';
-  return `<div class="fsec" id="sec-legami"><h3>${ic('link')}Legami e parentele</h3>
+  L.type = 'Coniuge di'; L.back = 'Coniuge di';
+  return `<div class="fsec" id="sec-legami"><h3>${ic('link')}Legami</h3>
     <p class="faint" style="margin:-6px 0 0;font-size:12.5px">Nota interna, non visibile al cliente. Il collegamento compare su entrambe le anagrafiche.</p>
     ${existing.length ? `<div class="card">${existing.map(x => `<div class="lk">${avatar(x.other)}<div class="grow"><div class="rel">${who} è ${esc(x.label.toLowerCase())}</div><b>${esc(fullName(x.other))}</b>${x.other.incomplete ? ' <span class="tag" style="height:20px">scheda da completare</span>' : ''}</div><button type="button" class="btn btn-ghost btn-sm" ${x.rm} aria-label="Rimuovi legame">${ic('trash')}</button></div>`).join('')}</div>` : ''}
     <div class="lk-add">
-      <div class="fgrid">
-        <label class="field"><span>${c ? esc(c.nome) : 'Il cliente'} è…</span><input class="in" id="lk-type" list="lk-dl" value="${esc(L.type)}" placeholder="Es. Moglie di" autocomplete="off"></label>
-        <label class="field"><span>Sulla scheda dell'altra persona comparirà</span><input class="in" id="lk-back" value="${esc(L.back)}" placeholder="Es. Marito di" autocomplete="off"></label>
-      </div>
-      <datalist id="lk-dl">${Object.keys(LINK_TYPES).map(t => `<option value="${t}">`).join('')}</datalist>
-      <div class="chips">${LINK_CHIPS.map(t => `<button type="button" class="chip ${L.type === t ? 'on' : ''}" data-act="lk-chip" data-v="${t}">${t}</button>`).join('')}</div>
+      <div class="field"><span>Tipo di legame</span><div class="chips">${LINK_CHIPS.map(t => `<button type="button" class="chip on" disabled>${ic('check')}${t}</button>`).join('')}</div></div>
       <div class="field"><span>Persona collegata</span>
         ${o ? `<div class="picked">${avatar(o)}<div class="grow"><b>${esc(fullName(o))}</b><div class="muted" style="font-size:12px">${esc(o.email || 'Anagrafica da completare')}</div></div><button type="button" class="link" data-act="lk-unpick">Cambia</button></div>`
         : L.quick ? `<div class="card card-b" style="display:flex;flex-direction:column;gap:12px">
@@ -1479,7 +1541,7 @@ function vPassaggi(){
     <select class="sel" style="width:auto;height:38px;border-radius:99px" data-evf="per">${[['','Sempre'],['7','Ultimi 7 giorni'],['30','Ultimi 30 giorni'],['90','Ultimi 3 mesi'],['365','Ultimo anno']].map(([v,l]) => `<option value="${v}" ${f.per === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     <input class="in" style="width:200px;height:38px;border-radius:99px" data-evf="q" value="${esc(f.q)}" placeholder="Cliente"></div>
   <div class="card tbl-wrap"><table class="tbl">
-    <thead><tr><th>Quando</th><th>Cliente</th><th>Tipo</th><th>Motivo e nota</th><th>Boutique · Venditore</th><th>Follow-up</th></tr></thead>
+    <thead><tr><th>Quando</th><th>Cliente</th><th>Tipo</th><th>Motivo e nota</th><th>Boutique · Venditore</th><th>Follow-up</th><th></th></tr></thead>
     <tbody>${list.map(e => { const c = C(e.clientId), t = EV[e.type]; return `<tr class="click" data-go="cliente" data-id="${c.id}">
       <td class="num" style="white-space:nowrap">${fmtDT(e.date)}</td>
       <td><div class="cell-person" style="min-width:160px">${avatar(c)}<b>${esc(fullName(c))}</b></div></td>
@@ -1487,6 +1549,7 @@ function vPassaggi(){
       <td style="max-width:340px">${e.motivo ? `<span class="tag" style="margin-bottom:4px">${esc(e.motivo)}</span><br>` : ''}${esc(e.note || (e.motivo ? '' : '—'))}</td>
       <td>${esc(e.boutique)}<div class="faint" style="font-size:12px">${esc(e.operator)}</div></td>
       <td>${e.followup ? `<span class="tag ${e.done ? 'ok' : dday(e.followup) <= 0 ? 'red' : 'amber'}">${e.done ? 'Fatto' : fmtD(e.followup).slice(0,5)}</span>` : '<span class="faint">—</span>'}</td>
+      <td style="text-align:right">${evTools(e)}</td>
     </tr>`; }).join('')}</tbody>
   </table></div>`;
 }
@@ -1505,8 +1568,48 @@ function vPda(){
     <label class="field"><span>Boutique del cliente</span><select class="sel" data-pdf="boutique">${opts(BOUTIQUES.map(b => b.name), f.boutique, 'Tutte')}</select></label>
     <label class="field"><span>Registrata da</span><select class="sel" data-pdf="operator">${opts(OPERATORS.map(o => o.name), f.operator, 'Tutti')}</select></label>
   </div>
-  <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['assegnata','Associata'],['venduta','Ordine'],['annullata','Annullata'],['','Tutte']].map(([v,l]) => `<button class="chip ${S.pdaf === v ? 'on' : ''}" data-act="pdaf" data-v="${v}">${l} <span class="num" style="opacity:.7">${pdas.filter(p => !v || p.stato === v).length}</span></button>`).join('')}</div>
-  <section class="card pda-list">${list.map(p => { const c = C(p.clientId); return `<div class="pda-it"><div style="padding:14px 20px 0;display:flex;align-items:center;gap:10px">${avatar(c)}<button class="link" data-go="cliente" data-id="${c.id}">${esc(fullName(c))}</button><span class="faint">· ${esc(c.boutique)}</span></div>${pdaCard(p)}</div>`; }).join('') || '<div class="empty">Nessuna manifestazione con questi filtri.</div>'}</section>`;
+  <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['assegnata','Associata'],['venduta','Ordine'],['annullata','Rifiutata'],['','Tutte']].map(([v,l]) => `<button class="chip ${S.pdaf === v ? 'on' : ''}" data-act="pdaf" data-v="${v}">${l} <span class="num" style="opacity:.7">${pdas.filter(p => !v || p.stato === v).length}</span></button>`).join('')}</div>
+  <section class="card pda-list">${list.map(p => { const c = C(p.clientId); return `<div class="pda-it"><div style="padding:14px 20px 0;display:flex;align-items:center;gap:10px">${avatar(c)}<button class="link" data-go="cliente" data-id="${c.id}">${esc(fullName(c))}</button></div>${pdaCard(p)}</div>`; }).join('') || '<div class="empty">Nessuna manifestazione con questi filtri.</div>'}</section>`;
+}
+/* per ora le manifestazioni si fanno su Rolex e Patek Philippe; per gli altri brand basta una nota (ricercabile) */
+const MN_BRANDS = ['Rolex','Patek Philippe','Altro'];
+const blankMn = (cid, back) => ({clientId:cid || null, lock:!!cid, back:back || {view:'pda'}, brand:'', modello:'', ref:'', nome:'', quad:'', brac:'', evento:'', incar:S.operator, note:'', stato:'aperta'});
+function vManifNew(){
+  const m = S.mn || (S.mn = blankMn()), c = m.clientId ? C(m.clientId) : null, rx = m.brand === 'Rolex', pk = m.brand === 'Patek Philippe', al = m.brand === 'Altro';
+  const inp = (k, l, ph, x = '') => `<label class="field"><span>${l}</span><input class="in" data-mn="${k}" ${k === 'ref' ? 'id="m-ref"' : k === 'nome' ? 'id="m-nome"' : ''} value="${esc(m[k])}" placeholder="${ph}" ${x}></label>`;
+  const ok = c && m.brand && (al ? m.note.trim() : m.modello);
+  return `
+  <div><button class="link" data-act="mn-cancel" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Indietro</button></div>
+  <div class="page-h"><div><div class="label">Clienti · ${esc(S.boutique)}</div><h1>Nuova manifestazione</h1></div></div>
+  <section class="card">
+    <div class="fsec"><h3>${ic('users')}Cliente</h3>
+      ${c ? `<div class="picked">${avatar(c)}<div class="grow"><b>${esc(fullName(c))}</b><div class="muted" style="font-size:12px">${esc(c.email || '')}</div></div>${m.lock ? '' : '<button class="link" data-act="mn-unpick">Cambia</button>'}</div>` : `<div class="scan-wrap">${ic('search')}<input class="in" id="mn-cs" style="padding-left:44px" placeholder="Cerca il cliente per nome, email o telefono" autocomplete="off"></div><div class="picklist" id="mn-cs-list">${clientPick('', 'mn-pick')}</div>`}
+    </div>
+    <div class="fsec"><h3>${ic('heart')}Brand</h3>
+      <div class="chips">${MN_BRANDS.map(v => `<button class="chip ${m.brand === v ? 'on' : ''}" data-act="mn-brand" data-v="${v}">${m.brand === v ? ic('check') : ''}${v === 'Altro' ? 'Altro brand o prodotto' : v}</button>`).join('')}</div>
+      ${!m.brand ? '<p class="faint" style="margin:0;font-size:12.5px">Scegli il brand per vedere i campi della manifestazione.</p>' : ''}
+    </div>
+    ${rx || pk ? `<div class="fsec"><h3>${ic('watch')}${rx ? 'Collezione e dettagli' : 'Modello'}</h3>
+      <div class="field"><span>${rx ? 'Collezione' : 'Modello'} <em>*</em></span><div class="chips">${(MODELS[m.brand] || []).map(v => `<button class="chip ${m.modello === v ? 'on' : ''}" data-act="mn-model" data-v="${v}">${v}</button>`).join('')}</div></div>
+      <div class="fgrid">
+        ${inp('ref', 'Referenza (se il cliente la sa)', 'Es. ' + (rx ? '126500LN' : '5811/1G'), 'class="in mono" autocomplete="off"')}
+        ${rx ? inp('nome', 'Nome modello', 'Si compila dalla referenza') : ''}
+        ${rx ? inp('quad', 'Quadrante', 'Es. bianco') + inp('brac', 'Bracciale', 'Es. Oyster, Jubilee') + inp('evento', 'Evento particolare legato all\'acquisto', 'Es. anniversario a dicembre') : ''}
+        <label class="field"><span>Venditore incaricato</span><select class="sel" data-mn="incar">${opts(OPERATORS.map(o => o.name), m.incar)}</select></label>
+      </div>
+    </div>` : ''}
+    ${m.brand ? `<div class="fsec"><h3>${ic('edit')}${al ? 'Interesse del cliente' : 'Note'}</h3>
+      <label class="field"><span>${al ? 'Cosa desidera: brand, modello, dettagli <em>*</em>' : 'Note'}</span><textarea class="ta" data-mn="note" placeholder="${al ? 'Es. interessato a un Cartier Santos medium in acciaio' : 'Es. accetta anche quadrante nero'}">${esc(m.note)}</textarea></label>
+      ${al ? '<p class="faint" style="margin:0;font-size:12.5px">Per gli altri brand non si associa un prodotto di magazzino: la nota resta sulla scheda e si trova con la ricerca (es. cercando «Cartier»).</p>' : `<div class="field"><span>Stato iniziale</span><div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine']].map(([k, l]) => `<button class="chip ${m.stato === k ? 'on' : ''}" data-act="mn-stato" data-v="${k}">${l}</button>`).join('')}</div></div>`}
+    </div>` : ''}
+    <div class="modal-f" style="border-radius:0 0 25px 25px"><span class="auto-info">${ic('info')}Registrata da ${esc(S.operator)} · ${esc(S.boutique)}</span><button class="btn" data-act="mn-cancel">Annulla</button><button class="btn btn-primary btn-lg" data-act="mn-save" ${ok ? '' : 'disabled'}>${ic('check')}Registra manifestazione</button></div>
+  </section>`;
+}
+function saveMn(){
+  const m = S.mn;
+  pdas.push({id:'p' + (++pdaSeq), clientId:m.clientId, brand:m.brand, modello:m.brand === 'Altro' ? '' : m.modello, ref:m.ref.trim().toUpperCase(), nome:m.nome.trim(), quadrante:m.quad.trim(), bracciale:m.brac.trim(), note:m.note.trim(), evento:m.evento.trim(), incaricato:m.incar, date:'2026-09-24', operator:S.operator, boutique:S.boutique, stato:m.brand === 'Altro' ? 'aperta' : m.stato});
+  const cid = m.clientId; S.mn = null; go('cliente', cid, {tab:'panoramica'});
+  toast('Manifestazione registrata · mail di presa in carico inviata al cliente');
 }
 function vManif(){
   const back = `<div><button class="link" data-go="pda" style="display:inline-flex;gap:6px;align-items:center">${ic('back')}Manifestazioni</button></div>`;
@@ -1514,18 +1617,18 @@ function vManif(){
   if (!p) return back + '<section class="card"><div class="empty">Manifestazione non trovata.</div></section>';
   const c = C(p.clientId), pr = p.productId ? P(p.productId) : null, lock = !canAssign(), open = ['aperta','preordine'].includes(p.stato);
   return `${back}
-  <div class="page-h"><div><div class="label">Manifestazione di interesse · inserita il ${fmtD(p.date)}</div><h1>${esc(p.brand)} ${esc(p.modello)}</h1></div><span class="sp"></span>${stateTag(p)}</div>
+  <div class="page-h"><div><div class="label">Manifestazione di interesse · inserita il ${fmtD(p.date)}</div><h1>${esc(pdaTitle(p))}</h1></div><span class="sp"></span>${stateTag(p)}</div>
   <div class="grid2">
     <div class="stack">
       <section class="card">
         <div class="card-h">${ic(JEWEL.includes(p.brand) ? 'gem' : 'watch')}<h2>Cosa desidera il cliente</h2></div>
         <div class="card-b"><dl class="kv">
-          <dt>Brand</dt><dd>${esc(p.brand)}</dd><dt>Modello</dt><dd>${esc(p.modello)}</dd><dt>Nome modello</dt><dd>${esc(pdaNome(p) || '—')}</dd>
+          <dt>Brand</dt><dd>${esc(p.brand)}</dd>${p.brand === 'Altro' ? '' : `<dt>${p.brand === 'Rolex' ? 'Collezione' : 'Modello'}</dt><dd>${esc(p.modello)}</dd>`}<dt>Nome modello</dt><dd>${esc(pdaNome(p) || '—')}</dd>
           <dt>Referenza</dt><dd>${p.ref ? `<span class="mono">${esc(p.ref)}</span>` : 'Qualsiasi'}</dd>
           <dt>Quadrante</dt><dd>${esc(p.quadrante || '—')}</dd><dt>Bracciale</dt><dd>${esc(p.bracciale || '—')}</dd>
           <dt>Evento particolare</dt><dd>${esc(p.evento || '—')}</dd><dt>Venditore incaricato</dt><dd>${esc(p.incaricato || p.operator)}</dd>
           <dt>Note</dt><dd>${esc(p.note || '—')}</dd>
-          <dt>Inserita</dt><dd>il ${fmtD(p.date)} da ${esc(p.operator)}</dd>
+          <dt>Inserita</dt><dd>il ${fmtD(p.date)} da <b>${esc(p.operator)}</b> in ${esc(pdaB(p))}</dd>
           ${open ? `<dt>In attesa da</dt><dd>${rel(p.date).replace(' fa','')}</dd>` : ''}
         </dl></div>
       </section>
@@ -1542,6 +1645,7 @@ function vManif(){
       <section class="card card-b" style="display:flex;flex-direction:column;gap:10px">
         ${pr ? `<span class="btn btn-done" role="status">${ic('check')}Prodotto associato</span>` : ''}
         ${p.stato === 'assegnata' ? `<button class="btn btn-primary" data-act="pda-cassa" data-id="${p.id}">${ic('cart')}Trasforma in ordine</button>${lock ? '' : `<button class="btn" data-act="dissocia" data-id="${p.id}">Dissocia prodotto</button>`}` : ''}
+        ${open ? `<button class="btn" data-act="pda-cancel" data-id="${p.id}">${ic('x')}Rifiuta · non è andata a buon fine</button>` : ''}
         <button class="btn btn-danger" data-act="pda-del" data-id="${p.id}">${ic('trash')}Elimina manifestazione</button>
         ${lock ? '<span class="faint" style="font-size:12px">Associare e dissociare: solo direttore vendite o titolare.</span>' : ''}
       </section>
@@ -1640,6 +1744,8 @@ const repairs = [
    prev:{stato:'accettato', voci:[{d:'Revisione completa movimento MT5402', p:450, ok:true},{d:'Sostituzione guarnizioni', p:80, ok:true}]},
    log:[{date:'2026-09-18T12:00', by:'Sara Colombo', t:'Busta aperta in Boutique Multibrand'},{date:'2026-09-20T10:00', by:'Chiara Rinaldi', t:'Preventivo inviato al cliente: 2 voci, € 530'},{date:'2026-09-23T19:10', by:'Cliente', t:'Preventivo accettato online: 2 voci su 2 (€ 530)'}]},
 ];
+/* chi vende un oggetto a Verga (CPO) è anche fornitore: etichetta sulla scheda */
+repairs.filter(r => r.tipo === 'CPO').forEach(r => { const c = C(r.clientId); if (c) c.fornitore = true; });
 const R = id => repairs.find(r => r.id === id);
 const wf = r => r.esterna ? (r.tipo === 'Garanzia' ? ESTERNA_GAR : ESTERNA) : RIP_TIPI[r.tipo];
 const stato = r => wf(r).stati[r.si];
@@ -2147,14 +2253,14 @@ function renderModal(){
   let h = '', b = '', f = '';
   if (M.kind === 'evento') {
     const c = M.clientId ? C(M.clientId) : null;
-    h = 'Registra passaggio';
+    h = M.editId ? 'Modifica passaggio' : 'Registra passaggio';
     b = `<div class="field"><span>Cliente</span>${c ? `<div class="picked">${avatar(c)}<div class="grow"><b>${esc(fullName(c))}</b><div class="muted" style="font-size:12px">${esc(c.email || '')}</div></div>${M.lock ? '' : '<button class="link" data-act="m-unpick">Cambia</button>'}</div>` :
         `<input class="in" id="m-cs" placeholder="Scrivi nome, email o telefono" autocomplete="off"><div class="picklist" id="m-cs-list">${clientPick('', 'm-pick')}</div><button class="link" data-act="m-newclient" style="align-self:flex-start">${ic('userPlus')} Non c'è? Crea nuovo cliente</button>`}</div>
       <div class="field"><span>Tipo</span><div class="seg" style="grid-template-columns:repeat(4,1fr);grid-auto-flow:row">${Object.entries(EV).map(([k,t]) => `<button class="${M.type === k ? 'on' : ''}" data-act="m-type" data-v="${k}">${ic(t.icon)}${t.label}</button>`).join('')}</div></div>
       <div class="field"><span>Motivo</span><div class="chips">${MOTIVI.map(v => `<button class="chip ${M.motivo === v ? 'on' : ''}" data-act="m-motivo" data-v="${v}">${v}</button>`).join('')}</div></div>
       <label class="field"><span>Nota (facoltativa)</span><textarea class="ta" id="m-note" placeholder="Es. ha provato il Submariner, torna sabato con la moglie">${esc(M.note)}</textarea></label>
-      <div class="field"><span>Follow-up</span><div class="chips">${[['','Nessuno'],['2026-09-27','Tra 3 giorni'],['2026-10-01','Tra una settimana'],['2026-10-24','Tra un mese']].map(([v,l]) => `<button class="chip ${M.fu === v ? 'on' : ''}" data-act="m-fu" data-v="${v}">${l}</button>`).join('')}</div></div>`;
-    f = `<span class="auto-info">${ic('clock')}Oggi ${fmtT(NOW.toISOString())} · ${S.operator} · ${S.boutique}</span><button class="btn" data-act="m-close">Annulla</button><button class="btn btn-primary" data-act="m-save-ev" ${c ? '' : 'disabled'}>${ic('check')}${M.motivo === MOTIVI[0] ? 'Registra e crea manifestazione' : 'Registra'}</button>`;
+      <label class="field" style="max-width:240px"><span>Follow-up · data in cui ricontattare (facoltativa)</span><input class="in" type="date" id="m-fu" value="${esc(M.fu || '')}" min="2026-09-24"></label>`;
+    f = `<span class="auto-info">${ic('clock')}Oggi ${fmtT(NOW.toISOString())} · ${S.operator} · ${S.boutique}</span><button class="btn" data-act="m-close">Annulla</button><button class="btn btn-primary" data-act="m-save-ev" ${c ? '' : 'disabled'}>${ic('check')}${M.editId ? 'Salva modifiche' : M.motivo === MOTIVI[0] ? 'Registra e crea manifestazione' : 'Registra'}</button>`;
   }
   if (M.kind === 'pda') {
     const c = M.clientId ? C(M.clientId) : null;
@@ -2211,7 +2317,7 @@ function renderModal(){
     const p = pdas.find(x => x.id === M.pdaId), pr = P(p.productId);
     h = 'Dissocia prodotto';
     b = `<p style="margin:0">Il ${esc(pr.brand)} ${esc(pr.modello)} (seriale <span class="mono">${esc(pr.seriale)}</span>) torna disponibile. In che stato mettere la PDA di <b>${esc(fullName(C(p.clientId)))}</b>?</p>
-      <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['annullata','Annullata · il cliente rinuncia']].map(([k,l]) => `<button class="chip ${M.to === k ? 'on' : ''}" data-act="m-dto" data-v="${k}">${l}</button>`).join('')}</div>
+      <div class="chips">${[['aperta','Manifestazione'],['preordine','Preordine'],['annullata','Rifiutata · il cliente rinuncia']].map(([k,l]) => `<button class="chip ${M.to === k ? 'on' : ''}" data-act="m-dto" data-v="${k}">${l}</button>`).join('')}</div>
       <p class="faint" style="margin:0;font-size:12px">Solo direttore vendite e titolare possono dissociare.</p>`;
     f = `<button class="btn" data-act="m-close">Annulla</button><button class="btn btn-primary" data-act="m-save-dis">${ic('check')}Dissocia</button>`;
   }
@@ -2344,6 +2450,7 @@ function act(el, ev){
       const r = {id:'r' + ripSeq, busta:`${pre}-2026-${num}`, tipo:n.tipo, clientId:cv ? 'vv' : n.clientId, boutique:S.boutique, by:S.operator, acc:nowISO(), obj:{...n.obj}, motivo:n.motivo, valore:cv ? n.cv.valore : n.valore, ritiro:n.ritiro, garanzia:n.garanzia || n.tipo === 'Garanzia', foto:n.photos.filter(Boolean).length, photos:n.photos.filter(Boolean), att:[...n.att], noteCliente:n.noteCliente, noteInterne:n.noteInterne, si:1, dates:{0:{date:nowISO(), by:S.operator}, 1:{date:nowISO(), by:S.operator}}, ric:false, et:false, resp:'', tecnico:'', ubic:'Cassaforte boutique', owner:'cliente', prev:{stato:'bozza', voci:[]}, log:[], cv:cv ? {...n.cv} : null, eco:['CPO','Conto vendita'].includes(n.tipo) ? {acquisto:cv ? n.cv.valore : '', revisione:'', certificazione:'', documenti:'', vendita:'', acquirente:''} : null};
       ripLog(r, `Busta ${r.tipo === 'Riparazione' ? '' : r.tipo + ' '}aperta in ${S.boutique}${n.photos.some(Boolean) ? ` con ${n.photos.filter(Boolean).length} foto` : ''}`, S.operator, false);
       if (n.prom) ripLog(r, `Promemoria${n.promD ? ' per il ' + fmtD(n.promD) : ''}: ${n.prom}`, S.operator, false);
+      if (r.tipo === 'CPO' && C(r.clientId)) { C(r.clientId).fornitore = true; ripLog(r, 'Cliente segnato anche come Fornitore', S.operator, false); }
       repairs.push(r); S.rn = blankRn(); go('busta', r.id); toast('Busta aperta · documento di presa in carico inviato al gestionale');
       openModal({kind:'ricevuta', rid:r.id}); break; }
     case 'rip-bo': S.ripBO = !S.ripBO; S.rf.chip = 'aperte'; render(); toast(S.ripBO ? 'Vista amministrazione e backoffice' : 'Vista venditore'); break;
@@ -2384,17 +2491,28 @@ function act(el, ev){
       if (v === '⌫') S.pin = S.pin.slice(0,-1); else if (S.pin.length < 4) S.pin += v;
       if (S.pin.length === 4) { render(); setTimeout(() => { S.pin = ''; go('dashboard'); toast(`Accesso come ${S.operator} · ${S.boutique}`); }, 250); } else render();
       break;
-    case 'tab': S.tab = v; render(); break;
+    case 'tab': S.tab = v; S.cev = ''; render(); break;
     case 'evento': openModal({kind:'evento', clientId:id || null, lock:!!id, type:'visita', fu:'', note:'', motivo:''}); break;
-    case 'm-motivo': M.motivo = M.motivo === v ? '' : v; M.note = document.getElementById('m-note').value; renderModal(); break;
+    case 'm-motivo': M.motivo = M.motivo === v ? '' : v; M.note = document.getElementById('m-note').value; M.fu = document.getElementById('m-fu').value; renderModal(); break;
     case 'quick-ev': {
       events.push({id:'e' + (++evSeq), clientId:id, type:el.dataset.t, date:nowISO(), operator:S.operator, boutique:S.boutique, note:''});
       render(); toast(`${EV[el.dataset.t].label} · registrato alle ${fmtT(NOW.toISOString())}`); break; }
-    case 'pda-new': openModal({kind:'pda', clientId:id || null, lock:!!id}); break;
+    case 'pda-new': S.mn = blankMn(id, S.view === 'cliente' ? {view:'cliente', id:S.id, tab:S.tab} : {view:S.view, id:S.id}); go('manif-new'); break;
+    case 'mn-brand': S.mn.brand = v; S.mn.modello = ''; keepY(render); break;
+    case 'mn-model': S.mn.modello = S.mn.modello === v ? '' : v; keepY(render); break;
+    case 'mn-stato': S.mn.stato = v; keepY(render); break;
+    case 'mn-pick': S.mn.clientId = id; render(); break;
+    case 'mn-unpick': S.mn.clientId = null; render(); break;
+    case 'mn-cancel': { const b = S.mn.back; go(b.view || 'pda', b.id, b.tab ? {tab:b.tab} : {}); break; }
+    case 'mn-save': saveMn(); break;
     case 'assegna': openModal({kind:'assegna', pdaId:id, productId: compatible(pdas.find(p => p.id === id))[0]?.id}); break;
     case 'to-cassa': S.cart.clientId = id; go('cassa'); break;
     case 'pda-cassa': { const p = pdas.find(x => x.id === id); S.cart.clientId = p.clientId; if (!S.cart.items.includes(p.productId)) S.cart.items.push(p.productId); go('cassa'); toast('Pre-acquisto messo in cassa'); break; }
+    case 'ev-edit': { const e = events.find(x => x.id === id); openModal({kind:'evento', editId:e.id, clientId:e.clientId, lock:true, type:e.type, fu:e.followup || '', note:e.note || '', motivo:e.motivo || ''}); break; }
+    case 'ev-del': { const i = events.findIndex(x => x.id === id), e = events[i]; events.splice(i, 1); S.undoEv = {e, i}; render(); toast(`${EV[e.type].label} del ${fmtD(e.date)} eliminato`); break; }
     case 'fu-done': { const x = events.find(z => z.id === id); x.done = true; render(); toast('Follow-up segnato come fatto'); break; }
+    case 'f-rate': { const a = S.f.rating ? S.f.rating.split(',') : []; toggle(a, v); S.f.rating = a.sort().reverse().join(','); render(); break; }
+    case 'cl-export': exportClients(); break;
     case 'clr-f': S.f[el.dataset.k] = ''; render(); break;
     case 'clr-all': Object.keys(S.f).forEach(x => S.f[x] = ''); render(); break;
     case 'evf': S.evf[el.dataset.k] = v; render(); break;
@@ -2412,13 +2530,14 @@ function act(el, ev){
     case 'az-add': S.nc.az.push(blankAz()); keepForm(render); break;
     case 'az-rm': S.nc.az.splice(+el.dataset.i, 1); keepForm(render); break;
     case 'az-main': S.nc.az.unshift(...S.nc.az.splice(+el.dataset.i, 1)); keepForm(render); toast('Azienda principale aggiornata'); break;
-    case 'addr-add': S.nc.addr.push({label:'',via:'',cap:'',citta:'',prov:'',naz:'Italia'}); keepForm(render); break;
+    case 'naz-pick': { const inp = el.closest('.naz-f').querySelector('input'), isAz = inp.dataset.az !== undefined, [i] = (isAz ? inp.dataset.az : inp.dataset.addr).split(':'); (isAz ? S.nc.az : S.nc.addr)[+i].naz = v; inp.value = v; el.parentElement.innerHTML = ''; break; }
+    case 'addr-add': S.nc.addr.push({label:'',via:'',cap:'',citta:'',prov:'',naz:'ITALIA'}); keepForm(render); break;
     case 'addr-rm': S.nc.addr.splice(+el.dataset.i, 1); keepForm(render); break;
     case 'add-note': { const t = document.getElementById('new-note').value.trim(); if (!t) { toast('Scrivi il testo della nota'); break; } C(id).notes.push({by:S.operator, date:nowISO(), text:t}); render(); toast('Nota aggiunta e firmata'); break; }
     case 'soon-edit': toast('Puoi modificare solo le note scritte da te (demo)'); break;
     case 'add-task': { const t = document.getElementById('task-text').value.trim(); if (!t) { toast('Scrivi il messaggio per il collega'); break; } const rec = document.getElementById('task-rec').value; C(id).tasks.push({to:document.getElementById('task-to').value, by:S.operator, text:t, due:document.getElementById('task-due').value, rec: rec === 'Una volta' ? '' : rec, done:false}); render(); toast('Messaggio inviato al collega'); break; }
     case 'task-done': { const t = C(id).tasks[+el.dataset.i]; t.done = !t.done; render(); break; }
-    case 'pda-cancel': { const p = pdas.find(x => x.id === id); p.stato = 'annullata'; render(); toast('Manifestazione annullata'); break; }
+    case 'pda-cancel': { const p = pdas.find(x => x.id === id); p.stato = 'annullata'; render(); toast('Manifestazione rifiutata'); break; }
     case 'pda-del': openModal({kind:'pda-del', pdaId:id}); break;
     case 'pda-disp': openModal({kind:'disponibili', ref:null}); break;
     case 'assegna-pr': openModal({kind:'assegna', pdaId:id, productId:v}); break;
@@ -2426,7 +2545,7 @@ function act(el, ev){
     case 'firma': openModal({kind:'firma', clientId:id}); break;
     case 'bell': S.bell = !S.bell; render(); break;
     case 'notif': { NOTIFS[+el.dataset.i].read = true; S.bell = false; go('cliente', id); break; }
-    case 'tab-legami': S.tab = 'anagrafica'; render(); document.getElementById('sec-legami').scrollIntoView({block:'center'}); document.getElementById('lk-type').focus({preventScroll:true}); break;
+    case 'tab-legami': S.tab = 'anagrafica'; render(); document.getElementById('sec-legami').scrollIntoView({block:'center'}); break;
     case 'lk-chip': Object.assign(S.nc.lk, {type:v, back:backOf(v)}); keepForm(render); break;
     case 'lk-pick': S.nc.lk.otherId = id; keepForm(render); break;
     case 'lk-unpick': S.nc.lk.otherId = null; keepForm(render); break;
@@ -2477,12 +2596,12 @@ function act(el, ev){
     case 'm-pick': M.clientId = id; renderModal(); break;
     case 'm-unpick': M.clientId = null; renderModal(); break;
     case 'm-newclient': closeModal(); go('nuovo'); break;
-    case 'm-type': M.type = v; M.note = document.getElementById('m-note').value; renderModal(); break;
-    case 'm-fu': M.fu = v; M.note = document.getElementById('m-note').value; renderModal(); break;
+    case 'm-type': M.type = v; M.note = document.getElementById('m-note').value; M.fu = document.getElementById('m-fu').value; renderModal(); break;
     case 'm-save-ev': {
-      events.push({id:'e' + (++evSeq), clientId:M.clientId, type:M.type, date:nowISO(), operator:S.operator, boutique:S.boutique, note:document.getElementById('m-note').value.trim(), followup:M.fu || null, motivo:M.motivo || ''});
+      if (M.editId) { const e = events.find(x => x.id === M.editId); Object.assign(e, {clientId:M.clientId, type:M.type, note:document.getElementById('m-note').value.trim(), followup:document.getElementById('m-fu').value || null, motivo:M.motivo || ''}); closeModal(); render(); toast('Passaggio aggiornato'); break; }
+      events.push({id:'e' + (++evSeq), clientId:M.clientId, type:M.type, date:nowISO(), operator:S.operator, boutique:S.boutique, note:document.getElementById('m-note').value.trim(), followup:document.getElementById('m-fu').value || null, motivo:M.motivo || ''});
       const cid = M.clientId, n = fullName(C(cid)), newPda = M.motivo === MOTIVI[0]; closeModal(); render(); toast(`${EV[events[events.length-1].type].label}: ${n}`);
-      if (newPda) openModal({kind:'pda', clientId:cid, lock:true, stato:'aperta'}); break; }
+      if (newPda) { S.mn = blankMn(cid, {view:S.view, id:S.id, tab:S.tab}); go('manif-new'); } break; }
     case 'm-brand': M.brand = v; M.modello = ''; renderModal(); break;
     case 'm-model': M.modello = v; renderModal(); break;
     case 'm-pstato': M.stato = v; renderModal(); break;
@@ -2530,13 +2649,15 @@ function keepAuto(){
 function saveClient(id){
   const v = x => document.getElementById(x)?.value.trim() ?? '';
   if (!v('f-nome') || !v('f-cognome')) { toast('Inserisci almeno nome e cognome'); return; }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v('f-email'))) { toast('L\'email principale è obbligatoria'); document.getElementById('f-email')?.focus(); return; }
+  const U = x => (x || '').trim().toUpperCase();
   const birth = {d:+v('f-bd') || null, m:+v('f-bm') || null};
   if (S.nc.noYear) birth.decade = v('f-dec'); else birth.y = +v('f-by') || null;
-  const addresses = S.nc.addr.filter(a => a.via || a.citta).map(a => ({...a}));
-  const aziende = S.nc.az.filter(a => a.rs.trim() || a.piva.trim()).map(a => ({rs:a.rs.trim(), ind:a.ind.trim(), piva:a.piva.trim().toUpperCase(), sdi:a.sdi.trim().toUpperCase()}));
-  const data = {tipo:v('f-tipo'), nome:v('f-nome'), cognome:v('f-cognome'), sesso:v('f-sesso'), prof:v('f-prof'), azienda:v('f-azienda'), email:v('f-email').toLowerCase(), email2:v('f-email2').toLowerCase(), tel:v('f-tel'), cf:v('f-cf').toUpperCase(), pec:v('f-pec').toLowerCase(), lingua:v('f-lingua'), addresses, indirizzo:addresses[0] ? `${addresses[0].via}, ${addresses[0].citta}` : '', boutique:v('f-boutique'), birth,
+  const addresses = S.nc.addr.filter(a => a.via || a.citta).map(a => ({label:a.label, via:U(a.via), cap:U(a.cap), citta:U(a.citta), prov:U(a.prov), naz:U(a.naz)}));
+  const aziende = S.nc.az.filter(a => a.rs.trim() || a.piva.trim()).map(a => { const x = {rs:U(a.rs), via:U(a.via), cap:U(a.cap), citta:U(a.citta), prov:U(a.prov), naz:U(a.naz), piva:U(a.piva), sdi:U(a.sdi)}; x.ind = `${x.via}${x.cap || x.citta ? ', ' + [x.cap, x.citta].filter(Boolean).join(' ') : ''}${x.prov ? ` (${x.prov})` : ''}`; return x; });
+  const data = {tipo:v('f-tipo'), nome:U(v('f-nome')), cognome:U(v('f-cognome')), sesso:v('f-sesso'), prof:v('f-prof'), azienda:U(v('f-azienda')), email:v('f-email').toLowerCase(), email2:v('f-email2').toLowerCase(), tel:v('f-tel'), cf:U(v('f-cf')), pec:v('f-pec').toLowerCase(), lingua:v('f-lingua'), addresses, indirizzo:addresses[0] ? `${addresses[0].via}, ${addresses[0].citta}` : '', boutique:v('f-boutique'), birth,
     aziende, billing:aziende[0] || {}, misure:{polso:v('f-polso'), dxMedio:v('f-dxm'), dxAnulare:v('f-dxa'), sxMedio:v('f-sxm'), sxAnulare:v('f-sxa')}, rating:S.nc.rating,
-    brands:[...S.nc.brands], modelli:[...(S.nc.modelli||[])], interests:[...S.nc.interests], celeb:S.nc.celeb && S.nc.celeb !== 'Nessuna' ? S.nc.celeb : ''};
+    brands:[...S.nc.brands], modelli:[], interests:[...S.nc.interests], celeb:''};
   const priv = document.getElementById('f-priv').checked, old = id ? C(id).privacy : null;
   data.privacy = priv ? old || {at:nowISO(), by:'venditore', operator:S.operator} : null;
   if (id) { const c = C(id); Object.assign(c, data); if (c.email && c.tel) c.incomplete = false; S.tab = 'panoramica'; render(); toast('Anagrafica aggiornata'); }
@@ -2556,14 +2677,14 @@ function checkout(){
   const m = {kind:'venduto', ord, total, acc, pay:S.cart.pay, name:fullName(c), clientId:c.id, promoted, inv, rs:az?.rs, righe, invState:''};
   S.cart = {clientId:null, items:[], pay:'Carta', inv:'persona', acc:'', sc:{}, naz:'Italia'}; render(); openModal(m);
 }
-const blankAz = () => ({rs:'', ind:'', piva:'', sdi:''});
+const blankAz = () => ({rs:'', ind:'', via:'', cap:'', citta:'', prov:'', naz:'ITALIA', piva:'', sdi:''});
 /* quando si apre una scheda in modifica, carico gli elenchi del cliente nello stato del form */
 const _go = go;
 go = function(view, id=null, extra={}){
   const lk = {type:'', back:'', q:'', otherId:null, quick:false};
   if (view === 'rip-new' && !extra.keepRn) S.rn = blankRn();
   if (view === 'prev') S.pv = null;
-  if (view === 'nuovo') S.nc = {brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk, pending:[], addr:[{label:'Casa',via:'',cap:'',citta:'',prov:'',naz:'Italia'}], az:[blankAz()], rating:0};
+  if (view === 'nuovo') S.nc = {brands:[], interests:[], modelli:[], noYear:false, decade:'', celeb:'Nessuna', lk, pending:[], addr:[{label:'',via:'',cap:'',citta:'',prov:'',naz:'ITALIA'}], az:[blankAz()], rating:0};
   if (view === 'cliente' && id) { const c = C(id); if (c) S.nc = {brands:[...c.brands], interests:[...c.interests], modelli:[...c.modelli], noYear:!!(c.birth && c.birth.decade), decade:c.birth?.decade || '', celeb:c.celeb || 'Nessuna', lk, pending:[], addr:c.addresses.map(a => ({...a})), az:(c.aziende || []).length ? c.aziende.map(a => ({...blankAz(), ...a})) : [blankAz()], rating:c.rating || 0}; }
   _go(view, id, extra);
 };
@@ -2577,6 +2698,11 @@ document.addEventListener('input', e => {
   if (t.dataset.sc !== undefined) { S.cart.sc[t.dataset.sc] = t.value; const k = t.dataset.sc, pos = t.selectionStart; render(); const n = document.querySelector(`[data-sc="${k}"]`); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (_) {} } return; }
   if (t.id === 'm-cs') { document.getElementById('m-cs-list').innerHTML = clientPick(t.value, 'm-pick'); return; }
   if (t.id === 'cart-cs') { document.getElementById('cart-cs-list').innerHTML = clientPick(t.value, 'cart-client'); return; }
+  if (t.dataset.mn !== undefined) { const k = t.dataset.mn; S.mn[k] = t.value;
+    if (k === 'ref') { const n = NOMI[t.value.trim().toUpperCase()]; if (n) { S.mn.nome = n; const e = document.getElementById('m-nome'); if (e) e.value = n; } }
+    if (k === 'note') { const b = document.querySelector('[data-act="mn-save"]'); if (b) b.disabled = !(S.mn.clientId && S.mn.brand && (S.mn.brand === 'Altro' ? S.mn.note.trim() : S.mn.modello)); }
+    return; }
+  if (t.id === 'mn-cs') { document.getElementById('mn-cs-list').innerHTML = clientPick(t.value, 'mn-pick'); return; }
   if (t.id === 'm-ref') { const n = NOMI[t.value.trim().toUpperCase()]; if (n) document.getElementById('m-nome').value = n; return; }
   if (t.id === 'scan') { document.getElementById('scan-list').innerHTML = scanList(t.value); return; }
   if (t.dataset.pdf !== undefined && t.tagName === 'INPUT') { S.pdf[t.dataset.pdf] = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('pdf-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
@@ -2585,8 +2711,9 @@ document.addEventListener('input', e => {
   if (t.id === 'lk-type') { S.nc.lk.type = t.value; if (!S.nc.lk.backEdited) { S.nc.lk.back = LINK_TYPES[t.value.trim()] || ''; document.getElementById('lk-back').value = S.nc.lk.back; } document.querySelector('[data-act="lk-add"]').disabled = !(S.nc.lk.otherId && t.value.trim()); return; }
   if (t.id === 'lk-back') { S.nc.lk.back = t.value; S.nc.lk.backEdited = !!t.value; return; }
   if (['f-email','f-email2','a-email','fs-email'].includes(t.id) && t.value !== t.value.toLowerCase()) { const pos = t.selectionStart; t.value = t.value.toLowerCase(); try { t.setSelectionRange(pos, pos); } catch (_) {} }
-  if (t.dataset.az !== undefined) { const [i, k] = t.dataset.az.split(':'); S.nc.az[+i][k] = t.value; return; }
-  if (t.dataset.addr !== undefined) { const [i, k] = t.dataset.addr.split(':'); S.nc.addr[+i][k] = t.value; return; }
+  if (t.dataset.az !== undefined || t.dataset.addr !== undefined) { const isAz = t.dataset.az !== undefined, [i, k] = (isAz ? t.dataset.az : t.dataset.addr).split(':'); (isAz ? S.nc.az : S.nc.addr)[+i][k] = t.value;
+    if (k === 'naz') { const d = t.parentElement.querySelector('.naz-drop'), m = nazMatch(t.value); d.innerHTML = m.length && !(m.length === 1 && m[0] === t.value.trim().toUpperCase()) ? m.map(n => `<button type="button" data-act="naz-pick" data-v="${esc(n)}">${esc(n)}</button>`).join('') : ''; }
+    return; }
   if (t.dataset.rn !== undefined) { const [a, b] = t.dataset.rn.split('.'); if (b) S.rn[a][b] = t.value; else S.rn[a] = t.value; return; }
   if (t.id === 'rn-cs') { S.rn.q = t.value; document.getElementById('rn-cs-list').innerHTML = clientPick(t.value, 'rn-pick'); return; }
   if (t.id === 'of-q') { S.of.q = t.value; const pos = t.selectionStart; render(); const n = document.getElementById('of-q'); n.focus(); n.setSelectionRange(pos, pos); return; }
@@ -2595,11 +2722,12 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
-  if (t.id === 'boutique-sel') { S.boutique = t.value; S.pf.loc = t.value; render(); toast(`Boutique attiva: ${t.value}`); return; }
+  if (t.id === 'boutique-sel') { S.boutique = t.value; S.pf.loc = t.value; if (S.view === 'nuovo' || (S.view === 'cliente' && S.tab === 'anagrafica')) keepForm(render); else render(); toast(`Boutique attiva: ${t.value}`); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'SELECT') { S.pf[t.dataset.pf] = t.value; render(); return; }
   if (t.dataset.pdf !== undefined && t.tagName === 'SELECT') { S.pdf[t.dataset.pdf] = t.value; render(); return; }
   if (t.dataset.evf !== undefined) { S.evf[t.dataset.evf] = t.value; render(); return; }
   if (t.dataset.rf !== undefined) { S.rf[t.dataset.rf] = t.value; render(); return; }
+  if (t.dataset.cev !== undefined) { S.cev = t.value; render(); return; }
   if (t.id === 'cart-iva') { S.cart.naz = t.value; keepY(render); return; }
   if (t.dataset.of !== undefined) { S.of[t.dataset.of] = t.value; render(); return; }
   if (t.classList.contains('rn-cam')) { const f = t.files[0]; if (f) S.rn.photos[+t.dataset.i] = URL.createObjectURL(f); keepY(render); return; }
@@ -2624,9 +2752,10 @@ document.addEventListener('keydown', e => {
 function gsearch(q){
   const d = document.getElementById('gs-drop'); q = q.trim().toLowerCase();
   if (!q) { d.innerHTML = ''; return; }
-  const cs = clients.filter(c => `${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(q)).slice(0,5);
+  const noteHit = c => [...c.notes.map(n => n.text), ...clientPdas(c.id).map(p => `${p.brand === 'Altro' ? '' : p.brand + ' ' + p.modello + ' '}${p.note || ''}`)].find(t => t.toLowerCase().includes(q));
+  const cs = clients.filter(c => `${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(q) || noteHit(c)).slice(0,6);
   const ps = refGroups(products.filter(p => p.stato !== 'venduto' && `${p.ref} ${p.seriale} ${p.modello} ${p.brand}`.toLowerCase().includes(q))).map(g => g[0]).slice(0,5);
-  d.innerHTML = `<div class="gs-drop">${cs.length ? '<div class="label">Clienti</div>' + cs.map(c => `<button class="gs-item" data-go="cliente" data-id="${c.id}">${avatar(c)}<span><b>${esc(fullName(c))}</b><br><small class="muted">${esc(c.email || 'Scheda da completare')}</small></span></button>`).join('') : ''}
+  d.innerHTML = `<div class="gs-drop">${cs.length ? '<div class="label">Clienti</div>' + cs.map(c => `<button class="gs-item" data-go="cliente" data-id="${c.id}">${avatar(c)}<span><b>${esc(fullName(c))}</b><br><small class="muted">${!`${c.nome} ${c.cognome} ${c.email} ${c.tel}`.toLowerCase().includes(q) && noteHit(c) ? `Nelle note: «${esc(noteHit(c).slice(0, 60))}${noteHit(c).length > 60 ? '…' : ''}»` : esc(c.email || 'Scheda da completare')}</small></span></button>`).join('') : ''}
     ${ps.length ? '<div class="label">Prodotti</div>' + ps.map(p => `<button class="gs-item" data-go="prodotto" data-id="${esc(p.ref)}">${ic(p.tipo === 'gioiello' ? 'gem' : 'watch')}<span><b>${esc(p.brand)} ${esc(p.modello)}</b><br><small class="muted mono">${esc(p.ref)} · ${esc(p.seriale)}</small></span><span style="margin-left:auto">${prodState(p)}</span></button>`).join('') : ''}
     ${!cs.length && !ps.length ? '<div class="empty">Nessun risultato. <button class="link" data-go="nuovo">Crea nuovo cliente</button></div>' : ''}</div>`;
 }
