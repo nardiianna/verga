@@ -1020,14 +1020,20 @@ function vClienti(){
   </div>`;
 }
 /* esportazione per il marketing: tutti i clienti che rispondono ai filtri attivi, in un file che si apre con Excel */
-function exportClients(){
+async function exportClients(){
   const list = filteredClients(), q = x => `"${String(x ?? '').replace(/"/g, '""')}"`;
   const head = ['Nome','Cognome','Email','Cellulare','Tipologia','Professione','Azienda','Valutazione','Fascia','Brand di interesse','Interessi','Lingua','Città','Nazione','Ultimo passaggio','Ultimo acquisto','Totale acquisti','Newsletter'];
   const rows = list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id), a = c.addresses[0] || {}; return [c.nome, c.cognome, c.email, c.tel, c.tipo, c.prof, c.azienda, c.rating || '', tierOf(c.id)?.n || '', c.brands.join(', '), c.interests.join(', '), c.lingua, a.citta, a.naz, v ? fmtD(v.date) : '', lp ? `${fmtD(lp.date)} ${lp.brand} ${lp.modello}` : '', spent(c.id), c.newsletter ? 'Sì' : 'No']; });
   const csv = '﻿' + [head, ...rows].map(r => r.map(q).join(';')).join('\r\n');
-  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})); a.download = `clienti-verga-${list.length}.csv`; document.body.appendChild(a); a.click(); a.remove();
+  const filename = `clienti-verga-${list.length}.csv`;
+  const dl = await downloadsCap();
+  if (dl) { try { await dl.save({filename, data:csv}); toast(`Esportati ${list.length} clienti con i filtri attivi`); } catch (e) { if (e?.code !== 'declined') toast('Esportazione non disponibile in questa vista'); } return; }
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'})); a.download = filename; document.body.appendChild(a); a.click(); a.remove();
   toast(`Esportati ${list.length} clienti con i filtri attivi`);
 }
+/* nel visualizzatore di claude.ai il file passa dalla conferma di download; aperto in locale si scarica direttamente */
+let _dl;
+const downloadsCap = () => _dl ??= (window.claude?.use ? Promise.race([window.claude.use('downloads'), new Promise(r => setTimeout(() => r(null), 3000))]).catch(() => null) : Promise.resolve(null));
 function filteredClients(){
   const f = S.f, q = f.q.trim().toLowerCase();
   return clients.filter(c => {
