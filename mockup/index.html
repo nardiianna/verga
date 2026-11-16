@@ -312,6 +312,11 @@ table.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
 .ev-tools{display:flex;gap:2px;flex:none;align-self:flex-start;white-space:nowrap}
 .tl:has(.ev-tools){grid-template-columns:44px 1fr auto}
 .rate-f{display:flex;flex-direction:column;gap:6px}
+.msel{position:relative}
+.msel-btn{width:100%;text-align:left;display:flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap}
+.stars-s{color:var(--amber);letter-spacing:1px;font-size:12px}
+.msel-drop{position:absolute;z-index:30;top:calc(100% + 4px);left:0;right:0;background:var(--surface,#fff);border:1px solid var(--line-strong);border-radius:10px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.rate-f .chip .ck{display:inline-flex;width:16px;color:var(--accent)}
 .rate-f .chip{height:32px;justify-content:flex-start;color:var(--amber);letter-spacing:2px}
 .rate-f .chip .off{color:var(--line-strong)}
 .rate-f .chip.on{background:var(--brand-soft);border-color:var(--accent)}
@@ -620,7 +625,7 @@ const DECADES = ["Anni '40","Anni '50","Anni '60","Anni '70","Anni '80","Anni '9
 const MESI = ['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
 const LINK_TYPES = {'Coniuge di':'Coniuge di','Collega di':'Collega di','Moglie di':'Marito di','Marito di':'Moglie di','Compagno/a di':'Compagno/a di','Figlio/a di':'Genitore di','Padre di':'Figlio/a di','Madre di':'Figlio/a di','Genitore di':'Figlio/a di','Fratello/Sorella di':'Fratello/Sorella di','Nipote di':'Zio/a di','Parente di':'Parente di','Amico/a di':'Amico/a di','Dipendente di':'Datore di lavoro di','Datore di lavoro di':'Dipendente di','Socio/a di':'Socio/a di','Assistente di':'Assistito/a da'};
 /* legami: per ora Verga tiene solo il coniuge */
-const LINK_CHIPS = ['Coniuge di'];
+const LINK_CHIPS = ['Coniuge di','Figlio/a di','Padre di','Madre di','Fratello/Sorella di','Amico/a di','Collega di'];
 const backOf = t => LINK_TYPES[t] || 'Collegato/a a';
 /* tutte le nazioni (nomi ISO 3166 in italiano), per il menu a tendina con ricerca */
 const NAZIONI = (() => { try { const dn = new Intl.DisplayNames(['it'], {type:'region'}), out = []; for (let a = 65; a <= 90; a++) for (let b = 65; b <= 90; b++) { const k = String.fromCharCode(a, b); if (['EU','EZ','UN','QO','XA','XB','ZZ','AA','QM','QN','QP','QQ','QR','QS','QT','QU','QV','QW','QX','QY','QZ','XK','AC','CP','DG','EA','IC','TA','CQ'].includes(k)) continue; const n = dn.of(k); if (n && n !== k) out.push(n.toUpperCase()); } return [...new Set(out)].sort((x, y) => x.localeCompare(y, 'it')); } catch (_) { return ['ITALIA','FRANCIA','GERMANIA','REGNO UNITO','SPAGNA','SVIZZERA','STATI UNITI']; } })();
@@ -656,7 +661,7 @@ const EXTRA = {
       notes:[{by:'Sara Colombo',date:'2025-12-03T17:40',text:'Ha chiesto di essere avvisato per le serate dedicate a Patek Philippe.'},{by:'Marco Verdi',date:'2024-06-11T12:05',text:'Preferisce essere contattato su WhatsApp dopo le 18. Collezionista di Rolex sportivi.'}],
       tasks:[{to:'Sara Colombo',by:'Marco Verdi',text:'Mandare gli auguri a Mario per l\'anniversario di matrimonio',due:'2026-10-12',rec:'Ogni anno',done:false}]},
   c2:{sesso:'F',lingua:'Italiano',tipo:'Prospect',rating:0,notes:[{by:'Marco Verdi',date:'2026-09-18T16:30',text:'Riferito dal marito: interessata a Pomellato.'}]},
-  c3:{cf:'BNCLRA85S45F205Y',sesso:'F',lingua:'Italiano',tipo:'Cliente',rating:4,misure:{polso:'15',dxMedio:'13',dxAnulare:'12',sxMedio:'12',sxAnulare:'12'},billing:{rs:'Studio Bianchi Architetti',ind:'Corso Esempio 12, Milano',piva:'IT09876543210',sdi:'0000000'}},
+  c3:{cf:'BNCLRA85S45F205Y',sesso:'F',lingua:'Italiano',tipo:'Cliente',rating:4,notes:[{by:'Sara Colombo',date:'2026-09-10T15:20',text:'Interessata a un Cartier Panthère medium in oro giallo, anche usato.'}],misure:{polso:'15',dxMedio:'13',dxAnulare:'12',sxMedio:'12',sxAnulare:'12'},billing:{rs:'Studio Bianchi Architetti',ind:'Corso Esempio 12, Milano',piva:'IT09876543210',sdi:'0000000'}},
   c4:{sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:5,notes:[{by:'Giorgia Costa',date:'2026-07-01T11:00',text:'Riservatezza massima: non citare in eventi pubblici.'}]},
   c5:{sesso:'F',lingua:'Italiano',tipo:'Prospect',rating:0},
   c6:{sesso:'M',lingua:'Italiano',tipo:'Cliente',rating:3},
@@ -704,7 +709,6 @@ const pdas = [
   {id:'p4',clientId:'c10',brand:'Rolex',modello:'Submariner',ref:'126610LN',quadrante:'Nero',bracciale:'Oyster',note:'',date:'2026-06-10',operator:'Giorgia Costa',stato:'aperta'},
   {id:'p5',clientId:'c7',brand:'Patek Philippe',modello:'Nautilus',ref:'5811/1G',quadrante:'Blu',bracciale:'Oro bianco',note:'',date:'2024-11-20',operator:'Luca Ferrari',stato:'assegnata',productId:'pr4'},
   {id:'p6',clientId:'c4',brand:'Tudor',modello:'Pelagos',ref:'',quadrante:'Blu',bracciale:'Titanio',note:'Anche FXD va bene.',date:'2026-07-01',operator:'Giorgia Costa',stato:'aperta'},
-  {id:'p8',clientId:'c3',brand:'Altro',modello:'',ref:'',note:'Interessata a un Cartier Panthère medium in oro giallo, anche usato.',date:'2026-09-10',operator:'Sara Colombo',boutique:'Boutique Multibrand',stato:'aperta'},
   {id:'p7',clientId:'c9',brand:'Messika',modello:'Move Uno',ref:'',quadrante:'',bracciale:'Collana, oro bianco',note:'Ordinata al fornitore su richiesta della cliente.',date:'2026-09-21',operator:'Sara Colombo',stato:'preordine'},
 ];
 const products = [
@@ -994,7 +998,7 @@ function vClienti(){
         <label class="field"><span>Cerca ovunque</span><input class="in" data-f="q" value="${esc(f.q)}" placeholder="Nome, email, cellulare, azienda, note…"></label>
         <label class="field"><span>Tipologia</span><select class="sel" data-f="tipo">${opts(TIPI, f.tipo, 'Tutte')}</select></label>
         <label class="field"><span>Fascia acquisti</span><select class="sel" data-f="tier">${opts(TIERS.map(t => t.n), f.tier, 'Tutte')}</select></label>
-        <div class="field"><span>Valutazione venditore · anche più di una</span><div class="rate-f">${[5,4,3,2,1].map(n => `<button type="button" class="chip ${f.rating.split(',').includes(String(n)) ? 'on' : ''}" data-act="f-rate" data-v="${n}" aria-label="${n} stelle">${'★'.repeat(n)}<span class="off">${'★'.repeat(5 - n)}</span></button>`).join('')}</div></div>
+        <div class="field"><span>Valutazione venditore</span><div class="msel ${S.rateOpen ? 'open' : ''}"><button type="button" class="sel msel-btn" data-act="rate-open" aria-expanded="${!!S.rateOpen}">${f.rating ? f.rating.split(',').map(n => `<span class="stars-s">${'★'.repeat(+n)}</span>`).join('<span class="faint">·</span>') : 'Tutte'}</button>${S.rateOpen ? `<div class="msel-drop rate-f">${[5,4,3,2,1].map(n => { const on = f.rating.split(',').includes(String(n)); return `<button type="button" class="chip ${on ? 'on' : ''}" data-act="f-rate" data-v="${n}" aria-pressed="${on}" aria-label="${n} stelle"><span class="ck">${on ? ic('check') : ''}</span>${'★'.repeat(n)}<span class="off">${'★'.repeat(5 - n)}</span></button>`; }).join('')}${f.rating ? '<button type="button" class="link" data-act="f-rate-clear" style="align-self:flex-start;font-size:12.5px">Azzera</button>' : ''}</div>` : ''}</div></div>
       </div>
       <div class="fsec"><div class="label">Acquisti</div>
         <label class="field"><span>Brand acquistato</span><select class="sel" data-f="brand">${opts(BRANDS, f.brand, 'Tutti')}</select></label>
@@ -1344,12 +1348,12 @@ function linkSection(c){
   const existing = c ? clientLinks(c.id).map(x => ({...x, rm:`data-act="lk-rm" data-i="${x.i}"`})) : S.nc.pending.map((x, i) => ({label:x.type, other:C(x.to), rm:`data-act="lk-rm-p" data-i="${i}"`}));
   const o = L.otherId ? C(L.otherId) : null;
   const who = c ? esc(c.nome) : 'Il cliente';
-  L.type = 'Coniuge di'; L.back = 'Coniuge di';
+  if (!L.type) Object.assign(L, {type:'Coniuge di', back:'Coniuge di'});
   return `<div class="fsec" id="sec-legami"><h3>${ic('link')}Legami</h3>
     <p class="faint" style="margin:-6px 0 0;font-size:12.5px">Nota interna, non visibile al cliente. Il collegamento compare su entrambe le anagrafiche.</p>
     ${existing.length ? `<div class="card">${existing.map(x => `<div class="lk">${avatar(x.other)}<div class="grow"><div class="rel">${who} è ${esc(x.label.toLowerCase())}</div><b>${esc(fullName(x.other))}</b>${x.other.incomplete ? ' <span class="tag" style="height:20px">scheda da completare</span>' : ''}</div><button type="button" class="btn btn-ghost btn-sm" ${x.rm} aria-label="Rimuovi legame">${ic('trash')}</button></div>`).join('')}</div>` : ''}
     <div class="lk-add">
-      <div class="field"><span>Tipo di legame</span><div class="chips">${LINK_CHIPS.map(t => `<button type="button" class="chip on" disabled>${ic('check')}${t}</button>`).join('')}</div></div>
+      <div class="field"><span>Tipo di legame</span><div class="chips">${LINK_CHIPS.map(t => `<button type="button" class="chip ${L.type === t ? 'on' : ''}" data-act="lk-chip" data-v="${t}">${L.type === t ? ic('check') : ''}${t}</button>`).join('')}</div>${L.type ? `<p class="faint" style="margin:2px 0 0;font-size:12px">Sulla scheda dell'altra persona comparirà «${esc(L.back || backOf(L.type))}».</p>` : ''}</div>
       <div class="field"><span>Persona collegata</span>
         ${o ? `<div class="picked">${avatar(o)}<div class="grow"><b>${esc(fullName(o))}</b><div class="muted" style="font-size:12px">${esc(o.email || 'Anagrafica da completare')}</div></div><button type="button" class="link" data-act="lk-unpick">Cambia</button></div>`
         : L.quick ? `<div class="card card-b" style="display:flex;flex-direction:column;gap:12px">
@@ -1578,7 +1582,7 @@ function vPda(){
   <section class="card pda-list">${list.map(p => { const c = C(p.clientId); return `<div class="pda-it"><div style="padding:14px 20px 0;display:flex;align-items:center;gap:10px">${avatar(c)}<button class="link" data-go="cliente" data-id="${c.id}">${esc(fullName(c))}</button></div>${pdaCard(p)}</div>`; }).join('') || '<div class="empty">Nessuna manifestazione con questi filtri.</div>'}</section>`;
 }
 /* per ora le manifestazioni si fanno su Rolex e Patek Philippe; per gli altri brand basta una nota (ricercabile) */
-const MN_BRANDS = ['Rolex','Patek Philippe','Altro'];
+const MN_BRANDS = ['Rolex','Patek Philippe']; /* 'Altro' tolto per ora: il codice resta per riattivarlo */
 const blankMn = (cid, back) => ({clientId:cid || null, lock:!!cid, back:back || {view:'pda'}, brand:'', modello:'', ref:'', nome:'', quad:'', brac:'', evento:'', incar:S.operator, note:'', stato:'aperta'});
 function vManifNew(){
   const m = S.mn || (S.mn = blankMn()), c = m.clientId ? C(m.clientId) : null, rx = m.brand === 'Rolex', pk = m.brand === 'Patek Philippe', al = m.brand === 'Altro';
@@ -2420,6 +2424,7 @@ function renderDrawer(){
 document.addEventListener('click', e => {
   const g = e.target.closest('[data-go]');
   const a = e.target.closest('[data-act]');
+  if (S.rateOpen && !e.target.closest('.msel')) { S.rateOpen = false; if (!a && !g) return render(); }
   if (a && (!g || a.contains(g) === false && g.contains(a))) return act(a, e);
   if (g) return go(g.dataset.go, g.dataset.id || null, g.dataset.tab ? {tab:g.dataset.tab} : {});
   if (a) return act(a, e);
@@ -2517,6 +2522,8 @@ function act(el, ev){
     case 'ev-edit': { const e = events.find(x => x.id === id); openModal({kind:'evento', editId:e.id, clientId:e.clientId, lock:true, type:e.type, fu:e.followup || '', note:e.note || '', motivo:e.motivo || ''}); break; }
     case 'ev-del': { const i = events.findIndex(x => x.id === id), e = events[i]; events.splice(i, 1); S.undoEv = {e, i}; render(); toast(`${EV[e.type].label} del ${fmtD(e.date)} eliminato`); break; }
     case 'fu-done': { const x = events.find(z => z.id === id); x.done = true; render(); toast('Follow-up segnato come fatto'); break; }
+    case 'rate-open': S.rateOpen = !S.rateOpen; render(); break;
+    case 'f-rate-clear': S.f.rating = ''; render(); break;
     case 'f-rate': { const a = S.f.rating ? S.f.rating.split(',') : []; toggle(a, v); S.f.rating = a.sort().reverse().join(','); render(); break; }
     case 'cl-export': exportClients(); break;
     case 'clr-f': S.f[el.dataset.k] = ''; render(); break;
