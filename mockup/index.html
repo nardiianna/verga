@@ -312,6 +312,7 @@ table.tbl{width:100%;border-collapse:separate;border-spacing:0;font-size:13.5px}
 .ev-tools{display:flex;gap:2px;flex:none;align-self:flex-start;white-space:nowrap}
 .tl:has(.ev-tools){grid-template-columns:44px 1fr auto}
 .rate-f{display:flex;flex-direction:column;gap:6px}
+.d-range{display:grid;grid-template-columns:auto 1fr;gap:6px 8px;align-items:center;font-size:12.5px;color:var(--muted)}
 .msel{position:relative}
 .msel-btn{width:100%;text-align:left;display:flex;align-items:center;gap:6px;overflow:hidden;white-space:nowrap}
 .stars-s{color:var(--amber);letter-spacing:1px;font-size:12px}
@@ -568,6 +569,8 @@ const I = {
   box:'<path d="M21 8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/>',
   scan:'<path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2M7 12h10"/>',
   clock:'<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
+  chart:'<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-6"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
   edit:'<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
   menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
   mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 5L2 7"/>',
@@ -602,12 +605,14 @@ const BOUTIQUES = [
   {name:'Boutique Portofino', addr:'Calata Marconi 45, Portofino'},
 ];
 const OPERATORS = [
-  {name:'Marco Verdi', email:'marco.verdi@verga1947.it', b:'Bottega Storica', role:'Direttore vendite'},
+  {name:'Marco Verdi', email:'marco.verdi@verga1947.it', b:'Bottega Storica', role:'Direttore vendite', priv:true},
   {name:'Sara Colombo', email:'sara.colombo@verga1947.it', b:'Boutique Multibrand', role:'Venditrice'},
   {name:'Luca Ferrari', email:'luca.ferrari@verga1947.it', b:'Boutique Patek Philippe', role:'Venditore'},
   {name:'Giorgia Costa', email:'giorgia.costa@verga1947.it', b:'Boutique Portofino', role:'Venditrice'},
 ];
 const role = () => OPERATORS.find(o => o.name === S.operator)?.role || '';
+/* profili abilitati: vedono acquisti dei clienti Platino e fatturato in home (nella demo solo il Direttore vendite) */
+const isPriv = () => !!OPERATORS.find(o => o.name === S.operator)?.priv;
 const canAssign = () => ['Direttore vendite','Titolare'].includes(role());
 /* lista chiusa fornita da Verga (LISTA PER NUOVO CRM 2027) */
 const BRANDS = ['Angelus','Breitling','Cartier','Gerald Charles','Girard-Perregaux','Grand Seiko','Hublot','Messika','Nomos','Norqain','Patek Philippe','Rolex','Rolex CPO','Tudor','TAG Heuer','Pomellato','Verga Pre-Owned'];
@@ -615,7 +620,7 @@ const JEWEL = ['Pomellato','Messika'];
 const LANGS = ['Italiano','Inglese','Spagnolo','Arabo','Cinese'];
 const TIPI = ['Prospect','Cliente','Commerciante','Dipendente Verga'];
 const TIERS = [{n:'Platino',min:60000,c:'#6d7f8c'},{n:'Oro',min:30000,c:'#a8811f'},{n:'Argento',min:10000,c:'#8a9298'},{n:'Bronzo',min:1,c:'#9a6437'}];
-const MOTIVI = ['Nuova manifestazione d\'interesse','Aggiornamento manifestazione','Acquisto','Riparazione','Altro'];
+const MOTIVI = ['Nuova manifestazione d\'interesse','Aggiornamento manifestazione','Acquisto','Riparazione','Lamentela','Altro'];
 const MODELS = {Angelus:['U10','U23','La Magia'],Breitling:['Navitimer','Chronomat','Superocean','Premier','Avenger'],'Gerald Charles':['Maestro'],'Girard-Perregaux':['Laureato','1966','Free Bridge'],'Grand Seiko':['Heritage','Evolution 9','Elegance'],Hublot:['Big Bang','Classic Fusion','Spirit of Big Bang'],Nomos:['Tangente','Club','Orion'],Norqain:['Freedom','Adventure','Wild ONE'],'Rolex CPO':['Submariner','Cosmograph Daytona','GMT-Master II','Datejust'],'TAG Heuer':['Carrera','Monaco','Aquaracer'],'Verga Pre-Owned':['Vintage','Contemporaneo'],Rolex:['Cosmograph Daytona','Submariner','GMT-Master II','Datejust 36','Datejust 41','Oyster Perpetual','Yacht-Master','Day-Date'],'Patek Philippe':['Nautilus','Aquanaut','Calatrava','Grand Complications'],Cartier:['Santos','Tank','Panthère','Ballon Bleu'],Tudor:['Black Bay 58','Pelagos','Ranger','Royal'],Pomellato:['Nudo','Iconica','Sabbia'],Messika:['Move Uno','Move Romane','Joy']};
 const INTERESTS = ['Arte','Automotive','BORGO12','Ciclismo','Equitazione','Fashion e beauty','Golf','Padel','Portofino','Teatro','Tennis','Vela'];
 const INT_OLD = {'Tennis e padel':['Tennis','Padel'], Beverage:['BORGO12'], Motori:['Automotive']};
@@ -689,7 +694,7 @@ let evSeq = 100;
 const events = [
   {id:'e1',clientId:'c1',type:'visita',date:'2026-09-18T16:20',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Ha visto il Daytona in vetrina, chiede i tempi di attesa. Accompagnato dalla moglie.',followup:'2026-09-25'},
   {id:'e11',clientId:'c2',type:'visita',date:'2026-09-18T16:20',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Prima volta in negozio con il marito. Scheda creata dal legame.'},
-  {id:'e2',clientId:'c3',type:'chiamata_in',date:'2026-09-24T10:05',operator:'Sara Colombo',boutique:'Boutique Multibrand',note:'Chiede disponibilità Santos medium.',motivo:'Acquisto'},
+  {id:'e2',clientId:'c3',type:'chiamata_in',date:'2026-09-24T10:05',operator:'Sara Colombo',boutique:'Boutique Multibrand',note:'Chiede disponibilità Santos medium.',motivo:'Acquisto',followup:'2026-09-26',fuCc:['Marco Verdi']},
   {id:'e3',clientId:'c7',type:'visita',date:'2026-09-24T09:40',operator:'Luca Ferrari',boutique:'Boutique Patek Philippe',note:'Passata per regolazione bracciale.'},
   {id:'e4',clientId:'c6',type:'visita',date:'2026-09-24T10:30',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Ritiro cinturino.'},
   {id:'e5',clientId:'c5',type:'visita',date:'2026-09-24T11:10',operator:'Marco Verdi',boutique:'Bottega Storica',note:'Prima visita dopo la registrazione online. Interessata a un Datejust 36.',followup:'2026-09-24'},
@@ -737,6 +742,7 @@ const pdaNome = p => p.nome || NOMI[(p.ref || '').toUpperCase()] || '';
 const purchases = [
   {clientId:'c1',date:'2025-06-03',brand:'Rolex',modello:'Oyster Perpetual 41',ref:'124300',price:6600,listino:6950,sconto:350,boutique:'Bottega Storica',seller:'Marco Verdi'},
   {clientId:'c1',date:'2023-04-12',brand:'Rolex',modello:'Submariner',ref:'124060',price:9100,boutique:'Bottega Storica',seller:'Marco Verdi'},
+  {clientId:'c1',date:'2024-11-15',brand:'Patek Philippe',modello:'Aquanaut',ref:'5168G-001',price:21000,boutique:'Boutique Patek Philippe',seller:'Luca Ferrari'},
   {clientId:'c1',date:'2019-12-20',brand:'Patek Philippe',modello:'Calatrava',ref:'5227G',price:28500,boutique:'Boutique Patek Philippe',seller:'Luca Ferrari'},
   {clientId:'c3',date:'2026-02-14',brand:'Pomellato',modello:'Nudo · orecchini',ref:'POB9010O6000000TB',price:2400,boutique:'Boutique Multibrand',seller:'Sara Colombo'},
   {clientId:'c3',date:'2024-12-10',brand:'Cartier',modello:'Tank Must',ref:'WSTA0041',price:3200,listino:3400,sconto:200,boutique:'Boutique Multibrand',seller:'Sara Colombo'},
@@ -754,7 +760,7 @@ purchases.forEach((p, i) => Object.assign(p, {ord:p.ord || `ORD-${p.date.slice(0
 const S = {
   view:'login', id:null, tab:'panoramica', navOpen:false, notes:false,
   boutique:'Bottega Storica', operator:'Marco Verdi', pin:'',
-  f:{q:'',tipo:'',tier:'',rating:'',brand:'',modello:'',ref:'',seller:'',pref:'',interest:'',ibrand:'',lingua:'',prof:'',last:'',visit:''},
+  f:{q:'',tipo:'',tier:'',rating:'',brand:'',modello:'',ref:'',seller:'',pref:'',interest:'',ibrand:'',lingua:'',prof:'',lastFrom:'',lastTo:'',visit:''},
   pf:{q:'',brand:'',tipo:'',sub:'',stato:'',loc:'Bottega Storica'},
   pdf:{q:'',brand:'',boutique:'',operator:''},
   evf:{type:'',boutique:'',op:'',per:'',q:''},
@@ -791,7 +797,9 @@ const clientPdas = id => pdas.filter(p => p.clientId === id);
 const openPdas = () => pdas.filter(p => ['aperta','preordine'].includes(p.stato));
 const spent = id => purchases.filter(p => p.clientId === id).reduce((a, p) => a + p.price, 0);
 const tierOf = id => TIERS.find(t => spent(id) >= t.min);
-const tierTag = id => { const t = tierOf(id); return t ? `<span class="tag" style="color:${t.c};border-color:currentColor;background:transparent" title="Fascia calcolata sugli acquisti: ${eur(spent(id))}"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 13.9 7 22l5-3 5 3-1.5-8.1"/></svg>${t.n}</span>` : ''; };
+const hidePurch = id => tierOf(id)?.n === 'Platino' && !isPriv();
+const lockedPurch = `<div class="empty" style="display:flex;flex-direction:column;align-items:center;gap:6px"><b style="display:inline-flex;gap:6px;align-items:center">${ic('lock')}Acquisti riservati</b><span>Cliente Platino: gli acquisti sono visibili solo ai profili abilitati.</span></div>`;
+const tierTag = id => { const t = tierOf(id); return t ? `<span class="tag" style="color:${t.c};border-color:currentColor;background:transparent" title="Fascia calcolata sugli acquisti${hidePurch(id) ? '' : ': ' + eur(spent(id))}"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M8.5 13.9 7 22l5-3 5 3-1.5-8.1"/></svg>${t.n}</span>` : ''; };
 const stars = (n, act) => `<span class="stars" ${act ? 'role="radiogroup" aria-label="Valutazione venditore"' : ''}>${[1,2,3,4,5].map(i => act ? `<button type="button" data-act="${act}" data-v="${i}" aria-label="${i} su 5" class="${i <= n ? 'on' : ''}">★</button>` : `<span class="${i <= n ? 'on' : ''}">★</span>`).join('')}</span>`;
 const sleeping = id => { const e = lastContact(id); return daysAgo(e ? e.date : C(id).since) > 180; };
 const unread = () => NOTIFS.filter(n => !n.read).length;
@@ -917,6 +925,7 @@ function vLogin(){
     <label class="field"><span>Password</span><div class="pw"><input class="in" id="l-pw" type="${S.showPw ? 'text' : 'password'}" autocomplete="current-password"><button type="button" data-act="pw-toggle" aria-label="${S.showPw ? 'Nascondi password' : 'Mostra password'}">${ic(S.showPw ? 'eyeOff' : 'eye')}</button></div></label>
     <p id="l-err" class="tag red" hidden style="align-self:flex-start"></p>
     <button class="btn btn-primary btn-lg" data-act="login">Accedi</button>
+    <p class="faint" style="margin:0;font-size:12.5px;text-align:center">Venditori: un solo accesso per dispositivo. I profili abilitati possono accedere da più dispositivi.</p>
     <button class="link" data-act="pw-forgot" style="align-self:center;font-size:13px">Password dimenticata?</button>
     <p class="faint" style="margin:0;font-size:12px;text-align:center;overflow-wrap:anywhere">Demo: premi <b>Accedi</b> anche senza compilare i campi. Per entrare come un altro venditore usa la sua email (es. sara.colombo@verga1947.it).</p>
   </section>
@@ -924,12 +933,13 @@ function vLogin(){
 }
 
 /* ---------------- DASHBOARD ---------------- */
+const REV = [['Da inizio anno', 1284500, 1162300, 'stesso periodo 2025'], ['Ultimi 3 mesi', 412800, 438100, 'stessi mesi 2025'], ['Settembre', 128900, 96400, 'agosto']];
 function vDash(){
   const todayEv = events.filter(e => sameDay(e.date) && e.boutique === S.boutique);
   const bdays = clients.filter(c => c.birth && c.birth.d && c.birth.m === 9 && c.birth.d >= 24 && c.birth.d <= 30);
   const recent = [...events].sort((a,b) => dt(b.date) - dt(a.date)).slice(0,6);
   const latest = recentPdas().filter(p => p.stato !== 'annullata').slice(0,6);
-  const fus = events.filter(e => e.followup && !e.done && e.operator === S.operator && dday(e.followup) <= 0).sort((a, b) => a.followup.localeCompare(b.followup));
+  const fus = events.filter(e => e.followup && !e.done && e.operator === S.operator).sort((a, b) => a.followup.localeCompare(b.followup));
   return `
   <div class="hello page-h"><div><div class="label">Giovedì 24 settembre 2026 · ${S.boutique}</div><h1>Buongiorno, ${S.operator.split(' ')[0]}</h1></div></div>
   <div class="qa">
@@ -938,12 +948,14 @@ function vDash(){
     <button data-act="pda-new"><span class="ic">${ic('heart')}</span><span><b>Manifestazione di interesse</b><small>Modello desiderato, senza prezzo</small></span></button>
     <button data-go="cassa"><span class="ic">${ic('cart')}</span><span><b>Apri cassa</b><small>Scansiona la referenza e associa il cliente</small></span></button>
   </div>
-  <div class="kpis">
-    <div class="kpi"><span class="label">Passaggi oggi</span><b class="num">${todayEv.length}</b><span class="muted">in ${S.boutique}</span></div>
-    <div class="kpi"><span class="label">Manifestazioni aperte</span><b class="num">${openPdas().length}</b><span class="muted">in tutte le boutique</span></div>
-    <div class="kpi"><span class="label">Compleanni</span><b class="num">${bdays.length}</b><span class="muted">questa settimana</span></div>
-    <div class="kpi"><span class="label">Orologi in magazzino</span><b class="num">${watchesInStock().length}</b><span class="muted">tra boutique e magazzino centrale</span></div>
-  </div>
+  ${isPriv() ? `<section class="card card-b">
+    <div class="card-h" style="padding:0 0 12px">${ic('chart')}<h2>Fatturato</h2><span class="tag" style="height:22px">${ic('lock')}Visibile solo ai profili abilitati</span><span class="sp"></span><span class="faint" style="font-size:12px">Dati di esempio · periodi e confronti da definire</span></div>
+    <div class="kpis" style="margin:0">${REV.map(([l, v, prev, pl]) => { const d = (v - prev) / prev * 100; return `<div class="kpi"><span class="label">${l}</span><b class="num">${eur(v)}</b><span class="muted"><b style="font:inherit;font-weight:700;color:var(--${d >= 0 ? 'ok' : 'red'})">${d >= 0 ? '+' : '−'}${Math.abs(d).toFixed(1).replace('.', ',')}%</b> rispetto a ${pl} (${eur(prev)})</span></div>`; }).join('')}</div>
+  </section>` : ''}
+  <section class="card">
+    <div class="card-h">${ic('calendar')}<h2>I miei follow-up</h2>${fus.length ? `<span class="tag amber num">${fus.length}</span>` : ''}<span class="sp"></span><span class="faint" style="font-size:12px">Clienti da ricontattare · ${esc(S.operator)}</span></div>
+    <div class="list">${fus.map(e => { const c = C(e.clientId), d = dday(e.followup); return `<div class="row click" data-go="cliente" data-id="${c.id}" data-tab="passaggi">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))} <span class="faint" style="font-weight:500">· ${EV[e.type].short.toLowerCase()} del ${fmtD(e.date).slice(0, 5)}${e.motivo ? ' · ' + esc(e.motivo.toLowerCase()) : ''}</span></div><div class="s">${esc(e.note || 'Da ricontattare')}${e.fuCc && e.fuCc.length ? ` · <span class="faint">in copia ${esc(e.fuCc.join(', '))}</span>` : ''}</div></div><span class="tag ${d < 0 ? 'red' : d === 0 ? 'amber' : ''}" style="white-space:nowrap">${d < 0 ? 'Scaduto il ' + fmtD(e.followup).slice(0, 5) : d === 0 ? 'Oggi' : fmtD(e.followup).slice(0, 5)}</span><button class="btn btn-sm" data-act="fu-done" data-id="${e.id}">${ic('check')}Fatto</button></div>`; }).join('') || '<div class="empty">Nessun follow-up aperto.</div>'}</div>
+  </section>
   <div class="grid2">
     <div class="stack">
       <section class="card">
@@ -958,10 +970,6 @@ function vDash(){
       </section>
     </div>
     <div class="stack">
-      <section class="card">
-        <div class="card-h">${ic('calendar')}<h2>Follow-up del giorno</h2><span class="sp"></span>${fus.length ? `<span class="tag amber num">${fus.length}</span>` : ''}</div>
-        <div class="list">${fus.map(e => { const c = C(e.clientId), late = dday(e.followup) < 0; return `<div class="row click" data-go="cliente" data-id="${c.id}" data-tab="passaggi">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))} <span class="faint" style="font-weight:500">· ${EV[e.type].short.toLowerCase()} del ${fmtD(e.date).slice(0, 5)}</span></div><div class="s">${late ? `<b style="color:var(--red)">Scaduto il ${fmtD(e.followup).slice(0, 5)}</b> · ` : ''}${esc(e.note || 'Da ricontattare')}</div></div><button class="btn btn-sm" data-act="fu-done" data-id="${e.id}">${ic('check')}Fatto</button></div>`; }).join('') || '<div class="empty">Nessun follow-up per oggi.</div>'}</div>
-      </section>
       <section class="card">
         <div class="card-h">${ic('gift')}<h2>Compleanni della settimana</h2></div>
         <div class="list">${bdays.map(c => `<div class="row click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${c.birth.d} ${MESI[c.birth.m-1]} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div>`).join('') || '<div class="empty">Nessun compleanno questa settimana.</div>'}</div>
@@ -1011,7 +1019,7 @@ function vClienti(){
       <div class="fsec"><div class="label">Attività</div>
         <label class="field"><span>Venditore</span><select class="sel" data-f="seller">${opts(OPERATORS.map(o => o.name), f.seller, 'Tutti i venditori')}</select></label>
         <label class="field"><span>Ultima attività (passaggi, chiamate, mail)</span><select class="sel" data-f="visit">${VISIT_F.map(([v,l]) => `<option value="${v}" ${f.visit === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
-        <label class="field"><span>Ultimo acquisto</span><select class="sel" data-f="last">${LAST_F.map(([v,l]) => `<option value="${v}" ${f.last === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+        <div class="field"><span>Ultimo acquisto</span><div class="d-range"><span>dal</span><input class="in" type="date" data-f="lastFrom" value="${esc(f.lastFrom)}" aria-label="Ultimo acquisto dal" max="2026-09-24"><span>al</span><input class="in" type="date" data-f="lastTo" value="${esc(f.lastTo)}" aria-label="Ultimo acquisto al" max="2026-09-24"></div><span class="faint" style="font-size:11.5px;font-weight:400">Solo la seconda data = nessun acquisto dopo quel giorno</span></div>
       </div>
       <div class="fsec"><div class="label">Profilo</div>
         <label class="field"><span>Brand di interesse</span><select class="sel" data-f="ibrand">${opts(BRANDS, f.ibrand, 'Tutti')}</select></label>
@@ -1027,7 +1035,7 @@ function vClienti(){
 async function exportClients(){
   const list = filteredClients(), q = x => `"${String(x ?? '').replace(/"/g, '""')}"`;
   const head = ['Nome','Cognome','Email','Cellulare','Tipologia','Professione','Azienda','Valutazione','Fascia','Brand di interesse','Interessi','Lingua','Città','Nazione','Ultimo passaggio','Ultimo acquisto','Totale acquisti','Newsletter'];
-  const rows = list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id), a = c.addresses[0] || {}; return [c.nome, c.cognome, c.email, c.tel, c.tipo, c.prof, c.azienda, c.rating || '', tierOf(c.id)?.n || '', c.brands.join(', '), c.interests.join(', '), c.lingua, a.citta, a.naz, v ? fmtD(v.date) : '', lp ? `${fmtD(lp.date)} ${lp.brand} ${lp.modello}` : '', spent(c.id), c.newsletter ? 'Sì' : 'No']; });
+  const rows = list.map(c => { const v = lastVisit(c.id), lp = lastPurchase(c.id), a = c.addresses[0] || {}; return [c.nome, c.cognome, c.email, c.tel, c.tipo, c.prof, c.azienda, c.rating || '', tierOf(c.id)?.n || '', c.brands.join(', '), c.interests.join(', '), c.lingua, a.citta, a.naz, v ? fmtD(v.date) : '', hidePurch(c.id) ? 'Riservato' : lp ? `${fmtD(lp.date)} ${lp.brand} ${lp.modello}` : '', hidePurch(c.id) ? '' : spent(c.id), c.newsletter ? 'Sì' : 'No']; });
   const csv = '﻿' + [head, ...rows].map(r => r.map(q).join(';')).join('\r\n');
   const filename = `clienti-verga-${list.length}.csv`;
   const dl = await downloadsCap();
@@ -1053,10 +1061,8 @@ function filteredClients(){
     if (f.modello && !ps.some(p => p.modello.toLowerCase().includes(f.modello.toLowerCase()))) return false;
     if (f.ref && !ps.some(p => p.ref.toLowerCase().includes(f.ref.toLowerCase()))) return false;
     if (f.seller && !sellerOf(c, f.seller)) return false;
-    if (f.last) { const lp = ps[0]; const d = lp ? daysAgo(lp.date) : null;
-      if (f.last === '12' && !(lp && d <= 365)) return false;
-      if (f.last === '1-3' && !(lp && d > 365 && d <= 1096)) return false;
-      if (f.last === '3' && !(lp && d > 1096)) return false; }
+    if (f.lastFrom || f.lastTo) { const lp = ps[0], d = lp ? lp.date.slice(0, 10) : '';
+      if (!lp || (f.lastFrom && d < f.lastFrom) || (f.lastTo && d > f.lastTo)) return false; }
     if (f.visit) { const e = lastContact(c.id), d = e ? daysAgo(e.date) : Infinity; if (f.visit === '90' && !(d <= 91)) return false; if (f.visit === '180' && !(d <= 183)) return false; if (f.visit === '365+' && !(d > 365)) return false; }
     if (f.interest && !c.interests.includes(f.interest)) return false;
     if (f.prof && c.prof !== f.prof) return false;
@@ -1066,12 +1072,12 @@ function filteredClients(){
 function renderResults(){
   const el = document.getElementById('results'); if (!el) return;
   const list = filteredClients();
-  const names = {q:'Ricerca',tipo:'Tipologia',tier:'Fascia',rating:'Valutazione',brand:'Brand acquistato',modello:'Modello',ref:'Referenza acquisti',seller:'Venditore',pref:'Referenza manifestazioni',ibrand:'Brand di interesse',lingua:'Lingua',last:'Ultimo acquisto',visit:'Ultima attività',interest:'Interessi',prof:'Professione'};
+  const names = {q:'Ricerca',tipo:'Tipologia',tier:'Fascia',rating:'Valutazione',brand:'Brand acquistato',modello:'Modello',ref:'Referenza acquisti',seller:'Venditore',pref:'Referenza manifestazioni',ibrand:'Brand di interesse',lingua:'Lingua',lastFrom:'Ultimo acquisto dal',lastTo:'Ultimo acquisto al',visit:'Ultima attività',interest:'Interessi',prof:'Professione'};
   const lastL = Object.fromEntries(LAST_F), visitL = Object.fromEntries(VISIT_F);
   const act = Object.entries(S.f).filter(([k,v]) => v);
   el.innerHTML = `
     <div class="active-f"><b class="num">${list.length} clienti</b>
-      ${act.map(([k,v]) => `<span class="tag brand">${names[k]}: ${esc(k === 'last' ? lastL[v].toLowerCase() : k === 'visit' ? visitL[v].toLowerCase() : k === 'rating' ? v.split(',').map(n => n + '★').join(', ') : v)}<button data-act="clr-f" data-k="${k}" aria-label="Rimuovi filtro">${ic('x')}</button></span>`).join('')}
+      ${act.map(([k,v]) => `<span class="tag brand">${names[k]}: ${esc(k === 'lastFrom' || k === 'lastTo' ? fmtD(v) : k === 'visit' ? visitL[v].toLowerCase() : k === 'rating' ? v.split(',').map(n => n + '★').join(', ') : v)}<button data-act="clr-f" data-k="${k}" aria-label="Rimuovi filtro">${ic('x')}</button></span>`).join('')}
       ${act.length ? '<button class="link" data-act="clr-all">Azzera filtri</button>' : '<span class="muted">Nessun filtro attivo</span>'}
     </div>
     <div class="card tbl-wrap"><table class="tbl">
@@ -1081,7 +1087,7 @@ function renderResults(){
           <td><div class="cell-person">${avatar(c)}<div><b>${esc(fullName(c))} </b>${c.rating ? stars(c.rating) : ''}<small>${esc(c.email || 'Scheda da completare')}</small><div class="tags" style="margin-top:4px"><span class="tag ${c.tipo === 'Prospect' ? 'blue' : ''}" style="height:20px">${esc(c.tipo || 'Prospect')}</span>${c.source === 'Autoregistrazione' ? `<span class="tag blue" style="height:20px">${ic('send')}Autoregistrato</span>` : ''}${tierTag(c.id)}${c.fornitore ? '<span class="tag amber" style="height:20px">Fornitore</span>' : ''}${sleeping(c.id) ? '<span class="tag red" style="height:20px">Dormiente</span>' : ''}</div></div></div></td>
           <td>${esc(c.prof || '—')}${c.azienda ? `<div class="faint" style="font-size:12px">${esc(c.azienda)}</div>` : ''}</td>
           <td class="num">${v ? `${fmtD(v.date)}<div class="faint" style="font-size:12px">${rel(v.date)}</div>` : '<span class="faint">—</span>'}</td>
-          <td class="num">${lp ? `${fmtD(lp.date)}<div class="faint" style="font-size:12px">${esc(lp.brand)} ${esc(lp.modello)}</div>` : '<span class="faint">Nessuno</span>'}</td>
+          <td class="num">${hidePurch(c.id) ? '<span class="faint">Riservato</span>' : lp ? `${fmtD(lp.date)}<div class="faint" style="font-size:12px">${esc(lp.brand)} ${esc(lp.modello)}</div>` : '<span class="faint">Nessuno</span>'}</td>
         </tr>`; }).join('') || `<tr><td colspan="4"><div class="empty">Nessun cliente corrisponde ai filtri.</div></td></tr>`}</tbody>
     </table></div>`;
 }
@@ -1098,7 +1104,7 @@ function vCliente(){
   if (S.tab === 'pda') body = `<section class="card"><div class="card-h">${ic('heart')}<h2>Manifestazioni di interesse</h2><span class="faint" style="font-size:12px">Registrate sul CRM</span><span class="sp"></span><button class="btn btn-sm" data-act="pda-new" data-id="${c.id}">${ic('plus')}Nuova</button></div><div>${cp.length ? cp.map(pdaCard).join('') : '<div class="empty">Nessuna manifestazione di interesse.</div>'}</div></section>`;
   if (S.tab === 'passaggi') { const fe = evs.filter(e => !S.cev || e.operator === S.cev); body = `<section class="card"><div class="card-h"><h2>Storico passaggi e contatti</h2><span class="sp"></span><select class="sel" style="width:auto;height:36px" data-cev aria-label="Filtra per venditore">${opts([...new Set(evs.map(e => e.operator))], S.cev, 'Tutti i venditori')}</select><button class="btn btn-sm" data-act="evento" data-id="${c.id}">${ic('plus')}Aggiungi con nota</button></div><div class="timeline">${fe.length ? fe.map(tlRow).join('') : '<div class="empty">Nessun passaggio registrato.</div>'}</div></section>`; }
   if (S.tab === 'comunicazione') body = commCard(c);
-  if (S.tab === 'acquisti') body = `<section class="card tbl-wrap"><div class="card-h">${ic('bag')}<h2>Acquisti</h2><span class="faint" style="font-size:12px">Documenti letti in tempo reale dal gestionale</span><span class="sp"></span>${ps.some(p => p.sconto) ? `<span class="muted num">Sconto medio ${pctTxt(ps.reduce((a, p) => a + (p.sconto || 0), 0), ps.reduce((a, p) => a + (p.listino || p.price), 0))} ·</span>` : ''}<span class="muted num">Totale ${eur(spent(c.id))}</span></div>${ps.length ? purchTable(ps) : '<div class="empty">Nessun acquisto registrato.</div>'}</section>`;
+  if (S.tab === 'acquisti') body = hidePurch(c.id) ? `<section class="card"><div class="card-h">${ic('bag')}<h2>Acquisti</h2></div>${lockedPurch}</section>` : `<section class="card tbl-wrap"><div class="card-h">${ic('bag')}<h2>Acquisti</h2><span class="faint" style="font-size:12px">Documenti letti in tempo reale dal gestionale</span><span class="sp"></span>${ps.some(p => p.sconto) ? `<span class="muted num">Sconto medio ${pctTxt(ps.reduce((a, p) => a + (p.sconto || 0), 0), ps.reduce((a, p) => a + (p.listino || p.price), 0))} ·</span>` : ''}<span class="muted num">Totale ${eur(spent(c.id))}</span></div>${ps.length ? purchTable(ps) : '<div class="empty">Nessun acquisto registrato.</div>'}</section>`;
   if (S.tab === 'riparazioni') body = ripPlaceholderCliente(c);
   const sl = sleeping(c.id);
   return `
@@ -1138,7 +1144,7 @@ function vCliente(){
     </div>
   </section>
   <nav class="tabs" aria-label="Sezioni scheda">
-    ${tab('panoramica','Panoramica')}${tab('anagrafica','Anagrafica')}${tab('pda','Manifestazioni', cp.length)}${tab('acquisti','Acquisti', ps.length)}${tab('riparazioni','Riparazioni', clientRepairs(c.id).length)}${tab('passaggi','Passaggi', evs.length)}${tab('comunicazione','Comunicazione', mailsOf(c).length)}
+    ${tab('panoramica','Panoramica')}${tab('anagrafica','Anagrafica')}${tab('pda','Manifestazioni', cp.length)}${tab('acquisti','Acquisti', hidePurch(c.id) ? undefined : ps.length)}${tab('riparazioni','Riparazioni', clientRepairs(c.id).length)}${tab('passaggi','Passaggi', evs.length)}${tab('comunicazione','Comunicazione', mailsOf(c).length)}
   </nav>
   ${body}`;
 }
@@ -1146,7 +1152,7 @@ function cPanoramica(c, cp, ps){
   const ls = clientLinks(c.id);
   const open = cp.filter(p => ['aperta','preordine','assegnata'].includes(p.stato));
   const sc = ps.reduce((a, p) => a + (p.sconto || 0), 0), lis = ps.reduce((a, p) => a + (p.listino || p.price), 0);
-  const acq = `<section class="card tbl-wrap">
+  const acq = hidePurch(c.id) ? `<section class="card"><div class="card-h">${ic('bag')}<h2>Ultimi acquisti</h2></div>${lockedPurch}</section>` : `<section class="card tbl-wrap">
         <div class="card-h">${ic('bag')}<h2>Ultimi acquisti</h2><span class="sp"></span>${ps.length ? `<span class="muted num" style="font-size:13px">Totale ${eur(spent(c.id))}${sc ? ` · sconto medio ${pctTxt(sc, lis)}` : ''}</span>` : ''}${ps.length > 3 ? `<button class="link" data-act="tab" data-v="acquisti">Tutti</button>` : ''}</div>
         ${ps.length ? purchTable(ps.slice(0,3), true) : '<div class="empty">Nessun acquisto registrato.</div>'}
       </section>`;
@@ -1185,7 +1191,7 @@ function sellersCard(c){
   const list = Object.values(m).sort((a, b) => b.v - a.v || b.tot - a.tot || b.a - a.a).slice(0, 4);
   return `<section class="card">
     <div class="card-h">${ic('users')}<h2>Venditori di riferimento</h2></div>
-    <div>${list.length ? list.map((x, i) => `<div class="row"><span class="av" style="${i ? '' : 'background:var(--brand);color:#fff'}">${opInitials(x.op)}</span><div class="grow"><div class="t">${esc(x.op)}${i === 0 ? ' <span class="tag brand" style="height:20px">principale</span>' : ''}</div><div class="s">${x.v ? `${x.v} ${x.v === 1 ? 'vendita' : 'vendite'} · ${eur(x.tot)}` : 'nessuna vendita'}${x.a ? ` · ${x.a} ${x.a === 1 ? 'contatto' : 'contatti'}` : ''}${x.last ? ` · ultimo ${fmtD(x.last)}` : ''}</div></div></div>`).join('') : '<div class="empty">Nessun venditore ha ancora seguito il cliente.</div>'}</div>
+    <div>${list.length ? list.map((x, i) => `<div class="row"><span class="av" style="${i ? '' : 'background:var(--brand);color:#fff'}">${opInitials(x.op)}</span><div class="grow"><div class="t">${esc(x.op)}${i === 0 ? ' <span class="tag brand" style="height:20px">principale</span>' : ''}</div><div class="s">${x.v ? `${x.v} ${x.v === 1 ? 'vendita' : 'vendite'}${hidePurch(c.id) ? '' : ' · ' + eur(x.tot)}` : 'nessuna vendita'}${x.a ? ` · ${x.a} ${x.a === 1 ? 'contatto' : 'contatti'}` : ''}${x.last ? ` · ultimo ${fmtD(x.last)}` : ''}</div></div></div>`).join('') : '<div class="empty">Nessun venditore ha ancora seguito il cliente.</div>'}</div>
   </section>`;
 }
 /* comunicazione: le newsletter e le mail inviate al cliente, lette da MailUp */
@@ -1488,14 +1494,15 @@ function vOrdini(){
   const groups = {}; purchases.forEach(p => (groups[p.ord] = groups[p.ord] || []).push(p));
   const all = Object.entries(groups).map(([ord, rows]) => { const p0 = rows[0], tot = rows.reduce((a, x) => a + x.price, 0), sc = rows.reduce((a, x) => a + (x.sconto || 0), 0), lis = rows.reduce((a, x) => a + (x.listino || x.price), 0);
     return {ord, rows, date:p0.date, clientId:p0.clientId, boutique:p0.boutique, seller:p0.seller, pay:p0.pay, doc:p0.doc, rs:p0.rs, acc:p0.acc, naz:p0.naz, tot, sc, lis}; });
-  const list = all.filter(o => (!f.boutique || o.boutique === f.boutique) && (!f.seller || o.seller === f.seller) && (!f.brand || o.rows.some(x => x.brand === f.brand)) && (!f.pay || o.pay === f.pay) && (!f.doc || o.doc === f.doc)
+  const hid = all.filter(o => hidePurch(o.clientId)).length;
+  const list = all.filter(o => !hidePurch(o.clientId) && (!f.boutique || o.boutique === f.boutique) && (!f.seller || o.seller === f.seller) && (!f.brand || o.rows.some(x => x.brand === f.brand)) && (!f.pay || o.pay === f.pay) && (!f.doc || o.doc === f.doc)
     && (!f.stato || (f.stato === 'acconto' ? o.acc !== null && o.acc < o.tot : o.acc === null || o.acc >= o.tot)) && (!f.sc || (f.sc === 'si' ? o.sc > 0 : !o.sc))
     && (!f.per || dday(o.date) >= -f.per) && (!q || `${o.ord} ${fullName(C(o.clientId))} ${o.rs || ''} ${o.rows.map(x => `${x.brand} ${x.modello} ${x.ref}`).join(' ')}`.toLowerCase().includes(q))).sort((a, b) => dt(b.date) - dt(a.date));
   const tot = list.reduce((a, o) => a + o.tot, 0), sc = list.reduce((a, o) => a + o.sc, 0), lis = list.reduce((a, o) => a + o.lis, 0);
   const sel = (k, l, o) => `<label class="field"><span>${l}</span><select class="sel" data-of="${k}">${o.map(([v, t]) => `<option value="${v}" ${f[k] === v ? 'selected' : ''}>${t}</option>`).join('')}</select></label>`;
   const brands = [...new Set(purchases.map(p => p.brand))].sort();
   return `
-  <div class="page-h"><div><div class="label">Vendita</div><h1>Storico ordini</h1></div><span class="sp"></span><span class="muted">Ordini creati dalla cassa in tutte le boutique · documenti letti dal gestionale</span></div>
+  <div class="page-h"><div><div class="label">Vendita</div><h1>Storico ordini</h1></div><span class="sp"></span><span class="muted">Ordini creati dalla cassa in tutte le boutique · documenti letti dal gestionale${hid ? ` · ${hid} ordini di clienti Platino riservati` : ''}</span></div>
   <div class="kpis">
     <div class="kpi"><span class="label">Ordini</span><b class="num">${list.length}</b><span class="muted">con i filtri attuali</span></div>
     <div class="kpi"><span class="label">Venduto</span><b class="num">${eur(tot)}</b><span class="muted">IVA inclusa</span></div>
@@ -2269,7 +2276,8 @@ function renderModal(){
       <div class="field"><span>Tipo</span><div class="seg" style="grid-template-columns:repeat(4,1fr);grid-auto-flow:row">${Object.entries(EV).map(([k,t]) => `<button class="${M.type === k ? 'on' : ''}" data-act="m-type" data-v="${k}">${ic(t.icon)}${t.label}</button>`).join('')}</div></div>
       <div class="field"><span>Motivo</span><div class="chips">${MOTIVI.map(v => `<button class="chip ${M.motivo === v ? 'on' : ''}" data-act="m-motivo" data-v="${v}">${v}</button>`).join('')}</div></div>
       <label class="field"><span>Nota (facoltativa)</span><textarea class="ta" id="m-note" placeholder="Es. ha provato il Submariner, torna sabato con la moglie">${esc(M.note)}</textarea></label>
-      <label class="field" style="max-width:240px"><span>Follow-up · data in cui ricontattare (facoltativa)</span><input class="in" type="date" id="m-fu" value="${esc(M.fu || '')}" min="2026-09-24"></label>`;
+      <label class="field" style="max-width:240px"><span>Follow-up · data in cui ricontattare (facoltativa)</span><input class="in" type="date" id="m-fu" value="${esc(M.fu || '')}" min="2026-09-24"></label>
+      <div class="field fu-mail" id="m-fu-mail" ${M.fu ? '' : 'hidden'}><span style="display:flex;gap:6px;align-items:center">${ic('mail')}Promemoria via email a ${esc(OPERATORS.find(o => o.name === S.operator)?.email || '')} · in copia (facoltativo)</span><div class="chips">${OPERATORS.filter(o => o.name !== S.operator).map(o => { const on = (M.cc || []).includes(o.name); return `<button class="chip ${on ? 'on' : ''}" data-act="m-cc" data-v="${o.name}">${on ? ic('check') : ''}${o.name}</button>`; }).join('')}</div></div>`;
     f = `<span class="auto-info">${ic('clock')}Oggi ${fmtT(NOW.toISOString())} · ${S.operator} · ${S.boutique}</span><button class="btn" data-act="m-close">Annulla</button><button class="btn btn-primary" data-act="m-save-ev" ${c ? '' : 'disabled'}>${ic('check')}${M.editId ? 'Salva modifiche' : M.motivo === MOTIVI[0] ? 'Registra e crea manifestazione' : 'Registra'}</button>`;
   }
   if (M.kind === 'pda') {
@@ -2504,7 +2512,7 @@ function act(el, ev){
       break;
     case 'tab': S.tab = v; S.cev = ''; render(); break;
     case 'evento': openModal({kind:'evento', clientId:id || null, lock:!!id, type:'visita', fu:'', note:'', motivo:''}); break;
-    case 'm-motivo': M.motivo = M.motivo === v ? '' : v; M.note = document.getElementById('m-note').value; M.fu = document.getElementById('m-fu').value; renderModal(); break;
+    case 'm-motivo': M.motivo = M.motivo === v ? '' : v; M.cc = M.cc || []; M.note = document.getElementById('m-note').value; M.fu = document.getElementById('m-fu').value; renderModal(); break;
     case 'quick-ev': {
       events.push({id:'e' + (++evSeq), clientId:id, type:el.dataset.t, date:nowISO(), operator:S.operator, boutique:S.boutique, note:''});
       render(); toast(`${EV[el.dataset.t].label} · registrato alle ${fmtT(NOW.toISOString())}`); break; }
@@ -2519,7 +2527,7 @@ function act(el, ev){
     case 'assegna': openModal({kind:'assegna', pdaId:id, productId: compatible(pdas.find(p => p.id === id))[0]?.id}); break;
     case 'to-cassa': S.cart.clientId = id; go('cassa'); break;
     case 'pda-cassa': { const p = pdas.find(x => x.id === id); S.cart.clientId = p.clientId; if (!S.cart.items.includes(p.productId)) S.cart.items.push(p.productId); go('cassa'); toast('Pre-acquisto messo in cassa'); break; }
-    case 'ev-edit': { const e = events.find(x => x.id === id); openModal({kind:'evento', editId:e.id, clientId:e.clientId, lock:true, type:e.type, fu:e.followup || '', note:e.note || '', motivo:e.motivo || ''}); break; }
+    case 'ev-edit': { const e = events.find(x => x.id === id); openModal({kind:'evento', editId:e.id, clientId:e.clientId, lock:true, type:e.type, fu:e.followup || '', cc:[...(e.fuCc || [])], note:e.note || '', motivo:e.motivo || ''}); break; }
     case 'ev-del': { const i = events.findIndex(x => x.id === id), e = events[i]; events.splice(i, 1); S.undoEv = {e, i}; render(); toast(`${EV[e.type].label} del ${fmtD(e.date)} eliminato`); break; }
     case 'fu-done': { const x = events.find(z => z.id === id); x.done = true; render(); toast('Follow-up segnato come fatto'); break; }
     case 'rate-open': S.rateOpen = !S.rateOpen; render(); break;
@@ -2609,11 +2617,14 @@ function act(el, ev){
     case 'm-pick': M.clientId = id; renderModal(); break;
     case 'm-unpick': M.clientId = null; renderModal(); break;
     case 'm-newclient': closeModal(); go('nuovo'); break;
+    case 'm-cc': { M.cc = M.cc || []; const i = M.cc.indexOf(v); i < 0 ? M.cc.push(v) : M.cc.splice(i, 1); M.note = document.getElementById('m-note').value; M.fu = document.getElementById('m-fu').value; renderModal(); break; }
     case 'm-type': M.type = v; M.note = document.getElementById('m-note').value; M.fu = document.getElementById('m-fu').value; renderModal(); break;
     case 'm-save-ev': {
-      if (M.editId) { const e = events.find(x => x.id === M.editId); Object.assign(e, {clientId:M.clientId, type:M.type, note:document.getElementById('m-note').value.trim(), followup:document.getElementById('m-fu').value || null, motivo:M.motivo || ''}); closeModal(); render(); toast('Passaggio aggiornato'); break; }
-      events.push({id:'e' + (++evSeq), clientId:M.clientId, type:M.type, date:nowISO(), operator:S.operator, boutique:S.boutique, note:document.getElementById('m-note').value.trim(), followup:document.getElementById('m-fu').value || null, motivo:M.motivo || ''});
-      const cid = M.clientId, n = fullName(C(cid)), newPda = M.motivo === MOTIVI[0]; closeModal(); render(); toast(`${EV[events[events.length-1].type].label}: ${n}`);
+      const fu = document.getElementById('m-fu').value || null, cc = fu ? (M.cc || []) : [];
+      const fuMail = old => fu && fu !== old ? ` · promemoria inviato via email${cc.length ? ' (in copia ' + cc.join(', ') + ')' : ''}` : '';
+      if (M.editId) { const e = events.find(x => x.id === M.editId), msg = fuMail(e.followup); Object.assign(e, {clientId:M.clientId, type:M.type, note:document.getElementById('m-note').value.trim(), followup:fu, fuCc:cc, motivo:M.motivo || ''}); closeModal(); render(); toast('Passaggio aggiornato' + msg); break; }
+      events.push({id:'e' + (++evSeq), clientId:M.clientId, type:M.type, date:nowISO(), operator:S.operator, boutique:S.boutique, note:document.getElementById('m-note').value.trim(), followup:fu, fuCc:cc, motivo:M.motivo || ''});
+      const cid = M.clientId, n = fullName(C(cid)), newPda = M.motivo === MOTIVI[0]; closeModal(); render(); toast(`${EV[events[events.length-1].type].label}: ${n}${fuMail(null)}`);
       if (newPda) { S.mn = blankMn(cid, {view:S.view, id:S.id, tab:S.tab}); go('manif-new'); } break; }
     case 'm-brand': M.brand = v; M.modello = ''; renderModal(); break;
     case 'm-model': M.modello = v; renderModal(); break;
@@ -2704,6 +2715,7 @@ go = function(view, id=null, extra={}){
 
 /* input: ricerche live senza perdere il focus */
 document.addEventListener('input', e => {
+  if (e.target.id === 'm-fu') { const w = document.getElementById('m-fu-mail'); if (w) w.hidden = !e.target.value; }
   const t = e.target;
   if (t.dataset.f !== undefined) { S.f[t.dataset.f] = t.value; renderResults(); return; }
   if (t.id === 'gs') return gsearch(t.value);
