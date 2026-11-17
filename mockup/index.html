@@ -99,6 +99,8 @@ svg.i{width:22px;height:22px;flex:none;fill:none;stroke:currentColor;stroke-widt
 .side-brand b{font-family:var(--serif);font-weight:500;font-size:22px;letter-spacing:.06em;line-height:1}
 .side-brand small{display:block;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--side-muted);margin-top:4px}
 .nav{display:flex;flex-direction:column;gap:2px}
+.demo-op{display:flex;flex-direction:column;gap:4px;padding:2px 12px 8px;font-size:11.5px;color:var(--side-muted)}
+.demo-op select{width:100%;height:34px;border-radius:8px;border:1px solid var(--side-2);background:var(--side-2);color:var(--side-ink);font:inherit;font-size:13px;padding:0 8px}
 .nav .grp{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--side-muted);padding:14px 12px 6px}
 .nav button{all:unset;display:flex;align-items:center;gap:12px;padding:0 12px;height:42px;border-radius:15px;color:var(--side-ink);font-weight:500;cursor:pointer;transition:background-color .3s,color .3s}
 .nav svg.i{width:18px;height:18px}
@@ -888,6 +890,7 @@ function shell(content){
     </nav>
     <div class="side-foot nav">
       <div class="grp">Viste demo</div>
+      <label class="demo-op"><span>Entra come</span><select id="op-sel" aria-label="Entra come">${OPERATORS.map(o => `<option value="${esc(o.name)}" ${o.name === S.operator ? 'selected' : ''}>${esc(o.name)} · ${esc(o.role)}${o.priv ? ' (abilitato)' : ''}</option>`).join('')}</select></label>
       <button data-go="auto">${ic('send')}Autoregistrazione cliente</button>
       <button data-act="logout">${ic('logout')}Esci</button>
     </div>
@@ -936,7 +939,6 @@ function vLogin(){
 const REV = [['Da inizio anno', 1284500, 1162300, 'stesso periodo 2025'], ['Ultimi 3 mesi', 412800, 438100, 'stessi mesi 2025'], ['Settembre', 128900, 96400, 'agosto']];
 function vDash(){
   const todayEv = events.filter(e => sameDay(e.date) && e.boutique === S.boutique);
-  const bdays = clients.filter(c => c.birth && c.birth.d && c.birth.m === 9 && c.birth.d >= 24 && c.birth.d <= 30);
   const recent = [...events].sort((a,b) => dt(b.date) - dt(a.date)).slice(0,6);
   const latest = recentPdas().filter(p => p.stato !== 'annullata').slice(0,6);
   const fus = events.filter(e => e.followup && !e.done && e.operator === S.operator).sort((a, b) => a.followup.localeCompare(b.followup));
@@ -970,10 +972,6 @@ function vDash(){
       </section>
     </div>
     <div class="stack">
-      <section class="card">
-        <div class="card-h">${ic('gift')}<h2>Compleanni della settimana</h2></div>
-        <div class="list">${bdays.map(c => `<div class="row click" data-go="cliente" data-id="${c.id}">${avatar(c)}<div class="grow"><div class="t">${esc(fullName(c))}</div><div class="s">${c.birth.d} ${MESI[c.birth.m-1]} · ${esc(c.boutique)}</div></div>${ic('arrow')}</div>`).join('') || '<div class="empty">Nessun compleanno questa settimana.</div>'}</div>
-      </section>
       <section class="card">
         <div class="card-h">${ic('clock')}<h2>Ultime attività inserite</h2><span class="sp"></span><button class="link" data-go="passaggi">Registro completo</button></div>
         <div class="list">${recent.map(evRow).join('')}</div>
@@ -2747,6 +2745,7 @@ document.addEventListener('input', e => {
 });
 document.addEventListener('change', e => {
   const t = e.target;
+  if (t.id === 'op-sel') { const o = OPERATORS.find(x => x.name === t.value); S.operator = o.name; S.boutique = o.b; S.pf.loc = o.b; render(); toast(`Ora sei ${o.name} · ${o.role}${o.priv ? ' (profilo abilitato)' : ''}`); return; }
   if (t.id === 'boutique-sel') { S.boutique = t.value; S.pf.loc = t.value; if (S.view === 'nuovo' || (S.view === 'cliente' && S.tab === 'anagrafica')) keepForm(render); else render(); toast(`Boutique attiva: ${t.value}`); return; }
   if (t.dataset.pf !== undefined && t.tagName === 'SELECT') { S.pf[t.dataset.pf] = t.value; render(); return; }
   if (t.dataset.pdf !== undefined && t.tagName === 'SELECT') { S.pdf[t.dataset.pdf] = t.value; render(); return; }
