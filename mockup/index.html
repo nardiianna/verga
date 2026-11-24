@@ -1164,7 +1164,6 @@ function cPanoramica(c, cp, ps){
       ${notesCard(c)}
     </div>
     <div class="stack">
-      ${sellersCard(c)}
       <section class="card">
         <div class="card-h">${ic('sparkle')}<h2>Interessi e misure</h2><span class="sp"></span><button class="link" data-act="tab" data-v="anagrafica">Modifica</button></div>
         <div class="card-b stack" style="gap:14px">
@@ -1262,7 +1261,7 @@ const evTools = e => `<span class="ev-tools"><button class="btn btn-ghost btn-sm
 function tlRow(e){
   const t = EV[e.type];
   return `<div class="tl"><span class="dot ${t.cls}">${ic(t.icon)}</span><div style="flex:1"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><b>${t.label}</b><span class="faint">${fmtDT(e.date)}</span>${e.motivo ? `<span class="tag">${esc(e.motivo)}</span>` : ''}${e.followup ? `<span class="tag ${e.done ? 'ok' : 'amber'}">${e.done ? 'Follow-up fatto' : 'Follow-up ' + fmtD(e.followup).slice(0,5)}</span>` : ''}</div>
-  <div class="muted" style="font-size:13px">${esc(e.boutique)} · <b style="color:var(--ink)">${esc(e.operator)}</b></div>${e.note ? `<div style="margin-top:4px">${esc(e.note)}</div>` : ''}</div>${evTools(e)}</div>`;
+  <div class="muted" style="font-size:13px">${esc(e.boutique)} · <b style="color:var(--ink)">${esc(e.operator)}</b></div>${e.note ? `<div style="margin-top:4px">${esc(e.note)}</div>` : ''}</div></div>`;
 }
 function cAnagrafica(c){ return `<section class="card">${clientForm(c)}<div class="modal-f" style="border-radius:0 0 25px 25px"><button class="btn" data-act="tab" data-v="panoramica">Annulla</button><button class="btn btn-primary" data-act="save-client" data-id="${c.id}">${ic('check')}Salva modifiche</button></div></section>`; }
 function clientForm(c){
@@ -1346,7 +1345,7 @@ function clientForm(c){
   </div></div>`;
 }
 /* nazione: si scrive e si sceglie dall'elenco (con "IT" esce solo ITALIA) */
-const nazField = (attr, val) => `<label class="field naz-f"><span>Nazione</span><input class="in" ${attr} value="${esc((val || '').toUpperCase())}" autocomplete="off" placeholder="Scrivi le prime lettere"><div class="naz-drop"></div></label>`;
+const nazField = (attr, val) => `<label class="field naz-f"><span>Nazione</span><input class="in" ${attr} value="${esc((val || '').toUpperCase())}" autocomplete="off" placeholder="Es. ITALIA"></label>`;
 function linkSection(c){
   const L = S.nc.lk, me = c ? c.id : null;
   const existing = c ? clientLinks(c.id).map(x => ({...x, rm:`data-act="lk-rm" data-i="${x.i}"`})) : S.nc.pending.map((x, i) => ({label:x.type, other:C(x.to), rm:`data-act="lk-rm-p" data-i="${i}"`}));
@@ -1556,7 +1555,7 @@ function vPassaggi(){
     <select class="sel" style="width:auto;height:38px;border-radius:99px" data-evf="per">${[['','Sempre'],['7','Ultimi 7 giorni'],['30','Ultimi 30 giorni'],['90','Ultimi 3 mesi'],['365','Ultimo anno']].map(([v,l]) => `<option value="${v}" ${f.per === v ? 'selected' : ''}>${l}</option>`).join('')}</select>
     <input class="in" style="width:200px;height:38px;border-radius:99px" data-evf="q" value="${esc(f.q)}" placeholder="Cliente"></div>
   <div class="card tbl-wrap"><table class="tbl">
-    <thead><tr><th>Quando</th><th>Cliente</th><th>Tipo</th><th>Motivo e nota</th><th>Boutique · Venditore</th><th>Follow-up</th><th></th></tr></thead>
+    <thead><tr><th>Quando</th><th>Cliente</th><th>Tipo</th><th>Motivo e nota</th><th>Boutique · Venditore</th><th>Follow-up</th></tr></thead>
     <tbody>${list.map(e => { const c = C(e.clientId), t = EV[e.type]; return `<tr class="click" data-go="cliente" data-id="${c.id}">
       <td class="num" style="white-space:nowrap">${fmtDT(e.date)}</td>
       <td><div class="cell-person" style="min-width:160px">${avatar(c)}<b>${esc(fullName(c))}</b></div></td>
@@ -1564,7 +1563,6 @@ function vPassaggi(){
       <td style="max-width:340px">${e.motivo ? `<span class="tag" style="margin-bottom:4px">${esc(e.motivo)}</span><br>` : ''}${esc(e.note || (e.motivo ? '' : '—'))}</td>
       <td>${esc(e.boutique)}<div class="faint" style="font-size:12px">${esc(e.operator)}</div></td>
       <td>${e.followup ? `<span class="tag ${e.done ? 'ok' : dday(e.followup) <= 0 ? 'red' : 'amber'}">${e.done ? 'Fatto' : fmtD(e.followup).slice(0,5)}</span>` : '<span class="faint">—</span>'}</td>
-      <td style="text-align:right">${evTools(e)}</td>
     </tr>`; }).join('')}</tbody>
   </table></div>`;
 }
@@ -2735,7 +2733,7 @@ document.addEventListener('input', e => {
   if (t.id === 'lk-back') { S.nc.lk.back = t.value; S.nc.lk.backEdited = !!t.value; return; }
   if (['f-email','f-email2','a-email','fs-email'].includes(t.id) && t.value !== t.value.toLowerCase()) { const pos = t.selectionStart; t.value = t.value.toLowerCase(); try { t.setSelectionRange(pos, pos); } catch (_) {} }
   if (t.dataset.az !== undefined || t.dataset.addr !== undefined) { const isAz = t.dataset.az !== undefined, [i, k] = (isAz ? t.dataset.az : t.dataset.addr).split(':'); (isAz ? S.nc.az : S.nc.addr)[+i][k] = t.value;
-    if (k === 'naz') { const d = t.parentElement.querySelector('.naz-drop'), m = nazMatch(t.value); d.innerHTML = m.length && !(m.length === 1 && m[0] === t.value.trim().toUpperCase()) ? m.map(n => `<button type="button" data-act="naz-pick" data-v="${esc(n)}">${esc(n)}</button>`).join('') : ''; }
+    if (k === 'naz' && t.parentElement.querySelector('.naz-drop')) { const d = t.parentElement.querySelector('.naz-drop'), m = nazMatch(t.value); d.innerHTML = m.length && !(m.length === 1 && m[0] === t.value.trim().toUpperCase()) ? m.map(n => `<button type="button" data-act="naz-pick" data-v="${esc(n)}">${esc(n)}</button>`).join('') : ''; }
     return; }
   if (t.dataset.rn !== undefined) { const [a, b] = t.dataset.rn.split('.'); if (b) S.rn[a][b] = t.value; else S.rn[a] = t.value; return; }
   if (t.id === 'rn-cs') { S.rn.q = t.value; document.getElementById('rn-cs-list').innerHTML = clientPick(t.value, 'rn-pick'); return; }
